@@ -1,10 +1,21 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTradeSchema, insertUserSchema } from "@shared/schema";
 import OpenAI from "openai";
+import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication routes
+  setupAuth(app);
+  
+  // Middleware to check if user is authenticated
+  function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.status(401).json({ message: "Nicht authentifiziert" });
+  }
   // Create OpenAI client
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY || "", // This will get real API key from environment
@@ -48,50 +59,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // User routes
-  app.post("/api/register", async (req: Request, res: Response) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      const existingUser = await storage.getUserByUsername(userData.username);
-      
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-      
-      const newUser = await storage.createUser(userData);
-      const { password, ...userWithoutPassword } = newUser;
-      
-      res.status(201).json(userWithoutPassword);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  });
+  // User authentication is handled by setupAuth in auth.ts
 
-  // For simplicity, using a basic login without sessions
-  app.post("/api/login", async (req: Request, res: Response) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid username or password" });
-      }
-      
-      const { password: _, ...userWithoutPassword } = user;
-      
-      res.status(200).json({ user: userWithoutPassword });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  // Trades routes
-  app.get("/api/trades", async (req: Request, res: Response) => {
+  // Trades routes - all protected by authentication
+  app.get("/api/trades", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = Number(req.query.userId);
       
@@ -116,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/trades/:id", async (req: Request, res: Response) => {
+  app.get("/api/trades/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const tradeId = Number(req.params.id);
       
@@ -136,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/trades", async (req: Request, res: Response) => {
+  app.post("/api/trades", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const tradeData = insertTradeSchema.parse(req.body);
       const userId = Number(req.body.userId);
@@ -163,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/trades/:id", async (req: Request, res: Response) => {
+  app.put("/api/trades/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const tradeId = Number(req.params.id);
       
@@ -184,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/trades/:id", async (req: Request, res: Response) => {
+  app.delete("/api/trades/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const tradeId = Number(req.params.id);
       
@@ -205,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Weekly summary route
-  app.get("/api/weekly-summary", async (req: Request, res: Response) => {
+  app.get("/api/weekly-summary", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = Number(req.query.userId);
       const weekStartStr = req.query.weekStart as string;
@@ -236,7 +207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Performance data route
-  app.get("/api/performance-data", async (req: Request, res: Response) => {
+  app.get("/api/performance-data", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = Number(req.query.userId);
       const startDateStr = req.query.startDate as string;
@@ -257,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Setup win rates route
-  app.get("/api/setup-win-rates", async (req: Request, res: Response) => {
+  app.get("/api/setup-win-rates", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = Number(req.query.userId);
       
@@ -273,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tradovate import route (placeholder for now, would need real Tradovate API integration)
-  app.post("/api/import-trades", async (req: Request, res: Response) => {
+  app.post("/api/import-trades", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { userId } = req.body;
       

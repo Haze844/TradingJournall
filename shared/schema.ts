@@ -50,7 +50,9 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   userId: true,
 });
 
-export type InsertTrade = z.infer<typeof insertTradeSchema>;
+export type InsertTrade = z.infer<typeof insertTradeSchema> & { 
+  gptFeedback?: string;
+};
 export type Trade = typeof trades.$inferSelect;
 
 // Weekly summary schema
