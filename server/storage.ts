@@ -5,9 +5,15 @@ import {
   performanceData, type PerformanceData, type InsertPerformanceData,
   setupWinRates, type SetupWinRate, type InsertSetupWinRate
 } from "@shared/schema";
+import session from "express-session";
+import createMemoryStore from "memorystore";
+
+const MemoryStore = createMemoryStore(session);
 
 // Interface for storage methods
 export interface IStorage {
+  // Session store
+  sessionStore: session.Store;
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -39,6 +45,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  sessionStore: session.Store;
   private users: Map<number, User>;
   private trades: Map<number, Trade>;
   private weeklySummaries: Map<number, WeeklySummary>;
@@ -52,6 +59,9 @@ export class MemStorage implements IStorage {
   private setupWinRateIdCounter: number;
 
   constructor() {
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    });
     this.users = new Map();
     this.trades = new Map();
     this.weeklySummaries = new Map();

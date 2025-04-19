@@ -7,14 +7,13 @@ import TradeDetail from "@/components/TradeDetail";
 import { synchronizeTrades } from "@/lib/tradovate";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 
-interface HomeProps {
-  userId: number;
-}
-
-export default function Home({ userId }: HomeProps) {
+export default function Home() {
+  const { user } = useAuth();
+  const userId = user?.id || 1; // Fallback to 1 only if user object isn't loaded yet
   const { toast } = useToast();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [filters, setFilters] = useState({
