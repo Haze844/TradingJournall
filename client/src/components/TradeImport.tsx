@@ -70,21 +70,65 @@ export default function TradeImport() {
             return;
           }
           
+          // TradingView Feldnamen erkennen
+          const mapTradingViewFields = (row: any) => {
+            // TradingView Exportfelder auf unsere Datenfelder mappen
+            const mappings: Record<string, string[]> = {
+              symbol: ["Symbol", "Ticker", "symbol", "instrument", "Instrument"],
+              setup: ["Setup", "Strategy", "setup", "Strategy Name", "strategy", "Trade Setup"],
+              mainTrendM15: ["Main Trend", "mainTrendM15", "main_trend_m15", "Main Direction", "Trend M15"],
+              internalTrendM5: ["Internal Trend", "internalTrendM5", "internal_trend_m5", "Sub Direction", "Trend M5"],
+              entryType: ["Entry Type", "entryType", "entry_type", "Entry", "Order Type"],
+              entryLevel: ["Entry Level", "entryLevel", "entry_level", "Entry Price", "Price"],
+              liquidation: ["Liquidation", "Stop Loss", "SL", "liquidation", "Stop"],
+              location: ["Location", "location", "Entry Zone", "Zone"],
+              rrAchieved: ["RR Achieved", "R:R", "Risk/Reward Achieved", "rrAchieved", "rr_achieved", "Actual R:R", "Real R:R"],
+              rrPotential: ["RR Potential", "Potential R:R", "Target R:R", "rrPotential", "rr_potential", "Expected R:R"],
+              isWin: ["Result", "Win", "isWin", "is_win", "Profit", "Trade Result", "Success"]
+            };
+
+            // Überprüfe für jedes unserer Felder, ob ein TradingView-Feld existiert
+            const result: Record<string, any> = {};
+            
+            Object.entries(mappings).forEach(([ourField, possibleTvFields]) => {
+              // Suche in der Zeile nach einem passenden Feld
+              const matchedField = possibleTvFields.find(field => row[field] !== undefined);
+              
+              if (matchedField) {
+                result[ourField] = row[matchedField];
+              } else {
+                // Wenn kein Feld gefunden wurde, setze Default-Wert
+                result[ourField] = ourField === 'rrAchieved' || ourField === 'rrPotential' ? 0 : "";
+              }
+            });
+            
+            return result;
+          };
+
           const trades = data.map((row: any) => {
             try {
+              // Zuerst TradingView-Feldnamen mappen
+              const mappedRow = mapTradingViewFields(row);
+              
               // Konvertiere String-Werte in richtigen Datentyp
               return {
-                symbol: row.symbol || "",
-                setup: row.setup || "",
-                mainTrendM15: row.mainTrendM15 || row.main_trend_m15 || "",
-                internalTrendM5: row.internalTrendM5 || row.internal_trend_m5 || "",
-                entryType: row.entryType || row.entry_type || "",
-                entryLevel: row.entryLevel || row.entry_level || "",
-                liquidation: row.liquidation || "",
-                location: row.location || "",
-                rrAchieved: parseFloat(row.rrAchieved || row.rr_achieved || "0"),
-                rrPotential: parseFloat(row.rrPotential || row.rr_potential || "0"),
-                isWin: row.isWin === "true" || row.is_win === "true" || row.isWin === true || row.is_win === true,
+                symbol: mappedRow.symbol || "",
+                setup: mappedRow.setup || "",
+                mainTrendM15: mappedRow.mainTrendM15 || "",
+                internalTrendM5: mappedRow.internalTrendM5 || "",
+                entryType: mappedRow.entryType || "",
+                entryLevel: mappedRow.entryLevel || "",
+                liquidation: mappedRow.liquidation || "",
+                location: mappedRow.location || "",
+                rrAchieved: parseFloat(String(mappedRow.rrAchieved || "0")),
+                rrPotential: parseFloat(String(mappedRow.rrPotential || "0")),
+                // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
+                isWin: typeof mappedRow.isWin === 'boolean' ? mappedRow.isWin : 
+                       String(mappedRow.isWin).toLowerCase() === 'true' || 
+                       String(mappedRow.isWin).toLowerCase() === 'win' ||
+                       String(mappedRow.isWin).toLowerCase() === 'yes' ||
+                       String(mappedRow.isWin).toLowerCase() === 'profit',
+                date: row.Date || row.date || row.Time || row.time || new Date().toISOString(),
               };
             } catch (error) {
               console.error("Fehler beim Verarbeiten der Zeile:", row, error);
@@ -127,9 +171,9 @@ export default function TradeImport() {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h3 className="text-xl font-bold moon-text">🚀 Boost Your Portfolio</h3>
+        <h3 className="text-xl font-bold moon-text">🚀 TradingView CSV-Import</h3>
         <p className="text-sm text-muted-foreground">
-          Import your trades and watch them moon! 📈
+          Importiere Trades direkt aus TradingView-Exporten 📈
         </p>
       </div>
       
@@ -143,8 +187,8 @@ export default function TradeImport() {
             disabled={importing}
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
-          <p className="text-sm font-medium">Drag CSV file here or click to browse</p>
-          <p className="text-xs text-muted-foreground mt-1">Support for CSV files only</p>
+          <p className="text-sm font-medium">CSV von TradingView ziehen oder klicken</p>
+          <p className="text-xs text-muted-foreground mt-1">Erkennt automatisch gängige Spalten aus TradingView</p>
         </div>
         
         {file && (
@@ -180,9 +224,25 @@ export default function TradeImport() {
         </Button>
       </div>
       
-      <div className="text-center space-y-1 pt-2">
-        <p className="text-xs text-muted-foreground">Your trade data is stored locally</p>
-        <p className="text-xs text-primary/80">Diamond hands required 💎🙌</p>
+      <div className="space-y-3 pt-2">
+        <div className="rocket-card p-3 rounded-lg">
+          <p className="text-xs font-medium text-primary/80 mb-1">Erkannte Felder aus TradingView:</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+            <p className="text-xs text-muted-foreground">• Symbol / Ticker</p>
+            <p className="text-xs text-muted-foreground">• Setup / Strategy</p>
+            <p className="text-xs text-muted-foreground">• Main Trend / Direction</p>
+            <p className="text-xs text-muted-foreground">• Internal Trend / Sub Direction</p>
+            <p className="text-xs text-muted-foreground">• Entry Type / Order Type</p>
+            <p className="text-xs text-muted-foreground">• Entry Level / Price</p>
+            <p className="text-xs text-muted-foreground">• Result / Win / Profit</p>
+            <p className="text-xs text-muted-foreground">• R:R / Risk-Reward</p>
+          </div>
+        </div>
+        
+        <div className="text-center space-y-1">
+          <p className="text-xs text-muted-foreground">Deine Trade-Daten werden lokal gespeichert</p>
+          <p className="text-xs text-primary/80">Diamond hands required 💎🙌</p>
+        </div>
       </div>
     </div>
   );
