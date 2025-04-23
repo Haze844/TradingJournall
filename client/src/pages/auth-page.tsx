@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, TrendingUp, BarChart3, BrainCircuit, Lock, User } from "lucide-react";
+import { Rocket, TrendingUp, BarChart3, BrainCircuit, Lock, User, Loader2 } from "lucide-react";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -32,12 +32,12 @@ export default function AuthPage() {
         <div className="rocket-card rounded-xl p-6 backdrop-blur-md">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-gradient-to-br from-primary to-cyan-400 text-black font-bold p-2 rounded-xl text-lg meme-logo">
-                🚀<br />TRADE
+              <div className="bg-white text-black font-bold p-2 rounded-xl text-lg meme-logo">
+                LVL<br />UP
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold moon-text">MoonTrader Pro</h1>
-                <p className="text-xs text-gray-400">To the moon and beyond 🌕</p>
+                <h1 className="text-2xl font-extrabold moon-text">LvlUp Tradingtagebuch</h1>
+                <p className="text-xs text-gray-400">Trading-Performance optimieren</p>
               </div>
             </div>
             <p className="text-muted-foreground">
@@ -253,15 +253,25 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
             />
           </div>
         </CardContent>
-        <CardFooter>
+        <div className="px-6 py-4">
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full pulse-btn bg-gradient-to-r from-primary to-cyan-500 hover:from-primary hover:to-cyan-400 text-black font-bold" 
             disabled={registerMutation.isPending}
           >
-            {registerMutation.isPending ? "Registrierung..." : "Registrieren"}
+            {registerMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Konto wird erstellt...
+              </>
+            ) : (
+              <>
+                <User className="mr-2 h-4 w-4" />
+                Konto erstellen
+              </>
+            )}
           </Button>
-        </CardFooter>
+        </div>
       </form>
     </TabsContent>
   );

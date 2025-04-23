@@ -97,12 +97,12 @@ export default function Home() {
       {/* Header */}
       <header className="flex justify-between items-center mb-8 backdrop-blur-sm p-4 rocket-card rounded-xl">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-primary to-cyan-400 text-black font-bold p-2 rounded-xl text-lg meme-logo">
-            🚀<br />TRADE
+          <div className="bg-white text-black font-bold p-2 rounded-xl text-lg meme-logo">
+            LVL<br />UP
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold moon-text">MoonTrader Pro</h1>
-            <p className="text-xs text-gray-400">To the moon and beyond 🌕</p>
+            <h1 className="text-2xl font-extrabold moon-text">LvlUp Tradingtagebuch</h1>
+            <p className="text-xs text-gray-400">Trading-Performance optimieren</p>
           </div>
         </div>
         <div className="flex gap-4">
