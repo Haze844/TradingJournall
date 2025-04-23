@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileUp, Settings } from "lucide-react";
 
 export default function Home() {
   const { user } = useAuth();
@@ -98,11 +99,18 @@ export default function Home() {
           <h1 className="text-xl font-bold">LvlUp Tradingtagebuch</h1>
         </div>
         <div className="flex gap-4">
-          <Button onClick={handleSyncTrades} className="flex items-center gap-2">
-            <i className="fas fa-sync-alt"></i> Trades synchronisieren
+          <Button 
+            onClick={() => {
+              const importTab = document.querySelector('[value="import"]') as HTMLElement;
+              if (importTab) importTab.click();
+            }} 
+            className="flex items-center gap-2"
+          >
+            <FileUp className="h-4 w-4 mr-2" />
+            CSV Import
           </Button>
           <Button variant="outline" size="icon">
-            <i className="fas fa-cog"></i>
+            <Settings className="h-4 w-4" />
           </Button>
         </div>
       </header>
@@ -130,7 +138,20 @@ export default function Home() {
 
         {/* Side Panel */}
         <div className="lg:col-span-1">
-          <TradeDetail selectedTrade={selectedTrade} />
+          <Tabs defaultValue="details" className="space-y-4">
+            <TabsList className="grid grid-cols-2">
+              <TabsTrigger value="details">Trade Details</TabsTrigger>
+              <TabsTrigger value="import">Import</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="details" className="space-y-4">
+              <TradeDetail selectedTrade={selectedTrade} />
+            </TabsContent>
+            
+            <TabsContent value="import" className="space-y-4">
+              <TradeImport />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

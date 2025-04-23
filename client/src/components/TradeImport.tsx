@@ -57,7 +57,7 @@ export default function TradeImport() {
       Papa.parse(text, {
         header: true,
         skipEmptyLines: true,
-        complete: (results) => {
+        complete: (results: Papa.ParseResult<any>) => {
           const { data, errors } = results;
           
           if (errors.length > 0) {
