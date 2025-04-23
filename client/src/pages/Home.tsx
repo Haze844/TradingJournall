@@ -4,12 +4,14 @@ import FilterBar from "@/components/FilterBar";
 import TradeTable from "@/components/TradeTable";
 import WeeklySummary from "@/components/WeeklySummary";
 import TradeDetail from "@/components/TradeDetail";
+import TradeImport from "@/components/TradeImport";
 import { synchronizeTrades } from "@/lib/tradovate";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates } from "@/lib/utils";
 import { Trade } from "@shared/schema";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   const { user } = useAuth();

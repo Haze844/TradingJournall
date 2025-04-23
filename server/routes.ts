@@ -259,6 +259,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CSV Import route
+  app.post("/api/import-csv", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { trades } = req.body;
+      const userId = req.user!.id;
+      
+      if (!trades || !Array.isArray(trades) || trades.length === 0) {
+        return res.status(400).json({ message: "Keine gültigen Trade-Daten gefunden" });
+      }
+      
+      const importedTrades = [];
+      
+      for (const tradeData of trades) {
+        try {
+          // Generate GPT feedback for each trade
+          const gptFeedback = await generateTradeFeedback({
+            ...tradeData,
+            userId,
+          });
+          
+          // Create trade in database with feedback
+          const newTrade = await storage.createTrade({
+            ...tradeData,
+            userId,
+            gptFeedback,
+            // Ensure date is set if not provided
+            date: tradeData.date || new Date().toISOString(),
+          });
+          
+          importedTrades.push(newTrade);
+        } catch (error) {
+          console.error("Error importing trade:", error);
+          // Continue with next trade even if one fails
+        }
+      }
+      
+      // Update statistics after import
+      try {
+        // Recalculate setup win rates
+        await storage.calculateSetupWinRates(userId);
+        
+        // Recalculate weekly summaries if needed
+        // This would likely need to be more granular in a production app
+      } catch (error) {
+        console.error("Error updating statistics:", error);
+      }
+      
+      res.status(200).json({ 
+        message: `${importedTrades.length} Trades erfolgreich importiert`, 
+        count: importedTrades.length 
+      });
+    } catch (error) {
+      console.error("CSV import error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
