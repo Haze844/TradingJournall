@@ -114,7 +114,7 @@ export default function Home() {
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80"
           >
             <FileUp className="h-4 w-4 mr-2" />
-            Import Trades
+            CSV Import
           </Button>
           <Button variant="outline" size="icon" className="border-primary/40 hover:border-primary/80">
             <Settings className="h-4 w-4" />

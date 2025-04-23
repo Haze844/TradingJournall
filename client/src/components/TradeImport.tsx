@@ -164,7 +164,7 @@ export default function TradeImport() {
         <Button
           onClick={handleImport}
           disabled={!file || importing}
-          className="w-full pulse-btn bg-gradient-to-r from-primary to-cyan-500 hover:from-primary hover:to-cyan-400 text-black font-bold"
+          className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold"
         >
           {importing ? (
             <>

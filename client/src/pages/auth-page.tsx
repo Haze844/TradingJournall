@@ -165,7 +165,7 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
         <div className="px-6 py-4">
           <Button 
             type="submit" 
-            className="w-full pulse-btn bg-gradient-to-r from-primary to-cyan-500 hover:from-primary hover:to-cyan-400 text-black font-bold" 
+            className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold" 
             disabled={loginMutation.isPending}
           >
             {loginMutation.isPending ? (
@@ -256,7 +256,7 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
         <div className="px-6 py-4">
           <Button 
             type="submit" 
-            className="w-full pulse-btn bg-gradient-to-r from-primary to-cyan-500 hover:from-primary hover:to-cyan-400 text-black font-bold" 
+            className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold" 
             disabled={registerMutation.isPending}
           >
             {registerMutation.isPending ? (
