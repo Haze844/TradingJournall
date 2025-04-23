@@ -89,14 +89,21 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
+      
       {/* Header */}
-      <header className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <div className="bg-white text-black font-bold p-1 text-xs">
-            LVL<br />UP
+      <header className="flex justify-between items-center mb-8 backdrop-blur-sm p-4 rocket-card rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-primary to-cyan-400 text-black font-bold p-2 rounded-xl text-lg meme-logo">
+            🚀<br />TRADE
           </div>
-          <h1 className="text-xl font-bold">LvlUp Tradingtagebuch</h1>
+          <div>
+            <h1 className="text-2xl font-extrabold moon-text">MoonTrader Pro</h1>
+            <p className="text-xs text-gray-400">To the moon and beyond 🌕</p>
+          </div>
         </div>
         <div className="flex gap-4">
           <Button 
@@ -104,54 +111,66 @@ export default function Home() {
               const importTab = document.querySelector('[value="import"]') as HTMLElement;
               if (importTab) importTab.click();
             }} 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80"
           >
             <FileUp className="h-4 w-4 mr-2" />
-            CSV Import
+            Import Trades
           </Button>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="border-primary/40 hover:border-primary/80">
             <Settings className="h-4 w-4" />
           </Button>
         </div>
       </header>
 
-      {/* Filter Bar */}
-      <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+      {/* Filter Bar - Wrapped in a styled card */}
+      <div className="rocket-card rounded-xl p-4 mb-6">
+        <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Trade Table Section */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           {/* Trade Table */}
-          <TradeTable
-            trades={trades}
-            isLoading={tradesLoading}
-            onTradeSelect={handleTradeSelect}
-          />
+          <div className="rocket-card rounded-xl p-4">
+            <TradeTable
+              trades={trades}
+              isLoading={tradesLoading}
+              onTradeSelect={handleTradeSelect}
+            />
+          </div>
 
           {/* Weekly Summary */}
-          <WeeklySummary
-            userId={userId}
-            weekStart={filters.startDate}
-            weekEnd={filters.endDate}
-          />
+          <div className="rocket-card rounded-xl p-4">
+            <WeeklySummary
+              userId={userId}
+              weekStart={filters.startDate}
+              weekEnd={filters.endDate}
+            />
+          </div>
         </div>
 
         {/* Side Panel */}
         <div className="lg:col-span-1">
-          <Tabs defaultValue="details" className="space-y-4">
-            <TabsList className="grid grid-cols-2">
-              <TabsTrigger value="details">Trade Details</TabsTrigger>
-              <TabsTrigger value="import">Import</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="details" className="space-y-4">
-              <TradeDetail selectedTrade={selectedTrade} />
-            </TabsContent>
-            
-            <TabsContent value="import" className="space-y-4">
-              <TradeImport />
-            </TabsContent>
-          </Tabs>
+          <div className="rocket-card rounded-xl">
+            <Tabs defaultValue="details" className="p-4">
+              <TabsList className="grid grid-cols-2 mb-4 bg-black/60">
+                <TabsTrigger value="details" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                  Trade Details
+                </TabsTrigger>
+                <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                  Import
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="details" className="mt-0">
+                <TradeDetail selectedTrade={selectedTrade} />
+              </TabsContent>
+              
+              <TabsContent value="import" className="mt-0">
+                <TradeImport />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>

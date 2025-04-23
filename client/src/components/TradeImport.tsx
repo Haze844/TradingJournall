@@ -125,47 +125,65 @@ export default function TradeImport() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Trades importieren</CardTitle>
-        <CardDescription>
-          Importieren Sie Ihre Trades aus einer CSV-Datei.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid w-full max-w-sm items-center gap-1.5">
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <h3 className="text-xl font-bold moon-text">🚀 Boost Your Portfolio</h3>
+        <p className="text-sm text-muted-foreground">
+          Import your trades and watch them moon! 📈
+        </p>
+      </div>
+      
+      <div className="space-y-6 relative">
+        <div className="w-full h-36 rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center p-4 hover:border-primary/60 transition-colors">
+          <Upload className="h-8 w-8 text-primary/60 mb-2" />
           <Input
             type="file"
             accept=".csv"
             onChange={handleFileChange}
             disabled={importing}
+            className="absolute inset-0 opacity-0 cursor-pointer"
           />
+          <p className="text-sm font-medium">Drag CSV file here or click to browse</p>
+          <p className="text-xs text-muted-foreground mt-1">Support for CSV files only</p>
         </div>
+        
         {file && (
-          <p className="text-sm text-muted-foreground">
-            Ausgewählte Datei: {file.name}
-          </p>
+          <div className="rocket-card p-3 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="bg-primary/20 rounded-full p-2">
+                <Upload className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Ready to import:</p>
+                <p className="text-xs text-muted-foreground">{file.name}</p>
+              </div>
+            </div>
+          </div>
         )}
-      </CardContent>
-      <CardFooter>
+        
         <Button
           onClick={handleImport}
           disabled={!file || importing}
-          className="w-full"
+          className="w-full pulse-btn bg-gradient-to-r from-primary to-cyan-500 hover:from-primary hover:to-cyan-400 text-black font-bold"
         >
           {importing ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Importiere...
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Launching to Moon...
             </>
           ) : (
             <>
-              <Upload className="mr-2 h-4 w-4" />
-              Importieren
+              <Upload className="mr-2 h-5 w-5" />
+              Launch Trades 🚀
             </>
           )}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+      
+      <div className="text-center space-y-1 pt-2">
+        <p className="text-xs text-muted-foreground">Your trade data is stored locally</p>
+        <p className="text-xs text-primary/80">Diamond hands required 💎🙌</p>
+      </div>
+    </div>
   );
 }
