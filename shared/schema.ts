@@ -39,6 +39,7 @@ export const trades = pgTable("trades", {
   rrAchieved: real("rr_achieved").notNull(),
   rrPotential: real("rr_potential").notNull(),
   gptFeedback: text("gpt_feedback"),
+  chartImage: text("chart_image"),
   isWin: boolean("is_win").notNull(),
   userId: integer("user_id").references(() => users.id),
 });

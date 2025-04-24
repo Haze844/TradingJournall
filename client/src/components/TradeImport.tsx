@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator"; 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, RefreshCw } from "lucide-react";
 import Papa from "papaparse";
 import { Trade, insertTradeSchema } from "@shared/schema";
 import { z } from "zod";
+import { synchronizeTrades } from "@/lib/tradovate";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function TradeImport() {
   const [file, setFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const importMutation = useMutation({
     mutationFn: async (trades: any[]) => {
@@ -237,7 +242,12 @@ export default function TradeImport() {
         </p>
       </div>
       
-      <div className="space-y-6 relative">
+      <div className="space-y-3">
+        <div className="w-full flex items-center justify-between gap-3 mb-2">
+          <h4 className="text-sm font-semibold text-primary">CSV-Import</h4>
+          <Separator className="flex-1" />
+        </div>
+        
         <div className="w-full h-36 rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center p-4 hover:border-primary/60 transition-colors">
           <Upload className="h-8 w-8 text-primary/60 mb-2" />
           <Input
@@ -282,6 +292,71 @@ export default function TradeImport() {
             </>
           )}
         </Button>
+        
+        <div className="w-full flex items-center justify-between gap-3 mt-6 mb-2">
+          <h4 className="text-sm font-semibold text-primary">Tradovate API</h4>
+          <Separator className="flex-1" />
+        </div>
+        
+        <div className="rocket-card p-4 rounded-lg">
+          <p className="text-xs text-muted-foreground mb-3">
+            Verbinde dein Tradovate-Konto und importiere deine Trades automatisch
+          </p>
+          <Button
+            onClick={async () => {
+              if (!user) return;
+              
+              setSyncing(true);
+              try {
+                const result = await synchronizeTrades(user.id);
+                
+                if (result.success) {
+                  toast({
+                    title: "Synchronisation erfolgreich",
+                    description: result.message,
+                  });
+                  
+                  // Aktualisiere die Daten im UI
+                  queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+                  queryClient.invalidateQueries({ queryKey: ["/api/weekly-summary"] });
+                  queryClient.invalidateQueries({ queryKey: ["/api/performance-data"] });
+                  queryClient.invalidateQueries({ queryKey: ["/api/setup-win-rates"] });
+                } else {
+                  toast({
+                    title: "Synchronisation fehlgeschlagen",
+                    description: result.message,
+                    variant: "destructive",
+                  });
+                }
+              } catch (error) {
+                toast({
+                  title: "Fehler bei der Synchronisation",
+                  description: error instanceof Error ? error.message : "Unbekannter Fehler",
+                  variant: "destructive",
+                });
+              } finally {
+                setSyncing(false);
+              }
+            }}
+            disabled={syncing || !user}
+            className="w-full pulse-btn bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+          >
+            {syncing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Synchronisiere...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Mit Tradovate synchronisieren
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Benötigt API-Zugangsdaten in den Einstellungen
+          </p>
+        </div>
       </div>
       
       <div className="space-y-3 pt-2">
