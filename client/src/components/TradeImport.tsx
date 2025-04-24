@@ -70,6 +70,54 @@ export default function TradeImport() {
             return;
           }
           
+          // CSV-Format erkennen (TradingView oder Tradovate)
+          const detectCSVFormat = (row: any): 'tradingview' | 'tradovate' | 'unknown' => {
+            // Prüfen auf charakteristische Tradovate-Felder
+            if (row['Contract'] !== undefined || 
+                row['Account ID'] !== undefined || 
+                row['P/L'] !== undefined ||
+                row['Commission'] !== undefined) {
+              return 'tradovate';
+            }
+            
+            // Prüfen auf charakteristische TradingView-Felder
+            if (row['Symbol'] !== undefined || 
+                row['Setup'] !== undefined || 
+                row['Strategy'] !== undefined) {
+              return 'tradingview';
+            }
+            
+            return 'unknown';
+          };
+          
+          // Tradovate Felder mappen
+          const mapTradovateFields = (row: any) => {
+            // Hier konvertieren wir Tradovate-spezifische Felder in unser internes Format
+            // P/L (Profit/Loss) bestimmt, ob der Trade gewonnen hat
+            const profitLoss = parseFloat(String(row['P/L'] || "0").replace(/[^0-9.-]/g, ''));
+            const isWin = profitLoss > 0;
+            
+            // Risk/Reward berechnen oder Default-Werte verwenden
+            // Für Tradovate können wir R:R aus Initial Risk und P/L berechnen
+            const initialRisk = parseFloat(String(row['Initial Risk'] || "1").replace(/[^0-9.-]/g, ''));
+            const rrAchieved = initialRisk !== 0 ? Math.abs(profitLoss / initialRisk) : 0;
+            
+            return {
+              symbol: row['Contract'] || row['Symbol'] || "",
+              setup: row['Strategy'] || row['Setup Type'] || "",
+              mainTrendM15: row['Market Direction'] || row['Trend'] || "",
+              internalTrendM5: row['Internal Direction'] || "",
+              entryType: row['Order Type'] || row['Action'] || (row['Side'] === 'Buy' ? 'Long' : 'Short') || "",
+              entryLevel: row['Fill Price'] || row['Average Price'] || "",
+              liquidation: row['Stop Price'] || row['Stop Loss'] || "",
+              location: row['Entry Zone'] || row['Entry Location'] || "",
+              rrAchieved: rrAchieved,
+              rrPotential: parseFloat(String(row['Target RR'] || "0").replace(/[^0-9.-]/g, '')),
+              isWin: isWin,
+              date: row['Fill Time'] || row['Time'] || row['Order Time'] || new Date().toISOString(),
+            };
+          };
+          
           // TradingView Feldnamen erkennen
           const mapTradingViewFields = (row: any) => {
             // TradingView Exportfelder auf unsere Datenfelder mappen
@@ -107,29 +155,41 @@ export default function TradeImport() {
 
           const trades = data.map((row: any) => {
             try {
-              // Zuerst TradingView-Feldnamen mappen
-              const mappedRow = mapTradingViewFields(row);
+              // Format erkennen
+              const csvFormat = detectCSVFormat(row);
+              let processedRow: any;
               
-              // Konvertiere String-Werte in richtigen Datentyp
-              return {
-                symbol: mappedRow.symbol || "",
-                setup: mappedRow.setup || "",
-                mainTrendM15: mappedRow.mainTrendM15 || "",
-                internalTrendM5: mappedRow.internalTrendM5 || "",
-                entryType: mappedRow.entryType || "",
-                entryLevel: mappedRow.entryLevel || "",
-                liquidation: mappedRow.liquidation || "",
-                location: mappedRow.location || "",
-                rrAchieved: parseFloat(String(mappedRow.rrAchieved || "0")),
-                rrPotential: parseFloat(String(mappedRow.rrPotential || "0")),
-                // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
-                isWin: typeof mappedRow.isWin === 'boolean' ? mappedRow.isWin : 
-                       String(mappedRow.isWin).toLowerCase() === 'true' || 
-                       String(mappedRow.isWin).toLowerCase() === 'win' ||
-                       String(mappedRow.isWin).toLowerCase() === 'yes' ||
-                       String(mappedRow.isWin).toLowerCase() === 'profit',
-                date: row.Date || row.date || row.Time || row.time || new Date().toISOString(),
-              };
+              // Entsprechend dem Format die Daten verarbeiten
+              if (csvFormat === 'tradovate') {
+                processedRow = mapTradovateFields(row);
+                console.log("Tradovate Format erkannt:", processedRow);
+              } else {
+                // Standardmäßig TradingView-Format annehmen
+                processedRow = mapTradingViewFields(row);
+                
+                // Konvertiere String-Werte in richtigen Datentyp für TradingView
+                processedRow = {
+                  symbol: processedRow.symbol || "",
+                  setup: processedRow.setup || "",
+                  mainTrendM15: processedRow.mainTrendM15 || "",
+                  internalTrendM5: processedRow.internalTrendM5 || "",
+                  entryType: processedRow.entryType || "",
+                  entryLevel: processedRow.entryLevel || "",
+                  liquidation: processedRow.liquidation || "",
+                  location: processedRow.location || "",
+                  rrAchieved: parseFloat(String(processedRow.rrAchieved || "0")),
+                  rrPotential: parseFloat(String(processedRow.rrPotential || "0")),
+                  // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
+                  isWin: typeof processedRow.isWin === 'boolean' ? processedRow.isWin : 
+                         String(processedRow.isWin).toLowerCase() === 'true' || 
+                         String(processedRow.isWin).toLowerCase() === 'win' ||
+                         String(processedRow.isWin).toLowerCase() === 'yes' ||
+                         String(processedRow.isWin).toLowerCase() === 'profit',
+                  date: row.Date || row.date || row.Time || row.time || new Date().toISOString(),
+                };
+              }
+              
+              return processedRow;
             } catch (error) {
               console.error("Fehler beim Verarbeiten der Zeile:", row, error);
               return null;
@@ -171,9 +231,9 @@ export default function TradeImport() {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h3 className="text-xl font-bold moon-text">🚀 TradingView CSV-Import</h3>
+        <h3 className="text-xl font-bold moon-text">🚀 CSV-Import</h3>
         <p className="text-sm text-muted-foreground">
-          Importiere Trades direkt aus TradingView-Exporten 📈
+          Importiere Trades aus TradingView oder Tradovate 📈
         </p>
       </div>
       
@@ -187,8 +247,8 @@ export default function TradeImport() {
             disabled={importing}
             className="absolute inset-0 opacity-0 cursor-pointer"
           />
-          <p className="text-sm font-medium">CSV von TradingView ziehen oder klicken</p>
-          <p className="text-xs text-muted-foreground mt-1">Erkennt automatisch gängige Spalten aus TradingView</p>
+          <p className="text-sm font-medium">CSV-Datei ziehen oder klicken</p>
+          <p className="text-xs text-muted-foreground mt-1">Unterstützt TradingView und Tradovate Exporte</p>
         </div>
         
         {file && (
@@ -226,16 +286,27 @@ export default function TradeImport() {
       
       <div className="space-y-3 pt-2">
         <div className="rocket-card p-3 rounded-lg">
-          <p className="text-xs font-medium text-primary/80 mb-1">Erkannte Felder aus TradingView:</p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-            <p className="text-xs text-muted-foreground">• Symbol / Ticker</p>
-            <p className="text-xs text-muted-foreground">• Setup / Strategy</p>
-            <p className="text-xs text-muted-foreground">• Main Trend / Direction</p>
-            <p className="text-xs text-muted-foreground">• Internal Trend / Sub Direction</p>
-            <p className="text-xs text-muted-foreground">• Entry Type / Order Type</p>
-            <p className="text-xs text-muted-foreground">• Entry Level / Price</p>
-            <p className="text-xs text-muted-foreground">• Result / Win / Profit</p>
-            <p className="text-xs text-muted-foreground">• R:R / Risk-Reward</p>
+          <p className="text-xs font-medium text-primary/80 mb-1">Unterstützte Plattformen & Felder:</p>
+          <div className="grid grid-cols-1 gap-1 mb-3">
+            <div className="bg-primary/10 rounded-md p-2">
+              <p className="text-xs font-medium text-primary mb-1">📊 TradingView:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <p className="text-xs text-muted-foreground">• Symbol / Ticker</p>
+                <p className="text-xs text-muted-foreground">• Setup / Strategy</p>
+                <p className="text-xs text-muted-foreground">• Main Trend / Direction</p>
+                <p className="text-xs text-muted-foreground">• Result / Win / Profit</p>
+              </div>
+            </div>
+            
+            <div className="bg-primary/10 rounded-md p-2">
+              <p className="text-xs font-medium text-primary mb-1">💹 Tradovate:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <p className="text-xs text-muted-foreground">• Contract / Symbol</p>
+                <p className="text-xs text-muted-foreground">• P/L (Profit/Loss)</p>
+                <p className="text-xs text-muted-foreground">• Fill Price / Average Price</p>
+                <p className="text-xs text-muted-foreground">• Side (Buy/Sell)</p>
+              </div>
+            </div>
           </div>
         </div>
         

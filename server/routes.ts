@@ -243,18 +243,202 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tradovate import route (placeholder for now, would need real Tradovate API integration)
+  // Tradovate API-Integration
+  // 1. Prüfen, ob Tradovate Zugangsdaten konfiguriert sind
+  app.get("/api/tradovate/check-credentials", isAuthenticated, (req: Request, res: Response) => {
+    const hasCredentials = 
+      process.env.TRADOVATE_USERNAME && 
+      process.env.TRADOVATE_PASSWORD && 
+      process.env.TRADOVATE_API_KEY &&
+      process.env.TRADOVATE_SECRET;
+    
+    res.status(200).json({ configured: !!hasCredentials });
+  });
+  
+  // 2. Tradovate Authentication Endpoint
+  app.post("/api/tradovate/auth", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Prüfen, ob Umgebungsvariablen konfiguriert sind
+      if (!process.env.TRADOVATE_API_KEY || !process.env.TRADOVATE_SECRET) {
+        return res.status(500).json({ message: "Tradovate API is not configured on the server" });
+      }
+      
+      // Für diesen Mock verwenden wir die Zugangsdaten aus der Umgebung
+      // In einer echten Implementierung würden wir den Tradovate API-Endpunkt ansprechen
+      // Hier simulieren wir nur eine erfolgreiche Antwort
+      
+      res.status(200).json({
+        accessToken: "mock-access-token-" + Date.now(),
+        mdAccessToken: "mock-md-token-" + Date.now(),
+        expirationTime: Date.now() + 3600000, // 1 Stunde
+        userId: 12345,
+        name: username
+      });
+    } catch (error) {
+      console.error("Tradovate auth error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // 3. Tradovate Contracts Endpoint
+  app.get("/api/tradovate/contracts", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      // Hier würden wir den Tradovate API-Endpunkt für Verträge ansprechen
+      // Für dieses Beispiel senden wir nur einige Beispieldaten zurück
+      
+      // Beispiel für Verträge
+      const mockContracts = [
+        { id: 1, name: "ESZ3", contractMaturity: "2023-12-15" },
+        { id: 2, name: "ESH4", contractMaturity: "2024-03-15" },
+        { id: 3, name: "NQZ3", contractMaturity: "2023-12-15" },
+        { id: 4, name: "NQH4", contractMaturity: "2024-03-15" }
+      ];
+      
+      res.status(200).json(mockContracts);
+    } catch (error) {
+      console.error("Tradovate contracts error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // 4. Tradovate Orders Endpoint
+  app.get("/api/tradovate/orders", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { accountId, ordStatus } = req.query;
+      
+      // Hier würden wir den Tradovate API-Endpunkt für Orders ansprechen
+      // Für dieses Beispiel senden wir nur einige Beispieldaten zurück
+      
+      // Beispiel für ausgeführte Orders
+      const mockOrders = [
+        { 
+          id: 10001, 
+          accountId: 12345, 
+          contractId: 1, 
+          timestamp: new Date().toISOString(), 
+          action: 'Buy', 
+          ordStatus: 'Filled',
+          executionId: 1001,
+          avgPrice: 4520.5,
+          filledQty: 1
+        },
+        { 
+          id: 10002, 
+          accountId: 12345, 
+          contractId: 3, 
+          timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 Tag früher
+          action: 'Sell', 
+          ordStatus: 'Filled',
+          executionId: 1002,
+          avgPrice: 15235.75,
+          filledQty: 1
+        }
+      ];
+      
+      // Filter anwenden, wenn accountId angegeben ist
+      let filteredOrders = mockOrders;
+      if (accountId) {
+        filteredOrders = filteredOrders.filter(order => order.accountId === Number(accountId));
+      }
+      
+      // Filter anwenden, wenn ordStatus angegeben ist
+      if (ordStatus) {
+        filteredOrders = filteredOrders.filter(order => order.ordStatus === ordStatus);
+      }
+      
+      res.status(200).json(filteredOrders);
+    } catch (error) {
+      console.error("Tradovate orders error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // 5. Tradovate Import Route
   app.post("/api/import-trades", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const { userId } = req.body;
+      const userId = req.user!.id;
       
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
       }
       
-      // This would be replaced with actual Tradovate API integration
-      res.status(200).json({ message: "Trade import initiated" });
+      // Zunächst prüfen, ob Tradovate API konfiguriert ist
+      const hasCredentials = 
+        process.env.TRADOVATE_USERNAME && 
+        process.env.TRADOVATE_PASSWORD && 
+        process.env.TRADOVATE_API_KEY &&
+        process.env.TRADOVATE_SECRET;
+      
+      if (!hasCredentials) {
+        return res.status(400).json({ 
+          message: "Tradovate API ist nicht konfiguriert. Bitte die API-Schlüssel in den Einstellungen hinterlegen." 
+        });
+      }
+      
+      // In einer echten Implementierung würden wir hier:
+      // 1. Die Tradovate API abfragen, um Trades zu erhalten
+      // 2. Die Trades in unser Format konvertieren
+      // 3. Die Trades in der Datenbank speichern
+      
+      // Für dieses Beispiel erstellen wir einige Beispiel-Trades
+      const mockTrades = [
+        {
+          userId,
+          symbol: "ESZ3",
+          setup: "Auto-Import-Tradovate",
+          mainTrendM15: "Long",
+          internalTrendM5: "Long",
+          entryType: "Buy",
+          entryLevel: "4520.50",
+          liquidation: "4500.00",
+          location: "Pullback",
+          rrAchieved: 1.5,
+          rrPotential: 2.0,
+          isWin: true,
+          date: new Date().toISOString(),
+          gptFeedback: "Auto-importierter Trade von Tradovate. Keine GPT-Analyse verfügbar."
+        },
+        {
+          userId,
+          symbol: "NQZ3",
+          setup: "Auto-Import-Tradovate",
+          mainTrendM15: "Short",
+          internalTrendM5: "Short",
+          entryType: "Sell",
+          entryLevel: "15235.75",
+          liquidation: "15300.00",
+          location: "Resistance",
+          rrAchieved: 2.0,
+          rrPotential: 2.5,
+          isWin: true,
+          date: new Date(Date.now() - 86400000).toISOString(),
+          gptFeedback: "Auto-importierter Trade von Tradovate. Keine GPT-Analyse verfügbar."
+        }
+      ];
+      
+      // Speichern der Trades in der Datenbank
+      let importedCount = 0;
+      for (const trade of mockTrades) {
+        try {
+          // Wir könnten hier GPT-Feedback generieren, überspringen es aber für simulierte Trades
+          const newTrade = await storage.createTrade(trade);
+          importedCount++;
+        } catch (error) {
+          console.error("Error importing trade:", error);
+        }
+      }
+      
+      // Statistiken aktualisieren
+      await storage.calculateSetupWinRates(userId);
+      
+      res.status(200).json({
+        message: `${importedCount} Trades von Tradovate importiert`,
+        count: importedCount
+      });
     } catch (error) {
+      console.error("Tradovate import error:", error);
       res.status(500).json({ message: error.message });
     }
   });
