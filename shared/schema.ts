@@ -108,3 +108,129 @@ export const insertSetupWinRateSchema = createInsertSchema(setupWinRates).omit({
 
 export type InsertSetupWinRate = z.infer<typeof insertSetupWinRateSchema>;
 export type SetupWinRate = typeof setupWinRates.$inferSelect;
+
+// Coach-Ziele und Feedback
+export const coachingGoals = pgTable("coaching_goals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  goalType: text("goal_type", { enum: ["daily", "weekly", "monthly"] }),
+  description: text("description"),
+  targetValue: integer("target_value"),
+  currentValue: integer("current_value").default(0),
+  completed: boolean("completed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  dueDate: timestamp("due_date"),
+});
+
+export const insertCoachingGoalSchema = createInsertSchema(coachingGoals).omit({
+  id: true,
+});
+
+export type InsertCoachingGoal = z.infer<typeof insertCoachingGoalSchema>;
+export type CoachingGoal = typeof coachingGoals.$inferSelect;
+
+export const coachingFeedback = pgTable("coaching_feedback", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  category: text("category", { enum: ["strategy", "psychology", "risk", "discipline"] }),
+  message: text("message"),
+  importance: integer("importance").default(1),
+  acknowledged: boolean("acknowledged").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCoachingFeedbackSchema = createInsertSchema(coachingFeedback).omit({
+  id: true,
+});
+
+export type InsertCoachingFeedback = z.infer<typeof insertCoachingFeedbackSchema>;
+export type CoachingFeedback = typeof coachingFeedback.$inferSelect;
+
+// Makroökonomische Ereignisse
+export const macroEconomicEvents = pgTable("macro_economic_events", {
+  id: serial("id").primaryKey(),
+  title: text("title"),
+  description: text("description"),
+  impact: text("impact", { enum: ["high", "medium", "low"] }),
+  date: timestamp("date"),
+  time: text("time"),
+  actual: text("actual").default(""),
+  forecast: text("forecast").default(""),
+  previous: text("previous").default(""),
+  country: text("country"),
+  currency: text("currency"),
+});
+
+export const insertMacroEconomicEventSchema = createInsertSchema(macroEconomicEvents).omit({
+  id: true,
+});
+
+export type InsertMacroEconomicEvent = z.infer<typeof insertMacroEconomicEventSchema>;
+export type MacroEconomicEvent = typeof macroEconomicEvents.$inferSelect;
+
+// Social Trading
+export const tradingStrategies = pgTable("trading_strategies", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  name: text("name"),
+  description: text("description"),
+  setupType: text("setup_type"),
+  entryRules: text("entry_rules"),
+  exitRules: text("exit_rules"),
+  riskManagement: text("risk_management"),
+  timeframes: text("timeframes"),
+  markets: text("markets"),
+  public: boolean("public").default(false),
+  rating: integer("rating").default(0),
+  ratingCount: integer("rating_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertTradingStrategySchema = createInsertSchema(tradingStrategies).omit({
+  id: true,
+  rating: true,
+  ratingCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTradingStrategy = z.infer<typeof insertTradingStrategySchema>;
+export type TradingStrategy = typeof tradingStrategies.$inferSelect;
+
+export const strategyComments = pgTable("strategy_comments", {
+  id: serial("id").primaryKey(),
+  strategyId: integer("strategy_id").references(() => tradingStrategies.id, { onDelete: "cascade" }),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  content: text("content"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertStrategyCommentSchema = createInsertSchema(strategyComments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertStrategyComment = z.infer<typeof insertStrategyCommentSchema>;
+export type StrategyComment = typeof strategyComments.$inferSelect;
+
+// App Settings für Multi-Device Sync
+export const appSettings = pgTable("app_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  theme: text("theme").default("dark"),
+  notifications: boolean("notifications").default(true),
+  syncEnabled: boolean("sync_enabled").default(true),
+  lastSyncedAt: timestamp("last_synced_at").defaultNow(),
+  offlineModeEnabled: boolean("offline_mode_enabled").default(false),
+  deviceId: text("device_id"),
+  deviceName: text("device_name"),
+  deviceType: text("device_type"),
+})
+
+export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({
+  id: true,
+});
+
+export type InsertAppSettings = z.infer<typeof insertAppSettingsSchema>;
+export type AppSettings = typeof appSettings.$inferSelect;

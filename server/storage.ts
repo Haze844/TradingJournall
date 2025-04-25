@@ -3,7 +3,13 @@ import {
   trades, type Trade, type InsertTrade,
   weeklySummaries, type WeeklySummary, type InsertWeeklySummary,
   performanceData, type PerformanceData, type InsertPerformanceData,
-  setupWinRates, type SetupWinRate, type InsertSetupWinRate
+  setupWinRates, type SetupWinRate, type InsertSetupWinRate,
+  coachingGoals, type CoachingGoal, type InsertCoachingGoal,
+  coachingFeedback, type CoachingFeedback, type InsertCoachingFeedback,
+  macroEconomicEvents, type MacroEconomicEvent, type InsertMacroEconomicEvent,
+  tradingStrategies, type TradingStrategy, type InsertTradingStrategy,
+  strategyComments, type StrategyComment, type InsertStrategyComment,
+  appSettings, type AppSettings, type InsertAppSettings
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -42,6 +48,44 @@ export interface IStorage {
   // Statistics operations
   calculateWeeklySummary(userId: number, weekStart: Date, weekEnd: Date): Promise<InsertWeeklySummary & { userId: number }>;
   calculateSetupWinRates(userId: number): Promise<void>;
+  
+  // Coaching Goals operations
+  getCoachingGoals(userId: number, completed?: boolean): Promise<CoachingGoal[]>;
+  getCoachingGoalById(id: number): Promise<CoachingGoal | undefined>;
+  createCoachingGoal(goal: InsertCoachingGoal): Promise<CoachingGoal>;
+  updateCoachingGoal(id: number, goal: Partial<CoachingGoal>): Promise<CoachingGoal | undefined>;
+  deleteCoachingGoal(id: number): Promise<boolean>;
+  
+  // Coaching Feedback operations
+  getCoachingFeedback(userId: number, acknowledged?: boolean): Promise<CoachingFeedback[]>;
+  createCoachingFeedback(feedback: InsertCoachingFeedback): Promise<CoachingFeedback>;
+  acknowledgeCoachingFeedback(id: number): Promise<CoachingFeedback | undefined>;
+  generateCoachingFeedback(userId: number): Promise<CoachingFeedback[]>;
+  
+  // Macroeconomic Events operations
+  getMacroEconomicEvents(startDate: Date, endDate: Date): Promise<MacroEconomicEvent[]>;
+  getMacroEconomicEventById(id: number): Promise<MacroEconomicEvent | undefined>;
+  createMacroEconomicEvent(event: InsertMacroEconomicEvent): Promise<MacroEconomicEvent>;
+  updateMacroEconomicEvent(id: number, event: Partial<MacroEconomicEvent>): Promise<MacroEconomicEvent | undefined>;
+  deleteMacroEconomicEvent(id: number): Promise<boolean>;
+  
+  // Trading Strategies operations
+  getTradingStrategies(userId?: number, publicOnly?: boolean): Promise<TradingStrategy[]>;
+  getTradingStrategyById(id: number): Promise<TradingStrategy | undefined>;
+  createTradingStrategy(strategy: InsertTradingStrategy): Promise<TradingStrategy>;
+  updateTradingStrategy(id: number, strategy: Partial<TradingStrategy>): Promise<TradingStrategy | undefined>;
+  deleteTradingStrategy(id: number): Promise<boolean>;
+  
+  // Strategy Comments operations
+  getStrategyComments(strategyId: number): Promise<StrategyComment[]>;
+  createStrategyComment(comment: InsertStrategyComment): Promise<StrategyComment>;
+  deleteStrategyComment(id: number): Promise<boolean>;
+  
+  // App Settings operations
+  getAppSettings(userId: number, deviceId?: string): Promise<AppSettings | undefined>;
+  createAppSettings(settings: InsertAppSettings): Promise<AppSettings>;
+  updateAppSettings(id: number, settings: Partial<AppSettings>): Promise<AppSettings | undefined>;
+  syncAppSettings(userId: number, deviceId: string): Promise<AppSettings | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -51,12 +95,24 @@ export class MemStorage implements IStorage {
   private weeklySummaries: Map<number, WeeklySummary>;
   private performanceData: Map<number, PerformanceData>;
   private setupWinRates: Map<number, SetupWinRate>;
+  private coachingGoals: Map<number, CoachingGoal>;
+  private coachingFeedback: Map<number, CoachingFeedback>;
+  private macroEconomicEvents: Map<number, MacroEconomicEvent>;
+  private tradingStrategies: Map<number, TradingStrategy>;
+  private strategyComments: Map<number, StrategyComment>;
+  private appSettings: Map<number, AppSettings>;
   
   private userIdCounter: number;
   private tradeIdCounter: number;
   private summaryIdCounter: number;
   private performanceIdCounter: number;
   private setupWinRateIdCounter: number;
+  private coachingGoalIdCounter: number;
+  private coachingFeedbackIdCounter: number;
+  private macroEconomicEventIdCounter: number;
+  private tradingStrategyIdCounter: number;
+  private strategyCommentIdCounter: number;
+  private appSettingsIdCounter: number;
 
   constructor() {
     this.sessionStore = new MemoryStore({
@@ -67,12 +123,24 @@ export class MemStorage implements IStorage {
     this.weeklySummaries = new Map();
     this.performanceData = new Map();
     this.setupWinRates = new Map();
+    this.coachingGoals = new Map();
+    this.coachingFeedback = new Map();
+    this.macroEconomicEvents = new Map();
+    this.tradingStrategies = new Map();
+    this.strategyComments = new Map();
+    this.appSettings = new Map();
     
     this.userIdCounter = 1;
     this.tradeIdCounter = 1;
     this.summaryIdCounter = 1;
     this.performanceIdCounter = 1;
     this.setupWinRateIdCounter = 1;
+    this.coachingGoalIdCounter = 1;
+    this.coachingFeedbackIdCounter = 1;
+    this.macroEconomicEventIdCounter = 1;
+    this.tradingStrategyIdCounter = 1;
+    this.strategyCommentIdCounter = 1;
+    this.appSettingsIdCounter = 1;
   }
 
   // User methods
