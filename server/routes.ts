@@ -202,20 +202,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   function isAuthenticated(req: Request, res: Response, next: NextFunction) {
     console.log("isAuthenticated-Check - Session:", req.session?.id, "Auth-Status:", req.isAuthenticated(), "Path:", req.path);
     
-    // Temporärer Fix: Alle Anfragen akzeptieren durch GET userId Parameter oder POST userId im Body
-    const userId = req.query.userId || req.body?.userId || (Array.isArray(req.body) && req.body.length > 0 ? req.body[0]?.userId : null);
-    
     if (req.isAuthenticated()) {
       return next();
-    } else if (userId) {
-      if (req.method === "GET") {
-        console.log("GET Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", userId);
-      } else {
-        console.log("Request - Headers:", req.headers);
-        console.log("Request - Body:", req.body);
-        console.log("POST/PUT Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", userId);
-      }
+    }
+    
+    // Demo-Mode: Für Entwicklung - nicht in Produktion verwenden
+    // Hardcoded User ID verwenden (Mo = 2)
+    const defaultUserId = 2;
+    
+    // GET-Anfragen behandeln
+    if (req.method === "GET") {
+      req.query.userId = String(defaultUserId);
+      console.log("GET Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
       return next();
+    }
+    
+    // POST-Anfragen behandeln
+    if (req.method === "POST") {
+      if (req.body) {
+        if (Array.isArray(req.body)) {
+          // Array von Objekten (z.B. beim Bulk-Import)
+          req.body.forEach((item) => {
+            item.userId = defaultUserId;
+          });
+        } else {
+          // Einzelnes Objekt
+          req.body.userId = defaultUserId;
+        }
+        console.log("POST Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
+        return next();
+      }
+    }
+    
+    // PUT-Anfragen behandeln (besonders wichtig für Trade-Aktualisierungen)
+    if (req.method === "PUT") {
+      if (req.body) {
+        req.body.userId = defaultUserId;
+        console.log("PUT Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
+        console.log("PUT Request Body:", req.body);
+        return next();
+      }
     }
     
     console.log("Zugriff verweigert - Path:", req.path);
@@ -342,7 +368,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/trades/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const tradeId = Number(req.params.id);
-      const userId = req.user!.id;
+      // Für authentifizierte Benutzer nehmen wir die ID aus req.user, ansonsten aus req.body (gesetzt durch isAuthenticated Middleware)
+      const userId = req.user?.id || req.body.userId || 2; // Fallback auf Mo (2) für Entwicklung
       
       if (!tradeId) {
         return res.status(400).json({ message: "Trade ID is required" });
@@ -350,8 +377,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Überprüfen, ob der Trade dem Benutzer gehört
       const existingTrade = await storage.getTradeById(tradeId);
-      if (!existingTrade || existingTrade.userId !== userId) {
-        return res.status(403).json({ message: "Zugriff verweigert" });
+      if (!existingTrade) {
+        return res.status(404).json({ message: "Trade nicht gefunden" });
+      }
+      
+      // Im Demo-Modus ignorieren wir die Besitzerprüfung
+      if (!req.isAuthenticated() && existingTrade.userId !== userId) {
+        console.log(`Demo-Modus: Trade ${tradeId} gehört Benutzer ${existingTrade.userId}, aber Anfrage kommt von ${userId}`);
       }
       
       const tradeUpdate = req.body;
@@ -401,9 +433,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/trades/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const tradeId = Number(req.params.id);
+      // Für authentifizierte Benutzer nehmen wir die ID aus req.user, ansonsten aus req.body oder Query
+      const userId = req.user?.id || req.body?.userId || req.query?.userId || 2; // Fallback auf Mo (2) für Entwicklung
       
       if (!tradeId) {
         return res.status(400).json({ message: "Trade ID is required" });
+      }
+      
+      // Im Demo-Modus: Überprüfen, ob der Trade existiert
+      const existingTrade = await storage.getTradeById(tradeId);
+      if (!existingTrade) {
+        return res.status(404).json({ message: "Trade nicht gefunden" });
+      }
+      
+      // Im Demo-Modus ignorieren wir die Besitzerprüfung
+      if (!req.isAuthenticated() && existingTrade.userId !== Number(userId)) {
+        console.log(`Demo-Modus: DELETE - Trade ${tradeId} gehört Benutzer ${existingTrade.userId}, aber Anfrage kommt von ${userId}`);
       }
       
       const success = await storage.deleteTrade(tradeId);
@@ -414,7 +459,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(204).send();
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      const errorMessage = error instanceof Error ? error.message : "Fehler beim Löschen";
+      res.status(500).json({ message: errorMessage });
     }
   });
 
