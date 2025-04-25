@@ -3,8 +3,23 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
-  Users, Download, TrendingDown, DollarSign, AlertCircle, BookOpen, LogOut
+  Users, Download, TrendingDown, DollarSign, AlertCircle, BookOpen, LogOut,
+  ChevronDown, ChevronRight, Menu
 } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const { user, logoutMutation } = useAuth();
@@ -31,7 +46,8 @@ export default function Header() {
           </div>
           
           {/* Hauptnavigation */}
-          <nav className="flex flex-wrap justify-center gap-2 mb-2 md:mb-0">
+          <nav className="flex flex-wrap justify-center gap-3 mb-2 md:mb-0">
+            {/* Dashboard Button */}
             <Button variant="ghost" size="sm" asChild>
               <Link href="/">
                 <BarChart2 className="w-4 h-4 mr-2" />
@@ -39,46 +55,146 @@ export default function Header() {
               </Link>
             </Button>
             
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/coach">
-                <Trophy className="w-4 h-4 mr-2" />
-                Coach
-              </Link>
-            </Button>
+            {/* Trading Funktionen Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <BarChart2 className="w-4 h-4 mr-2" />
+                  Trading
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-md border-primary/20">
+                <DropdownMenuLabel>Trading Funktionen</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/#trades">
+                      <BarChart2 className="w-4 h-4 mr-2" />
+                      <span>Trades Übersicht</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/#import">
+                      <FileUp className="w-4 h-4 mr-2" />
+                      <span>CSV Import</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/#risk-management">
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      <span>Risikomanagement</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/#market-phase">
+                      <Activity className="w-4 h-4 mr-2" />
+                      <span>Marktphasen</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/calendar">
-                <Calendar className="w-4 h-4 mr-2" />
-                Makro-Kalender
-              </Link>
-            </Button>
+            {/* Analyse Funktionen Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <Brain className="w-4 h-4 mr-2" />
+                  Analyse
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-md border-primary/20">
+                <DropdownMenuLabel>Analyse Werkzeuge</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/#ai-analysis">
+                      <Brain className="w-4 h-4 mr-2" />
+                      <span>KI-Analyse</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/coach">
+                      <Trophy className="w-4 h-4 mr-2" />
+                      <span>Trading Coach</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/calendar">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      <span>Makro-Kalender</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
+            {/* Community Button */}
             <Button variant="ghost" size="sm" asChild>
               <Link href="/social">
                 <Users className="w-4 h-4 mr-2" />
-                Social Trading
+                Community
               </Link>
             </Button>
             
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/booklet">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Handbuch
-              </Link>
-            </Button>
+            {/* Hilfe Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Hilfe
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-md border-primary/20">
+                <DropdownMenuLabel>Handbuch & Hilfe</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/booklet">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      <span>Online Handbuch</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.open('/lvlup-trading-handbuch-style.html', '_blank')}>
+                    <Download className="w-4 h-4 mr-2" />
+                    <span>Handbuch PDF</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
           
           {/* User-Menü rechts */}
           <div className="flex items-center gap-2">
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground mr-2">
+                <span className="text-sm text-muted-foreground mr-1">
                   {user.username}
                 </span>
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="w-4 h-4 mr-1" />
-                  Abmelden
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center">
+                      <Settings className="w-4 h-4" />
+                      <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-40 bg-black/80 backdrop-blur-md border-primary/20">
+                    <DropdownMenuLabel>Benutzer</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Settings className="w-4 h-4 mr-2" />
+                      <span>Einstellungen</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      <span>Abmelden</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <Button variant="ghost" size="sm" asChild>
@@ -86,86 +202,6 @@ export default function Header() {
               </Button>
             )}
           </div>
-        </div>
-        
-        {/* Zweite Navigationszeile für Untermenüs */}
-        <div className="submenu-items mt-3 text-muted-foreground">
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/">
-              <BarChart2 className="w-3 h-3 mr-1" />
-              Dashboard
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/#trades">
-              <BarChart2 className="w-3 h-3 mr-1" />
-              Trades Übersicht
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/#import">
-              <FileUp className="w-3 h-3 mr-1" />
-              CSV Import
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/#ai-analysis">
-              <Brain className="w-3 h-3 mr-1" />
-              KI-Analyse
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/#risk-management">
-              <AlertCircle className="w-3 h-3 mr-1" />
-              Risikomanagement
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/#market-phase">
-              <Activity className="w-3 h-3 mr-1" />
-              Marktphasen
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/coach">
-              <Trophy className="w-3 h-3 mr-1" />
-              Coach
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/calendar">
-              <Calendar className="w-3 h-3 mr-1" />
-              Makro-Kalender
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/social">
-              <Users className="w-3 h-3 mr-1" />
-              Social Trading
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/booklet">
-              <BookOpen className="w-3 h-3 mr-1" />
-              Handbuch
-            </Link>
-          </Button>
-          
-          <Button variant="link" size="sm" className="submenu-item" asChild>
-            <Link href="/lvlup-trading-handbuch-style.html" target="_blank">
-              <Download className="w-3 h-3 mr-1" />
-              Handbuch PDF
-            </Link>
-          </Button>
         </div>
       </div>
     </header>
