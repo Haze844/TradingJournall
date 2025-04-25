@@ -195,7 +195,7 @@ export default function Booklet() {
 
         <div className="flex justify-center">
           <a
-            href="/lvlup-trading-handbuch.pdf"
+            href={manualPdf}
             target="_blank"
             download="LvlUp_Trading_Handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
