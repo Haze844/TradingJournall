@@ -14,7 +14,12 @@ import { synchronizeTrades } from "@/lib/tradovate";
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function TradeImport() {
+interface TradeImportProps {
+  userId: number;
+  onImport?: () => void;
+}
+
+export default function TradeImport({ userId, onImport }: TradeImportProps) {
   const [file, setFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -29,7 +34,7 @@ export default function TradeImport() {
       console.log("Importiere Trades mit userId:", user?.id);
       const res = await apiRequest("POST", "/api/import-csv", { 
         trades,
-        userId: user?.id // Explizite Benutzer-ID für den Import
+        userId: userId // Verwende die über Props übergebene userId
       });
       return await res.json();
     },
@@ -124,13 +129,13 @@ export default function TradeImport() {
     
     setImporting(true);
     
-    console.log("Link-Import mit userId:", user?.id);
+    console.log("Link-Import mit userId:", userId);
     
     // Speichere nur den Link selbst, keine weitere Daten
     // Das setzt voraus, dass das Schema Null-Werte erlaubt
     const emptyTrade = {
       chartImage: linkInput,
-      userId: user?.id // Explizite Weitergabe der Benutzer-ID
+      userId: userId // Verwende die über Props übergebene userId
       // Keine weiteren Felder, damit keine Standardwerte gesetzt werden
     };
     
