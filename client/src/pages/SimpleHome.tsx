@@ -140,6 +140,15 @@ export default function SimpleHome() {
                   <Activity className="h-4 w-4 mr-2" />
                   Phasen
                 </Button>
+                <Link href="/booklet">
+                  <Button 
+                    variant="ghost" 
+                    className="text-sm py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                  >
+                    <FileUp className="h-4 w-4 mr-2" />
+                    Handbuch
+                  </Button>
+                </Link>
               </div>
             </div>
             

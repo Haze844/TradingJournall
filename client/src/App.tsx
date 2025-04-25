@@ -13,6 +13,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import PersonalCoach from "@/components/PersonalCoach";
 import MacroEconomicCalendar from "@/components/MacroEconomicCalendar";
 import SocialTrading from "@/components/SocialTrading";
+import Booklet from "@/components/Booklet";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
       <ProtectedRoute path="/coach" component={PersonalCoach} />
       <ProtectedRoute path="/calendar" component={MacroEconomicCalendar} />
       <ProtectedRoute path="/social" component={SocialTrading} />
+      <ProtectedRoute path="/booklet" component={Booklet} />
       <Route path="/auth" component={AuthPage} />
       <Route path="*" component={NotFound} />
     </Switch>
