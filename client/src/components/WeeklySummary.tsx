@@ -112,16 +112,15 @@ export default function WeeklySummary({ userId, weekStart, weekEnd }: WeeklySumm
         </div>
         
         <div className="bg-muted p-4 rounded-lg">
-          <h3 className="font-bold mb-3">Trefferquote pro Setup</h3>
-          <div className="h-48">
-            {setupWinRatesLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <Skeleton className="h-40 w-full" />
-              </div>
-            ) : (
+          {setupWinRatesLoading ? (
+            <div className="h-48 flex items-center justify-center">
+              <Skeleton className="h-40 w-full" />
+            </div>
+          ) : (
+            <div className="h-64">
               <SetupWinRateChart data={setupWinRates} />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
