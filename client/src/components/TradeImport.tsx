@@ -429,7 +429,16 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     let rrAchieved = processedRow.rrAchieved || 0;
                     let rrPotential = processedRow.rrPotential || 0;
                     
-                    if (hasSpecialFormat && row.buyPrice && row.sellPrice && row.qty) {
+                    // Prüfen wir zuerst, ob es ein Verlust ist (vorberechnet)
+                    const isProfitLossNegative = profitLoss < 0;
+                    
+                    if (isProfitLossNegative) {
+                      // Bei Verlust-Trades direkt RR auf -1 setzen und RR Potential leer lassen
+                      rrAchieved = -1;
+                      rrPotential = 0; // Leerer Wert im Frontend
+                      console.log("Verlust erkannt, setze RR auf -1 und RR Potential auf leer");
+                    } 
+                    else if (hasSpecialFormat && row.buyPrice && row.sellPrice && row.qty) {
                       try {
                         const buyPrice = parseFloat(row.buyPrice);
                         const sellPrice = parseFloat(row.sellPrice);
@@ -493,12 +502,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                         // Loggen wir das Ergebnis für Debugging
                         console.log(`Win/Loss Status: ${result ? 'WIN' : 'LOSS'} (P/L: ${profitLoss}, Explicit: ${isExplicitlyTrue}, Text: ${isTextWin}, Profit: ${isProfitPositive})`);
                         
-                        // Bei Verlust passen wir auch RR und RR Potential an
-                        if (!result) {
-                          // Für Verlust-Trades: RR auf -1 setzen und RR Potential leer lassen
-                          rrAchieved = -1;
-                          rrPotential = 0; // Leerer Wert im Frontend
-                        }
+                        // Hinweis: RR und RR Potential werden bereits weiter oben angepasst
                         
                         return result;
                       })(),
