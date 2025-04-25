@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, createElement } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -438,7 +438,7 @@ const FeedbackList = ({ userId }: { userId: number }) => {
               <CardHeader className="pb-2">
                 <div className="flex justify-between">
                   <div className="flex gap-2 items-center">
-                    {React.createElement(getCategoryIcon(item.category), {
+                    {createElement(getCategoryIcon(item.category), {
                       className: cn("h-5 w-5", getCategoryColor(item.category))
                     })}
                     <div>

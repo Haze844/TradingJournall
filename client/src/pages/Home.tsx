@@ -110,7 +110,35 @@ export default function Home() {
             <p className="text-xs text-gray-400">Trading-Performance optimieren</p>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
+          {/* Navigation */}
+          <div className="hidden md:flex gap-2 mr-2">
+            <Link href="/">
+              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
+                <Activity className="h-4 w-4 mr-1" />
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/coach">
+              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
+                <Trophy className="h-4 w-4 mr-1" />
+                Coach
+              </Button>
+            </Link>
+            <Link href="/calendar">
+              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
+                <Calendar className="h-4 w-4 mr-1" />
+                Kalender
+              </Button>
+            </Link>
+            <Link href="/social">
+              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
+                <Users className="h-4 w-4 mr-1" />
+                Social
+              </Button>
+            </Link>
+          </div>
+          
           <Button 
             onClick={() => {
               const importTab = document.querySelector('[value="import"]') as HTMLElement;
@@ -124,6 +152,8 @@ export default function Home() {
           <Button variant="outline" size="icon" className="border-primary/40 hover:border-primary/80">
             <Settings className="h-4 w-4" />
           </Button>
+          
+          {/* Mobile navigation buttons would go here */}
         </div>
       </header>
 
