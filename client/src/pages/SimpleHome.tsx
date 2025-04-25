@@ -19,7 +19,7 @@ import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
-  Users, Download, TrendingDown, DollarSign, AlertCircle, ImageIcon
+  Users, Download, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon
 } from "lucide-react";
 import { Link } from "wouter";
 
