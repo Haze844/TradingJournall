@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Rocket, TrendingUp, BarChart3, BrainCircuit, Lock, User, Loader2 } from "lucide-react";
@@ -124,11 +125,15 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
+    rememberMe: false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -160,6 +165,22 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
               onChange={handleChange}
               required 
             />
+          </div>
+          <div className="flex items-center space-x-2 mt-3">
+            <Checkbox 
+              id="rememberMe" 
+              name="rememberMe"
+              checked={formData.rememberMe}
+              onCheckedChange={(checked) => {
+                setFormData(prev => ({ ...prev, rememberMe: !!checked }));
+              }}
+            />
+            <Label 
+              htmlFor="rememberMe" 
+              className="text-sm font-medium cursor-pointer"
+            >
+              Eingeloggt bleiben
+            </Label>
           </div>
         </CardContent>
         <div className="px-6 py-4">

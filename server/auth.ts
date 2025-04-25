@@ -111,8 +111,18 @@ export function setupAuth(app: Express) {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info?.message || "Anmeldung fehlgeschlagen" });
 
+      // Überprüfe, ob "Eingeloggt bleiben" Option aktiviert ist
+      const rememberMe = req.body.rememberMe === true;
+      
       req.login(user, (loginErr) => {
         if (loginErr) return next(loginErr);
+        
+        // Cookie-Lebensdauer ändern, wenn "Eingeloggt bleiben" aktiviert ist
+        if (rememberMe && req.session.cookie) {
+          // 30 Tage statt 1 Woche
+          req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
+        }
+        
         // Don't send password to the client
         const { password, ...userWithoutPassword } = user;
         return res.status(200).json(userWithoutPassword);
