@@ -1,19 +1,9 @@
-import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
-  FileUp, Download, Brain, BarChart2, Activity, Trophy, Calendar, 
-  Users, TrendingDown, DollarSign, ChevronDown, FileText
+  FileUp, Brain, BarChart2, Activity, Trophy, Calendar, 
+  Users, TrendingDown, FileText
 } from "lucide-react";
-import { 
-  PDFDownloadLink, 
-  Document, 
-  Page, 
-  Text, 
-  View, 
-  StyleSheet, 
-  Image,
-  Font 
-} from '@react-pdf/renderer';
 
 // Beispielbilder für das Handbuch
 const PLACEHOLDER_IMAGES = {
@@ -28,222 +18,10 @@ const PLACEHOLDER_IMAGES = {
   import: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48cGF0aCBkPSJNMjAwIDgwdjE0MGgxMDBWODBIMjAweiIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMjIwIDExMGgzMG0tMzAgMzBoNjBtLTYwIDMwaDYwbS02MCAzMGg2MCIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMTUwIDEzMGgzMG0tMzAgMzBoMzBtOTAgLTMwaDMwbS0zMCAzMGgzMG0tMTUwIDMwdjIwIiBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNSw1Ii8+PHRleHQgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgeD0iMTUwIiB5PSIzMCI+Q1NWIEltcG9ydDwvdGV4dD48L2c+PC9zdmc+'
 };
 
-// PDF-Stile definieren
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#202337',
-    padding: 20,
-    color: '#ffffff',
-  },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-    borderWidth: 1,
-    borderColor: '#485474',
-    borderRadius: 5,
-    backgroundColor: 'rgba(50, 55, 85, 0.8)',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 10,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#5c66c5',
-  },
-  heading: {
-    fontSize: 18,
-    marginVertical: 10,
-    fontWeight: 'bold',
-    color: '#5c66c5',
-  },
-  subheading: {
-    fontSize: 14,
-    marginVertical: 6,
-    fontWeight: 'bold',
-    color: '#ffffff',
-  },
-  text: {
-    fontSize: 12,
-    marginBottom: 6,
-    lineHeight: 1.4,
-  },
-  bulletPoint: {
-    fontSize: 12,
-    marginLeft: 10,
-    marginBottom: 3,
-  },
-  image: {
-    width: '100%',
-    height: 180,
-    marginVertical: 10,
-    objectFit: 'contain',
-  },
-  logo: {
-    width: 50,
-    height: 50,
-    marginBottom: 10,
-    alignSelf: 'center',
-  },
-  flexRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  headerText: {
-    fontSize: 28,
-    marginBottom: 5,
-    textAlign: 'center',
-    color: '#5c66c5',
-    fontWeight: 'bold',
-  },
-  subheaderText: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-    color: '#a0a0a0',
-  },
-  pageNumber: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    fontSize: 10,
-    color: '#a0a0a0',
-  },
-});
 
-// PDF-Dokument definieren
-const BookletPDF = () => (
-  <Document>
-    {/* Titelseite */}
-    <Page size="A4" style={styles.page}>
-      <View style={{ marginTop: 100, marginBottom: 100, alignItems: 'center' }}>
-        <Text style={{...styles.headerText, fontSize: 40, marginBottom: 20}}>LvlUp Trading</Text>
-        <Text style={{...styles.subheaderText, fontSize: 20, marginBottom: 40}}>Benutzerhandbuch</Text>
-        <Text style={styles.text}>Version 1.0 | April 2025</Text>
-      </View>
-    </Page>
-
-    {/* Dashboard & Navigation */}
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>1. Dashboard & Navigation</Text>
-        <Text style={styles.heading}>Hauptnavigation</Text>
-        <Text style={styles.text}>Das Dashboard bietet Zugriff auf alle Funktionen der Anwendung:</Text>
-        <Text style={styles.bulletPoint}>• Dashboard: Übersicht über deine Trade-Aktivitäten</Text>
-        <Text style={styles.bulletPoint}>• KI-Analyse: Erkennung von Handelsmustern</Text>
-        <Text style={styles.bulletPoint}>• Risikomanagement: Analyse deiner Risikometriken</Text>
-        <Text style={styles.bulletPoint}>• Marktphasen: Performance in verschiedenen Marktphasen</Text>
-        
-        <Text style={styles.heading}>Zusätzliche Funktionen</Text>
-        <Text style={styles.bulletPoint}>• Trading Coach: Personalisierte Verbesserungsvorschläge</Text>
-        <Text style={styles.bulletPoint}>• Makro-Kalender: Wichtige Wirtschaftsereignisse</Text>
-        <Text style={styles.bulletPoint}>• Social Trading: Community-Integration</Text>
-      </View>
-      <Text style={styles.pageNumber}>1</Text>
-    </Page>
-
-    {/* Trade-Management */}
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>2. Trade-Management</Text>
-        <Text style={styles.heading}>Trade-Tabelle</Text>
-        <Text style={styles.text}>Die Trade-Tabelle zeigt alle erfassten Trades mit wichtigen Informationen:</Text>
-        <Text style={styles.bulletPoint}>• Datum und Symbol</Text>
-        <Text style={styles.bulletPoint}>• Setup und Trendanalyse</Text>
-        <Text style={styles.bulletPoint}>• Entry-Typ und Level</Text>
-        <Text style={styles.bulletPoint}>• Risk-Reward-Verhältnis</Text>
-        
-        <Text style={styles.heading}>Trade-Details</Text>
-        <Text style={styles.text}>Durch Klicken auf einen Trade werden alle Details angezeigt:</Text>
-        <Text style={styles.bulletPoint}>• Vollständige Trade-Informationen</Text>
-        <Text style={styles.bulletPoint}>• Kommentare und Notizen</Text>
-        <Text style={styles.bulletPoint}>• Chart-Screenshots</Text>
-        <Text style={styles.bulletPoint}>• KI-generiertes Feedback</Text>
-      </View>
-      <Text style={styles.pageNumber}>2</Text>
-    </Page>
-
-    {/* KI-Analyse */}
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>3. KI-Analyse</Text>
-        <Text style={styles.heading}>Trading-Muster</Text>
-        <Text style={styles.text}>Die KI analysiert deine Trade-Historie und identifiziert wiederkehrende Muster:</Text>
-        <Text style={styles.bulletPoint}>• Erkennung deiner erfolgreichsten Setups</Text>
-        <Text style={styles.bulletPoint}>• Identifikation von Schwachstellen</Text>
-        <Text style={styles.bulletPoint}>• Analyse von emotionalen Mustern</Text>
-        <Text style={styles.bulletPoint}>• Vorschläge zur Optimierung</Text>
-        
-        <Text style={styles.heading}>Erweiterte Trade-Analyse</Text>
-        <Text style={styles.text}>Detaillierte Analysen zu spezifischen Aspekten:</Text>
-        <Text style={styles.bulletPoint}>• Zeitbasierte Analyse (beste Trading-Zeiten)</Text>
-        <Text style={styles.bulletPoint}>• Symbol-Performance</Text>
-        <Text style={styles.bulletPoint}>• Setup-Erfolgsanalyse</Text>
-      </View>
-      <Text style={styles.pageNumber}>3</Text>
-    </Page>
-
-    {/* Risikomanagement */}
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>4. Risikomanagement</Text>
-        <Text style={styles.heading}>Drawdown-Analyse</Text>
-        <Text style={styles.text}>Verfolge und analysiere deine Drawdowns:</Text>
-        <Text style={styles.bulletPoint}>• Historische Drawdown-Perioden</Text>
-        <Text style={styles.bulletPoint}>• Maximaler Drawdown</Text>
-        <Text style={styles.bulletPoint}>• Durchschnittliche Erholungszeit</Text>
-        
-        <Text style={styles.heading}>Risiko pro Trade & Positionsgröße</Text>
-        <Text style={styles.text}>Optimiere dein Risiko und berechne Positionsgrößen:</Text>
-        <Text style={styles.bulletPoint}>• Durchschnittliches Risiko pro Trade</Text>
-        <Text style={styles.bulletPoint}>• Risk-Reward-Verhältnis über Zeit</Text>
-        <Text style={styles.bulletPoint}>• Optimales Risiko basierend auf deiner Performance</Text>
-        <Text style={styles.bulletPoint}>• Positionsgrößen-Kalkulator</Text>
-      </View>
-      <Text style={styles.pageNumber}>4</Text>
-    </Page>
-
-    {/* Marktphasen-Analyse */}
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>5. Marktphasen-Analyse</Text>
-        <Text style={styles.heading}>Marktphasen-Verteilung</Text>
-        <Text style={styles.text}>Analyse der verschiedenen Marktphasen in deiner Trading-Historie:</Text>
-        <Text style={styles.bulletPoint}>• Trend-Phasen</Text>
-        <Text style={styles.bulletPoint}>• Range-Phasen</Text>
-        <Text style={styles.bulletPoint}>• Volatile Phasen</Text>
-        
-        <Text style={styles.heading}>Performance & Setup-Analyse</Text>
-        <Text style={styles.text}>Analyse deiner Performance und Setups in verschiedenen Marktphasen:</Text>
-        <Text style={styles.bulletPoint}>• Gewinnrate pro Marktphase</Text>
-        <Text style={styles.bulletPoint}>• Durchschnittliches RR pro Marktphase</Text>
-        <Text style={styles.bulletPoint}>• Setups für verschiedene Marktphasen</Text>
-        <Text style={styles.bulletPoint}>• Handlungsempfehlungen</Text>
-      </View>
-      <Text style={styles.pageNumber}>5</Text>
-    </Page>
-
-    {/* Trading Coach, Makro-Kalender, Social Trading */}
-    <Page size="A4" style={styles.page}>
-      <View style={styles.section}>
-        <Text style={styles.title}>6. Trading Coach</Text>
-        <Text style={styles.text}>Setze und verfolge deine Trading-Ziele, erhalte personalisiertes Feedback und verbessere deine Handelsstrategien mit Hilfe der KI.</Text>
-        
-        <Text style={styles.title}>7. Makroökonomischer Kalender</Text>
-        <Text style={styles.text}>Behalte wichtige Wirtschaftsereignisse im Blick und plane deine Trades entsprechend. Filtere nach Land, Währung oder Wichtigkeit.</Text>
-        
-        <Text style={styles.title}>8. Social Trading & Import</Text>
-        <Text style={styles.text}>Teile und entdecke Trading-Strategien, tausche dich mit anderen Tradern aus und importiere deine Trades aus verschiedenen Quellen.</Text>
-      </View>
-      <Text style={styles.pageNumber}>6</Text>
-    </Page>
-  </Document>
-);
 
 export default function Booklet() {
-  const [pdLoaded, setPdLoaded] = useState<boolean>(false);
+
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -263,17 +41,14 @@ export default function Booklet() {
         </p>
 
         <div className="flex justify-end mb-6">
-          <PDFDownloadLink 
-            document={<BookletPDF />} 
-            fileName="LvlUp_Trading_Handbuch.pdf"
+          <a
+            href="https://drive.google.com/uc?export=download&id=1ZGJg4OTRpFqXZsU15tZAGkr1l_qYUecp"
+            target="_blank"
+            download="LvlUp_Trading_Handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
           >
-            {({ blob, url, loading, error }) => 
-              loading ? 
-                'PDF wird generiert...' : 
-                <><FileText className="h-5 w-5" /> PDF Handbuch herunterladen</>
-            }
-          </PDFDownloadLink>
+            <FileText className="h-5 w-5" /> PDF Handbuch herunterladen
+          </a>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -418,17 +193,14 @@ export default function Booklet() {
         </p>
 
         <div className="flex justify-center">
-          <PDFDownloadLink 
-            document={<BookletPDF />} 
-            fileName="LvlUp_Trading_Handbuch.pdf"
+          <a
+            href="https://drive.google.com/uc?export=download&id=1ZGJg4OTRpFqXZsU15tZAGkr1l_qYUecp"
+            target="_blank"
+            download="LvlUp_Trading_Handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
           >
-            {({ blob, url, loading, error }) => 
-              loading ? 
-                'PDF wird generiert...' : 
-                <><FileText className="h-5 w-5" /> PDF Handbuch herunterladen</>
-            }
-          </PDFDownloadLink>
+            <FileText className="h-5 w-5" /> PDF Handbuch herunterladen
+          </a>
         </div>
       </div>
     </div>
