@@ -230,21 +230,26 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
               const mapTradingViewFields = (row: any) => {
                 // TradingView Exportfelder auf unsere Datenfelder mappen
                 const mappings: Record<string, string[]> = {
-                  symbol: ["Symbol", "Ticker", "symbol", "instrument", "Instrument"],
-                  setup: ["Setup", "Strategy", "setup", "Strategy Name", "strategy", "Trade Setup"],
-                  mainTrendM15: ["Main Trend", "mainTrendM15", "main_trend_m15", "Main Direction", "Trend M15"],
-                  internalTrendM5: ["Internal Trend", "internalTrendM5", "internal_trend_m5", "Sub Direction", "Trend M5"],
-                  entryType: ["Entry Type", "entryType", "entry_type", "Entry", "Order Type"],
-                  entryLevel: ["Entry Level", "entryLevel", "entry_level", "Entry Price", "Price"],
-                  liquidation: ["Liquidation", "Stop Loss", "SL", "liquidation", "Stop"],
-                  location: ["Location", "location", "Entry Zone", "Zone"],
-                  rrAchieved: ["RR Achieved", "R:R", "Risk/Reward Achieved", "rrAchieved", "rr_achieved", "Actual R:R", "Real R:R"],
-                  rrPotential: ["RR Potential", "Potential R:R", "Target R:R", "rrPotential", "rr_potential", "Expected R:R"],
-                  isWin: ["Result", "Win", "isWin", "is_win", "Profit", "Trade Result", "Success"]
+                  symbol: ["Symbol", "Ticker", "symbol", "instrument", "Instrument", "Asset", "Trading Pair"],
+                  setup: ["Setup", "Strategy", "setup", "Strategy Name", "strategy", "Trade Setup", "Pattern", "Trading Pattern"],
+                  mainTrendM15: ["Main Trend", "mainTrendM15", "main_trend_m15", "Main Direction", "Trend M15", "Main Trend Direction", "Market Trend"],
+                  internalTrendM5: ["Internal Trend", "internalTrendM5", "internal_trend_m5", "Sub Direction", "Trend M5", "Internal Direction", "Secondary Trend"],
+                  entryType: ["Entry Type", "entryType", "entry_type", "Entry", "Order Type", "Trade Type", "Position Type", "Direction", "Side", "Buy/Sell"],
+                  entryLevel: ["Entry Level", "entryLevel", "entry_level", "Entry Price", "Price", "Open Price", "Average Entry", "Entry Value"],
+                  liquidation: ["Liquidation", "Stop Loss", "SL", "liquidation", "Stop", "Stop Level", "Stop Price", "Risk Level", "Exit if Wrong"],
+                  location: ["Location", "location", "Entry Zone", "Zone", "Chart Area", "Chart Position", "Market Position"],
+                  rrAchieved: ["RR Achieved", "R:R", "Risk/Reward Achieved", "rrAchieved", "rr_achieved", "Actual R:R", "Real R:R", "Risk Reward", "Risk-Reward", "RR Ratio Achieved"],
+                  rrPotential: ["RR Potential", "Potential R:R", "Target R:R", "rrPotential", "rr_potential", "Expected R:R", "Target Risk Reward", "Planned RR", "Theoretical RR"],
+                  isWin: ["Result", "Win", "isWin", "is_win", "Profit", "Trade Result", "Success", "Outcome", "Profitable", "Win/Loss"]
                 };
 
                 // Überprüfe für jedes unserer Felder, ob ein TradingView-Feld existiert
                 const result: Record<string, any> = {};
+                
+                // Zeige verfügbare CSV-Spalten im ersten Durchlauf an
+                if (Object.keys(result).length === 0) {
+                  console.log("Verfügbare CSV-Spalten:", Object.keys(row).join(", "));
+                }
                 
                 Object.entries(mappings).forEach(([ourField, possibleTvFields]) => {
                   // Suche in der Zeile nach einem passenden Feld
@@ -252,9 +257,11 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                   
                   if (matchedField) {
                     result[ourField] = row[matchedField];
+                    console.log(`Feld gefunden: ${ourField} = ${matchedField} mit Wert: ${row[matchedField]}`);
                   } else {
                     // Wenn kein Feld gefunden wurde, setze Default-Wert
                     result[ourField] = ourField === 'rrAchieved' || ourField === 'rrPotential' ? 0 : "";
+                    console.log(`Kein passendes Feld für ${ourField} gefunden`);
                   }
                 });
                 
@@ -276,8 +283,15 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     
                     // Konvertiere String-Werte in richtigen Datentyp für TradingView
                     // Versuche Profit/Loss-Wert aus verschiedenen möglichen Feldern zu extrahieren
-                    const profitLossValue = row['P/L'] || row['PL'] || row['Profit'] || row['Profit/Loss'] || row['Net P/L'] || "0";
-                    const profitLoss = parseFloat(String(profitLossValue).replace(/[^0-9.-]/g, ''));
+                    const profitLossValue = row['P/L'] || row['PL'] || row['Profit'] || row['Profit/Loss'] || row['Net P/L'] || 
+                                          row['Profit'] || row['P&L'] || row['Trade P/L'] || row['Result Value'] || "0";
+                    
+                    // Entferne Währungssymbole und Tausendertrennzeichen für korrekte Umwandlung in Float
+                    const cleanProfitLossValue = String(profitLossValue).replace(/[^0-9.\-,]/g, '')
+                                                                        .replace(',', '.');
+                    const profitLoss = parseFloat(cleanProfitLossValue) || 0;
+                    
+                    console.log("Profit/Loss erkannt:", profitLossValue, "→", profitLoss);
                     
                     processedRow = {
                       symbol: processedRow.symbol || "",
