@@ -73,12 +73,8 @@ export default function TradingPatterns({ userId }: { userId: number }) {
     }
   };
 
-  // Automatische erstmalige Analyse, wenn noch keine Patterns vorhanden sind
-  useEffect(() => {
-    if (!isLoading && patterns.length === 0 && !isGenerating) {
-      generatePatterns();
-    }
-  }, [isLoading, patterns.length, isGenerating]);
+  // Automatische Analyse deaktiviert, da sie in Endlosschleife läuft
+  // Wenn der Benutzer Trades hat, kann er manuell die Analyse starten
 
   // Kategorie-Icons und Farben
   const getCategoryIcon = (category: string) => {
