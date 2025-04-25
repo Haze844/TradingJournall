@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trade, setupTypes, trendTypes, entryLevelTypes } from "@shared/schema";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
+import { BadgeTrend } from "@/components/ui/badge-trend";
 import { formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import ChartImageUpload from "./ChartImageUpload";
@@ -119,10 +120,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     });
   };
 
-  // Trend text color class
-  const getTrendColorClass = (trend: string) => {
-    return trend === "Long" ? "text-green-500" : "text-red-500";
-  };
+  // Funktion entfernt, da wir jetzt BadgeTrend verwenden
 
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4">
@@ -190,9 +188,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             </div>
             <div>
               <div className="text-sm text-muted-foreground mb-1">Einstieg</div>
-              <div className={`font-bold ${getTrendColorClass(selectedTrade.entryType || '')}`}>
-                {selectedTrade.entryType || '-'}
-              </div>
+              <BadgeTrend trend={selectedTrade.entryType || '-'} />
             </div>
           </div>
           
@@ -213,9 +209,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                   </SelectContent>
                 </Select>
               ) : (
-                <div className={`font-bold ${getTrendColorClass(selectedTrade.mainTrendM15 || '')}`}>
-                  {selectedTrade.mainTrendM15 || '-'}
-                </div>
+                <BadgeTrend trend={selectedTrade.mainTrendM15 || '-'} />
               )}
             </div>
             <div>
@@ -234,9 +228,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                   </SelectContent>
                 </Select>
               ) : (
-                <div className={`font-bold ${getTrendColorClass(selectedTrade.internalTrendM5 || '')}`}>
-                  {selectedTrade.internalTrendM5 || '-'}
-                </div>
+                <BadgeTrend trend={selectedTrade.internalTrendM5 || '-'} />
               )}
             </div>
             <div>

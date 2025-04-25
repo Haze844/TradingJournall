@@ -389,23 +389,23 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                           
                           if (parseFloat(row.buyPrice) < parseFloat(row.sellPrice)) {
                             // Wir haben in einem Aufwärtstrend gekauft und verkauft
-                            mainTrend = "Bullish";
+                            mainTrend = "Long";
                             
                             // Für den internen Trend schauen wir nach Details in der Handelsdauer
                             if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
-                              internalTrend = "Scalp Bullish";
+                              internalTrend = "Scalp Long";
                             } else {
-                              internalTrend = "Trend Bullish";
+                              internalTrend = "Trend Long";
                             }
                           } else if (parseFloat(row.buyPrice) > parseFloat(row.sellPrice)) {
                             // Wir haben in einem Abwärtstrend gekauft/verkauft
-                            mainTrend = "Bearish";
+                            mainTrend = "Short";
                             
                             // Für den internen Trend
                             if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
-                              internalTrend = "Scalp Bearish";
+                              internalTrend = "Scalp Short";
                             } else {
-                              internalTrend = "Trend Bearish";
+                              internalTrend = "Trend Short";
                             }
                           } else {
                             // Seitwärtsbewegung
