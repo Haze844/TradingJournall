@@ -679,17 +679,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const tradeData of trades) {
         try {
-          // Generate GPT feedback for each trade
-          const gptFeedback = await generateTradeFeedback({
-            ...tradeData,
-            userId,
-          });
+          // Prüfen, ob es ein Link-Import ist (nur chartImage-Feld gefüllt)
+          const isLinkImport = tradeData.chartImage && 
+            Object.keys(tradeData).filter(key => 
+              key !== 'chartImage' && key !== 'date' && tradeData[key] !== '' && tradeData[key] !== 0).length === 0;
+          
+          let gptFeedback = '';
+          
+          // Nur GPT-Feedback generieren, wenn es kein Link-Import ist
+          if (!isLinkImport) {
+            // Generate GPT feedback for each trade
+            gptFeedback = await generateTradeFeedback({
+              ...tradeData,
+              userId,
+            });
+          }
           
           // Create trade in database with feedback
           const newTrade = await storage.createTrade({
             ...tradeData,
             userId,
-            gptFeedback,
+            gptFeedback: isLinkImport ? '' : gptFeedback, // Kein Feedback für Link-Imports
             // Ensure date is set if not provided
             date: tradeData.date || new Date().toISOString(),
           });
