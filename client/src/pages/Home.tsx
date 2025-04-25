@@ -125,7 +125,7 @@ export default function Home() {
               </Link>
               
               {/* Dropdown Menu für Funktionen */}
-              <div className="relative group">
+              <div className="dropdown">
                 <Button variant="ghost" className="text-sm py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary">
                   <Brain className="h-4 w-4 mr-2" />
                   Funktionen
@@ -133,7 +133,7 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </Button>
-                <div className="hidden group-hover:block absolute z-10 w-64 mt-1 origin-top-right bg-black/70 backdrop-blur-md border border-gray-700 rounded-md shadow-lg p-1">
+                <div className="dropdown-content absolute z-20 w-64 mt-1 left-0 origin-top-right bg-black/70 backdrop-blur-md border border-gray-700 rounded-md shadow-lg p-1">
                   {/* Trade-Analyse Funktionen */}
                   <div className="px-2 py-1 text-xs text-gray-400 uppercase">Analyse Tools</div>
                   <Button 
