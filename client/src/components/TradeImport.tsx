@@ -87,23 +87,11 @@ export default function TradeImport() {
     
     setImporting(true);
     
-    // Speichere Link direkt als Chart-URL
-    // Alle Felder leer lassen, nur das chartImage-Feld mit dem Link befüllen
+    // Speichere nur den Link selbst, keine weitere Daten
+    // Das setzt voraus, dass das Schema Null-Werte erlaubt
     const emptyTrade = {
-      symbol: "",
-      setup: "",
-      mainTrendM15: "",
-      internalTrendM5: "",
-      entryType: "",
-      entryLevel: "",
-      liquidation: "",
-      location: "",
-      rrAchieved: 0,
-      rrPotential: 0,
-      isWin: false,
-      profitLoss: 0,
-      date: new Date().toISOString(),
       chartImage: linkInput
+      // Keine weiteren Felder, damit keine Standardwerte gesetzt werden
     };
     
     // Speichere als neuen Trade mit dem Link als chartImage-Feld

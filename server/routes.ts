@@ -679,10 +679,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const tradeData of trades) {
         try {
-          // Prüfen, ob es ein Link-Import ist (nur chartImage-Feld gefüllt)
-          const isLinkImport = tradeData.chartImage && 
-            Object.keys(tradeData).filter(key => 
-              key !== 'chartImage' && key !== 'date' && tradeData[key] !== '' && tradeData[key] !== 0).length === 0;
+          // Prüfen, ob es ein Link-Import ist (nur chartImage-Feld vorhanden) 
+          const isLinkImport = tradeData.chartImage && Object.keys(tradeData).length === 1;
           
           let gptFeedback = '';
           

@@ -600,10 +600,23 @@ export class MemStorage implements IStorage {
 
   async createTrade(trade: InsertTrade & { userId: number }): Promise<Trade> {
     const id = this.tradeIdCounter++;
+    // Standardwerte setzen, falls nicht vorhanden
     const newTrade: Trade = { 
-      ...trade, 
+      symbol: "",
+      setup: "",
+      mainTrendM15: "",
+      internalTrendM5: "",
+      entryType: "",
+      entryLevel: "",
+      liquidation: "",
+      location: "",
+      rrAchieved: 0,
+      rrPotential: 0,
+      isWin: false,
+      profitLoss: 0,
+      ...trade, // Von Client übergebene Werte überschreiben Standardwerte
       id,
-      date: new Date(),
+      date: trade.date ? new Date(trade.date) : new Date(),
       gptFeedback: trade.gptFeedback || ""
     };
     
