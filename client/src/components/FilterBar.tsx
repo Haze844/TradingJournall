@@ -27,8 +27,15 @@ export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
   };
 
   return (
-    <div className="pb-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div className="px-6 pt-6 pb-5 mb-0 border-b border-border/30 bg-gradient-to-b from-background/90 to-background/50 rounded-t-lg">
+      <h3 className="text-base font-medium mb-5 text-primary/90 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+        Trades filtern
+      </h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div>
           <Label className="text-sm text-muted-foreground mb-1">Zeitraum</Label>
           <div className="flex gap-2">
