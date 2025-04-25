@@ -304,9 +304,21 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     }
                     
                     // Entferne Währungssymbole und Tausendertrennzeichen für korrekte Umwandlung in Float
-                    const cleanProfitLossValue = String(profitLossValue).replace(/[^0-9.\-,]/g, '')
-                                                                        .replace(',', '.');
-                    const profitLoss = parseFloat(cleanProfitLossValue) || 0;
+                    let profitLoss = 0;
+                    
+                    // Verbesserte Erkennung für negative Werte wie $(272.00) aus Tradovate
+                    if (typeof profitLossValue === 'string' && profitLossValue.includes('$(')) {
+                      // Negativer Wert in Format $(272.00)
+                      const numericValue = profitLossValue.replace(/\$\(|\)/g, '');
+                      profitLoss = -parseFloat(numericValue);
+                      console.log("Negativer P/L erkannt:", profitLossValue, "→", profitLoss);
+                    } else {
+                      // Standardverarbeitung für andere Formate
+                      const cleanProfitLossValue = String(profitLossValue).replace(/[^0-9.\-,]/g, '')
+                                                                         .replace(',', '.');
+                      profitLoss = parseFloat(cleanProfitLossValue) || 0;
+                      console.log("Profit/Loss erkannt:", profitLossValue, "→", profitLoss);
+                    }
                     
                     // Setze entryType basierend auf buyPrice/sellPrice wenn verfügbar
                     let entryType = processedRow.entryType || "";
@@ -498,12 +510,24 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                       rrPotential: rrPotential || parseFloat(String(processedRow.rrPotential || "0")),
                       profitLoss: profitLoss, // Ergebnis in $
                       // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
-                      isWin: typeof processedRow.isWin === 'boolean' ? processedRow.isWin : 
-                             String(processedRow.isWin).toLowerCase() === 'true' || 
-                             String(processedRow.isWin).toLowerCase() === 'win' ||
-                             String(processedRow.isWin).toLowerCase() === 'yes' ||
-                             String(processedRow.isWin).toLowerCase() === 'profit' ||
-                             profitLoss > 0,
+                      isWin: (() => {
+                        // Führen wir alle Prüfungen separat aus für bessere Nachvollziehbarkeit
+                        const isExplicitlyTrue = typeof processedRow.isWin === 'boolean' ? processedRow.isWin : false;
+                        const isTextWin = 
+                          String(processedRow.isWin || '').toLowerCase() === 'true' || 
+                          String(processedRow.isWin || '').toLowerCase() === 'win' ||
+                          String(processedRow.isWin || '').toLowerCase() === 'yes' ||
+                          String(processedRow.isWin || '').toLowerCase() === 'profit';
+                        const isProfitPositive = (profitLoss !== undefined && profitLoss > 0);
+                        
+                        // Kombinieren wir die Ergebnisse
+                        const result = isExplicitlyTrue || isTextWin || isProfitPositive;
+                        
+                        // Loggen wir das Ergebnis für Debugging
+                        console.log(`Win/Loss Status: ${result ? 'WIN' : 'LOSS'} (P/L: ${profitLoss}, Explicit: ${isExplicitlyTrue}, Text: ${isTextWin}, Profit: ${isProfitPositive})`);
+                        
+                        return result;
+                      })(),
                       date: tradeDate,
                     };
                   }
