@@ -31,11 +31,11 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "lvlup-trading-journal-secret-key",
-    resave: true,
-    saveUninitialized: true,
+    resave: false, // Nur bei Änderungen speichern
+    saveUninitialized: false, // Keine leeren Sessions speichern
     store: storage.sessionStore,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days by default
+      maxAge: 1000 * 60 * 60 * 24, // 24 Stunden Standardwert
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -119,9 +119,16 @@ export function setupAuth(app: Express) {
         if (loginErr) return next(loginErr);
         
         // Cookie-Lebensdauer ändern, wenn "Eingeloggt bleiben" aktiviert ist
-        if (rememberMe && req.session.cookie) {
-          // 30 Tage statt 1 Woche
-          req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
+        if (req.session.cookie) {
+          if (rememberMe) {
+            // 30 Tage für "Eingeloggt bleiben"
+            req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
+            console.log("'Eingeloggt bleiben' aktiviert - Cookie-Lebensdauer auf 30 Tage gesetzt");
+          } else {
+            // 24 Stunden Standard-Lebensdauer
+            req.session.cookie.maxAge = 1000 * 60 * 60 * 24;
+            console.log("Standard-Cookie-Lebensdauer auf 24 Stunden gesetzt");
+          }
         }
         
         // Don't send password to the client
