@@ -470,13 +470,13 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <td className="p-3">{trade.symbol}</td>
                   <td className="p-3">{trade.setup}</td>
                   <td className="p-3">
-                    <span className={getTrendColorClass(trade.mainTrendM15)}>{trade.mainTrendM15}</span>
+                    <span className={getTrendColorClass(trade.mainTrendM15 || '')}>{trade.mainTrendM15 || '-'}</span>
                   </td>
                   <td className="p-3">
-                    <span className={getTrendColorClass(trade.internalTrendM5)}>{trade.internalTrendM5}</span>
+                    <span className={getTrendColorClass(trade.internalTrendM5 || '')}>{trade.internalTrendM5 || '-'}</span>
                   </td>
                   <td className="p-3">
-                    <span className={getTrendColorClass(trade.entryType)}>{trade.entryType}</span>
+                    <span className={getTrendColorClass(trade.entryType || '')}>{trade.entryType || '-'}</span>
                   </td>
                   <td className="p-3">{trade.rrAchieved}</td>
                   <td className="p-3">

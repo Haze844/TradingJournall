@@ -333,7 +333,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
               
               importMutation.mutate(tradesWithUserId);
             },
-            error: function(error) {
+            error: function(error: Error) {
               toast({
                 title: "Fehler beim Parsen der CSV-Datei",
                 description: error.message,

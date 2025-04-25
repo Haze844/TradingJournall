@@ -85,8 +85,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
       const response = await apiRequest("POST", "/api/trades", {
         ...tradeData,
         date: dateTime.toISOString(),
-        rrAchieved: parseFloat(tradeData.rrAchieved.toString()),
-        rrPotential: parseFloat(tradeData.rrPotential.toString()),
+        rrAchieved: tradeData.rrAchieved ? parseFloat(tradeData.rrAchieved.toString()) : 0,
+        rrPotential: tradeData.rrPotential ? parseFloat(tradeData.rrPotential.toString()) : 0,
         userId
       });
       
