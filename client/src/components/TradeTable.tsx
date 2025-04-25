@@ -157,10 +157,10 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
         <table className="w-full text-sm">
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
-              <th className="p-3 text-left">
+              <th className="p-3 text-left whitespace-nowrap">
                 Datum
               </th>
-              <th className="p-3 text-left">
+              <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   Symbol
                   <Popover>
@@ -206,7 +206,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </Popover>
                 </div>
               </th>
-              <th className="p-3 text-left">
+              <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   Setup
                   <Popover>
@@ -252,7 +252,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </Popover>
                 </div>
               </th>
-              <th className="p-3 text-left">
+              <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   M15 Trend
                   <Popover>
@@ -296,7 +296,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </Popover>
                 </div>
               </th>
-              <th className="p-3 text-left">
+              <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   M5 Trend
                   <Popover>
@@ -340,7 +340,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </Popover>
                 </div>
               </th>
-              <th className="p-3 text-left">
+              <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   Einstieg
                   <Popover>
@@ -384,9 +384,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </Popover>
                 </div>
               </th>
-              <th className="p-3 text-left">RR</th>
-              <th className="p-3 text-left">P/L ($)</th>
-              <th className="p-3 text-left">
+              <th className="p-3 text-left whitespace-nowrap">RR</th>
+              <th className="p-3 text-left whitespace-nowrap">P/L ($)</th>
+              <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">
                   Status
                   <Popover>
