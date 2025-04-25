@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
-  Users, Download, TrendingDown, DollarSign, AlertCircle, BookOpen, LogOut,
+  Users, TrendingDown, DollarSign, AlertCircle, LogOut,
   ChevronDown, ChevronRight, Menu
 } from "lucide-react";
 
@@ -140,33 +140,6 @@ export default function Header() {
                 Community
               </Link>
             </Button>
-            
-            {/* Hilfe & Dokumentation */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Hilfe
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-black/90 backdrop-blur-md border-primary/20">
-                <DropdownMenuLabel className="text-primary">Handbuch & Hilfe</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href="/booklet">
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      <span>Online Handbuch</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.open('/lvlup-trading-handbuch-style.html', '_blank')}>
-                    <Download className="w-4 h-4 mr-2" />
-                    <span>Handbuch PDF</span>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </nav>
           
           {/* User-Menü rechts */}
