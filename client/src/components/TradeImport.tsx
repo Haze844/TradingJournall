@@ -6,17 +6,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload, RefreshCw } from "lucide-react";
+import { Loader2, Upload, RefreshCw, Link as LinkIcon } from "lucide-react";
 import Papa from "papaparse";
 import { Trade, insertTradeSchema } from "@shared/schema";
 import { z } from "zod";
 import { synchronizeTrades } from "@/lib/tradovate";
 import { useAuth } from "@/hooks/use-auth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function TradeImport() {
   const [file, setFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [linkInput, setLinkInput] = useState<string>("");
+  const [linkError, setLinkError] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -52,6 +55,59 @@ export default function TradeImport() {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
     }
+  };
+
+  // Überprüfung der TradingView-URL
+  const isValidTradingViewUrl = (url: string): boolean => {
+    // Überprüft, ob die URL mit http:// oder https:// beginnt
+    const hasValidProtocol = /^https?:\/\//i.test(url);
+    
+    // Überprüft, ob es sich um eine Bild-URL handelt oder eine TradingView-URL
+    const isTradingViewUrl = /\.(jpg|jpeg|png|gif)$/i.test(url) || 
+                              /tradingview\.com/i.test(url) ||
+                              /\.tradingstation\.com/i.test(url);
+    
+    return hasValidProtocol && isTradingViewUrl;
+  };
+
+  // TradingView Link Import Handler
+  const handleLinkImport = () => {
+    setLinkError(null);
+    
+    if (!linkInput.trim()) {
+      setLinkError("Bitte gib einen TradingView-Link ein");
+      return;
+    }
+    
+    // Überprüfen, ob es ein gültiger TradingView-Link ist
+    if (!isValidTradingViewUrl(linkInput)) {
+      setLinkError("Der Link muss mit http:// oder https:// beginnen und zu TradingView gehören");
+      return;
+    }
+    
+    setImporting(true);
+    
+    // Speichere Link direkt als Chart-URL
+    const mockTrade = {
+      symbol: "CHART",
+      setup: "TradingView Link",
+      mainTrendM15: "",
+      internalTrendM5: "",
+      entryType: "",
+      entryLevel: "",
+      liquidation: "",
+      location: "",
+      rrAchieved: 0,
+      rrPotential: 0,
+      isWin: false,
+      profitLoss: 0,
+      date: new Date().toISOString(),
+      chartImage: linkInput
+    };
+    
+    // Speichere als neuen Trade mit dem Link als chartImage-Feld
+    importMutation.mutate([mockTrade]);
+    setLinkInput("");
   };
 
   const handleImport = async () => {
@@ -282,50 +338,106 @@ export default function TradeImport() {
           <Separator className="flex-1" />
         </div>
         
-        <div className="w-full h-36 rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center p-4 hover:border-primary/60 transition-colors">
-          <Upload className="h-8 w-8 text-primary/60 mb-2" />
-          <Input
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-            disabled={importing}
-            className="absolute inset-0 opacity-0 cursor-pointer"
-          />
-          <p className="text-sm font-medium">CSV-Datei ziehen oder klicken</p>
-          <p className="text-xs text-muted-foreground mt-1">Unterstützt TradingView und Tradovate Exporte</p>
-        </div>
-        
-        {file && (
-          <div className="rocket-card p-3 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <div className="bg-primary/20 rounded-full p-2">
-                <Upload className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Ready to import:</p>
-                <p className="text-xs text-muted-foreground">{file.name}</p>
+        <Tabs defaultValue="link" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="link">Link Import</TabsTrigger>
+            <TabsTrigger value="csv">CSV Import</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="link" className="space-y-4">
+            <div className="rocket-card p-4 rounded-lg">
+              <div className="flex flex-col space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-primary/20 rounded-full p-2">
+                      <LinkIcon className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">TradingView Link einfügen</p>
+                      <p className="text-xs text-muted-foreground">Füge den Link des TradingView Charts ein</p>
+                    </div>
+                  </div>
+                  
+                  <Input
+                    type="url"
+                    placeholder="https://www.tradingview.com/x/..."
+                    value={linkInput}
+                    onChange={(e) => setLinkInput(e.target.value)}
+                    className={linkError ? "border-red-500" : ""}
+                  />
+                  {linkError && (
+                    <p className="text-xs text-red-500">{linkError}</p>
+                  )}
+                </div>
+                
+                <Button
+                  onClick={handleLinkImport}
+                  disabled={importing || !linkInput.trim()}
+                  className="w-full pulse-btn bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+                >
+                  {importing ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Verarbeite Link...
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon className="mr-2 h-5 w-5" />
+                      Link importieren
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
-          </div>
-        )}
-        
-        <Button
-          onClick={handleImport}
-          disabled={!file || importing}
-          className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold"
-        >
-          {importing ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Launching to Moon...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-5 w-5" />
-              Launch Trades 🚀
-            </>
-          )}
-        </Button>
+          </TabsContent>
+          
+          <TabsContent value="csv" className="space-y-4">
+            <div className="w-full h-36 rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center p-4 hover:border-primary/60 transition-colors">
+              <Upload className="h-8 w-8 text-primary/60 mb-2" />
+              <Input
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                disabled={importing}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+              <p className="text-sm font-medium">CSV-Datei ziehen oder klicken</p>
+              <p className="text-xs text-muted-foreground mt-1">Unterstützt TradingView und Tradovate Exporte</p>
+            </div>
+            
+            {file && (
+              <div className="rocket-card p-3 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="bg-primary/20 rounded-full p-2">
+                    <Upload className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Ready to import:</p>
+                    <p className="text-xs text-muted-foreground">{file.name}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <Button
+              onClick={handleImport}
+              disabled={!file || importing}
+              className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold"
+            >
+              {importing ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Launching to Moon...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-5 w-5" />
+                  Launch Trades 🚀
+                </>
+              )}
+            </Button>
+          </TabsContent>
+        </Tabs>
         
         <div className="w-full flex items-center justify-between gap-3 mt-6 mb-2">
           <h4 className="text-sm font-semibold text-primary">Tradovate API</h4>
