@@ -53,7 +53,40 @@ export default function TradeImport() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      if (selectedFile.name.endsWith('.csv')) {
+        setFile(selectedFile);
+      } else {
+        toast({
+          title: "Ungültiger Dateityp",
+          description: "Bitte wählen Sie eine CSV-Datei aus.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // Event-Handler für Drag & Drop
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile.name.endsWith('.csv')) {
+        setFile(droppedFile);
+      } else {
+        toast({
+          title: "Ungültiger Dateityp",
+          description: "Bitte wählen Sie eine CSV-Datei aus.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -381,14 +414,18 @@ export default function TradeImport() {
           </TabsContent>
           
           <TabsContent value="csv" className="space-y-4">
-            <div className="w-full h-36 rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center p-4 hover:border-primary/60 transition-colors">
+            <div 
+              className="w-full h-36 rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center p-4 hover:border-primary/60 transition-colors relative"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
               <Upload className="h-8 w-8 text-primary/60 mb-2" />
-              <Input
+              <input
                 type="file"
                 accept=".csv"
                 onChange={handleFileChange}
                 disabled={importing}
-                className="absolute inset-0 opacity-0 cursor-pointer"
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
               />
               <p className="text-sm font-medium">CSV-Datei ziehen oder klicken</p>
               <p className="text-xs text-muted-foreground mt-1">Unterstützt TradingView und Tradovate Exporte</p>
