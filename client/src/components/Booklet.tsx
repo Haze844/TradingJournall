@@ -1,12 +1,9 @@
 
-import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   FileUp, Brain, BarChart2, Activity, Trophy, Calendar, 
   Users, TrendingDown, FileText, Download, ExternalLink
 } from "lucide-react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
 // Beispielbilder für das Handbuch
 const PLACEHOLDER_IMAGES = {
@@ -24,80 +21,13 @@ const PLACEHOLDER_IMAGES = {
 
 
 export default function Booklet() {
-  const bookletRef = useRef<HTMLDivElement>(null);
-
-  const generatePDF = async () => {
-    if (!bookletRef.current) return;
-    
-    try {
-      // Lade den Inhalt mit einem Loading-Indikator
-      const loadingMessage = document.createElement('div');
-      loadingMessage.style.position = 'fixed';
-      loadingMessage.style.top = '50%';
-      loadingMessage.style.left = '50%';
-      loadingMessage.style.transform = 'translate(-50%, -50%)';
-      loadingMessage.style.background = 'rgba(0,0,0,0.8)';
-      loadingMessage.style.color = 'white';
-      loadingMessage.style.padding = '20px';
-      loadingMessage.style.borderRadius = '10px';
-      loadingMessage.style.zIndex = '9999';
-      loadingMessage.innerHTML = 'PDF wird erstellt...';
-      document.body.appendChild(loadingMessage);
-
-      // Erstelle das PDF mit optimierten Optionen
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      // Füge einen weißen Hintergrund zu jeder Seite hinzu
-      const canvas = await html2canvas(bookletRef.current, {
-        scale: 1.5, // Höhere Auflösung
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.9);
-      
-      // Füge das Bild zum PDF hinzu
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      
-      // Hintergrundbild auf jeder Seite
-      let heightLeft = imgHeight;
-      let position = 0;
-      
-      // Erste Seite
-      pdf.addImage(imgData, 'JPEG', imgX, position, imgWidth * ratio, imgHeight * ratio);
-      heightLeft -= pdfHeight;
-      
-      // Weitere Seiten, falls nötig
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', imgX, position, imgWidth * ratio, imgHeight * ratio);
-        heightLeft -= pdfHeight;
-      }
-      
-      // Download des PDFs
-      pdf.save('lvlup-trading-handbuch.pdf');
-      
-      // Entferne die Loading-Nachricht
-      document.body.removeChild(loadingMessage);
-    } catch (error) {
-      console.error('Fehler beim PDF-Export:', error);
-      alert('Es gab ein Problem beim Erstellen des PDFs. Bitte versuche es später erneut.');
-    }
-  };
+  function handleDownload() {
+    // Direkter Download der statischen PDF aus dem public Verzeichnis
+    window.location.href = '/lvlup-trading-handbuch.pdf';
+  }
 
   return (
-    <div className="container mx-auto px-4 py-6" ref={bookletRef}>
+    <div className="container mx-auto px-4 py-6">
       <div className="rocket-card rounded-xl p-8 mb-8">
         <div className="flex items-center gap-4 mb-4">
           <div className="h-16 w-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg">
@@ -115,7 +45,7 @@ export default function Booklet() {
 
         <div className="flex justify-end mb-6">
           <Button 
-            onClick={generatePDF}
+            onClick={handleDownload}
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white"
           >
             <Download className="h-5 w-5" /> PDF herunterladen
@@ -265,7 +195,7 @@ export default function Booklet() {
 
         <div className="flex justify-center">
           <Button 
-            onClick={generatePDF}
+            onClick={handleDownload}
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white"
           >
             <Download className="h-5 w-5" /> PDF herunterladen
