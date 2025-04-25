@@ -1,11 +1,258 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   FileUp, Download, Brain, BarChart2, Activity, Trophy, Calendar, 
-  Users, TrendingDown, DollarSign, ChevronDown
+  Users, TrendingDown, DollarSign, ChevronDown, FileText
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { 
+  PDFDownloadLink, 
+  Document, 
+  Page, 
+  Text, 
+  View, 
+  StyleSheet, 
+  Image,
+  Font 
+} from '@react-pdf/renderer';
+
+// Beispielbilder für das Handbuch
+const PLACEHOLDER_IMAGES = {
+  dashboard: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1MCw1MCkiIHN0cm9rZT0iIzQ4NTRhZiIgc3Ryb2tlLXdpZHRoPSIyIj48cGF0aCBkPSJNMCAxNTBMMTAwIDgwIDIwMCAxMjAgMzAwIDMwIDQwMCAyMCIvPjxwYXRoIGQ9Ik0wIDIwMEwxMDAgMTYwIDIwMCAxMTAgMzAwIDExMCA0MDAgNjAiLz48L2c+PHRleHQgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgeD0iMTgwIiB5PSIzMCI+RGFzaGJvYXJkPC90ZXh0PjwvZz48L3N2Zz4=',
+  trades: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48cmVjdCBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIgeD0iNTAiIHk9IjUwIiB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgcng9IjQiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1MCw1MCkiPjxsaW5lIHgxPSIwIiB5MT0iNDAiIHgyPSI0MDAiIHkyPSI0MCIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjEiLz48L2c+PGcgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0Ij48dGV4dCB4PSI2MCIgeT0iNzUiPkRhdHVtPC90ZXh0Pjx0ZXh0IHg9IjEyMCIgeT0iNzUiPlN5bWJvbDwvdGV4dD48dGV4dCB4PSIyMDAiIHk9Ijc1Ij5TZXRVcDwvdGV4dD48dGV4dCB4PSIyODAiIHk9Ijc1Ij5FbnRyeTwvdGV4dD48dGV4dCB4PSIzNDAiIHk9Ijc1Ij5SL1I8L3RleHQ+PHRleHQgeD0iNDAwIiB5PSI3NSI+UC9MPC90ZXh0PjwvZz48dGV4dCBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB4PSIxNzUiIHk9IjMwIj5UcmFkZSBUYWJsZTwvdGV4dD48L2c+PC9zdmc+',
+  aiAnalysis: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48cGF0aCBkPSJNMTUwIDEyMGMwLTMzLjEzIDI2Ljg3LTYwIDYwLTYwIDMzLjE0IDAgNjAgMjYuODcgNjAgNjAgMCAzMy4xNC0yNi44NiA2MC02MCA2MC0zMy4xMyAwLTYwLTI2Ljg2LTYwLTYweiIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMTkwIDEyMGgyMG0tMTAgLTEwdjIwbTIwIC0xMGgxMG0xMCAwaDEwbS00MCAtMjB2MTBtMCAyMHYxMCIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB4PSIxNTAiIHk9IjMwIj5LSS1BbmFseXNlPC90ZXh0PjwvZz48L3N2Zz4=',
+  risk: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3MCw1MCkiPjxyZWN0IGZpbGw9IiM0ODU0YWYiIHg9IjAiIHk9IjEyMCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjgwIiByeD0iMiIvPjxyZWN0IGZpbGw9IiM0ODU0YWYiIHg9IjkwIiB5PSI4MCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEyMCIgcng9IjIiLz48cmVjdCBmaWxsPSIjZWU0NDQ0IiB4PSIxODAiIHk9IjQwIiB3aWR0aD0iNjAiIGhlaWdodD0iMTYwIiByeD0iMiIvPjxyZWN0IGZpbGw9IiM0ODU0YWYiIHg9IjI3MCIgeT0iMTAwIiB3aWR0aD0iNjAiIGhlaWdodD0iMTAwIiByeD0iMiIvPjwvZz48dGV4dCBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB4PSIxNDAiIHk9IjMwIj5SaXNpa29hbmFseXNlPC90ZXh0PjwvZz48L3N2Zz4=',
+  phases: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDAsMTAwKSI+PHBhdGggZD0iTTE1MCA3NWMwIDQxLjQyLTMzLjU4IDc1LTc1IDc1UzAgMTE2LjQyIDAgNzUgMzMuNTggMCA3NSAwczc1IDMzLjU4IDc1IDc1eiIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNNzUgMHY3NU0wIDc1aDE1MCIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjEiLz48cGF0aCBkPSJNNzUgMGw1MCA4MG0tNTAtODBsLTMwIDYwIiBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0zNSAxMjVsNDAtNTBtMTUgNTBsMzUtLTUwIiBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48dGV4dCBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB4PSIxMTAiIHk9IjMwIj5NYXJrdHBoYXNlbiBBbmFseXNlPC90ZXh0PjwvZz48L3N2Zz4=',
+  coach: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48cGF0aCBkPSJNMTYwIDkwYzAtMjIuMDkgMTcuOTEtNDAgNDAtNDAgMjIuMDkgMCA0MCAxNy45MSA0MCA0MCAwIDIyLjA5LTE3LjkxIDQwLTQwIDQwLTIyLjA5IDAtNDAtMTcuOTEtNDAtNDAiIHN0cm9rZT0iIzQ4NTRhZiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTE3MCAxNzB2LTQwaDYwYzAgMCAwIDQwIDAgNDBoNTB2MjBoLTE2MHYtMjBoNTB6IiBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9ImJvbGQiIHg9IjEzNSIgeT0iMzAiPlRyYWRpbmcgQ29hY2g8L3RleHQ+PC9nPjwvc3ZnPg==',
+  calendar: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48cmVjdCBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIgeD0iMTAwIiB5PSI2MCIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxODAiIHJ4PSI0Ii8+PHBhdGggZD0iTTEwMCA5MGgzMDAiIHN0cm9rZT0iIzQ4NTRhZiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTE0MCA2MHYzMG0yMjAgMHYtMzAiIHN0cm9rZT0iIzQ4NTRhZiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE4IiB4PSIxMjAiIHk9IjEyMCI+MjUuMDQuMjAyNSAtIFpuc2VudHNjaGVpZHVuZzwvdGV4dD48dGV4dCBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIHg9IjEyMCIgeT0iMTUwIj4yOC4wNC4yMDI1IC0gQklQIERhdGVuPC90ZXh0Pjx0ZXh0IGZpbGw9IiNmZmYiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgeD0iMTIwIiB5PSIxODAiPjMwLjA0LjIwMjUgLSBBcmJlaXRzbWFya3Q8L3RleHQ+PHRleHQgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgeD0iMTAwIiB5PSIzMCI+TWFrcm8tS2FsZW5kZXI8L3RleHQ+PC9nPjwvc3ZnPg==',
+  social: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxMDAsMTAwKSI+PGNpcmNsZSBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIgY3g9IjMwIiBjeT0iMzAiIHI9IjIwIi8+PGNpcmNsZSBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIgY3g9IjE1MCIgY3k9IjMwIiByPSIyMCIvPjxjaXJjbGUgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjIiIGN4PSIzMCIgY3k9IjEyMCIgcj0iMjAiLz48Y2lyY2xlIHN0cm9rZT0iIzQ4NTRhZiIgc3Ryb2tlLXdpZHRoPSIyIiBjeD0iMTUwIiBjeT0iMTIwIiByPSIyMCIvPjxjaXJjbGUgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjIiIGN4PSI5MCIgY3k9IjcwIiByPSIyMCIvPjxwYXRoIGQ9Ik0zMCA1MGwzMCAxMG0zMCAxMGw2MC0yMG0tMTIwIDcwbDMwLTMwbTMwLTEwbDYwIDMwIiBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIvPjwvZz48dGV4dCBmaWxsPSIjZmZmIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSJib2xkIiB4PSIxMzAiIHk9IjMwIj5Tb2NpYWwgVHJhZGluZzwvdGV4dD48L2c+PC9zdmc+',
+  import: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMjAyMzM3IiBkPSJNMCAwaDUwMHYzMDBIMHoiLz48cGF0aCBkPSJNMjAwIDgwdjE0MGgxMDBWODBIMjAweiIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMjIwIDExMGgzMG0tMzAgMzBoNjBtLTYwIDMwaDYwbS02MCAzMGg2MCIgc3Ryb2tlPSIjNDg1NGFmIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMTUwIDEzMGgzMG0tMzAgMzBoMzBtOTAgLTMwaDMwbS0zMCAzMGgzMG0tMTUwIDMwdjIwIiBzdHJva2U9IiM0ODU0YWYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNSw1Ii8+PHRleHQgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgeD0iMTUwIiB5PSIzMCI+Q1NWIEltcG9ydDwvdGV4dD48L2c+PC9zdmc+'
+};
+
+// PDF-Stile definieren
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    backgroundColor: '#202337',
+    padding: 20,
+    color: '#ffffff',
+  },
+  section: {
+    margin: 10,
+    padding: 10,
+    flexGrow: 1,
+    borderWidth: 1,
+    borderColor: '#485474',
+    borderRadius: 5,
+    backgroundColor: 'rgba(50, 55, 85, 0.8)',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#5c66c5',
+  },
+  heading: {
+    fontSize: 18,
+    marginVertical: 10,
+    fontWeight: 'bold',
+    color: '#5c66c5',
+  },
+  subheading: {
+    fontSize: 14,
+    marginVertical: 6,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  text: {
+    fontSize: 12,
+    marginBottom: 6,
+    lineHeight: 1.4,
+  },
+  bulletPoint: {
+    fontSize: 12,
+    marginLeft: 10,
+    marginBottom: 3,
+  },
+  image: {
+    width: '100%',
+    height: 180,
+    marginVertical: 10,
+    objectFit: 'contain',
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  flexRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  headerText: {
+    fontSize: 28,
+    marginBottom: 5,
+    textAlign: 'center',
+    color: '#5c66c5',
+    fontWeight: 'bold',
+  },
+  subheaderText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#a0a0a0',
+  },
+  pageNumber: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    fontSize: 10,
+    color: '#a0a0a0',
+  },
+});
+
+// PDF-Dokument definieren
+const BookletPDF = () => (
+  <Document>
+    {/* Titelseite */}
+    <Page size="A4" style={styles.page}>
+      <View style={{ marginTop: 100, marginBottom: 100, alignItems: 'center' }}>
+        <Text style={{...styles.headerText, fontSize: 40, marginBottom: 20}}>LvlUp Trading</Text>
+        <Text style={{...styles.subheaderText, fontSize: 20, marginBottom: 40}}>Benutzerhandbuch</Text>
+        <Text style={styles.text}>Version 1.0 | April 2025</Text>
+      </View>
+    </Page>
+
+    {/* Dashboard & Navigation */}
+    <Page size="A4" style={styles.page}>
+      <View style={styles.section}>
+        <Text style={styles.title}>1. Dashboard & Navigation</Text>
+        <Image src={PLACEHOLDER_IMAGES.dashboard} style={styles.image} />
+        <Text style={styles.heading}>Hauptnavigation</Text>
+        <Text style={styles.text}>Das Dashboard bietet Zugriff auf alle Funktionen der Anwendung:</Text>
+        <Text style={styles.bulletPoint}>• Dashboard: Übersicht über deine Trade-Aktivitäten</Text>
+        <Text style={styles.bulletPoint}>• KI-Analyse: Erkennung von Handelsmustern</Text>
+        <Text style={styles.bulletPoint}>• Risikomanagement: Analyse deiner Risikometriken</Text>
+        <Text style={styles.bulletPoint}>• Marktphasen: Performance in verschiedenen Marktphasen</Text>
+        
+        <Text style={styles.heading}>Zusätzliche Funktionen</Text>
+        <Text style={styles.bulletPoint}>• Trading Coach: Personalisierte Verbesserungsvorschläge</Text>
+        <Text style={styles.bulletPoint}>• Makro-Kalender: Wichtige Wirtschaftsereignisse</Text>
+        <Text style={styles.bulletPoint}>• Social Trading: Community-Integration</Text>
+      </View>
+      <Text style={styles.pageNumber}>1</Text>
+    </Page>
+
+    {/* Trade-Management */}
+    <Page size="A4" style={styles.page}>
+      <View style={styles.section}>
+        <Text style={styles.title}>2. Trade-Management</Text>
+        <Image src={PLACEHOLDER_IMAGES.trades} style={styles.image} />
+        <Text style={styles.heading}>Trade-Tabelle</Text>
+        <Text style={styles.text}>Die Trade-Tabelle zeigt alle erfassten Trades mit wichtigen Informationen:</Text>
+        <Text style={styles.bulletPoint}>• Datum und Symbol</Text>
+        <Text style={styles.bulletPoint}>• Setup und Trendanalyse</Text>
+        <Text style={styles.bulletPoint}>• Entry-Typ und Level</Text>
+        <Text style={styles.bulletPoint}>• Risk-Reward-Verhältnis</Text>
+        
+        <Text style={styles.heading}>Trade-Details</Text>
+        <Text style={styles.text}>Durch Klicken auf einen Trade werden alle Details angezeigt:</Text>
+        <Text style={styles.bulletPoint}>• Vollständige Trade-Informationen</Text>
+        <Text style={styles.bulletPoint}>• Kommentare und Notizen</Text>
+        <Text style={styles.bulletPoint}>• Chart-Screenshots</Text>
+        <Text style={styles.bulletPoint}>• KI-generiertes Feedback</Text>
+      </View>
+      <Text style={styles.pageNumber}>2</Text>
+    </Page>
+
+    {/* KI-Analyse */}
+    <Page size="A4" style={styles.page}>
+      <View style={styles.section}>
+        <Text style={styles.title}>3. KI-Analyse</Text>
+        <Image src={PLACEHOLDER_IMAGES.aiAnalysis} style={styles.image} />
+        <Text style={styles.heading}>Trading-Muster</Text>
+        <Text style={styles.text}>Die KI analysiert deine Trade-Historie und identifiziert wiederkehrende Muster:</Text>
+        <Text style={styles.bulletPoint}>• Erkennung deiner erfolgreichsten Setups</Text>
+        <Text style={styles.bulletPoint}>• Identifikation von Schwachstellen</Text>
+        <Text style={styles.bulletPoint}>• Analyse von emotionalen Mustern</Text>
+        <Text style={styles.bulletPoint}>• Vorschläge zur Optimierung</Text>
+        
+        <Text style={styles.heading}>Erweiterte Trade-Analyse</Text>
+        <Text style={styles.text}>Detaillierte Analysen zu spezifischen Aspekten:</Text>
+        <Text style={styles.bulletPoint}>• Zeitbasierte Analyse (beste Trading-Zeiten)</Text>
+        <Text style={styles.bulletPoint}>• Symbol-Performance</Text>
+        <Text style={styles.bulletPoint}>• Setup-Erfolgsanalyse</Text>
+      </View>
+      <Text style={styles.pageNumber}>3</Text>
+    </Page>
+
+    {/* Risikomanagement */}
+    <Page size="A4" style={styles.page}>
+      <View style={styles.section}>
+        <Text style={styles.title}>4. Risikomanagement</Text>
+        <Image src={PLACEHOLDER_IMAGES.risk} style={styles.image} />
+        <Text style={styles.heading}>Drawdown-Analyse</Text>
+        <Text style={styles.text}>Verfolge und analysiere deine Drawdowns:</Text>
+        <Text style={styles.bulletPoint}>• Historische Drawdown-Perioden</Text>
+        <Text style={styles.bulletPoint}>• Maximaler Drawdown</Text>
+        <Text style={styles.bulletPoint}>• Durchschnittliche Erholungszeit</Text>
+        
+        <Text style={styles.heading}>Risiko pro Trade & Positionsgröße</Text>
+        <Text style={styles.text}>Optimiere dein Risiko und berechne Positionsgrößen:</Text>
+        <Text style={styles.bulletPoint}>• Durchschnittliches Risiko pro Trade</Text>
+        <Text style={styles.bulletPoint}>• Risk-Reward-Verhältnis über Zeit</Text>
+        <Text style={styles.bulletPoint}>• Optimales Risiko basierend auf deiner Performance</Text>
+        <Text style={styles.bulletPoint}>• Positionsgrößen-Kalkulator</Text>
+      </View>
+      <Text style={styles.pageNumber}>4</Text>
+    </Page>
+
+    {/* Marktphasen-Analyse */}
+    <Page size="A4" style={styles.page}>
+      <View style={styles.section}>
+        <Text style={styles.title}>5. Marktphasen-Analyse</Text>
+        <Image src={PLACEHOLDER_IMAGES.phases} style={styles.image} />
+        <Text style={styles.heading}>Marktphasen-Verteilung</Text>
+        <Text style={styles.text}>Analyse der verschiedenen Marktphasen in deiner Trading-Historie:</Text>
+        <Text style={styles.bulletPoint}>• Trend-Phasen</Text>
+        <Text style={styles.bulletPoint}>• Range-Phasen</Text>
+        <Text style={styles.bulletPoint}>• Volatile Phasen</Text>
+        
+        <Text style={styles.heading}>Performance & Setup-Analyse</Text>
+        <Text style={styles.text}>Analyse deiner Performance und Setups in verschiedenen Marktphasen:</Text>
+        <Text style={styles.bulletPoint}>• Gewinnrate pro Marktphase</Text>
+        <Text style={styles.bulletPoint}>• Durchschnittliches RR pro Marktphase</Text>
+        <Text style={styles.bulletPoint}>• Setups für verschiedene Marktphasen</Text>
+        <Text style={styles.bulletPoint}>• Handlungsempfehlungen</Text>
+      </View>
+      <Text style={styles.pageNumber}>5</Text>
+    </Page>
+
+    {/* Trading Coach, Makro-Kalender, Social Trading */}
+    <Page size="A4" style={styles.page}>
+      <View style={styles.section}>
+        <Text style={styles.title}>6. Trading Coach</Text>
+        <Image src={PLACEHOLDER_IMAGES.coach} style={styles.image} />
+        <Text style={styles.text}>Setze und verfolge deine Trading-Ziele, erhalte personalisiertes Feedback und verbessere deine Handelsstrategien mit Hilfe der KI.</Text>
+        
+        <Text style={styles.title}>7. Makroökonomischer Kalender</Text>
+        <Image src={PLACEHOLDER_IMAGES.calendar} style={styles.image} />
+        <Text style={styles.text}>Behalte wichtige Wirtschaftsereignisse im Blick und plane deine Trades entsprechend. Filtere nach Land, Währung oder Wichtigkeit.</Text>
+        
+        <Text style={styles.title}>8. Social Trading & Import</Text>
+        <Image src={PLACEHOLDER_IMAGES.social} style={styles.image} />
+        <Text style={styles.text}>Teile und entdecke Trading-Strategien, tausche dich mit anderen Tradern aus und importiere deine Trades aus verschiedenen Quellen.</Text>
+      </View>
+      <Text style={styles.pageNumber}>6</Text>
+    </Page>
+  </Document>
+);
 
 export default function Booklet() {
+  const [pdLoaded, setPdLoaded] = useState<boolean>(false);
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="rocket-card rounded-xl p-8 mb-8">
@@ -15,478 +262,182 @@ export default function Booklet() {
           </div>
           <div>
             <h1 className="text-3xl font-extrabold moon-text">LvlUp Trading</h1>
-            <p className="text-gray-400">Benutzerhandbuch und Dokumentation</p>
+            <p className="text-gray-400">Kompaktes Benutzerhandbuch</p>
           </div>
         </div>
         
         <p className="text-lg mb-6">
-          Willkommen zum LvlUp Trading Benutzerhandbuch. Hier findest du eine ausführliche Erklärung aller Funktionen und Möglichkeiten der Anwendung.
+          Willkommen zum kompakten LvlUp Trading Benutzerhandbuch. Hier findest du eine Übersicht aller Funktionen und Möglichkeiten der Anwendung.
         </p>
+
+        <div className="flex justify-end mb-6">
+          <PDFDownloadLink 
+            document={<BookletPDF />} 
+            fileName="LvlUp_Trading_Handbuch.pdf"
+            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
+            onLoadSuccess={() => setPdLoaded(true)}
+          >
+            {({ blob, url, loading, error }) => 
+              loading ? 
+                'PDF wird generiert...' : 
+                <><FileText className="h-5 w-5" /> PDF Handbuch herunterladen</>
+            }
+          </PDFDownloadLink>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start bg-opacity-20 hover:bg-opacity-30">
             <FileUp className="mr-2 h-4 w-4" /> Import Optionen
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start bg-opacity-20 hover:bg-opacity-30">
             <Brain className="mr-2 h-4 w-4" /> KI-Analysen
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start bg-opacity-20 hover:bg-opacity-30">
             <BarChart2 className="mr-2 h-4 w-4" /> Risikomanagement
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start bg-opacity-20 hover:bg-opacity-30">
             <Activity className="mr-2 h-4 w-4" /> Marktphasen-Analyse
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start bg-opacity-20 hover:bg-opacity-30">
             <Trophy className="mr-2 h-4 w-4" /> Trading Coach
           </Button>
-          <Button variant="outline" className="justify-start">
+          <Button variant="outline" className="justify-start bg-opacity-20 hover:bg-opacity-30">
             <Calendar className="mr-2 h-4 w-4" /> Makro-Kalender
           </Button>
         </div>
       </div>
 
-      {/* Inhaltsverzeichnis */}
-      <div className="rocket-card rounded-xl p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-4">Inhaltsverzeichnis</h2>
-        <ul className="space-y-2">
-          <li className="flex items-center">
-            <span className="text-primary mr-2">1.</span>
-            <a href="#dashboard" className="hover:text-primary">Dashboard & Navigation</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">2.</span>
-            <a href="#trade-management" className="hover:text-primary">Trade-Management</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">3.</span>
-            <a href="#ai-analysis" className="hover:text-primary">KI-Analyse</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">4.</span>
-            <a href="#risk-management" className="hover:text-primary">Risikomanagement</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">5.</span>
-            <a href="#market-phases" className="hover:text-primary">Marktphasen-Analyse</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">6.</span>
-            <a href="#coach" className="hover:text-primary">Trading Coach</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">7.</span>
-            <a href="#macro-calendar" className="hover:text-primary">Makroökonomischer Kalender</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">8.</span>
-            <a href="#social" className="hover:text-primary">Social Trading</a>
-          </li>
-          <li className="flex items-center">
-            <span className="text-primary mr-2">9.</span>
-            <a href="#import-export" className="hover:text-primary">Import & Export</a>
-          </li>
-        </ul>
-      </div>
-
-      {/* Dashboard & Navigation */}
+      {/* Dashboard & Navigation mit Screenshot */}
       <div id="dashboard" className="rocket-card rounded-xl p-6 mb-8">
         <h2 className="text-2xl font-bold mb-4">1. Dashboard & Navigation</h2>
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Hauptnavigation</h3>
+          <img src={PLACEHOLDER_IMAGES.dashboard} alt="Dashboard Screenshot" className="rounded-lg w-full max-w-2xl mx-auto mb-4" />
           <p className="mb-4">
             Das Dashboard ist deine zentrale Anlaufstelle. Von hier aus hast du Zugriff auf alle Funktionen der Anwendung:
           </p>
-          <ul className="space-y-2 mb-4">
-            <li className="flex items-center">
-              <Activity className="h-4 w-4 mr-2 text-primary" />
-              <span><strong>Dashboard:</strong> Übersicht über deine Trade-Aktivitäten</span>
-            </li>
-            <li className="flex items-center">
-              <Brain className="h-4 w-4 mr-2 text-primary" />
-              <span><strong>KI-Analyse:</strong> Automatische Erkennung von Handelsmustern und Verbesserungspotential</span>
-            </li>
-            <li className="flex items-center">
-              <BarChart2 className="h-4 w-4 mr-2 text-primary" />
-              <span><strong>Risikomanagement:</strong> Analyse deiner Risikometriken und Optimierungsmöglichkeiten</span>
-            </li>
-            <li className="flex items-center">
-              <Activity className="h-4 w-4 mr-2 text-primary" />
-              <span><strong>Marktphasen:</strong> Analyse deiner Performance in verschiedenen Marktphasen</span>
-            </li>
-          </ul>
-          <div className="bg-muted p-4 rounded-lg">
-            <p className="text-sm">
-              <strong>Tipp:</strong> Die Navigationsleiste ist immer oben verfügbar. Für schnellen Zugriff auf wichtige Funktionen, nutze die direkten Tab-Links unterhalb des Headers.
-            </p>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Zusätzliche Funktionen</h3>
-          <p className="mb-4">
-            Außerhalb des Dashboards kannst du auf diese erweiterten Funktionen zugreifen:
-          </p>
-          <ul className="space-y-2">
-            <li className="flex items-center">
-              <Trophy className="h-4 w-4 mr-2 text-primary" />
-              <span><strong>Trading Coach:</strong> Personalisierte Verbesserungsvorschläge und Ziele</span>
-            </li>
-            <li className="flex items-center">
-              <Calendar className="h-4 w-4 mr-2 text-primary" />
-              <span><strong>Makro-Kalender:</strong> Übersicht wichtiger Wirtschaftsereignisse</span>
-            </li>
-            <li className="flex items-center">
-              <Users className="h-4 w-4 mr-2 text-primary" />
-              <span><strong>Social Trading:</strong> Teile und lerne von anderen Tradern</span>
-            </li>
+          <ul className="space-y-2 mb-4 list-disc pl-5">
+            <li><strong>Dashboard:</strong> Übersicht über deine Trade-Aktivitäten</li>
+            <li><strong>KI-Analyse:</strong> Automatische Erkennung von Handelsmustern</li>
+            <li><strong>Risikomanagement:</strong> Analyse deiner Risikometriken</li>
+            <li><strong>Marktphasen:</strong> Analyse deiner Performance in verschiedenen Marktphasen</li>
           </ul>
         </div>
       </div>
 
-      {/* Trade-Management */}
+      {/* Trade-Management mit Screenshot */}
       <div id="trade-management" className="rocket-card rounded-xl p-6 mb-8">
         <h2 className="text-2xl font-bold mb-4">2. Trade-Management</h2>
-        
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Trade-Tabelle</h3>
+          <img src={PLACEHOLDER_IMAGES.trades} alt="Trades Screenshot" className="rounded-lg w-full max-w-2xl mx-auto mb-4" />
           <p className="mb-4">
-            Die Trade-Tabelle zeigt alle deine erfassten Trades mit wichtigen Informationen auf einen Blick:
+            Die Trade-Tabelle zeigt alle deine erfassten Trades mit wichtigen Informationen:
           </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Datum und Symbol</li>
-            <li>• Setup und Trendanalyse</li>
-            <li>• Entry-Typ und Level</li>
-            <li>• Risk-Reward-Verhältnis</li>
-            <li>• Profit/Loss</li>
-          </ul>
-          <div className="bg-muted p-4 rounded-lg mb-4">
-            <p className="text-sm">
-              <strong>Filterfunktion:</strong> Nutze die Filterleiste oberhalb der Tabelle, um Trades nach verschiedenen Kriterien zu filtern, wie Datum, Symbol, Setup, Trend oder Entry-Typ.
-            </p>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Trade-Details</h3>
-          <p className="mb-4">
-            Durch Klicken auf einen Trade in der Tabelle werden die vollständigen Details im rechten Seitenbereich angezeigt:
-          </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Vollständige Trade-Informationen</li>
-            <li>• Kommentare und Notizen</li>
-            <li>• Angehängte Chart-Screenshots</li>
-            <li>• KI-generiertes Feedback zum Trade</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Wöchentliche Zusammenfassung</h3>
-          <p className="mb-4">
-            Unterhalb der Trade-Tabelle findest du eine wöchentliche Zusammenfassung mit wichtigen Kennzahlen:
-          </p>
-          <ul className="space-y-1">
-            <li>• Gesamtzahl der Trades</li>
-            <li>• Gewinnrate</li>
-            <li>• Durchschnittliches RR-Verhältnis</li>
-            <li>• Gesamtperformance</li>
-            <li>• Vergleich zur Vorwoche</li>
+          <ul className="space-y-1 mb-4 list-disc pl-5">
+            <li>Datum und Symbol</li>
+            <li>Setup und Trendanalyse</li>
+            <li>Entry-Typ und Level</li>
+            <li>Risk-Reward-Verhältnis</li>
           </ul>
         </div>
       </div>
 
-      {/* KI-Analyse */}
+      {/* KI-Analyse mit Screenshot */}
       <div id="ai-analysis" className="rocket-card rounded-xl p-6 mb-8">
         <h2 className="text-2xl font-bold mb-4">3. KI-Analyse</h2>
-        
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Trading-Muster</h3>
+          <img src={PLACEHOLDER_IMAGES.aiAnalysis} alt="KI-Analyse Screenshot" className="rounded-lg w-full max-w-2xl mx-auto mb-4" />
           <p className="mb-4">
             Die KI analysiert deine Trade-Historie und identifiziert wiederkehrende Muster:
           </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Erkennung deiner erfolgreichsten Setups</li>
-            <li>• Identifikation von Schwachstellen und Problemen</li>
-            <li>• Analyse von emotionalen Mustern (Overtrading, Revenge Trading)</li>
-            <li>• Vorschläge zur Optimierung</li>
-          </ul>
-          <div className="bg-muted p-4 rounded-lg mb-4">
-            <p className="text-sm">
-              <strong>Tipp:</strong> Klicke auf "Neue Analyse generieren", um eine frische KI-Beurteilung basierend auf deinen neuesten Trades zu erhalten.
-            </p>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Erweiterte Trade-Analyse</h3>
-          <p className="mb-4">
-            Detaillierte Analysen zu spezifischen Aspekten deines Tradings:
-          </p>
-          <ul className="space-y-1">
-            <li>• Zeitbasierte Analyse (beste Trading-Zeiten)</li>
-            <li>• Symbol-Performance (was funktioniert am besten)</li>
-            <li>• Setup-Erfolgsanalyse</li>
-            <li>• Psychologische Faktoren und Gewohnheiten</li>
+          <ul className="space-y-1 mb-4 list-disc pl-5">
+            <li>Erkennung deiner erfolgreichsten Setups</li>
+            <li>Identifikation von Schwachstellen und Problemen</li>
+            <li>Analyse von emotionalen Mustern (Overtrading, Revenge Trading)</li>
+            <li>Vorschläge zur Optimierung</li>
           </ul>
         </div>
       </div>
 
-      {/* Risikomanagement */}
+      {/* Risikomanagement mit Screenshot */}
       <div id="risk-management" className="rocket-card rounded-xl p-6 mb-8">
         <h2 className="text-2xl font-bold mb-4">4. Risikomanagement</h2>
-        
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Drawdown-Analyse</h3>
+          <img src={PLACEHOLDER_IMAGES.risk} alt="Risikomanagement Screenshot" className="rounded-lg w-full max-w-2xl mx-auto mb-4" />
           <p className="mb-4">
-            Verfolge und analysiere deine Drawdowns:
+            Überwache dein Risiko und optimiere deine Handelsstrategien:
           </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Historische Drawdown-Perioden</li>
-            <li>• Maximaler Drawdown</li>
-            <li>• Durchschnittliche Erholungszeit</li>
-            <li>• Drawdown-Vergleich (Aktuell vs. Historisch)</li>
-          </ul>
-          <div className="rounded-lg border p-4 mb-4">
-            <div className="flex items-center">
-              <TrendingDown className="h-5 w-5 mr-2 text-destructive" />
-              <h4 className="font-medium">Drawdown-Warnung</h4>
-            </div>
-            <p className="text-sm mt-2">
-              Die Anwendung benachrichtigt dich, wenn du dich einem kritischen Drawdown-Level näherst oder bereits darin befindest.
-            </p>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Risiko pro Trade</h3>
-          <p className="mb-4">
-            Überwache dein Risiko pro Trade und optimiere es:
-          </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Durchschnittliches Risiko pro Trade</li>
-            <li>• Risk-Reward-Verhältnis über Zeit</li>
-            <li>• Risiko-Konsistenz</li>
-            <li>• Optimales Risiko basierend auf deiner Performance</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Positionsgrößen-Kalkulator</h3>
-          <p className="mb-4">
-            Berechne die optimale Positionsgröße für deine Trades:
-          </p>
-          <ul className="space-y-1">
-            <li>• Basierend auf deinem Kontostand</li>
-            <li>• Anpassbar an dein Risikoprofil</li>
-            <li>• Berücksichtigung von Stop-Loss-Levels</li>
-            <li>• Automatische Berechnung basierend auf Währungspaar und Volatilität</li>
+          <ul className="space-y-1 mb-4 list-disc pl-5">
+            <li><strong>Drawdown-Analyse:</strong> Verfolge historische Drawdowns und Erholungszeiten</li>
+            <li><strong>Risiko pro Trade:</strong> Analyse und Optimierung deines Risikos</li>
+            <li><strong>Positionsgrößen-Kalkulator:</strong> Berechne optimale Positionsgrößen</li>
           </ul>
         </div>
       </div>
 
-      {/* Marktphasen-Analyse */}
+      {/* Marktphasen-Analyse mit Screenshot */}
       <div id="market-phases" className="rocket-card rounded-xl p-6 mb-8">
         <h2 className="text-2xl font-bold mb-4">5. Marktphasen-Analyse</h2>
-        
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Marktphasen-Verteilung</h3>
+          <img src={PLACEHOLDER_IMAGES.phases} alt="Marktphasen Screenshot" className="rounded-lg w-full max-w-2xl mx-auto mb-4" />
           <p className="mb-4">
-            Analyse der verschiedenen Marktphasen in deiner Trading-Historie:
+            Analysiere deine Performance in verschiedenen Marktbedingungen:
           </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Trend-Phasen</li>
-            <li>• Range-Phasen</li>
-            <li>• Volatile Phasen</li>
-          </ul>
-          <div className="bg-muted p-4 rounded-lg mb-4">
-            <p className="text-sm">
-              <strong>Verteilungsdiagramm:</strong> Visualisiert den Anteil jeder Marktphase an deinen gesamten Trades.
-            </p>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Performance nach Marktphase</h3>
-          <p className="mb-4">
-            Detaillierte Analyse deiner Performance in verschiedenen Marktbedingungen:
-          </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Gewinnrate pro Marktphase</li>
-            <li>• Durchschnittliches RR pro Marktphase</li>
-            <li>• Verlustphasen und Ursachen</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Setup-Performance nach Marktphase</h3>
-          <p className="mb-4">
-            Analyse, welche Setups in welchen Marktphasen am besten funktionieren:
-          </p>
-          <ul className="space-y-1">
-            <li>• Setups für Trend-Märkte</li>
-            <li>• Setups für Range-Märkte</li>
-            <li>• Setups für volatile Phasen</li>
-            <li>• Empfehlungen für verschiedene Marktbedingungen</li>
+          <ul className="space-y-1 mb-4 list-disc pl-5">
+            <li><strong>Marktphasen-Verteilung:</strong> Anteil von Trend-, Range- und volatilen Phasen</li>
+            <li><strong>Performance-Analyse:</strong> Gewinnrate und RR pro Marktphase</li>
+            <li><strong>Setup-Performance:</strong> Welche Setups funktionieren in welchen Phasen am besten</li>
           </ul>
         </div>
       </div>
 
-      {/* Trading Coach */}
-      <div id="coach" className="rocket-card rounded-xl p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-4">6. Trading Coach</h2>
-        
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Persönliche Ziele</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Trading Coach */}
+        <div id="coach" className="rocket-card rounded-xl p-6">
+          <h2 className="text-xl font-bold mb-4">6. Trading Coach</h2>
+          <img src={PLACEHOLDER_IMAGES.coach} alt="Coach Screenshot" className="rounded-lg w-full mb-4 h-40 object-cover" />
           <p className="mb-4">
-            Setze und verfolge deine Trading-Ziele:
+            Personalisierte Verbesserungsvorschläge und Zielsetzungen für dein Trading.
           </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Tägliche, wöchentliche und monatliche Ziele</li>
-            <li>• Fortschrittsanzeige</li>
-            <li>• Zielerreichungshistorie</li>
-            <li>• KI-generierte Zielvorschläge basierend auf deiner Performance</li>
-          </ul>
-          <div className="bg-muted p-4 rounded-lg mb-4">
-            <p className="text-sm">
-              <strong>Tipp:</strong> Fokussiere dich auf prozessorientierte Ziele (z.B. "Setup-Regeln einhalten") statt auf ergebnisorientierte Ziele (z.B. "X% Profit").
-            </p>
-          </div>
         </div>
 
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Coaching-Feedback</h3>
+        {/* Makroökonomischer Kalender */}
+        <div id="macro-calendar" className="rocket-card rounded-xl p-6">
+          <h2 className="text-xl font-bold mb-4">7. Makro-Kalender</h2>
+          <img src={PLACEHOLDER_IMAGES.calendar} alt="Kalender Screenshot" className="rounded-lg w-full mb-4 h-40 object-cover" />
           <p className="mb-4">
-            Erhalte personalisiertes Feedback zu deinem Trading:
+            Behalte wichtige Wirtschaftsereignisse im Blick und plane deine Trades entsprechend.
           </p>
-          <ul className="space-y-1">
-            <li>• KI-generierte Trading-Tipps</li>
-            <li>• Identifikation von Verbesserungspotential</li>
-            <li>• Erfolgsstrategien und Verstärkung positiver Gewohnheiten</li>
-            <li>• Warnungen bei problematischen Mustern</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Makroökonomischer Kalender */}
-      <div id="macro-calendar" className="rocket-card rounded-xl p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-4">7. Makroökonomischer Kalender</h2>
-        
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Wirtschaftsereignisse</h3>
-          <p className="mb-4">
-            Übersicht wichtiger wirtschaftlicher Ereignisse:
-          </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Zinsentscheidungen</li>
-            <li>• Wirtschaftsindikatoren</li>
-            <li>• Unternehmensberichte</li>
-            <li>• Politische Ereignisse</li>
-          </ul>
-          <div className="bg-muted p-4 rounded-lg mb-4">
-            <p className="text-sm">
-              <strong>Filterfunktion:</strong> Filtere nach Land, Währung, Wichtigkeit oder Zeitraum.
-            </p>
-          </div>
         </div>
 
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Trade-Planung mit Makrodaten</h3>
+        {/* Import & Export */}
+        <div id="import-export" className="rocket-card rounded-xl p-6">
+          <h2 className="text-xl font-bold mb-4">8. Import & Export</h2>
+          <img src={PLACEHOLDER_IMAGES.import} alt="Import Screenshot" className="rounded-lg w-full mb-4 h-40 object-cover" />
           <p className="mb-4">
-            Nutze den Kalender für deine Trading-Planung:
+            Importiere Trades aus verschiedenen Quellen und exportiere deine Daten für weitere Analysen.
           </p>
-          <ul className="space-y-1">
-            <li>• Vorhersage von Marktvolatilität</li>
-            <li>• Vermeidung von Trades während wichtiger Ankündigungen</li>
-            <li>• Identifikation von Trading-Möglichkeiten nach Veröffentlichungen</li>
-            <li>• Korrelation deiner historischen Performance mit Wirtschaftsereignissen</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Social Trading */}
-      <div id="social" className="rocket-card rounded-xl p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-4">8. Social Trading</h2>
-        
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Trading-Strategien</h3>
-          <p className="mb-4">
-            Teile und entdecke Trading-Strategien:
-          </p>
-          <ul className="space-y-1 mb-4">
-            <li>• Veröffentliche deine erfolgreichen Setups</li>
-            <li>• Entdecke Strategien anderer Trader</li>
-            <li>• Bewerte und kommentiere Strategien</li>
-            <li>• Sortierung nach Popularität oder Performance</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Community-Interaktion</h3>
-          <p className="mb-4">
-            Tausche dich mit anderen Tradern aus:
-          </p>
-          <ul className="space-y-1">
-            <li>• Kommentiere und diskutiere Strategien</li>
-            <li>• Stelle Fragen an erfahrene Trader</li>
-            <li>• Teile Erfolge und Learnings</li>
-            <li>• Folge Top-Performern</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Import & Export */}
-      <div id="import-export" className="rocket-card rounded-xl p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-4">9. Import & Export</h2>
-        
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Daten-Import</h3>
-          <p className="mb-4">
-            Importiere deine Trades aus verschiedenen Quellen:
-          </p>
-          <ul className="space-y-1 mb-4">
-            <li>• CSV-Import (Universal-Format)</li>
-            <li>• TradingView-Export</li>
-            <li>• Tradovate-Integration</li>
-            <li>• Manueller Trade-Import</li>
-          </ul>
-          <div className="bg-muted p-4 rounded-lg mb-4">
-            <p className="text-sm">
-              <strong>Tipp:</strong> Nutze die CSV-Vorlagen für verschiedene Plattformen, um den Import zu erleichtern.
-            </p>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">Daten-Export</h3>
-          <p className="mb-4">
-            Exportiere deine Daten für externe Analyse:
-          </p>
-          <ul className="space-y-1">
-            <li>• CSV-Export</li>
-            <li>• PDF-Reports (wöchentlich, monatlich)</li>
-            <li>• Performance-Zusammenfassungen</li>
-            <li>• KI-Analysen und Empfehlungen</li>
-          </ul>
         </div>
       </div>
 
       {/* Abschluss */}
-      <div className="rocket-card rounded-xl p-6">
+      <div className="rocket-card rounded-xl p-6 text-center">
         <h2 className="text-2xl font-bold mb-4">Fazit</h2>
         <p className="mb-4">
-          LvlUp Trading wurde entwickelt, um dir zu helfen, deine Trading-Performance kontinuierlich zu verbessern und von deinen eigenen Daten zu lernen. 
-          Die Kombination aus detaillierter Analyse, KI-gestützter Erkennung von Mustern und Risikomanagement-Tools gibt dir alle Werkzeuge an die Hand, 
-          die du brauchst, um ein besserer Trader zu werden.
-        </p>
-        <p className="mb-6">
-          Wir empfehlen, mit dem regelmäßigen Import deiner Trades zu beginnen und dann die verschiedenen Analyse-Tools zu nutzen, 
-          um Verbesserungspotential zu identifizieren. Setze dir realistische Ziele mit dem Trading Coach und verfolge deinen Fortschritt.
+          LvlUp Trading hilft dir, deine Trading-Performance kontinuierlich zu verbessern und von deinen eigenen Daten zu lernen.
         </p>
 
         <div className="flex justify-center">
-          <Button variant="default" className="flex items-center" size="lg">
-            <FileUp className="mr-2 h-4 w-4" />
-            Mit dem CSV-Import beginnen
-          </Button>
+          <PDFDownloadLink 
+            document={<BookletPDF />} 
+            fileName="LvlUp_Trading_Handbuch.pdf"
+            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
+          >
+            {({ blob, url, loading, error }) => 
+              loading ? 
+                'PDF wird generiert...' : 
+                <><FileText className="h-5 w-5" /> PDF Handbuch herunterladen</>
+            }
+          </PDFDownloadLink>
         </div>
       </div>
     </div>
