@@ -88,9 +88,10 @@ export default function TradeImport() {
     setImporting(true);
     
     // Speichere Link direkt als Chart-URL
-    const mockTrade = {
-      symbol: "CHART",
-      setup: "TradingView Link",
+    // Alle Felder leer lassen, nur das chartImage-Feld mit dem Link befüllen
+    const emptyTrade = {
+      symbol: "",
+      setup: "",
       mainTrendM15: "",
       internalTrendM5: "",
       entryType: "",
@@ -106,7 +107,7 @@ export default function TradeImport() {
     };
     
     // Speichere als neuen Trade mit dem Link als chartImage-Feld
-    importMutation.mutate([mockTrade]);
+    importMutation.mutate([emptyTrade]);
     setLinkInput("");
   };
 
