@@ -26,7 +26,6 @@ export default function SimpleHome() {
   const userId = user?.id || 1; // Fallback to 1 only if user object isn't loaded yet
   const { toast } = useToast();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
-  const [functionsOpen, setFunctionsOpen] = useState(false);
   
   const [filters, setFilters] = useState({
     startDate: getWeekDates().weekStart,
@@ -73,10 +72,7 @@ export default function SimpleHome() {
     setFilters({ ...filters, ...newFilters });
   };
 
-  // Handle Function Menu
-  const toggleFunctions = () => {
-    setFunctionsOpen(!functionsOpen);
-  };
+  // Toggle function removed
 
   return (
     <div className="container mx-auto px-4 py-6 relative overflow-hidden">
@@ -109,102 +105,41 @@ export default function SimpleHome() {
                 </Button>
               </Link>
               
-              {/* Einfaches Dropdown Menu für Funktionen */}
-              <div className="relative">
+              {/* Navigation Links - Direct Links statt Dropdown */}
+              <div className="flex space-x-1">
                 <Button 
                   variant="ghost" 
                   className="text-sm py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
-                  onClick={toggleFunctions}
+                  onClick={() => {
+                    const tab = document.querySelector('[value="ai-analysis"]') as HTMLElement;
+                    if (tab) tab.click();
+                  }}
                 >
                   <Brain className="h-4 w-4 mr-2" />
-                  Funktionen
-                  <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
+                  KI-Analyse
                 </Button>
-                
-                {functionsOpen && (
-                  <div className="absolute z-20 w-64 mt-1 left-0 origin-top-right bg-black/70 backdrop-blur-md border border-gray-700 rounded-md shadow-lg p-1">
-                    {/* Trade-Analyse Funktionen */}
-                    <div className="px-2 py-1 text-xs text-gray-400 uppercase">Analyse Tools</div>
-                    <Button 
-                      variant="ghost" 
-                      className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
-                      onClick={() => {
-                        const tab = document.querySelector('[value="ai-analysis"]') as HTMLElement;
-                        if (tab) tab.click();
-                        setFunctionsOpen(false);
-                      }}
-                    >
-                      <Brain className="h-4 w-4 mr-2" />
-                      KI-Analyse
-                    </Button>
-                    <div className="space-y-1">
-                      <Button 
-                        variant="ghost" 
-                        className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
-                        onClick={() => {
-                          const tab = document.querySelector('[value="risk"]') as HTMLElement;
-                          if (tab) tab.click();
-                          setFunctionsOpen(false);
-                        }}
-                      >
-                        <BarChart2 className="h-4 w-4 mr-2" />
-                        Risikomanagement
-                      </Button>
-                      <div className="pl-8 space-y-1">
-                        <Button 
-                          variant="ghost" 
-                          className="text-sm w-full justify-start py-1 px-3 flex items-center hover:bg-primary/10 hover:text-primary text-xs"
-                          onClick={() => {
-                            const tab = document.querySelector('[value="risk"]') as HTMLElement;
-                            if (tab) {
-                              tab.click();
-                              setTimeout(() => {
-                                const drawdownTab = document.querySelector('[value="drawdown"]') as HTMLElement;
-                                if (drawdownTab) drawdownTab.click();
-                              }, 100);
-                            }
-                            setFunctionsOpen(false);
-                          }}
-                        >
-                          <TrendingDown className="h-3 w-3 mr-2" />
-                          Drawdowns
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          className="text-sm w-full justify-start py-1 px-3 flex items-center hover:bg-primary/10 hover:text-primary text-xs"
-                          onClick={() => {
-                            const tab = document.querySelector('[value="risk"]') as HTMLElement;
-                            if (tab) {
-                              tab.click();
-                              setTimeout(() => {
-                                const riskPerTradeTab = document.querySelector('[value="risk-per-trade"]') as HTMLElement;
-                                if (riskPerTradeTab) riskPerTradeTab.click();
-                              }, 100);
-                            }
-                            setFunctionsOpen(false);
-                          }}
-                        >
-                          <DollarSign className="h-3 w-3 mr-2" />
-                          Risiko pro Trade
-                        </Button>
-                      </div>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
-                      onClick={() => {
-                        const tab = document.querySelector('[value="market-phases"]') as HTMLElement;
-                        if (tab) tab.click();
-                        setFunctionsOpen(false);
-                      }}
-                    >
-                      <Activity className="h-4 w-4 mr-2" />
-                      Marktphasen
-                    </Button>
-                  </div>
-                )}
+                <Button 
+                  variant="ghost" 
+                  className="text-sm py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                  onClick={() => {
+                    const tab = document.querySelector('[value="risk"]') as HTMLElement;
+                    if (tab) tab.click();
+                  }}
+                >
+                  <BarChart2 className="h-4 w-4 mr-2" />
+                  Risiko
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="text-sm py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                  onClick={() => {
+                    const tab = document.querySelector('[value="market-phases"]') as HTMLElement;
+                    if (tab) tab.click();
+                  }}
+                >
+                  <Activity className="h-4 w-4 mr-2" />
+                  Phasen
+                </Button>
               </div>
             </div>
             
