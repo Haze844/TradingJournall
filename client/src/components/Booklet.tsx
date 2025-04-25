@@ -42,10 +42,11 @@ export default function Booklet() {
 
         <div className="flex justify-end mb-6">
           <a 
-            href="/generate-pdf"
+            href="https://gist.githubusercontent.com/anonymous/e4bb137a991cc0b592e2a7a64e7e8c60/raw/3f621d6e6fa4dfdab69c7b87e2d1a6d31ed2969c/lvlup-trading-handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
             target="_blank"
             rel="noopener noreferrer"
+            download="lvlup-trading-handbuch.pdf"
           >
             <Download className="h-5 w-5" /> PDF herunterladen
           </a>
@@ -194,10 +195,11 @@ export default function Booklet() {
 
         <div className="flex justify-center">
           <a 
-            href="/generate-pdf"
+            href="https://gist.githubusercontent.com/anonymous/e4bb137a991cc0b592e2a7a64e7e8c60/raw/3f621d6e6fa4dfdab69c7b87e2d1a6d31ed2969c/lvlup-trading-handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
             target="_blank"
             rel="noopener noreferrer"
+            download="lvlup-trading-handbuch.pdf"
           >
             <Download className="h-5 w-5" /> PDF herunterladen
           </a>
