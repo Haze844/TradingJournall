@@ -4,7 +4,8 @@ import {
   FileUp, Brain, BarChart2, Activity, Trophy, Calendar, 
   Users, TrendingDown, FileText
 } from "lucide-react";
-import manualPdf from "../assets/lvlup-trading-handbuch.pdf";
+// Hier nutzen wir den Server-Pfad direkt statt den Import
+const manualPdfPath = "/manual-pdf";
 
 // Beispielbilder für das Handbuch
 const PLACEHOLDER_IMAGES = {
@@ -43,7 +44,7 @@ export default function Booklet() {
 
         <div className="flex justify-end mb-6">
           <a
-            href={manualPdf}
+            href={manualPdfPath}
             target="_blank"
             download="LvlUp_Trading_Handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
@@ -195,7 +196,7 @@ export default function Booklet() {
 
         <div className="flex justify-center">
           <a
-            href={manualPdf}
+            href={manualPdfPath}
             target="_blank"
             download="LvlUp_Trading_Handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"

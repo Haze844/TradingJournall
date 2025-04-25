@@ -4,10 +4,17 @@ import { storage } from "./storage";
 import { insertTradeSchema, insertUserSchema } from "@shared/schema";
 import OpenAI from "openai";
 import { setupAuth } from "./auth";
+import path from "path";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+  
+  // PDF Manual Route
+  app.get("/manual-pdf", (req: Request, res: Response) => {
+    const pdfPath = path.join(process.cwd(), 'public', 'lvlup-trading-handbuch.pdf');
+    res.sendFile(pdfPath);
+  });
   
   // Middleware to check if user is authenticated
   function isAuthenticated(req: Request, res: Response, next: NextFunction) {
