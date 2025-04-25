@@ -129,7 +129,6 @@ const BookletPDF = () => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.title}>1. Dashboard & Navigation</Text>
-        <Image src={PLACEHOLDER_IMAGES.dashboard} style={styles.image} />
         <Text style={styles.heading}>Hauptnavigation</Text>
         <Text style={styles.text}>Das Dashboard bietet Zugriff auf alle Funktionen der Anwendung:</Text>
         <Text style={styles.bulletPoint}>• Dashboard: Übersicht über deine Trade-Aktivitäten</Text>
@@ -149,7 +148,6 @@ const BookletPDF = () => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.title}>2. Trade-Management</Text>
-        <Image src={PLACEHOLDER_IMAGES.trades} style={styles.image} />
         <Text style={styles.heading}>Trade-Tabelle</Text>
         <Text style={styles.text}>Die Trade-Tabelle zeigt alle erfassten Trades mit wichtigen Informationen:</Text>
         <Text style={styles.bulletPoint}>• Datum und Symbol</Text>
@@ -171,7 +169,6 @@ const BookletPDF = () => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.title}>3. KI-Analyse</Text>
-        <Image src={PLACEHOLDER_IMAGES.aiAnalysis} style={styles.image} />
         <Text style={styles.heading}>Trading-Muster</Text>
         <Text style={styles.text}>Die KI analysiert deine Trade-Historie und identifiziert wiederkehrende Muster:</Text>
         <Text style={styles.bulletPoint}>• Erkennung deiner erfolgreichsten Setups</Text>
@@ -192,7 +189,6 @@ const BookletPDF = () => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.title}>4. Risikomanagement</Text>
-        <Image src={PLACEHOLDER_IMAGES.risk} style={styles.image} />
         <Text style={styles.heading}>Drawdown-Analyse</Text>
         <Text style={styles.text}>Verfolge und analysiere deine Drawdowns:</Text>
         <Text style={styles.bulletPoint}>• Historische Drawdown-Perioden</Text>
@@ -213,7 +209,6 @@ const BookletPDF = () => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.title}>5. Marktphasen-Analyse</Text>
-        <Image src={PLACEHOLDER_IMAGES.phases} style={styles.image} />
         <Text style={styles.heading}>Marktphasen-Verteilung</Text>
         <Text style={styles.text}>Analyse der verschiedenen Marktphasen in deiner Trading-Historie:</Text>
         <Text style={styles.bulletPoint}>• Trend-Phasen</Text>
@@ -234,15 +229,12 @@ const BookletPDF = () => (
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.title}>6. Trading Coach</Text>
-        <Image src={PLACEHOLDER_IMAGES.coach} style={styles.image} />
         <Text style={styles.text}>Setze und verfolge deine Trading-Ziele, erhalte personalisiertes Feedback und verbessere deine Handelsstrategien mit Hilfe der KI.</Text>
         
         <Text style={styles.title}>7. Makroökonomischer Kalender</Text>
-        <Image src={PLACEHOLDER_IMAGES.calendar} style={styles.image} />
         <Text style={styles.text}>Behalte wichtige Wirtschaftsereignisse im Blick und plane deine Trades entsprechend. Filtere nach Land, Währung oder Wichtigkeit.</Text>
         
         <Text style={styles.title}>8. Social Trading & Import</Text>
-        <Image src={PLACEHOLDER_IMAGES.social} style={styles.image} />
         <Text style={styles.text}>Teile und entdecke Trading-Strategien, tausche dich mit anderen Tradern aus und importiere deine Trades aus verschiedenen Quellen.</Text>
       </View>
       <Text style={styles.pageNumber}>6</Text>
@@ -275,7 +267,6 @@ export default function Booklet() {
             document={<BookletPDF />} 
             fileName="LvlUp_Trading_Handbuch.pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
-            onLoadSuccess={() => setPdLoaded(true)}
           >
             {({ blob, url, loading, error }) => 
               loading ? 
