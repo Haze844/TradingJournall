@@ -100,60 +100,85 @@ export default function Home() {
       <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
       
       {/* Header */}
-      <header className="flex justify-between items-center mb-8 backdrop-blur-sm p-4 rocket-card rounded-xl">
-        <div className="flex items-center gap-3">
-          <div className="bg-white text-black font-bold p-2 rounded-xl text-lg meme-logo">
-            LVL<br />UP
+      <header className="mb-8 backdrop-blur-sm p-4 rocket-card rounded-xl">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
+          {/* Logo Section */}
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg">
+              LVL<br />UP
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold moon-text">LvlUp Trading</h1>
+              <p className="text-xs text-gray-400">Trading-Performance optimieren</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-extrabold moon-text">LvlUp Tradingtagebuch</h1>
-            <p className="text-xs text-gray-400">Trading-Performance optimieren</p>
+
+          {/* Navigation & Actions */}
+          <div className="flex gap-3 items-center">
+            {/* Main Navigation - Desktop */}
+            <div className="hidden md:flex gap-2 mr-2">
+              <Link href="/">
+                <Button variant="ghost" className="text-sm py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary">
+                  <Activity className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Button>
+              </Link>
+              
+              {/* Dropdown Menu für Funktionen */}
+              <div className="relative group">
+                <Button variant="ghost" className="text-sm py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary">
+                  <Brain className="h-4 w-4 mr-2" />
+                  Funktionen
+                  <svg className="w-3 h-3 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </Button>
+                <div className="hidden group-hover:block absolute z-10 w-48 mt-1 origin-top-right bg-black/70 backdrop-blur-md border border-gray-700 rounded-md shadow-lg p-1">
+                  <Link href="/coach">
+                    <Button variant="ghost" className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary">
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Trading Coach
+                    </Button>
+                  </Link>
+                  <Link href="/calendar">
+                    <Button variant="ghost" className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Makro-Kalender
+                    </Button>
+                  </Link>
+                  <Link href="/social">
+                    <Button variant="ghost" className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary">
+                      <Users className="h-4 w-4 mr-2" />
+                      Social Trading
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <Button 
+              onClick={() => {
+                const importTab = document.querySelector('[value="import"]') as HTMLElement;
+                if (importTab) importTab.click();
+              }} 
+              className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80"
+            >
+              <FileUp className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">CSV Import</span>
+            </Button>
+            
+            <Button variant="outline" size="icon" className="border-primary/40 hover:border-primary/80">
+              <Settings className="h-4 w-4" />
+            </Button>
+            
+            {/* Mobile menu button - would expand to show full menu on mobile */}
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-5 w-5">
+                <path d="M1.5 3C1.22386 3 1 3.22386 1 3.5C1 3.77614 1.22386 4 1.5 4H13.5C13.7761 4 14 3.77614 14 3.5C14 3.22386 13.7761 3 13.5 3H1.5ZM1 7.5C1 7.22386 1.22386 7 1.5 7H13.5C13.7761 7 14 7.22386 14 7.5C14 7.77614 13.7761 8 13.5 8H1.5C1.22386 8 1 7.77614 1 7.5ZM1 11.5C1 11.2239 1.22386 11 1.5 11H13.5C13.7761 11 14 11.2239 14 11.5C14 11.7761 13.7761 12 13.5 12H1.5C1.22386 12 1 11.7761 1 11.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
+              </svg>
+            </Button>
           </div>
-        </div>
-        <div className="flex gap-4 items-center">
-          {/* Navigation */}
-          <div className="hidden md:flex gap-2 mr-2">
-            <Link href="/">
-              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
-                <Activity className="h-4 w-4 mr-1" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/coach">
-              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
-                <Trophy className="h-4 w-4 mr-1" />
-                Coach
-              </Button>
-            </Link>
-            <Link href="/calendar">
-              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
-                <Calendar className="h-4 w-4 mr-1" />
-                Kalender
-              </Button>
-            </Link>
-            <Link href="/social">
-              <Button variant="ghost" className="text-xs py-1 h-8 px-2 flex items-center">
-                <Users className="h-4 w-4 mr-1" />
-                Social
-              </Button>
-            </Link>
-          </div>
-          
-          <Button 
-            onClick={() => {
-              const importTab = document.querySelector('[value="import"]') as HTMLElement;
-              if (importTab) importTab.click();
-            }} 
-            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80"
-          >
-            <FileUp className="h-4 w-4 mr-2" />
-            CSV Import
-          </Button>
-          <Button variant="outline" size="icon" className="border-primary/40 hover:border-primary/80">
-            <Settings className="h-4 w-4" />
-          </Button>
-          
-          {/* Mobile navigation buttons would go here */}
         </div>
       </header>
 
