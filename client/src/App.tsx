@@ -6,7 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 
 import NotFound from "@/pages/not-found";
-import Home from "@/pages/Home";
+// import Home from "@/pages/Home";
+import SimpleHome from "@/pages/SimpleHome";
 import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "@/lib/protected-route";
 import PersonalCoach from "@/components/PersonalCoach";
@@ -16,7 +17,7 @@ import SocialTrading from "@/components/SocialTrading";
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={Home} />
+      <ProtectedRoute path="/" component={SimpleHome} />
       <ProtectedRoute path="/coach" component={PersonalCoach} />
       <ProtectedRoute path="/calendar" component={MacroEconomicCalendar} />
       <ProtectedRoute path="/social" component={SocialTrading} />
