@@ -47,7 +47,7 @@ export default function Header() {
           
           {/* Hauptnavigation */}
           <nav className="flex flex-wrap justify-center gap-3 mb-2 md:mb-0">
-            {/* Dashboard Button */}
+            {/* Dashboard Button - Immer zuerst */}
             <Button variant="ghost" size="sm" asChild>
               <Link href="/">
                 <BarChart2 className="w-4 h-4 mr-2" />
@@ -55,7 +55,7 @@ export default function Header() {
               </Link>
             </Button>
             
-            {/* Trading Funktionen Dropdown */}
+            {/* Trading Dropdown - Kern der Anwendung */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center">
@@ -64,10 +64,11 @@ export default function Header() {
                   <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-md border-primary/20">
-                <DropdownMenuLabel>Trading Funktionen</DropdownMenuLabel>
+              <DropdownMenuContent align="center" className="w-56 bg-black/90 backdrop-blur-md border-primary/20">
+                <DropdownMenuLabel className="text-primary">Trading Funktionen</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  {/* Chronologisch nach Workflow geordnet */}
                   <DropdownMenuItem asChild>
                     <Link href="/#trades">
                       <BarChart2 className="w-4 h-4 mr-2" />
@@ -96,7 +97,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Analyse Funktionen Dropdown */}
+            {/* Analyse Dropdown - Erweiterte Features */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center">
@@ -105,10 +106,11 @@ export default function Header() {
                   <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-md border-primary/20">
-                <DropdownMenuLabel>Analyse Werkzeuge</DropdownMenuLabel>
+              <DropdownMenuContent align="center" className="w-56 bg-black/90 backdrop-blur-md border-primary/20">
+                <DropdownMenuLabel className="text-primary">Analyse Werkzeuge</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
+                  {/* Nach Komplexität sortiert */}
                   <DropdownMenuItem asChild>
                     <Link href="/#ai-analysis">
                       <Brain className="w-4 h-4 mr-2" />
@@ -131,7 +133,7 @@ export default function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Community Button */}
+            {/* Community - Social Trading */}
             <Button variant="ghost" size="sm" asChild>
               <Link href="/social">
                 <Users className="w-4 h-4 mr-2" />
@@ -139,7 +141,7 @@ export default function Header() {
               </Link>
             </Button>
             
-            {/* Hilfe Dropdown */}
+            {/* Hilfe & Dokumentation */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center">
@@ -148,8 +150,8 @@ export default function Header() {
                   <ChevronDown className="w-3 h-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-md border-primary/20">
-                <DropdownMenuLabel>Handbuch & Hilfe</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-56 bg-black/90 backdrop-blur-md border-primary/20">
+                <DropdownMenuLabel className="text-primary">Handbuch & Hilfe</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
@@ -181,8 +183,8 @@ export default function Header() {
                       <ChevronDown className="w-3 h-3 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-40 bg-black/80 backdrop-blur-md border-primary/20">
-                    <DropdownMenuLabel>Benutzer</DropdownMenuLabel>
+                  <DropdownMenuContent align="end" className="w-40 bg-black/90 backdrop-blur-md border-primary/20">
+                    <DropdownMenuLabel className="text-primary">Benutzer</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                       <Settings className="w-4 h-4 mr-2" />
