@@ -1,14 +1,52 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trade } from "@shared/schema";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import ChartImageUpload from "./ChartImageUpload";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface TradeDetailProps {
   selectedTrade: Trade | null;
 }
 
 export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Mutation für das Update des Charts
+  const updateChartImageMutation = useMutation({
+    mutationFn: async ({ id, chartImage }: { id: number, chartImage: string | null }) => {
+      await apiRequest("PUT", `/api/trades/${id}`, { chartImage });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      toast({
+        title: "Chart aktualisiert",
+        description: "Der TradingView-Chart wurde erfolgreich gespeichert."
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Fehler beim Speichern des Charts",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Handler für Chart-Änderungen
+  const handleChartImageChange = (base64Image: string | null) => {
+    if (!selectedTrade) return;
+    
+    updateChartImageMutation.mutate({
+      id: selectedTrade.id,
+      chartImage: base64Image
+    });
+  };
+
   // Trend text color class
   const getTrendColorClass = (trend: string) => {
     return trend === "Long" ? "text-green-500" : "text-red-500";
@@ -98,6 +136,14 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             <div className="bg-muted p-3 rounded-lg text-sm">
               {selectedTrade.gptFeedback || "Kein Feedback verfügbar."}
             </div>
+          </div>
+          
+          {/* TradingView Chart Upload */}
+          <div className="border-t border-border pt-4 mt-6">
+            <ChartImageUpload 
+              existingImage={selectedTrade.chartImage || null} 
+              onChange={handleChartImageChange}
+            />
           </div>
         </CardContent>
       )}

@@ -48,11 +48,13 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   id: true,
   date: true,
   gptFeedback: true,
+  chartImage: true,
   userId: true,
 });
 
 export type InsertTrade = z.infer<typeof insertTradeSchema> & { 
   gptFeedback?: string;
+  chartImage?: string;
 };
 export type Trade = typeof trades.$inferSelect;
 

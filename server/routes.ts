@@ -137,21 +137,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/trades/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const tradeId = Number(req.params.id);
+      const userId = req.user!.id;
       
       if (!tradeId) {
         return res.status(400).json({ message: "Trade ID is required" });
       }
       
+      // Überprüfen, ob der Trade dem Benutzer gehört
+      const existingTrade = await storage.getTradeById(tradeId);
+      if (!existingTrade || existingTrade.userId !== userId) {
+        return res.status(403).json({ message: "Zugriff verweigert" });
+      }
+      
       const tradeUpdate = req.body;
+      
+      // Wenn nur das Chart-Bild aktualisiert wird, kein GPT-Feedback generieren
+      if (Object.keys(tradeUpdate).length === 1 && 'chartImage' in tradeUpdate) {
+        // Nur Chart-Update
+        const updatedTrade = await storage.updateTrade(tradeId, tradeUpdate);
+        
+        if (!updatedTrade) {
+          return res.status(404).json({ message: "Trade not found" });
+        }
+        
+        return res.status(200).json(updatedTrade);
+      }
+      
+      // Normale Trade-Update-Logik
       const updatedTrade = await storage.updateTrade(tradeId, tradeUpdate);
       
       if (!updatedTrade) {
         return res.status(404).json({ message: "Trade not found" });
       }
       
+      // Wenn relevante Handelsfelder aktualisiert wurden, generiere neues GPT-Feedback
+      if (
+        tradeUpdate.symbol || 
+        tradeUpdate.setup || 
+        tradeUpdate.mainTrendM15 || 
+        tradeUpdate.internalTrendM5 || 
+        tradeUpdate.entryType || 
+        tradeUpdate.isWin
+      ) {
+        const gptFeedback = await generateTradeFeedback({
+          ...updatedTrade
+        });
+        
+        await storage.updateTrade(tradeId, { gptFeedback });
+        updatedTrade.gptFeedback = gptFeedback;
+      }
+      
       res.status(200).json(updatedTrade);
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      res.status(400).json({ message: error instanceof Error ? error.message : "Fehler beim Aktualisieren" });
     }
   });
 
