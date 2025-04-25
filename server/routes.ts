@@ -538,6 +538,355 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Marktphasen-Analyse-Endpunkte
+  
+  // Hilfsfunktionen für Marktphasen-Analyse
+  
+  function determineMarketPhase(trade: any): 'trend' | 'range' | 'volatile' {
+    // Die Marktphase könnte direkt im Trade gespeichert sein
+    if (trade.marketPhase) {
+      return trade.marketPhase as 'trend' | 'range' | 'volatile';
+    }
+    
+    // Wenn keine explizite Marktphase vorhanden ist, versuchen wir sie aus anderen Daten abzuleiten
+    // Beispiel: Bestimmung basierend auf dem Setup oder Trend
+    
+    // Wenn es sich um ein trendbasiertes Setup handelt
+    if (trade.setup === 'OZEM' || trade.internalTrendM5 === 'Long' || trade.internalTrendM5 === 'Short') {
+      return 'trend';
+    }
+    
+    // Wenn es sich um ein Range-basiertes Setup handelt
+    if (trade.setup === 'BB') {
+      return 'range';
+    }
+    
+    // Wenn die Marktbedingungen volatil waren (z.B. basierend auf Nachrichtenereignissen)
+    if (trade.setup === 'BZEM') {
+      return 'volatile';
+    }
+    
+    // Standardmäßig als Trend klassifizieren
+    return 'trend';
+  }
+  
+  function calculateMarketPhaseDistribution(trades: any[]) {
+    // Wenn keine Trades vorhanden sind, leeres Array zurückgeben
+    if (!trades || trades.length === 0) {
+      return [];
+    }
+    
+    // Zähle die Anzahl der Trades pro Marktphase
+    const phaseCounts: Record<string, number> = {
+      trend: 0,
+      range: 0,
+      volatile: 0
+    };
+    
+    for (const trade of trades) {
+      const phase = determineMarketPhase(trade);
+      phaseCounts[phase]++;
+    }
+    
+    // Farben für die verschiedenen Marktphasen
+    const phaseColors: Record<string, string> = {
+      trend: '#4F46E5',   // Indigo
+      range: '#10B981',   // Grün
+      volatile: '#F59E0B', // Gelb
+    };
+    
+    // Berechne die prozentuale Verteilung
+    const totalTrades = trades.length;
+    
+    return Object.entries(phaseCounts).map(([phase, count]) => ({
+      phase,
+      count,
+      percentage: Math.round((count / totalTrades) * 100),
+      color: phaseColors[phase]
+    }));
+  }
+  
+  function calculateMarketPhasePerformance(trades: any[]) {
+    // Wenn keine Trades vorhanden sind, leeres Array zurückgeben
+    if (!trades || trades.length === 0) {
+      return [];
+    }
+    
+    // Gruppiere Trades nach Marktphase
+    const phaseGroups: Record<string, any[]> = {
+      trend: [],
+      range: [],
+      volatile: []
+    };
+    
+    for (const trade of trades) {
+      const phase = determineMarketPhase(trade);
+      phaseGroups[phase].push(trade);
+    }
+    
+    // Farben für die verschiedenen Marktphasen
+    const phaseColors: Record<string, string> = {
+      trend: '#4F46E5',   // Indigo
+      range: '#10B981',   // Grün
+      volatile: '#F59E0B', // Gelb
+    };
+    
+    // Berechne Performance-Metriken für jede Phase
+    return Object.entries(phaseGroups).map(([phase, phaseTradeList]) => {
+      // Wenn keine Trades in dieser Phase, setze Default-Werte
+      if (phaseTradeList.length === 0) {
+        return {
+          phase,
+          winRate: 0,
+          avgRR: 0,
+          totalTrades: 0,
+          color: phaseColors[phase]
+        };
+      }
+      
+      // Berechne Win-Rate
+      const wins = phaseTradeList.filter(t => t.isWin).length;
+      const winRate = Math.round((wins / phaseTradeList.length) * 100);
+      
+      // Berechne durchschnittliches RR
+      const totalRR = phaseTradeList.reduce((sum, trade) => sum + (trade.profitLossRR || 0), 0);
+      const avgRR = totalRR / phaseTradeList.length;
+      
+      return {
+        phase,
+        winRate,
+        avgRR,
+        totalTrades: phaseTradeList.length,
+        color: phaseColors[phase]
+      };
+    });
+  }
+  
+  function calculateSetupPerformanceByMarketPhase(trades: any[]) {
+    // Wenn keine Trades vorhanden sind, leeres Array zurückgeben
+    if (!trades || trades.length === 0) {
+      return [];
+    }
+    
+    // Finde alle einzigartigen Setups
+    const setupSet = new Set<string>();
+    for (const trade of trades) {
+      if (trade.setup) {
+        setupSet.add(trade.setup);
+      }
+    }
+    
+    const setups = Array.from(setupSet);
+    
+    // Berechne Win-Rate pro Setup und Marktphase
+    const setupPerformance = [];
+    
+    for (const setup of setups) {
+      // Filtere Trades für dieses Setup
+      const setupTrades = trades.filter(t => t.setup === setup);
+      
+      // Berechne Win-Rate pro Marktphase für dieses Setup
+      const phaseWinRates: Record<string, number> = {
+        trend: 0,
+        range: 0,
+        volatile: 0
+      };
+      
+      for (const phase of Object.keys(phaseWinRates)) {
+        const phaseTradeList = setupTrades.filter(t => determineMarketPhase(t) === phase);
+        
+        if (phaseTradeList.length > 0) {
+          const wins = phaseTradeList.filter(t => t.isWin).length;
+          phaseWinRates[phase] = Math.round((wins / phaseTradeList.length) * 100);
+        }
+      }
+      
+      setupPerformance.push({
+        setup,
+        trend: phaseWinRates.trend,
+        range: phaseWinRates.range,
+        volatile: phaseWinRates.volatile
+      });
+    }
+    
+    return setupPerformance;
+  }
+  
+  function generateMarketPhaseRecommendations(trades: any[]) {
+    // Wenn keine oder zu wenige Trades vorhanden sind, leeres Array zurückgeben
+    if (!trades || trades.length < 5) {
+      return [];
+    }
+    
+    const recommendations = [];
+    
+    // Berechne Performance pro Marktphase
+    const phasePerformance = calculateMarketPhasePerformance(trades);
+    
+    // Finde beste und schlechteste Phase
+    const bestPhase = phasePerformance.reduce((best, current) => 
+      (current.winRate > best.winRate) ? current : best, phasePerformance[0]);
+    
+    const worstPhase = phasePerformance.reduce((worst, current) => 
+      (current.winRate < worst.winRate && current.totalTrades > 0) ? current : worst, phasePerformance[0]);
+    
+    // Berechne Setup-Performance pro Marktphase
+    const setupPerformance = calculateSetupPerformanceByMarketPhase(trades);
+    
+    // 1. Empfehlung für die beste Phase
+    if (bestPhase.totalTrades > 0) {
+      // Finde das beste Setup für diese Phase
+      const bestSetupForPhase = setupPerformance.reduce((best, current) => 
+        (current[bestPhase.phase as keyof typeof current] as number > (best[bestPhase.phase as keyof typeof best] as number)) ? current : best, 
+        setupPerformance[0]
+      );
+      
+      recommendations.push({
+        id: `rec-best-phase-${bestPhase.phase}`,
+        phase: bestPhase.phase as 'trend' | 'range' | 'volatile',
+        recommendation: `Fokussiere dich auf ${bestPhase.phase}-Phasen`,
+        explanation: `Deine beste Performance erzielst du in ${bestPhase.phase}-Phasen mit einer Win-Rate von ${bestPhase.winRate}% und einem durchschnittlichen RR von ${bestPhase.avgRR.toFixed(2)}. Besonders effektiv ist das Setup "${bestSetupForPhase.setup}" in dieser Phase.`
+      });
+    }
+    
+    // 2. Empfehlung für die schwächste Phase
+    if (worstPhase.totalTrades > 0 && worstPhase.phase !== bestPhase.phase) {
+      recommendations.push({
+        id: `rec-worst-phase-${worstPhase.phase}`,
+        phase: worstPhase.phase as 'trend' | 'range' | 'volatile',
+        recommendation: `Vermeide Trading in ${worstPhase.phase}-Phasen`,
+        explanation: `Deine Performance in ${worstPhase.phase}-Phasen ist mit einer Win-Rate von ${worstPhase.winRate}% und einem durchschnittlichen RR von ${worstPhase.avgRR.toFixed(2)} unterdurchschnittlich. Erwäge, diese Phasen zu vermeiden oder deine Strategie anzupassen.`
+      });
+    }
+    
+    // 3. Setup-spezifische Empfehlungen
+    for (const setup of setupPerformance) {
+      // Finde die beste Phase für dieses Setup
+      const phaseEntries = [
+        { phase: 'trend', winRate: setup.trend },
+        { phase: 'range', winRate: setup.range },
+        { phase: 'volatile', winRate: setup.volatile }
+      ];
+      
+      const bestPhaseForSetup = phaseEntries.reduce((best, current) => 
+        (current.winRate > best.winRate) ? current : best, 
+        phaseEntries[0]
+      );
+      
+      // Wenn dieses Setup eine besonders hohe Win-Rate in einer bestimmten Phase hat
+      if (bestPhaseForSetup.winRate > 70) {
+        recommendations.push({
+          id: `rec-setup-${setup.setup}-${bestPhaseForSetup.phase}`,
+          phase: bestPhaseForSetup.phase as 'trend' | 'range' | 'volatile',
+          recommendation: `Nutze ${setup.setup} in ${bestPhaseForSetup.phase}-Phasen`,
+          explanation: `Das Setup "${setup.setup}" hat eine hervorragende Win-Rate von ${bestPhaseForSetup.winRate}% in ${bestPhaseForSetup.phase}-Phasen. Fokussiere dich auf diese Kombination für optimale Ergebnisse.`
+        });
+      }
+    }
+    
+    // 4. Allgemeine Empfehlung, wenn keine spezifischen gefunden wurden
+    if (recommendations.length === 0) {
+      // Finde die Phase mit den meisten Trades
+      const mostTradesPhase = phasePerformance.reduce((most, current) => 
+        (current.totalTrades > most.totalTrades) ? current : most, 
+        phasePerformance[0]
+      );
+      
+      recommendations.push({
+        id: "rec-general",
+        phase: mostTradesPhase.phase as 'trend' | 'range' | 'volatile',
+        recommendation: "Erweitere deine Marktphasen-Analyse",
+        explanation: "Um präzisere Empfehlungen zu erhalten, verfolge und kennzeichne Marktphasen in deinen zukünftigen Trades. Dies wird dir helfen, deine Stärken und Schwächen in verschiedenen Marktbedingungen besser zu verstehen."
+      });
+    }
+    
+    return recommendations;
+  }
+  
+  // Marktphasen-Verteilung
+  app.get("/api/market-phases/distribution", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      // Holen Sie alle Trades des Benutzers
+      const trades = await storage.getTrades(userId);
+      
+      // Marktphasen-Verteilung berechnen
+      const distribution = calculateMarketPhaseDistribution(trades);
+      
+      res.json(distribution);
+    } catch (error) {
+      console.error("Error calculating market phase distribution:", error);
+      res.status(500).json({ error: "Failed to calculate market phase distribution" });
+    }
+  });
+  
+  // Marktphasen-Performance
+  app.get("/api/market-phases/performance", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      // Holen Sie alle Trades des Benutzers
+      const trades = await storage.getTrades(userId);
+      
+      // Marktphasen-Performance berechnen
+      const performance = calculateMarketPhasePerformance(trades);
+      
+      res.json(performance);
+    } catch (error) {
+      console.error("Error calculating market phase performance:", error);
+      res.status(500).json({ error: "Failed to calculate market phase performance" });
+    }
+  });
+  
+  // Setup-Performance nach Marktphasen
+  app.get("/api/market-phases/setup-performance", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      // Holen Sie alle Trades des Benutzers
+      const trades = await storage.getTrades(userId);
+      
+      // Setup-Performance nach Marktphasen berechnen
+      const setupPerformance = calculateSetupPerformanceByMarketPhase(trades);
+      
+      res.json(setupPerformance);
+    } catch (error) {
+      console.error("Error calculating setup performance by market phase:", error);
+      res.status(500).json({ error: "Failed to calculate setup performance by market phase" });
+    }
+  });
+  
+  // Marktphasen-Empfehlungen
+  app.get("/api/market-phases/recommendations", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      // Holen Sie alle Trades des Benutzers
+      const trades = await storage.getTrades(userId);
+      
+      // Marktphasen-Empfehlungen generieren
+      const recommendations = generateMarketPhaseRecommendations(trades);
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error generating market phase recommendations:", error);
+      res.status(500).json({ error: "Failed to generate market phase recommendations" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
