@@ -281,15 +281,44 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     // Standardmäßig TradingView-Format annehmen
                     processedRow = mapTradingViewFields(row);
                     
-                    // Konvertiere String-Werte in richtigen Datentyp für TradingView
+                    // Spezielle Behandlung für datenquellenspezifische Felder
+                    
+                    // Prüfen, ob dies eine CSV mit deinem speziellen Format ist (Symbol + pnl + timestamps)
+                    const hasSpecialFormat = row.symbol && row.pnl !== undefined && 
+                                           (row.boughtTimestamp !== undefined || row.soldTimestamp !== undefined);
+                    
                     // Versuche Profit/Loss-Wert aus verschiedenen möglichen Feldern zu extrahieren
-                    const profitLossValue = row['P/L'] || row['PL'] || row['Profit'] || row['Profit/Loss'] || row['Net P/L'] || 
-                                          row['Profit'] || row['P&L'] || row['Trade P/L'] || row['Result Value'] || "0";
+                    let profitLossValue;
+                    
+                    if (hasSpecialFormat) {
+                      // Verwende pnl aus deiner speziellen CSV
+                      profitLossValue = row.pnl;
+                      console.log("Spezialformat erkannt, verwende pnl:", profitLossValue);
+                    } else {
+                      // Standardfelder für andere Quellen
+                      profitLossValue = row['P/L'] || row['PL'] || row['Profit'] || row['Profit/Loss'] || row['Net P/L'] || 
+                                        row['Profit'] || row['P&L'] || row['Trade P/L'] || row['Result Value'] || "0";
+                    }
                     
                     // Entferne Währungssymbole und Tausendertrennzeichen für korrekte Umwandlung in Float
                     const cleanProfitLossValue = String(profitLossValue).replace(/[^0-9.\-,]/g, '')
                                                                         .replace(',', '.');
                     const profitLoss = parseFloat(cleanProfitLossValue) || 0;
+                    
+                    // Setze entryType basierend auf buyPrice/sellPrice wenn verfügbar
+                    let entryType = processedRow.entryType || "";
+                    if (hasSpecialFormat && row.buyPrice && row.sellPrice) {
+                      entryType = parseFloat(row.buyPrice) > 0 ? "Long" : "Short";
+                      console.log("Entry-Typ basierend auf Preis gesetzt:", entryType);
+                    }
+                    
+                    // Setze Datumsfeld aus speziellen Timestamps
+                    let tradeDate = row.Date || row.date || row.Time || row.time || new Date().toISOString();
+                    if (hasSpecialFormat && (row.boughtTimestamp || row.soldTimestamp)) {
+                      const timestamp = row.boughtTimestamp || row.soldTimestamp;
+                      tradeDate = new Date(Number(timestamp)).toISOString();
+                      console.log("Datum aus Timestamp gesetzt:", tradeDate);
+                    }
                     
                     console.log("Profit/Loss erkannt:", profitLossValue, "→", profitLoss);
                     
@@ -298,7 +327,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                       setup: processedRow.setup || "",
                       mainTrendM15: processedRow.mainTrendM15 || "",
                       internalTrendM5: processedRow.internalTrendM5 || "",
-                      entryType: processedRow.entryType || "",
+                      entryType: entryType || processedRow.entryType || "",
                       entryLevel: processedRow.entryLevel || "",
                       liquidation: processedRow.liquidation || "",
                       location: processedRow.location || "",
@@ -312,7 +341,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                              String(processedRow.isWin).toLowerCase() === 'yes' ||
                              String(processedRow.isWin).toLowerCase() === 'profit' ||
                              profitLoss > 0,
-                      date: row.Date || row.date || row.Time || row.time || new Date().toISOString(),
+                      date: tradeDate,
                     };
                   }
                   
