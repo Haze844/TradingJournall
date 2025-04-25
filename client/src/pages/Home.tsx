@@ -16,7 +16,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileUp, Settings, Brain, BarChart2, Activity } from "lucide-react";
+import { FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar, Users, Download } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Home() {
   const { user } = useAuth();

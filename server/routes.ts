@@ -887,6 +887,430 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Coaching-Routen
+  app.get("/api/coaching/goals", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const completed = req.query.completed === "true" ? true : 
+                      req.query.completed === "false" ? false : 
+                      undefined;
+      
+      const goals = await storage.getCoachingGoals(userId, completed);
+      res.json(goals);
+    } catch (error) {
+      console.error("Error fetching coaching goals:", error);
+      res.status(500).json({ error: "Failed to fetch coaching goals" });
+    }
+  });
+
+  app.post("/api/coaching/goals", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const goal = req.body;
+      const newGoal = await storage.createCoachingGoal(goal);
+      res.status(201).json(newGoal);
+    } catch (error) {
+      console.error("Error creating coaching goal:", error);
+      res.status(500).json({ error: "Failed to create coaching goal" });
+    }
+  });
+
+  app.put("/api/coaching/goals/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const goalUpdate = req.body;
+      const updatedGoal = await storage.updateCoachingGoal(id, goalUpdate);
+
+      if (!updatedGoal) {
+        return res.status(404).json({ error: "Goal not found" });
+      }
+
+      res.json(updatedGoal);
+    } catch (error) {
+      console.error("Error updating coaching goal:", error);
+      res.status(500).json({ error: "Failed to update coaching goal" });
+    }
+  });
+
+  app.delete("/api/coaching/goals/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const success = await storage.deleteCoachingGoal(id);
+
+      if (!success) {
+        return res.status(404).json({ error: "Goal not found" });
+      }
+
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting coaching goal:", error);
+      res.status(500).json({ error: "Failed to delete coaching goal" });
+    }
+  });
+
+  app.get("/api/coaching/feedback", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const acknowledged = req.query.acknowledged === "true" ? true : 
+                          req.query.acknowledged === "false" ? false : 
+                          undefined;
+      
+      const feedback = await storage.getCoachingFeedback(userId, acknowledged);
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error fetching coaching feedback:", error);
+      res.status(500).json({ error: "Failed to fetch coaching feedback" });
+    }
+  });
+
+  app.post("/api/coaching/feedback/generate", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.body.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const feedback = await storage.generateCoachingFeedback(userId);
+      res.status(201).json(feedback);
+    } catch (error) {
+      console.error("Error generating coaching feedback:", error);
+      res.status(500).json({ error: "Failed to generate coaching feedback" });
+    }
+  });
+
+  app.put("/api/coaching/feedback/:id/acknowledge", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const feedback = await storage.acknowledgeCoachingFeedback(id);
+
+      if (!feedback) {
+        return res.status(404).json({ error: "Feedback not found" });
+      }
+
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error acknowledging feedback:", error);
+      res.status(500).json({ error: "Failed to acknowledge feedback" });
+    }
+  });
+
+  // Makroökonomische Ereignisse
+  app.get("/api/macro-events", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const startDate = req.query.startDate ? new Date(req.query.startDate as string) : new Date();
+      const endDate = req.query.endDate ? new Date(req.query.endDate as string) : new Date(startDate);
+      
+      // Wenn nur startDate angegeben ist, setze endDate auf eine Woche später
+      if (!req.query.endDate) {
+        endDate.setDate(endDate.getDate() + 7);
+      }
+
+      const events = await storage.getMacroEconomicEvents(startDate, endDate);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching macro events:", error);
+      res.status(500).json({ error: "Failed to fetch macro events" });
+    }
+  });
+
+  app.post("/api/macro-events", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const event = req.body;
+      const newEvent = await storage.createMacroEconomicEvent(event);
+      res.status(201).json(newEvent);
+    } catch (error) {
+      console.error("Error creating macro event:", error);
+      res.status(500).json({ error: "Failed to create macro event" });
+    }
+  });
+
+  app.put("/api/macro-events/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const eventUpdate = req.body;
+      const updatedEvent = await storage.updateMacroEconomicEvent(id, eventUpdate);
+
+      if (!updatedEvent) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating macro event:", error);
+      res.status(500).json({ error: "Failed to update macro event" });
+    }
+  });
+
+  app.delete("/api/macro-events/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const success = await storage.deleteMacroEconomicEvent(id);
+
+      if (!success) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting macro event:", error);
+      res.status(500).json({ error: "Failed to delete macro event" });
+    }
+  });
+
+  // Social Trading Routen
+  app.get("/api/strategies", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      const publicOnly = req.query.publicOnly === "true";
+
+      const strategies = await storage.getTradingStrategies(userId, publicOnly);
+      res.json(strategies);
+    } catch (error) {
+      console.error("Error fetching strategies:", error);
+      res.status(500).json({ error: "Failed to fetch strategies" });
+    }
+  });
+
+  app.get("/api/strategies/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const strategy = await storage.getTradingStrategyById(id);
+
+      if (!strategy) {
+        return res.status(404).json({ error: "Strategy not found" });
+      }
+
+      res.json(strategy);
+    } catch (error) {
+      console.error("Error fetching strategy:", error);
+      res.status(500).json({ error: "Failed to fetch strategy" });
+    }
+  });
+
+  app.post("/api/strategies", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const strategy = req.body;
+      const newStrategy = await storage.createTradingStrategy(strategy);
+      res.status(201).json(newStrategy);
+    } catch (error) {
+      console.error("Error creating strategy:", error);
+      res.status(500).json({ error: "Failed to create strategy" });
+    }
+  });
+
+  app.put("/api/strategies/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const strategyUpdate = req.body;
+      const updatedStrategy = await storage.updateTradingStrategy(id, strategyUpdate);
+
+      if (!updatedStrategy) {
+        return res.status(404).json({ error: "Strategy not found" });
+      }
+
+      res.json(updatedStrategy);
+    } catch (error) {
+      console.error("Error updating strategy:", error);
+      res.status(500).json({ error: "Failed to update strategy" });
+    }
+  });
+
+  app.delete("/api/strategies/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const strategy = await storage.getTradingStrategyById(id);
+
+      if (!strategy) {
+        return res.status(404).json({ error: "Strategy not found" });
+      }
+
+      // Nur der Ersteller kann seine Strategie löschen
+      if (strategy.userId !== req.user?.id) {
+        return res.status(403).json({ error: "Unauthorized to delete this strategy" });
+      }
+
+      await storage.deleteTradingStrategy(id);
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting strategy:", error);
+      res.status(500).json({ error: "Failed to delete strategy" });
+    }
+  });
+
+  app.get("/api/strategies/:id/comments", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const strategyId = parseInt(req.params.id);
+      if (isNaN(strategyId)) {
+        return res.status(400).json({ error: "Invalid strategy ID" });
+      }
+
+      const comments = await storage.getStrategyComments(strategyId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ error: "Failed to fetch comments" });
+    }
+  });
+
+  app.post("/api/strategies/:id/comments", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const strategyId = parseInt(req.params.id);
+      if (isNaN(strategyId)) {
+        return res.status(400).json({ error: "Invalid strategy ID" });
+      }
+
+      // Sicherstellen, dass die Strategie existiert
+      const strategy = await storage.getTradingStrategyById(strategyId);
+      if (!strategy) {
+        return res.status(404).json({ error: "Strategy not found" });
+      }
+
+      const comment = {
+        strategyId,
+        userId: req.user!.id,
+        content: req.body.content
+      };
+
+      const newComment = await storage.createStrategyComment(comment);
+      res.status(201).json(newComment);
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      res.status(500).json({ error: "Failed to create comment" });
+    }
+  });
+
+  app.delete("/api/comments/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const success = await storage.deleteStrategyComment(id);
+
+      if (!success) {
+        return res.status(404).json({ error: "Comment not found" });
+      }
+
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json({ error: "Failed to delete comment" });
+    }
+  });
+
+  // PWA und Multi-Device Routen
+  app.get("/api/settings", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const deviceId = req.query.deviceId as string;
+
+      const settings = await storage.getAppSettings(userId, deviceId);
+      res.json(settings || {});
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.post("/api/settings", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const settings = {
+        ...req.body,
+        userId
+      };
+
+      const newSettings = await storage.createAppSettings(settings);
+      res.status(201).json(newSettings);
+    } catch (error) {
+      console.error("Error creating settings:", error);
+      res.status(500).json({ error: "Failed to create settings" });
+    }
+  });
+
+  app.put("/api/settings/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid ID" });
+      }
+
+      const settingsUpdate = req.body;
+      const updatedSettings = await storage.updateAppSettings(id, settingsUpdate);
+
+      if (!updatedSettings) {
+        return res.status(404).json({ error: "Settings not found" });
+      }
+
+      res.json(updatedSettings);
+    } catch (error) {
+      console.error("Error updating settings:", error);
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  app.post("/api/settings/sync", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const { deviceId } = req.body;
+
+      if (!deviceId) {
+        return res.status(400).json({ error: "Device ID is required" });
+      }
+
+      const settings = await storage.syncAppSettings(userId, deviceId);
+
+      if (!settings) {
+        return res.status(404).json({ error: "Settings not found for this device" });
+      }
+
+      res.json(settings);
+    } catch (error) {
+      console.error("Error syncing settings:", error);
+      res.status(500).json({ error: "Failed to sync settings" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

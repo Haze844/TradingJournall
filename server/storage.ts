@@ -113,6 +113,419 @@ export class MemStorage implements IStorage {
   private tradingStrategyIdCounter: number;
   private strategyCommentIdCounter: number;
   private appSettingsIdCounter: number;
+  
+  // Coaching Goals operations
+  async getCoachingGoals(userId: number, completed?: boolean): Promise<CoachingGoal[]> {
+    let goals = Array.from(this.coachingGoals.values()).filter(
+      (goal) => goal.userId === userId
+    );
+    
+    if (completed !== undefined) {
+      goals = goals.filter(goal => goal.completed === completed);
+    }
+    
+    return goals;
+  }
+  
+  async getCoachingGoalById(id: number): Promise<CoachingGoal | undefined> {
+    return this.coachingGoals.get(id);
+  }
+  
+  async createCoachingGoal(goal: InsertCoachingGoal): Promise<CoachingGoal> {
+    const id = this.coachingGoalIdCounter++;
+    const newGoal: CoachingGoal = { ...goal, id };
+    this.coachingGoals.set(id, newGoal);
+    return newGoal;
+  }
+  
+  async updateCoachingGoal(id: number, goalUpdate: Partial<CoachingGoal>): Promise<CoachingGoal | undefined> {
+    const existingGoal = this.coachingGoals.get(id);
+    
+    if (!existingGoal) {
+      return undefined;
+    }
+    
+    const updatedGoal = { ...existingGoal, ...goalUpdate };
+    this.coachingGoals.set(id, updatedGoal);
+    
+    return updatedGoal;
+  }
+  
+  async deleteCoachingGoal(id: number): Promise<boolean> {
+    return this.coachingGoals.delete(id);
+  }
+  
+  // Coaching Feedback operations
+  async getCoachingFeedback(userId: number, acknowledged?: boolean): Promise<CoachingFeedback[]> {
+    let feedback = Array.from(this.coachingFeedback.values()).filter(
+      (fb) => fb.userId === userId
+    );
+    
+    if (acknowledged !== undefined) {
+      feedback = feedback.filter(fb => fb.acknowledged === acknowledged);
+    }
+    
+    return feedback.sort((a, b) => 
+      b.importance - a.importance || 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+  
+  async createCoachingFeedback(feedback: InsertCoachingFeedback): Promise<CoachingFeedback> {
+    const id = this.coachingFeedbackIdCounter++;
+    const newFeedback: CoachingFeedback = { ...feedback, id };
+    this.coachingFeedback.set(id, newFeedback);
+    return newFeedback;
+  }
+  
+  async acknowledgeCoachingFeedback(id: number): Promise<CoachingFeedback | undefined> {
+    const existingFeedback = this.coachingFeedback.get(id);
+    
+    if (!existingFeedback) {
+      return undefined;
+    }
+    
+    const updatedFeedback = { ...existingFeedback, acknowledged: true };
+    this.coachingFeedback.set(id, updatedFeedback);
+    
+    return updatedFeedback;
+  }
+  
+  async generateCoachingFeedback(userId: number): Promise<CoachingFeedback[]> {
+    // Fetch user trades to analyze
+    const userTrades = await this.getTrades(userId);
+    
+    if (userTrades.length === 0) {
+      return [];
+    }
+    
+    const feedback: CoachingFeedback[] = [];
+    
+    // Analyze trading patterns
+    const setupCounts: Record<string, { total: number, wins: number }> = {};
+    const trendCounts: Record<string, { total: number, wins: number }> = {};
+    
+    for (const trade of userTrades) {
+      // Track setup statistics
+      if (!setupCounts[trade.setup]) {
+        setupCounts[trade.setup] = { total: 0, wins: 0 };
+      }
+      setupCounts[trade.setup].total++;
+      if (trade.isWin) {
+        setupCounts[trade.setup].wins++;
+      }
+      
+      // Track trend statistics
+      if (!trendCounts[trade.internalTrendM5]) {
+        trendCounts[trade.internalTrendM5] = { total: 0, wins: 0 };
+      }
+      trendCounts[trade.internalTrendM5].total++;
+      if (trade.isWin) {
+        trendCounts[trade.internalTrendM5].wins++;
+      }
+    }
+    
+    // Find best and worst setups
+    let bestSetup = '';
+    let bestSetupWinRate = 0;
+    let worstSetup = '';
+    let worstSetupWinRate = 1;
+    
+    for (const [setup, stats] of Object.entries(setupCounts)) {
+      if (stats.total >= 5) { // Only consider setups with enough data
+        const winRate = stats.wins / stats.total;
+        if (winRate > bestSetupWinRate) {
+          bestSetupWinRate = winRate;
+          bestSetup = setup;
+        }
+        if (winRate < worstSetupWinRate) {
+          worstSetupWinRate = winRate;
+          worstSetup = setup;
+        }
+      }
+    }
+    
+    // Generate strategy feedback
+    if (bestSetup && bestSetupWinRate > 0.6) {
+      feedback.push({
+        id: this.coachingFeedbackIdCounter++,
+        userId,
+        category: "strategy",
+        message: `Dein Setup "${bestSetup}" zeigt eine starke Performance mit einer Win-Rate von ${Math.round(bestSetupWinRate * 100)}%. Fokussiere dich mehr auf dieses Setup.`,
+        importance: 3,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+    }
+    
+    if (worstSetup && worstSetupWinRate < 0.4) {
+      feedback.push({
+        id: this.coachingFeedbackIdCounter++,
+        userId,
+        category: "strategy",
+        message: `Dein Setup "${worstSetup}" hat eine niedrige Win-Rate von ${Math.round(worstSetupWinRate * 100)}%. Überprüfe deine Einstiegskriterien oder vermeide dieses Setup.`,
+        importance: 4,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+    }
+    
+    // Analyze risk management
+    const recentTrades = userTrades.slice(0, 20); // Consider last 20 trades
+    const hasConsecutiveLosses = this.hasConsecutiveLosses(recentTrades, 3);
+    const riskReward = this.calculateAverageRiskReward(recentTrades);
+    
+    if (hasConsecutiveLosses) {
+      feedback.push({
+        id: this.coachingFeedbackIdCounter++,
+        userId,
+        category: "psychology",
+        message: "Du hast mehrere Verluste in Folge. Überdenke deine aktuelle Strategie und nimm dir Zeit, um dich zu erholen. Überhandle nicht.",
+        importance: 5,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+    }
+    
+    if (riskReward < 1.5) {
+      feedback.push({
+        id: this.coachingFeedbackIdCounter++,
+        userId,
+        category: "risk",
+        message: `Dein durchschnittliches Risiko-Ertrags-Verhältnis von ${riskReward.toFixed(2)} ist zu niedrig. Strebe ein Verhältnis von mindestens 2:1 an.`,
+        importance: 4,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+    }
+    
+    // Save feedback
+    for (const fb of feedback) {
+      this.coachingFeedback.set(fb.id, fb);
+    }
+    
+    return feedback;
+  }
+  
+  // Helper methods for coaching feedback
+  private hasConsecutiveLosses(trades: Trade[], count: number): boolean {
+    let consecutiveLosses = 0;
+    
+    for (const trade of trades) {
+      if (!trade.isWin) {
+        consecutiveLosses++;
+        if (consecutiveLosses >= count) {
+          return true;
+        }
+      } else {
+        consecutiveLosses = 0;
+      }
+    }
+    
+    return false;
+  }
+  
+  private calculateAverageRiskReward(trades: Trade[]): number {
+    if (trades.length === 0) {
+      return 0;
+    }
+    
+    const totalRR = trades.reduce((sum, trade) => sum + trade.rrAchieved, 0);
+    return totalRR / trades.length;
+  }
+  
+  // Macroeconomic Events operations
+  async getMacroEconomicEvents(startDate: Date, endDate: Date): Promise<MacroEconomicEvent[]> {
+    let events = Array.from(this.macroEconomicEvents.values());
+    
+    events = events.filter(
+      (event) => event.date >= startDate && event.date <= endDate
+    );
+    
+    return events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }
+  
+  async getMacroEconomicEventById(id: number): Promise<MacroEconomicEvent | undefined> {
+    return this.macroEconomicEvents.get(id);
+  }
+  
+  async createMacroEconomicEvent(event: InsertMacroEconomicEvent): Promise<MacroEconomicEvent> {
+    const id = this.macroEconomicEventIdCounter++;
+    const newEvent: MacroEconomicEvent = { ...event, id };
+    this.macroEconomicEvents.set(id, newEvent);
+    return newEvent;
+  }
+  
+  async updateMacroEconomicEvent(id: number, eventUpdate: Partial<MacroEconomicEvent>): Promise<MacroEconomicEvent | undefined> {
+    const existingEvent = this.macroEconomicEvents.get(id);
+    
+    if (!existingEvent) {
+      return undefined;
+    }
+    
+    const updatedEvent = { ...existingEvent, ...eventUpdate };
+    this.macroEconomicEvents.set(id, updatedEvent);
+    
+    return updatedEvent;
+  }
+  
+  async deleteMacroEconomicEvent(id: number): Promise<boolean> {
+    return this.macroEconomicEvents.delete(id);
+  }
+  
+  // Trading Strategies operations
+  async getTradingStrategies(userId?: number, publicOnly?: boolean): Promise<TradingStrategy[]> {
+    let strategies = Array.from(this.tradingStrategies.values());
+    
+    if (userId !== undefined) {
+      strategies = strategies.filter(strategy => 
+        strategy.userId === userId || (publicOnly && strategy.public)
+      );
+    } else if (publicOnly) {
+      strategies = strategies.filter(strategy => strategy.public);
+    }
+    
+    return strategies.sort((a, b) => b.rating - a.rating);
+  }
+  
+  async getTradingStrategyById(id: number): Promise<TradingStrategy | undefined> {
+    return this.tradingStrategies.get(id);
+  }
+  
+  async createTradingStrategy(strategy: InsertTradingStrategy): Promise<TradingStrategy> {
+    const id = this.tradingStrategyIdCounter++;
+    const newStrategy: TradingStrategy = { 
+      ...strategy, 
+      id, 
+      rating: 0, 
+      ratingCount: 0, 
+      createdAt: new Date(), 
+      updatedAt: new Date() 
+    };
+    this.tradingStrategies.set(id, newStrategy);
+    return newStrategy;
+  }
+  
+  async updateTradingStrategy(id: number, strategyUpdate: Partial<TradingStrategy>): Promise<TradingStrategy | undefined> {
+    const existingStrategy = this.tradingStrategies.get(id);
+    
+    if (!existingStrategy) {
+      return undefined;
+    }
+    
+    const updatedStrategy = { 
+      ...existingStrategy, 
+      ...strategyUpdate, 
+      updatedAt: new Date() 
+    };
+    this.tradingStrategies.set(id, updatedStrategy);
+    
+    return updatedStrategy;
+  }
+  
+  async deleteTradingStrategy(id: number): Promise<boolean> {
+    // Also delete associated comments
+    const commentsToDelete = Array.from(this.strategyComments.values())
+      .filter(comment => comment.strategyId === id);
+    
+    for (const comment of commentsToDelete) {
+      this.strategyComments.delete(comment.id);
+    }
+    
+    return this.tradingStrategies.delete(id);
+  }
+  
+  // Strategy Comments operations
+  async getStrategyComments(strategyId: number): Promise<StrategyComment[]> {
+    const comments = Array.from(this.strategyComments.values())
+      .filter(comment => comment.strategyId === strategyId);
+    
+    return comments.sort((a, b) => 
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+  }
+  
+  async createStrategyComment(comment: InsertStrategyComment): Promise<StrategyComment> {
+    const id = this.strategyCommentIdCounter++;
+    const newComment: StrategyComment = { 
+      ...comment, 
+      id, 
+      createdAt: new Date()
+    };
+    this.strategyComments.set(id, newComment);
+    return newComment;
+  }
+  
+  async deleteStrategyComment(id: number): Promise<boolean> {
+    return this.strategyComments.delete(id);
+  }
+  
+  // App Settings operations
+  async getAppSettings(userId: number, deviceId?: string): Promise<AppSettings | undefined> {
+    const userSettings = Array.from(this.appSettings.values())
+      .filter(settings => settings.userId === userId);
+    
+    if (deviceId) {
+      return userSettings.find(settings => settings.deviceId === deviceId);
+    }
+    
+    // Return the most recently synced settings
+    return userSettings.sort((a, b) => 
+      new Date(b.lastSyncedAt).getTime() - new Date(a.lastSyncedAt).getTime()
+    )[0];
+  }
+  
+  async createAppSettings(settings: InsertAppSettings): Promise<AppSettings> {
+    const id = this.appSettingsIdCounter++;
+    const newSettings: AppSettings = { 
+      ...settings, 
+      id,
+      lastSyncedAt: new Date()
+    };
+    this.appSettings.set(id, newSettings);
+    return newSettings;
+  }
+  
+  async updateAppSettings(id: number, settingsUpdate: Partial<AppSettings>): Promise<AppSettings | undefined> {
+    const existingSettings = this.appSettings.get(id);
+    
+    if (!existingSettings) {
+      return undefined;
+    }
+    
+    const updatedSettings = { 
+      ...existingSettings, 
+      ...settingsUpdate,
+      lastSyncedAt: new Date()
+    };
+    this.appSettings.set(id, updatedSettings);
+    
+    return updatedSettings;
+  }
+  
+  async syncAppSettings(userId: number, deviceId: string): Promise<AppSettings | undefined> {
+    // Find settings for this device
+    const deviceSettings = await this.getAppSettings(userId, deviceId);
+    
+    if (!deviceSettings) {
+      return undefined;
+    }
+    
+    // Find most up-to-date settings across all devices
+    const latestSettings = await this.getAppSettings(userId);
+    
+    if (!latestSettings || latestSettings.id === deviceSettings.id) {
+      return deviceSettings;
+    }
+    
+    // Sync settings from latest to this device
+    const updatedSettings = await this.updateAppSettings(deviceSettings.id, {
+      theme: latestSettings.theme,
+      notifications: latestSettings.notifications
+    });
+    
+    return updatedSettings;
+  }
 
   constructor() {
     this.sessionStore = new MemoryStore({
