@@ -129,66 +129,91 @@ export default function SimpleHome() {
 
             {/* Two Column Grid for Details and Charts */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* TradingView Chart Display - Mobile: Volle Breite, Desktop: 2 Spalten */}
-              {selectedTrade && selectedTrade.chartImage && (
-                <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-2">
-                  <h3 className="text-lg font-bold mb-2 sm:mb-4 flex items-center">
-                    <ImageIcon className="w-4 h-4 mr-2" /> 
-                    Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
-                  </h3>
-                  <div className="rounded-lg overflow-hidden border border-border">
-                    {selectedTrade.chartImage.startsWith('http') ? (
-                      // Externe URL (TradingView Link)
-                      <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
+              {/* TradingView Chart Display mit Tools darunter */}
+              {selectedTrade && selectedTrade.chartImage ? (
+                <div className="col-span-1 md:col-span-3 space-y-4">
+                  {/* Chart Image */}
+                  <div className="rocket-card rounded-xl p-2 sm:p-4">
+                    <h3 className="text-lg font-bold mb-2 sm:mb-4 flex items-center">
+                      <ImageIcon className="w-4 h-4 mr-2" /> 
+                      Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
+                    </h3>
+                    <div className="rounded-lg overflow-hidden border border-border">
+                      {selectedTrade.chartImage.startsWith('http') ? (
+                        // Externe URL (TradingView Link)
+                        <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
+                          <img 
+                            src={selectedTrade.chartImage} 
+                            alt={`Chart für ${selectedTrade.symbol}`}
+                            className="w-full h-auto max-h-[500px] object-contain"
+                          />
+                        </a>
+                      ) : (
+                        // Base64 Bild
                         <img 
                           src={selectedTrade.chartImage} 
                           alt={`Chart für ${selectedTrade.symbol}`}
                           className="w-full h-auto max-h-[500px] object-contain"
                         />
-                      </a>
-                    ) : (
-                      // Base64 Bild
-                      <img 
-                        src={selectedTrade.chartImage} 
-                        alt={`Chart für ${selectedTrade.symbol}`}
-                        className="w-full h-auto max-h-[500px] object-contain"
-                      />
-                    )}
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tools Panel direkt unter dem Chart */}
+                  <div className="rocket-card rounded-xl">
+                    <Tabs defaultValue="add" className="p-2 sm:p-4">
+                      <TabsList className="grid grid-cols-2 mb-2 sm:mb-4 bg-black/60">
+                        <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                          Hinzufügen
+                        </TabsTrigger>
+                        <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                          Import
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="add" className="mt-0">
+                        <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
+                      </TabsContent>
+                      
+                      <TabsContent value="import" className="mt-0">
+                        <TradeImport userId={userId} onImport={refetchTrades} />
+                      </TabsContent>
+                    </Tabs>
                   </div>
                 </div>
+              ) : (
+                <>
+                  {/* Placeholder für Chartanzeige, wenn kein Chart ausgewählt ist */}
+                  <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-2">
+                    <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Chart Analyse</h3>
+                    <p className="text-muted-foreground">Wähle einen Trade aus, um Details und Charts anzuzeigen.</p>
+                  </div>
+                  
+                  {/* Tools Panel, wenn kein Chart angezeigt wird */}
+                  <div className="col-span-1">
+                    <div className="rocket-card rounded-xl">
+                      <Tabs defaultValue="add" className="p-2 sm:p-4">
+                        <TabsList className="grid grid-cols-2 mb-2 sm:mb-4 bg-black/60">
+                          <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                            Hinzufügen
+                          </TabsTrigger>
+                          <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                            Import
+                          </TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="add" className="mt-0">
+                          <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
+                        </TabsContent>
+                        
+                        <TabsContent value="import" className="mt-0">
+                          <TradeImport userId={userId} onImport={refetchTrades} />
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </div>
+                </>
               )}
-
-              {/* Placeholder für andere Elemente - Mobile: Volle Breite wenn kein Chart, sonst unsichtbar */}
-              {!selectedTrade?.chartImage && (
-                <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-2">
-                  <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Chart Analyse</h3>
-                  <p className="text-muted-foreground">Wähle einen Trade aus, um Details und Charts anzuzeigen.</p>
-                </div>
-              )}
-
-              {/* Tools Panel - Mobile: Volle Breite, Desktop: 1 Spalte rechts */}
-              <div className="col-span-1">
-                <div className="rocket-card rounded-xl">
-                  <Tabs defaultValue="add" className="p-2 sm:p-4">
-                    <TabsList className="grid grid-cols-2 mb-2 sm:mb-4 bg-black/60">
-                      <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                        Hinzufügen
-                      </TabsTrigger>
-                      <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                        Import
-                      </TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="add" className="mt-0">
-                      <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
-                    </TabsContent>
-                    
-                    <TabsContent value="import" className="mt-0">
-                      <TradeImport userId={userId} onImport={refetchTrades} />
-                    </TabsContent>
-                  </Tabs>
-                </div>
-              </div>
             </div>
           </div>
         </TabsContent>
