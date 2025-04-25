@@ -22,8 +22,8 @@ const PLACEHOLDER_IMAGES = {
 
 export default function Booklet() {
   function handleDownload() {
-    // Direkter Download der statischen PDF aus dem public Verzeichnis
-    window.location.href = '/lvlup-trading-handbuch.pdf';
+    // Öffnet das gestylte HTML-Handbuch, das besser formatiert ist als reines Markdown
+    window.location.href = '/lvlup-trading-handbuch-style.html';
   }
 
   return (
