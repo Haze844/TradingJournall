@@ -668,8 +668,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CSV Import route
   app.post("/api/import-csv", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const { trades } = req.body;
-      const userId = req.user!.id;
+      const { trades, userId: clientUserId } = req.body;
+      // Bevorzuge die userId aus der Authentifizierung, prüfe aber auch auf explizit gesendete userId
+      const userId = req.user?.id || clientUserId;
+      
+      console.log("Import request with userId:", userId, "Auth status:", req.isAuthenticated());
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Bitte melden Sie sich an, um Trades zu importieren" });
+      }
       
       if (!trades || !Array.isArray(trades) || trades.length === 0) {
         return res.status(400).json({ message: "Keine gültigen Trade-Daten gefunden" });

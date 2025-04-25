@@ -5,6 +5,15 @@ import path from "path";
 import cors from "cors";
 
 const app = express();
+
+// CORS konfigurieren, um Cross-Origin-Anfragen zu erlauben
+app.use(cors({
+  origin: true, // Erlaubt alle Herkunftsquellen im Entwicklungsmodus
+  credentials: true, // Wichtig für Cookies und Authentifizierung
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));

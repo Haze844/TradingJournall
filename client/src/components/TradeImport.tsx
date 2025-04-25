@@ -26,7 +26,11 @@ export default function TradeImport() {
 
   const importMutation = useMutation({
     mutationFn: async (trades: any[]) => {
-      const res = await apiRequest("POST", "/api/import-csv", { trades });
+      console.log("Importiere Trades mit userId:", user?.id);
+      const res = await apiRequest("POST", "/api/import-csv", { 
+        trades,
+        userId: user?.id // Explizite Benutzer-ID für den Import
+      });
       return await res.json();
     },
     onSuccess: () => {
@@ -120,10 +124,13 @@ export default function TradeImport() {
     
     setImporting(true);
     
+    console.log("Link-Import mit userId:", user?.id);
+    
     // Speichere nur den Link selbst, keine weitere Daten
     // Das setzt voraus, dass das Schema Null-Werte erlaubt
     const emptyTrade = {
-      chartImage: linkInput
+      chartImage: linkInput,
+      userId: user?.id // Explizite Weitergabe der Benutzer-ID
       // Keine weiteren Felder, damit keine Standardwerte gesetzt werden
     };
     
@@ -311,7 +318,15 @@ export default function TradeImport() {
               const batchSize = 50;
               const processedTrades = trades.slice(0, Math.min(batchSize, trades.length));
               
-              importMutation.mutate(processedTrades);
+              // Füge die userId zu jedem Trade hinzu
+              const tradesWithUserId = processedTrades.map(trade => ({
+                ...trade,
+                userId: user?.id
+              }));
+              
+              console.log("CSV-Import mit userId:", user?.id, "für", tradesWithUserId.length, "Trades");
+              
+              importMutation.mutate(tradesWithUserId);
             },
             error: function(error) {
               toast({
