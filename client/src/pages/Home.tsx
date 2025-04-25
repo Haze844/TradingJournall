@@ -133,7 +133,47 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </Button>
-                <div className="hidden group-hover:block absolute z-10 w-48 mt-1 origin-top-right bg-black/70 backdrop-blur-md border border-gray-700 rounded-md shadow-lg p-1">
+                <div className="hidden group-hover:block absolute z-10 w-64 mt-1 origin-top-right bg-black/70 backdrop-blur-md border border-gray-700 rounded-md shadow-lg p-1">
+                  {/* Trade-Analyse Funktionen */}
+                  <div className="px-2 py-1 text-xs text-gray-400 uppercase">Analyse Tools</div>
+                  <Button 
+                    variant="ghost" 
+                    className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                    onClick={() => {
+                      const tab = document.querySelector('[value="ai-analysis"]') as HTMLElement;
+                      if (tab) tab.click();
+                    }}
+                  >
+                    <Brain className="h-4 w-4 mr-2" />
+                    KI-Analyse
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                    onClick={() => {
+                      const tab = document.querySelector('[value="risk"]') as HTMLElement;
+                      if (tab) tab.click();
+                    }}
+                  >
+                    <BarChart2 className="h-4 w-4 mr-2" />
+                    Risikomanagement
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                    onClick={() => {
+                      const tab = document.querySelector('[value="market-phases"]') as HTMLElement;
+                      if (tab) tab.click();
+                    }}
+                  >
+                    <Activity className="h-4 w-4 mr-2" />
+                    Marktphasen
+                  </Button>
+                  
+                  <div className="my-1 border-t border-gray-700"></div>
+                  
+                  {/* Weitere Tools */}
+                  <div className="px-2 py-1 text-xs text-gray-400 uppercase">Trading Tools</div>
                   <Link href="/coach">
                     <Button variant="ghost" className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary">
                       <Trophy className="h-4 w-4 mr-2" />
@@ -152,6 +192,29 @@ export default function Home() {
                       Social Trading
                     </Button>
                   </Link>
+                  
+                  <div className="my-1 border-t border-gray-700"></div>
+                  
+                  {/* Import / Export */}
+                  <div className="px-2 py-1 text-xs text-gray-400 uppercase">Daten</div>
+                  <Button 
+                    variant="ghost" 
+                    className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                    onClick={() => {
+                      const importTab = document.querySelector('[value="import"]') as HTMLElement;
+                      if (importTab) importTab.click();
+                    }}
+                  >
+                    <FileUp className="h-4 w-4 mr-2" />
+                    Import
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
                 </div>
               </div>
             </div>
