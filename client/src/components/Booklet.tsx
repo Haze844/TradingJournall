@@ -2,10 +2,8 @@
 import { Button } from "@/components/ui/button";
 import {
   FileUp, Brain, BarChart2, Activity, Trophy, Calendar, 
-  Users, TrendingDown, FileText
+  Users, TrendingDown, FileText, Download, ExternalLink
 } from "lucide-react";
-// Hier nutzen wir den Server-Pfad direkt statt den Import
-const manualPdfPath = "/manual-pdf";
 
 // Beispielbilder für das Handbuch
 const PLACEHOLDER_IMAGES = {
@@ -44,12 +42,12 @@ export default function Booklet() {
 
         <div className="flex justify-end mb-6">
           <a
-            href={manualPdfPath}
+            href="https://drive.google.com/file/d/1tANR7YcnOAUUbLi9XbSv4UKsIy-PGFnn/view?usp=sharing" 
             target="_blank"
-            download="LvlUp_Trading_Handbuch.pdf"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
           >
-            <FileText className="h-5 w-5" /> PDF Handbuch herunterladen
+            <ExternalLink className="h-5 w-5" /> Handbuch auf Google Drive ansehen
           </a>
         </div>
         
@@ -196,12 +194,12 @@ export default function Booklet() {
 
         <div className="flex justify-center">
           <a
-            href={manualPdfPath}
+            href="https://drive.google.com/file/d/1tANR7YcnOAUUbLi9XbSv4UKsIy-PGFnn/view?usp=sharing" 
             target="_blank"
-            download="LvlUp_Trading_Handbuch.pdf"
+            rel="noopener noreferrer"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
           >
-            <FileText className="h-5 w-5" /> PDF Handbuch herunterladen
+            <ExternalLink className="h-5 w-5" /> Handbuch auf Google Drive ansehen
           </a>
         </div>
       </div>
