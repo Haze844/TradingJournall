@@ -101,13 +101,14 @@ export default function SimpleHome() {
           <div className="space-y-6">
             {/* Main Trade Table Section - Full Width */}
             <div className="w-full">
-              {/* Filter Bar - Integriert mit der Trade-Tabelle */}
-              <div className="rocket-card rounded-xl p-4 mb-0">
-                <FilterBar filters={filters} onFilterChange={handleFilterChange} />
-              </div>
-              
-              {/* Trade Table - Direkt unter dem Filter ohne Abstand */}
-              <div className="rocket-card rounded-xl rounded-t-none border-t-0 p-4">
+              {/* Ein gemeinsames Element für Filter und Tabelle */}
+              <div className="rocket-card rounded-xl p-4">
+                {/* Filter Bar als integrierter Teil des Elementes */}
+                <div className="mb-4 pb-4 border-b border-border/30">
+                  <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+                </div>
+                
+                {/* Trade Table direkt angeschlossen */}
                 <TradeTable
                   trades={trades}
                   isLoading={tradesLoading}
