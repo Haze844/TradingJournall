@@ -100,16 +100,15 @@ export default function WeeklySummary({ userId, weekStart, weekEnd }: WeeklySumm
         </div>
         
         <div className="bg-muted p-4 rounded-lg mb-4">
-          <h3 className="font-bold mb-3">Ergebnisverlauf</h3>
-          <div className="h-48">
-            {performanceLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <Skeleton className="h-40 w-full" />
-              </div>
-            ) : (
+          {performanceLoading ? (
+            <div className="h-48 flex items-center justify-center">
+              <Skeleton className="h-40 w-full" />
+            </div>
+          ) : (
+            <div className="h-64">
               <PerformanceChart data={performanceData} />
-            )}
-          </div>
+            </div>
+          )}
         </div>
         
         <div className="bg-muted p-4 rounded-lg">
