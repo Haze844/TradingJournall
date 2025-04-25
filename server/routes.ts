@@ -5,15 +5,92 @@ import { insertTradeSchema, insertUserSchema } from "@shared/schema";
 import OpenAI from "openai";
 import { setupAuth } from "./auth";
 import path from "path";
+import fs from "fs";
+import puppeteer from "puppeteer";
+import { Readable } from "stream";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
   
-  // PDF Manual Route
+  // Generate and return PDF Manual
+  app.get("/generate-pdf", async (req: Request, res: Response) => {
+    try {
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      const page = await browser.newPage();
+      
+      // Get the full URL of the booklet page
+      const protocol = req.protocol;
+      const host = req.get('host');
+      const bookletUrl = `${protocol}://${host}/booklet`;
+      
+      await page.goto(bookletUrl, { 
+        waitUntil: 'networkidle0',
+        timeout: 60000
+      });
+      
+      // Add print-specific styles
+      await page.addStyleTag({
+        content: `
+          @page { 
+            margin: 1cm; 
+            size: A4; 
+          }
+          body { 
+            background: white; 
+            color: black; 
+          }
+          .rocket-card {
+            background: white !important;
+            color: black !important;
+            border: 1px solid #ddd;
+            box-shadow: none !important;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-bottom: 15px;
+          }
+          header, nav, button, .nonprintable {
+            display: none !important;
+          }
+        `
+      });
+      
+      // Generate PDF
+      const pdfBuffer = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
+      });
+      
+      await browser.close();
+      
+      // Set response headers
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=lvlup-trading-handbuch.pdf');
+      
+      // Create a readable stream from the PDF buffer and pipe it to the response
+      const stream = new Readable();
+      stream.push(pdfBuffer);
+      stream.push(null);
+      stream.pipe(res);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      res.status(500).send('Fehler bei der PDF-Generierung');
+    }
+  });
+  
+  // Legacy PDF Manual Route
   app.get("/manual-pdf", (req: Request, res: Response) => {
     const pdfPath = path.join(process.cwd(), 'public', 'lvlup-trading-handbuch.pdf');
-    res.sendFile(pdfPath);
+    if (fs.existsSync(pdfPath)) {
+      res.sendFile(pdfPath);
+    } else {
+      // Redirect to the PDF generator if the file doesn't exist
+      res.redirect('/generate-pdf');
+    }
   });
   
   // Middleware to check if user is authenticated
