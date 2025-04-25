@@ -82,15 +82,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Legacy PDF Manual Route
-  app.get("/manual-pdf", (req: Request, res: Response) => {
-    const pdfPath = path.join(process.cwd(), 'public', 'lvlup-trading-handbuch.pdf');
-    if (fs.existsSync(pdfPath)) {
-      res.sendFile(pdfPath);
-    } else {
-      // Redirect to the PDF generator if the file doesn't exist
-      res.redirect('/generate-pdf');
-    }
+  // Static PDF Route - Serves directly from public
+  app.get("/lvlup-trading-handbuch.pdf", (req: Request, res: Response) => {
+    // Generate PDF on-demand and save to public folder, then serve
+    (async () => {
+      try {
+        console.log("Generating PDF for direct download...");
+        const browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        
+        // Set viewport to A4 size
+        await page.setViewport({
+          width: 1240,
+          height: 1754,
+          deviceScaleFactor: 1.5
+        });
+        
+        // Get the full URL of the booklet page
+        const bookletUrl = `http://localhost:5000/booklet`;
+        
+        await page.goto(bookletUrl, { 
+          waitUntil: 'networkidle0',
+          timeout: 60000
+        });
+        
+        // Add print-specific styles
+        await page.addStyleTag({
+          content: `
+            @page { 
+              margin: 1cm; 
+              size: A4; 
+            }
+            body { 
+              background: white; 
+              font-family: Arial, sans-serif;
+              color: black; 
+            }
+            .rocket-card {
+              background: white !important;
+              color: black !important;
+              border: 1px solid #ddd;
+              box-shadow: none !important;
+              break-inside: avoid;
+              page-break-inside: avoid;
+              margin-bottom: 15px;
+            }
+          `
+        });
+        
+        // Generate PDF
+        const pdfBuffer = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
+        });
+        
+        await browser.close();
+        
+        // Write to public folder
+        const pdfPath = path.join(process.cwd(), 'public', 'lvlup-trading-handbuch.pdf');
+        fs.writeFileSync(pdfPath, pdfBuffer);
+        console.log("PDF generated and saved to public folder");
+        
+        // Send the file
+        res.sendFile(pdfPath);
+        
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        // Fall back to existing file if available
+        const pdfPath = path.join(process.cwd(), 'public', 'lvlup-trading-handbuch.pdf');
+        if (fs.existsSync(pdfPath)) {
+          res.sendFile(pdfPath);
+        } else {
+          res.status(500).send('Fehler bei der PDF-Generierung');
+        }
+      }
+    })();
   });
   
   // Middleware to check if user is authenticated
