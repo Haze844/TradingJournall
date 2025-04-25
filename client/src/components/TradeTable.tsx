@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Card, 
   CardContent, 
@@ -6,10 +6,19 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from "@/components/ui/popover";
 import { Trade } from "@shared/schema";
 import { formatDate, formatTime } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Filter, SlidersHorizontal } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TradeTableProps {
   trades: Trade[];
@@ -21,14 +30,109 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 5;
   
-  // Calculate pagination
+  // Filter state
+  const [filters, setFilters] = useState({
+    symbols: new Set<string>(),
+    setups: new Set<string>(),
+    mainTrends: new Set<string>(),
+    internalTrends: new Set<string>(),
+    entryTypes: new Set<string>(),
+    isWin: null as boolean | null
+  });
+  
+  // Unique values for filters
+  const uniqueValues = {
+    symbols: Array.from(new Set(trades.map(t => t.symbol).filter(Boolean))) as string[],
+    setups: Array.from(new Set(trades.map(t => t.setup).filter(Boolean))) as string[],
+    mainTrends: Array.from(new Set(trades.map(t => t.mainTrendM15).filter(Boolean))) as string[],
+    internalTrends: Array.from(new Set(trades.map(t => t.internalTrendM5).filter(Boolean))) as string[],
+    entryTypes: Array.from(new Set(trades.map(t => t.entryType).filter(Boolean))) as string[]
+  };
+  
+  // Apply filters
+  const filteredTrades = trades.filter(trade => {
+    // Symbol filter
+    if (filters.symbols.size > 0 && trade.symbol && !filters.symbols.has(trade.symbol)) {
+      return false;
+    }
+    
+    // Setup filter
+    if (filters.setups.size > 0 && trade.setup && !filters.setups.has(trade.setup)) {
+      return false;
+    }
+    
+    // Main trend filter
+    if (filters.mainTrends.size > 0 && trade.mainTrendM15 && !filters.mainTrends.has(trade.mainTrendM15)) {
+      return false;
+    }
+    
+    // Internal trend filter
+    if (filters.internalTrends.size > 0 && trade.internalTrendM5 && !filters.internalTrends.has(trade.internalTrendM5)) {
+      return false;
+    }
+    
+    // Entry type filter
+    if (filters.entryTypes.size > 0 && trade.entryType && !filters.entryTypes.has(trade.entryType)) {
+      return false;
+    }
+    
+    // Win/Loss filter
+    if (filters.isWin !== null && trade.isWin !== filters.isWin) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  // Calculate pagination for filtered trades
   const indexOfLastTrade = currentPage * tradesPerPage;
   const indexOfFirstTrade = indexOfLastTrade - tradesPerPage;
-  const currentTrades = trades.slice(indexOfFirstTrade, indexOfLastTrade);
-  const totalPages = Math.ceil(trades.length / tradesPerPage);
+  const currentTrades = filteredTrades.slice(indexOfFirstTrade, indexOfLastTrade);
+  const totalPages = Math.ceil(filteredTrades.length / tradesPerPage);
+  
+  // Reset page when filters change (for now without useEffect)
   
   // Handle page change
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  
+  // Toggle filter for a value
+  const toggleFilter = (filterType: keyof typeof filters, value: string) => {
+    const newFilters = { ...filters };
+    const filterSet = new Set(filters[filterType] as Set<string>);
+    
+    if (filterSet.has(value)) {
+      filterSet.delete(value);
+    } else {
+      filterSet.add(value);
+    }
+    
+    // Reset to first page when applying filter
+    setCurrentPage(1);
+    
+    // @ts-ignore - This is fine because we know the type
+    newFilters[filterType] = filterSet;
+    setFilters(newFilters);
+  };
+  
+  // Toggle win/loss filter
+  const toggleWinLossFilter = (value: boolean | null) => {
+    setFilters(prev => ({
+      ...prev,
+      isWin: prev.isWin === value ? null : value
+    }));
+  };
+  
+  // Reset all filters
+  const resetFilters = () => {
+    setFilters({
+      symbols: new Set<string>(),
+      setups: new Set<string>(),
+      mainTrends: new Set<string>(),
+      internalTrends: new Set<string>(),
+      entryTypes: new Set<string>(),
+      isWin: null
+    });
+  };
   
   // Trend text color class
   const getTrendColorClass = (trend: string) => {
@@ -53,15 +157,287 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
         <table className="w-full text-sm">
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
-              <th className="p-3 text-left">Datum</th>
-              <th className="p-3 text-left">Symbol</th>
-              <th className="p-3 text-left">Setup</th>
-              <th className="p-3 text-left">M15 Trend</th>
-              <th className="p-3 text-left">M5 Trend</th>
-              <th className="p-3 text-left">Einstieg</th>
+              <th className="p-3 text-left">
+                Datum
+              </th>
+              <th className="p-3 text-left">
+                <div className="flex items-center gap-1">
+                  Symbol
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56" align="start">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Symbol filtern</h4>
+                        <ScrollArea className="h-48">
+                          <div className="space-y-2 px-1">
+                            {uniqueValues.symbols.map(symbol => (
+                              <div key={symbol} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`symbol-${symbol}`} 
+                                  checked={filters.symbols.has(symbol)}
+                                  onCheckedChange={() => toggleFilter('symbols', symbol)}
+                                />
+                                <Label htmlFor={`symbol-${symbol}`} className="text-sm cursor-pointer">
+                                  {symbol}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                        {filters.symbols.size > 0 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => {
+                              setFilters({...filters, symbols: new Set()});
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Filter zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </th>
+              <th className="p-3 text-left">
+                <div className="flex items-center gap-1">
+                  Setup
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56" align="start">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Setup filtern</h4>
+                        <ScrollArea className="h-48">
+                          <div className="space-y-2 px-1">
+                            {uniqueValues.setups.map(setup => (
+                              <div key={setup} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={`setup-${setup}`} 
+                                  checked={filters.setups.has(setup)}
+                                  onCheckedChange={() => toggleFilter('setups', setup)}
+                                />
+                                <Label htmlFor={`setup-${setup}`} className="text-sm cursor-pointer">
+                                  {setup}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                        {filters.setups.size > 0 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => {
+                              setFilters({...filters, setups: new Set()});
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Filter zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </th>
+              <th className="p-3 text-left">
+                <div className="flex items-center gap-1">
+                  M15 Trend
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56" align="start">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">M15 Trend filtern</h4>
+                        <div className="space-y-2 px-1">
+                          {uniqueValues.mainTrends.map(trend => (
+                            <div key={trend} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`main-${trend}`} 
+                                checked={filters.mainTrends.has(trend)}
+                                onCheckedChange={() => toggleFilter('mainTrends', trend)}
+                              />
+                              <Label htmlFor={`main-${trend}`} className="text-sm cursor-pointer">
+                                <span className={getTrendColorClass(trend)}>{trend}</span>
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                        {filters.mainTrends.size > 0 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => {
+                              setFilters({...filters, mainTrends: new Set()});
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Filter zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </th>
+              <th className="p-3 text-left">
+                <div className="flex items-center gap-1">
+                  M5 Trend
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56" align="start">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">M5 Trend filtern</h4>
+                        <div className="space-y-2 px-1">
+                          {uniqueValues.internalTrends.map(trend => (
+                            <div key={trend} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`intern-${trend}`} 
+                                checked={filters.internalTrends.has(trend)}
+                                onCheckedChange={() => toggleFilter('internalTrends', trend)}
+                              />
+                              <Label htmlFor={`intern-${trend}`} className="text-sm cursor-pointer">
+                                <span className={getTrendColorClass(trend)}>{trend}</span>
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                        {filters.internalTrends.size > 0 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => {
+                              setFilters({...filters, internalTrends: new Set()});
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Filter zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </th>
+              <th className="p-3 text-left">
+                <div className="flex items-center gap-1">
+                  Einstieg
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56" align="start">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Einstieg filtern</h4>
+                        <div className="space-y-2 px-1">
+                          {uniqueValues.entryTypes.map(entry => (
+                            <div key={entry} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`entry-${entry}`} 
+                                checked={filters.entryTypes.has(entry)}
+                                onCheckedChange={() => toggleFilter('entryTypes', entry)}
+                              />
+                              <Label htmlFor={`entry-${entry}`} className="text-sm cursor-pointer">
+                                <span className={getTrendColorClass(entry)}>{entry}</span>
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                        {filters.entryTypes.size > 0 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => {
+                              setFilters({...filters, entryTypes: new Set()});
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Filter zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </th>
               <th className="p-3 text-left">RR</th>
               <th className="p-3 text-left">P/L ($)</th>
-              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">
+                <div className="flex items-center gap-1">
+                  Status
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56" align="start">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Status filtern</h4>
+                        <div className="space-y-2 px-1">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="win-status" 
+                              checked={filters.isWin === true}
+                              onCheckedChange={() => toggleWinLossFilter(true)}
+                            />
+                            <Label htmlFor="win-status" className="text-sm cursor-pointer">
+                              <span className="text-green-500">Win</span>
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="loss-status" 
+                              checked={filters.isWin === false}
+                              onCheckedChange={() => toggleWinLossFilter(false)}
+                            />
+                            <Label htmlFor="loss-status" className="text-sm cursor-pointer">
+                              <span className="text-red-500">Loss</span>
+                            </Label>
+                          </div>
+                        </div>
+                        {filters.isWin !== null && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => {
+                              setFilters({...filters, isWin: null});
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Filter zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
