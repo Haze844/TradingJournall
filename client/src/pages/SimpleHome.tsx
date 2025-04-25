@@ -14,12 +14,12 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { getWeekDates } from "@/lib/utils";
+import { getWeekDates, formatDate } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
-  Users, Download, TrendingDown, DollarSign, AlertCircle
+  Users, Download, TrendingDown, DollarSign, AlertCircle, ImageIcon
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -116,6 +116,35 @@ export default function SimpleHome() {
                   onTradeSelect={handleTradeSelect}
                 />
               </div>
+              
+              {/* TradingView Chart Display (wenn ein Trade ausgewählt ist) */}
+              {selectedTrade && selectedTrade.chartImage && (
+                <div className="rocket-card rounded-xl p-4">
+                  <h3 className="text-lg font-bold mb-4 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2" /> 
+                    Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
+                  </h3>
+                  <div className="rounded-lg overflow-hidden border border-border">
+                    {selectedTrade.chartImage.startsWith('http') ? (
+                      // Externe URL (TradingView Link)
+                      <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
+                        <img 
+                          src={selectedTrade.chartImage} 
+                          alt={`Chart für ${selectedTrade.symbol}`}
+                          className="w-full h-auto max-h-[500px] object-contain"
+                        />
+                      </a>
+                    ) : (
+                      // Base64 Bild
+                      <img 
+                        src={selectedTrade.chartImage} 
+                        alt={`Chart für ${selectedTrade.symbol}`}
+                        className="w-full h-auto max-h-[500px] object-contain"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Weekly Summary */}
               <div className="rocket-card rounded-xl p-4">
