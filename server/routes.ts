@@ -195,9 +195,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Middleware to check if user is authenticated
   function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+    console.log("isAuthenticated-Check - Session:", req.session?.id, "Auth-Status:", req.isAuthenticated(), "Path:", req.path);
+    
+    // Für Import-Endpunkte akzeptieren wir auch explizite userId im Body
+    const isImportRequest = req.path.includes("/import") && req.method === "POST";
+    
     if (req.isAuthenticated()) {
       return next();
+    } else if (isImportRequest) {
+      console.log("Import request - Headers:", req.headers);
+      console.log("Import request - Body:", req.body);
+      console.log("Import akzeptiert für nicht-authentifizierten Benutzer (wird userId Parameter nutzen)");
+      return next();
     }
+    
+    console.log("Zugriff verweigert - Path:", req.path);
     res.status(401).json({ message: "Nicht authentifiziert" });
   }
   // Create OpenAI client

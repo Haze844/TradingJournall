@@ -139,9 +139,16 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    console.log("Auth-Check - Session:", req.session.id, "Auth-Status:", req.isAuthenticated());
+    
+    if (!req.isAuthenticated()) {
+      console.log("Nicht authentifiziert - Headers:", req.headers);
+      return res.sendStatus(401);
+    }
+    
     // Don't send password to the client
     const { password, ...userWithoutPassword } = req.user as SelectUser;
+    console.log("Authentifiziert als Benutzer:", userWithoutPassword.username);
     res.json(userWithoutPassword);
   });
   
