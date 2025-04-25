@@ -287,6 +287,8 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     const hasSpecialFormat = row.symbol && row.pnl !== undefined && 
                                            (row.boughtTimestamp !== undefined || row.soldTimestamp !== undefined) &&
                                            (row.buyPrice !== undefined || row.sellPrice !== undefined);
+                                           
+                    console.log("CSV-Format erkannt:", hasSpecialFormat ? "Tradovate" : "Standard");
                     
                     // Versuche Profit/Loss-Wert aus verschiedenen möglichen Feldern zu extrahieren
                     let profitLossValue;
@@ -346,6 +348,104 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     
                     console.log("Profit/Loss erkannt:", profitLossValue, "→", profitLoss);
                     
+                    // Setup basierend auf Symbol und Handelszeit bestimmen
+                    let setupValue = processedRow.setup || "";
+                    let liquidationValue = processedRow.liquidation || "";
+                    
+                    if (hasSpecialFormat && row.symbol && row.duration) {
+                      try {
+                        // Beispiel für eine Setup-Ableitung basierend auf den vorhandenen Daten
+                        const symbol = row.symbol.toUpperCase();
+                        const duration = row.duration || "";
+                        
+                        // Beispiellogik - basierend auf deinen tatsächlichen Setup-Mustern anpassen
+                        if (symbol.includes("MNQ")) {
+                          if (duration.includes("min") && parseInt(duration) < 10) {
+                            // Kurze Trades unter 10 Minuten sind oft Scalping
+                            setupValue = "Scalp";
+                          } else if (duration.includes("min") && parseInt(duration) > 15) {
+                            // Längere Trades über 15 Minuten könnten Trendfolge sein
+                            setupValue = "Trend";
+                          }
+                        }
+                        
+                        // Marktphase basierend auf Uhrzeit bestimmen
+                        if (row.boughtTimestamp) {
+                          const tradeTime = new Date(tradeDate);
+                          const hours = tradeTime.getUTCHours();
+                          
+                          // Beispielmäßige Zuordnung von Marktphasen
+                          if (hours >= 14 && hours < 16) {
+                            // 14:00-16:00 UTC ist oft die NY-Eröffnung
+                            setupValue += " NY Open";
+                          } else if (hours >= 19 && hours < 21) {
+                            // 19:00-21:00 UTC könnte der NY-Close sein
+                            setupValue += " NY Close";
+                          }
+                          
+                          // Trendbestimmung basierend auf konkreten Kursbewegungen
+                          let mainTrend = "";
+                          let internalTrend = "";
+                          
+                          if (parseFloat(row.buyPrice) < parseFloat(row.sellPrice)) {
+                            // Wir haben in einem Aufwärtstrend gekauft und verkauft
+                            mainTrend = "Bullish";
+                            
+                            // Für den internen Trend schauen wir nach Details in der Handelsdauer
+                            if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
+                              internalTrend = "Scalp Bullish";
+                            } else {
+                              internalTrend = "Trend Bullish";
+                            }
+                          } else if (parseFloat(row.buyPrice) > parseFloat(row.sellPrice)) {
+                            // Wir haben in einem Abwärtstrend gekauft/verkauft
+                            mainTrend = "Bearish";
+                            
+                            // Für den internen Trend
+                            if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
+                              internalTrend = "Scalp Bearish";
+                            } else {
+                              internalTrend = "Trend Bearish";
+                            }
+                          } else {
+                            // Seitwärtsbewegung
+                            mainTrend = "Neutral";
+                            internalTrend = "Range";
+                          }
+                          
+                          // Setze die Trend-Werte
+                          processedRow.mainTrendM15 = mainTrend;
+                          processedRow.internalTrendM5 = internalTrend;
+                        }
+                        
+                        console.log("Setup abgeleitet:", setupValue);
+                      } catch (err) {
+                        console.error("Fehler bei Setup-Ableitung:", err);
+                      }
+                    }
+                    
+                    // Liquidation-Wert berechnen
+                    if (hasSpecialFormat && row.buyPrice && entryType) {
+                      try {
+                        const buyPrice = parseFloat(row.buyPrice);
+                        const spreadFactor = 0.5; // Spread als Prozentsatz
+                        
+                        if (entryType === "Long") {
+                          // Wenn Long, dann Liquidation unterhalb des Einkaufspreises
+                          const liquidationPrice = buyPrice * (1 - spreadFactor/100);
+                          liquidationValue = liquidationPrice.toFixed(2);
+                        } else if (entryType === "Short") {
+                          // Wenn Short, dann Liquidation oberhalb des Verkaufspreises
+                          const liquidationPrice = buyPrice * (1 + spreadFactor/100);
+                          liquidationValue = liquidationPrice.toFixed(2);
+                        }
+                        
+                        console.log("Liquidation berechnet:", liquidationValue);
+                      } catch (err) {
+                        console.error("Fehler bei Liquidationsberechnung:", err);
+                      }
+                    }
+                    
                     // RR-Berechnung für Specicalformat mit Buy/Sell Price
                     let rrAchieved = processedRow.rrAchieved || 0;
                     let rrPotential = processedRow.rrPotential || 0;
@@ -378,12 +478,12 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     
                     processedRow = {
                       symbol: processedRow.symbol || "",
-                      setup: processedRow.setup || "",
+                      setup: setupValue || processedRow.setup || "",
                       mainTrendM15: processedRow.mainTrendM15 || "",
                       internalTrendM5: processedRow.internalTrendM5 || "",
                       entryType: entryType || processedRow.entryType || "",
                       entryLevel: hasSpecialFormat && row.buyPrice ? row.buyPrice : processedRow.entryLevel || "",
-                      liquidation: processedRow.liquidation || "",
+                      liquidation: liquidationValue || processedRow.liquidation || "",
                       // Zusätzliche Felder, die spezifisch für dein CSV-Format sind (für Debug/Analyse)
                       extraInfo: hasSpecialFormat ? {
                         buyPrice: row.buyPrice,
