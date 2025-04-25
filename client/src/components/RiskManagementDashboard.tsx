@@ -35,7 +35,7 @@ interface RiskRecommendation {
 
 export default function RiskManagementDashboard({ userId }: { userId: number }) {
   const [chartType, setChartType] = useState<ChartType>('line');
-  const [activeTab, setActiveTab] = useState('drawdown');
+  const [activeTab, setActiveTab] = useState<'drawdown' | 'risk-per-trade' | 'position-size' | 'recommendations'>('drawdown');
 
   // Fetch drawdown data
   const { data: drawdownData = [], isLoading: drawdownLoading } = useQuery({

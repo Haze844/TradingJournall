@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar, Users, Download } from "lucide-react";
+import { FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar, Users, Download, TrendingDown, DollarSign } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -147,17 +147,72 @@ export default function Home() {
                     <Brain className="h-4 w-4 mr-2" />
                     KI-Analyse
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
-                    onClick={() => {
-                      const tab = document.querySelector('[value="risk"]') as HTMLElement;
-                      if (tab) tab.click();
-                    }}
-                  >
-                    <BarChart2 className="h-4 w-4 mr-2" />
-                    Risikomanagement
-                  </Button>
+                  <div className="space-y-1">
+                    <Button 
+                      variant="ghost" 
+                      className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
+                      onClick={() => {
+                        const tab = document.querySelector('[value="risk"]') as HTMLElement;
+                        if (tab) tab.click();
+                      }}
+                    >
+                      <BarChart2 className="h-4 w-4 mr-2" />
+                      Risikomanagement
+                    </Button>
+                    <div className="pl-8 space-y-1">
+                      <Button 
+                        variant="ghost" 
+                        className="text-sm w-full justify-start py-1 px-3 flex items-center hover:bg-primary/10 hover:text-primary text-xs"
+                        onClick={() => {
+                          const tab = document.querySelector('[value="risk"]') as HTMLElement;
+                          if (tab) {
+                            tab.click();
+                            setTimeout(() => {
+                              const drawdownTab = document.querySelector('[value="drawdown"]') as HTMLElement;
+                              if (drawdownTab) drawdownTab.click();
+                            }, 100);
+                          }
+                        }}
+                      >
+                        <TrendingDown className="h-3 w-3 mr-2" />
+                        Drawdowns
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="text-sm w-full justify-start py-1 px-3 flex items-center hover:bg-primary/10 hover:text-primary text-xs"
+                        onClick={() => {
+                          const tab = document.querySelector('[value="risk"]') as HTMLElement;
+                          if (tab) {
+                            tab.click();
+                            setTimeout(() => {
+                              const riskPerTradeTab = document.querySelector('[value="risk-per-trade"]') as HTMLElement;
+                              if (riskPerTradeTab) riskPerTradeTab.click();
+                            }, 100);
+                          }
+                        }}
+                      >
+                        <DollarSign className="h-3 w-3 mr-2" />
+                        Risiko pro Trade
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="text-sm w-full justify-start py-1 px-3 flex items-center hover:bg-primary/10 hover:text-primary text-xs"
+                        onClick={() => {
+                          const tab = document.querySelector('[value="risk"]') as HTMLElement;
+                          if (tab) {
+                            tab.click();
+                            setTimeout(() => {
+                              const positionSizeTab = document.querySelector('[value="position-size"]') as HTMLElement;
+                              if (positionSizeTab) positionSizeTab.click();
+                            }, 100);
+                          }
+                        }}
+                      >
+                        <BarChart2 className="h-3 w-3 mr-2" />
+                        Positionsgrößen
+                      </Button>
+                    </div>
+                  </div>
                   <Button 
                     variant="ghost" 
                     className="text-sm w-full justify-start py-2 px-3 flex items-center hover:bg-primary/10 hover:text-primary"
