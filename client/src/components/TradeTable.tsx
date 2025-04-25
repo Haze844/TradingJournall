@@ -60,6 +60,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
               <th className="p-3 text-left">M5 Trend</th>
               <th className="p-3 text-left">Einstieg</th>
               <th className="p-3 text-left">RR</th>
+              <th className="p-3 text-left">P/L ($)</th>
               <th className="p-3 text-left">Status</th>
             </tr>
           </thead>
@@ -75,6 +76,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-16" /></td>
                 </tr>
               ))
@@ -101,6 +103,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     <span className={getTrendColorClass(trade.entryType)}>{trade.entryType}</span>
                   </td>
                   <td className="p-3">{trade.rrAchieved}</td>
+                  <td className="p-3">
+                    <span className={`${trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                      {trade.profitLoss ? `${trade.profitLoss > 0 ? '+' : ''}${trade.profitLoss.toFixed(2)}` : '-'}
+                    </span>
+                  </td>
                   <td className="p-3">
                     <BadgeWinLoss isWin={trade.isWin} />
                   </td>

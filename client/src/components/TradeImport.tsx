@@ -174,6 +174,10 @@ export default function TradeImport() {
                 processedRow = mapTradingViewFields(row);
                 
                 // Konvertiere String-Werte in richtigen Datentyp für TradingView
+                // Versuche Profit/Loss-Wert aus verschiedenen möglichen Feldern zu extrahieren
+                const profitLossValue = row['P/L'] || row['PL'] || row['Profit'] || row['Profit/Loss'] || row['Net P/L'] || "0";
+                const profitLoss = parseFloat(String(profitLossValue).replace(/[^0-9.-]/g, ''));
+                
                 processedRow = {
                   symbol: processedRow.symbol || "",
                   setup: processedRow.setup || "",
@@ -185,12 +189,14 @@ export default function TradeImport() {
                   location: processedRow.location || "",
                   rrAchieved: parseFloat(String(processedRow.rrAchieved || "0")),
                   rrPotential: parseFloat(String(processedRow.rrPotential || "0")),
+                  profitLoss: profitLoss, // Ergebnis in $
                   // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
                   isWin: typeof processedRow.isWin === 'boolean' ? processedRow.isWin : 
                          String(processedRow.isWin).toLowerCase() === 'true' || 
                          String(processedRow.isWin).toLowerCase() === 'win' ||
                          String(processedRow.isWin).toLowerCase() === 'yes' ||
-                         String(processedRow.isWin).toLowerCase() === 'profit',
+                         String(processedRow.isWin).toLowerCase() === 'profit' ||
+                         profitLoss > 0,
                   date: row.Date || row.date || row.Time || row.time || new Date().toISOString(),
                 };
               }
