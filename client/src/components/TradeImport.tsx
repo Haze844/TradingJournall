@@ -360,79 +360,46 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     
                     console.log("Profit/Loss erkannt:", profitLossValue, "→", profitLoss);
                     
-                    // Setup basierend auf Symbol und Handelszeit bestimmen
-                    let setupValue = processedRow.setup || "";
+                    // Setup wird immer leer gelassen
                     let liquidationValue = processedRow.liquidation || "";
                     
-                    if (hasSpecialFormat && row.symbol && row.duration) {
+                    // Trendbestimmung basierend auf konkreten Kursbewegungen, wenn Buy/Sell Price vorhanden
+                    if (hasSpecialFormat && row.buyPrice && row.sellPrice) {
                       try {
-                        // Beispiel für eine Setup-Ableitung basierend auf den vorhandenen Daten
-                        const symbol = row.symbol.toUpperCase();
-                        const duration = row.duration || "";
+                        let mainTrend = "";
+                        let internalTrend = "";
                         
-                        // Beispiellogik - basierend auf deinen tatsächlichen Setup-Mustern anpassen
-                        if (symbol.includes("MNQ")) {
-                          if (duration.includes("min") && parseInt(duration) < 10) {
-                            // Kurze Trades unter 10 Minuten sind oft Scalping
-                            setupValue = "Scalp";
-                          } else if (duration.includes("min") && parseInt(duration) > 15) {
-                            // Längere Trades über 15 Minuten könnten Trendfolge sein
-                            setupValue = "Trend";
-                          }
-                        }
-                        
-                        // Marktphase basierend auf Uhrzeit bestimmen
-                        if (row.boughtTimestamp) {
-                          const tradeTime = new Date(tradeDate);
-                          const hours = tradeTime.getUTCHours();
+                        if (parseFloat(row.buyPrice) < parseFloat(row.sellPrice)) {
+                          // Wir haben in einem Aufwärtstrend gekauft und verkauft
+                          mainTrend = "Long";
                           
-                          // Beispielmäßige Zuordnung von Marktphasen
-                          if (hours >= 14 && hours < 16) {
-                            // 14:00-16:00 UTC ist oft die NY-Eröffnung
-                            setupValue += " NY Open";
-                          } else if (hours >= 19 && hours < 21) {
-                            // 19:00-21:00 UTC könnte der NY-Close sein
-                            setupValue += " NY Close";
-                          }
-                          
-                          // Trendbestimmung basierend auf konkreten Kursbewegungen
-                          let mainTrend = "";
-                          let internalTrend = "";
-                          
-                          if (parseFloat(row.buyPrice) < parseFloat(row.sellPrice)) {
-                            // Wir haben in einem Aufwärtstrend gekauft und verkauft
-                            mainTrend = "Long";
-                            
-                            // Für den internen Trend schauen wir nach Details in der Handelsdauer
-                            if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
-                              internalTrend = "Long";
-                            } else {
-                              internalTrend = "Trend Long";
-                            }
-                          } else if (parseFloat(row.buyPrice) > parseFloat(row.sellPrice)) {
-                            // Wir haben in einem Abwärtstrend gekauft/verkauft
-                            mainTrend = "Short";
-                            
-                            // Für den internen Trend
-                            if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
-                              internalTrend = "Short";
-                            } else {
-                              internalTrend = "Trend Short";
-                            }
+                          // Für den internen Trend schauen wir nach Details in der Handelsdauer
+                          if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
+                            internalTrend = "Long";
                           } else {
-                            // Seitwärtsbewegung
-                            mainTrend = "Neutral";
-                            internalTrend = "Range";
+                            internalTrend = "Trend Long";
                           }
+                        } else if (parseFloat(row.buyPrice) > parseFloat(row.sellPrice)) {
+                          // Wir haben in einem Abwärtstrend gekauft/verkauft
+                          mainTrend = "Short";
                           
-                          // Setze die Trend-Werte
-                          processedRow.mainTrendM15 = mainTrend;
-                          processedRow.internalTrendM5 = internalTrend;
+                          // Für den internen Trend
+                          if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
+                            internalTrend = "Short";
+                          } else {
+                            internalTrend = "Trend Short";
+                          }
+                        } else {
+                          // Seitwärtsbewegung
+                          mainTrend = "Neutral";
+                          internalTrend = "Range";
                         }
                         
-                        console.log("Setup abgeleitet:", setupValue);
+                        // Setze die Trend-Werte
+                        processedRow.mainTrendM15 = mainTrend;
+                        processedRow.internalTrendM5 = internalTrend;
                       } catch (err) {
-                        console.error("Fehler bei Setup-Ableitung:", err);
+                        console.error("Fehler bei Trendbestimmung:", err);
                       }
                     }
                     
@@ -490,7 +457,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     
                     processedRow = {
                       symbol: processedRow.symbol || "",
-                      setup: setupValue || processedRow.setup || "",
+                      setup: "", // Immer leer lassen
                       mainTrendM15: processedRow.mainTrendM15 || "",
                       internalTrendM5: processedRow.internalTrendM5 || "",
                       entryType: entryType || processedRow.entryType || "",
@@ -525,6 +492,13 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                         
                         // Loggen wir das Ergebnis für Debugging
                         console.log(`Win/Loss Status: ${result ? 'WIN' : 'LOSS'} (P/L: ${profitLoss}, Explicit: ${isExplicitlyTrue}, Text: ${isTextWin}, Profit: ${isProfitPositive})`);
+                        
+                        // Bei Verlust passen wir auch RR und RR Potential an
+                        if (!result) {
+                          // Für Verlust-Trades: RR auf -1 setzen und RR Potential leer lassen
+                          rrAchieved = -1;
+                          rrPotential = 0; // Leerer Wert im Frontend
+                        }
                         
                         return result;
                       })(),
