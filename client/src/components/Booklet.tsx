@@ -41,14 +41,13 @@ export default function Booklet() {
         </p>
 
         <div className="flex justify-end mb-6">
-          <a
-            href="https://drive.google.com/file/d/1tANR7YcnOAUUbLi9XbSv4UKsIy-PGFnn/view?usp=sharing" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
+          <Button 
+            variant="default"
+            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white"
+            onClick={() => window.print()}
           >
-            <ExternalLink className="h-5 w-5" /> Handbuch auf Google Drive ansehen
-          </a>
+            <FileText className="h-5 w-5" /> Handbuch drucken
+          </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -193,14 +192,13 @@ export default function Booklet() {
         </p>
 
         <div className="flex justify-center">
-          <a
-            href="https://drive.google.com/file/d/1tANR7YcnOAUUbLi9XbSv4UKsIy-PGFnn/view?usp=sharing" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
+          <Button 
+            variant="default"
+            className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white"
+            onClick={() => window.print()}
           >
-            <ExternalLink className="h-5 w-5" /> Handbuch auf Google Drive ansehen
-          </a>
+            <FileText className="h-5 w-5" /> Handbuch drucken
+          </Button>
         </div>
       </div>
     </div>
