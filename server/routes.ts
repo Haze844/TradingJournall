@@ -9,6 +9,11 @@ import fs from "fs";
 import puppeteer from "puppeteer";
 import { Readable } from "stream";
 
+// Helper function to handle error messages safely
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error';
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);

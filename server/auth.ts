@@ -108,14 +108,14 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: info?.message || "Anmeldung fehlgeschlagen" });
 
       // Überprüfe, ob "Eingeloggt bleiben" Option aktiviert ist
       const rememberMe = req.body.rememberMe === true;
       
-      req.login(user, (loginErr) => {
+      req.login(user, (loginErr: any) => {
         if (loginErr) return next(loginErr);
         
         // Cookie-Lebensdauer ändern, wenn "Eingeloggt bleiben" aktiviert ist
@@ -139,7 +139,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
+    req.logout((err: any) => {
       if (err) return next(err);
       res.sendStatus(200);
     });
