@@ -18,7 +18,7 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
 // Trade setup types
-export const setupTypes = ["BB", "OZEM", "BZEM"] as const;
+export const setupTypes = ["BREAKER", "OZEM", "BZEM", "A OZEM", "A BZEM"] as const;
 export const trendTypes = ["Long", "Short"] as const;
 export const entryLevelTypes = ["50%", "67%"] as const;
 export const timeframeTypes = ["M1", "M5", "M15", "H1"] as const;
