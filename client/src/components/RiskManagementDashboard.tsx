@@ -1,0 +1,522 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, ResponsiveContainer, LineChart, Line, BarChart, Bar, CartesianGrid, XAxis, YAxis, Cell } from 'recharts';
+import { ChartTypeSelector, type ChartType } from '@/components/ui/chart-type-selector';
+import { format } from 'date-fns';
+import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart } from 'lucide-react';
+
+interface DrawdownData {
+  date: string;
+  drawdown: number;
+  maxDrawdown: number;
+}
+
+interface RiskPerTradeData {
+  date: string;
+  riskPercent: number;
+  riskDollar: number;
+}
+
+interface PositionSizeData {
+  positionSize: number;
+  winRate: number;
+  count: number;
+}
+
+interface RiskRecommendation {
+  id: string;
+  recommendation: string;
+  explanation: string;
+  impact: number;
+}
+
+export default function RiskManagementDashboard({ userId }: { userId: number }) {
+  const [chartType, setChartType] = useState<ChartType>('line');
+  const [activeTab, setActiveTab] = useState('drawdown');
+
+  // Fetch drawdown data
+  const { data: drawdownData = [], isLoading: drawdownLoading } = useQuery({
+    queryKey: ['/api/risk/drawdown', userId],
+    queryFn: async () => {
+      try {
+        const response = await fetch(`/api/risk/drawdown?userId=${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch drawdown data');
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching drawdown data:', error);
+        return [];
+      }
+    },
+  });
+
+  // Fetch risk per trade data
+  const { data: riskPerTradeData = [], isLoading: riskPerTradeLoading } = useQuery({
+    queryKey: ['/api/risk/per-trade', userId],
+    queryFn: async () => {
+      try {
+        const response = await fetch(`/api/risk/per-trade?userId=${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch risk per trade data');
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching risk per trade data:', error);
+        return [];
+      }
+    },
+  });
+
+  // Fetch position size correlation data
+  const { data: positionSizeData = [], isLoading: positionSizeLoading } = useQuery({
+    queryKey: ['/api/risk/position-size', userId],
+    queryFn: async () => {
+      try {
+        const response = await fetch(`/api/risk/position-size?userId=${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch position size data');
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching position size data:', error);
+        return [];
+      }
+    },
+  });
+
+  // Fetch risk recommendations
+  const { data: riskRecommendations = [], isLoading: recommendationsLoading } = useQuery({
+    queryKey: ['/api/risk/recommendations', userId],
+    queryFn: async () => {
+      try {
+        const response = await fetch(`/api/risk/recommendations?userId=${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch risk recommendations');
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching risk recommendations:', error);
+        return [];
+      }
+    },
+  });
+
+  // Calculate optimal position size
+  const optimalPositionSize = positionSizeData.reduce((optimal, current) => {
+    return current.winRate > optimal.winRate ? current : optimal;
+  }, { positionSize: 0, winRate: 0, count: 0 });
+
+  // Tooltips and common props for charts
+  const tooltipProps = {
+    contentStyle: {
+      backgroundColor: '#262626',
+      border: 'none',
+      borderRadius: '4px',
+      color: '#F3F4F6',
+    },
+    labelStyle: { color: '#F3F4F6' },
+  };
+
+  const getImpactColor = (impact: number) => {
+    if (impact > 0.7) return { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20' };
+    if (impact > 0.4) return { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20' };
+    return { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20' };
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <TrendingDown className="h-5 w-5" />
+          Risikomanagement-Dashboard
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-4 mb-6">
+            <TabsTrigger value="drawdown" className="text-xs md:text-sm flex items-center gap-1">
+              <TrendingDown className="h-4 w-4" />
+              <span className="hidden sm:inline">Drawdowns</span>
+            </TabsTrigger>
+            <TabsTrigger value="risk-per-trade" className="text-xs md:text-sm flex items-center gap-1">
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden sm:inline">Risiko pro Trade</span>
+            </TabsTrigger>
+            <TabsTrigger value="position-size" className="text-xs md:text-sm flex items-center gap-1">
+              <BarChart2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Positionsgröße</span>
+            </TabsTrigger>
+            <TabsTrigger value="recommendations" className="text-xs md:text-sm flex items-center gap-1">
+              <AlertCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Empfehlungen</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Drawdown Tab */}
+          <TabsContent value="drawdown">
+            <div className="flex flex-col gap-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Drawdown-Analyse</h3>
+                <ChartTypeSelector value={chartType} onChange={setChartType} />
+              </div>
+
+              {drawdownLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    {chartType === 'line' ? (
+                      <LineChart
+                        data={drawdownData}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                        />
+                        <YAxis
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <Tooltip {...tooltipProps} />
+                        <Line
+                          type="monotone"
+                          dataKey="drawdown"
+                          stroke="#EF4444"
+                          name="Drawdown"
+                          strokeWidth={2}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="maxDrawdown"
+                          stroke="#F59E0B"
+                          name="Max Drawdown"
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                        />
+                      </LineChart>
+                    ) : (
+                      <BarChart
+                        data={drawdownData}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                        />
+                        <YAxis
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <Tooltip {...tooltipProps} />
+                        <Bar
+                          dataKey="drawdown"
+                          fill="#EF4444"
+                          name="Drawdown"
+                        />
+                        <Bar
+                          dataKey="maxDrawdown"
+                          fill="#F59E0B"
+                          name="Max Drawdown"
+                        />
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Aktueller Drawdown</div>
+                  <div className="font-bold text-lg">
+                    {drawdownLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      `${drawdownData[drawdownData.length - 1]?.drawdown || 0}%`
+                    )}
+                  </div>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Maximaler Drawdown</div>
+                  <div className="font-bold text-lg">
+                    {drawdownLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      `${Math.max(...drawdownData.map(d => d.maxDrawdown), 0)}%`
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Risk Per Trade Tab */}
+          <TabsContent value="risk-per-trade">
+            <div className="flex flex-col gap-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Risiko pro Trade</h3>
+                <ChartTypeSelector value={chartType} onChange={setChartType} />
+              </div>
+
+              {riskPerTradeLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    {chartType === 'line' ? (
+                      <LineChart
+                        data={riskPerTradeData}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                        />
+                        <YAxis
+                          yAxisId="left"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                          tickFormatter={(value) => `$${value}`}
+                        />
+                        <Tooltip {...tooltipProps} />
+                        <Line
+                          yAxisId="left"
+                          type="monotone"
+                          dataKey="riskPercent"
+                          stroke="#10B981"
+                          name="Risiko (%)"
+                          strokeWidth={2}
+                        />
+                        <Line
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="riskDollar"
+                          stroke="#8B5CF6"
+                          name="Risiko ($)"
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    ) : (
+                      <BarChart
+                        data={riskPerTradeData}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                        />
+                        <YAxis
+                          yAxisId="left"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          stroke="#9CA3AF"
+                          tick={{ fill: '#9CA3AF' }}
+                          tickFormatter={(value) => `$${value}`}
+                        />
+                        <Tooltip {...tooltipProps} />
+                        <Bar
+                          yAxisId="left"
+                          dataKey="riskPercent"
+                          fill="#10B981"
+                          name="Risiko (%)"
+                        />
+                        <Bar
+                          yAxisId="right"
+                          dataKey="riskDollar"
+                          fill="#8B5CF6"
+                          name="Risiko ($)"
+                        />
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Durchschnittliches Risiko</div>
+                  <div className="font-bold text-lg">
+                    {riskPerTradeLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      `${(riskPerTradeData.reduce((acc, item) => acc + item.riskPercent, 0) / riskPerTradeData.length || 0).toFixed(1)}%`
+                    )}
+                  </div>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Max. Risiko</div>
+                  <div className="font-bold text-lg">
+                    {riskPerTradeLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      `${Math.max(...riskPerTradeData.map(d => d.riskPercent), 0).toFixed(1)}%`
+                    )}
+                  </div>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Durchschn. Risiko ($)</div>
+                  <div className="font-bold text-lg">
+                    {riskPerTradeLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      `$${(riskPerTradeData.reduce((acc, item) => acc + item.riskDollar, 0) / riskPerTradeData.length || 0).toFixed(0)}`
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Position Size Tab */}
+          <TabsContent value="position-size">
+            <div className="flex flex-col gap-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Positionsgröße & Erfolgsquote</h3>
+              </div>
+
+              {positionSizeLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={positionSizeData}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                      <XAxis
+                        dataKey="positionSize"
+                        stroke="#9CA3AF"
+                        tick={{ fill: '#9CA3AF' }}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <YAxis
+                        stroke="#9CA3AF"
+                        tick={{ fill: '#9CA3AF' }}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip 
+                        {...tooltipProps} 
+                        formatter={(value, name, props) => {
+                          if (name === 'winRate') return [`${value}%`, 'Erfolgsquote'];
+                          if (name === 'count') return [value, 'Anzahl Trades'];
+                          return [value, name];
+                        }}
+                      />
+                      <Bar 
+                        dataKey="winRate" 
+                        name="Erfolgsquote"
+                        fill="#4F46E5"
+                      >
+                        {positionSizeData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.positionSize === optimalPositionSize.positionSize ? '#10B981' : '#4F46E5'} 
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Optimale Positionsgröße</div>
+                  <div className="font-bold text-lg">
+                    {positionSizeLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      `${optimalPositionSize.positionSize || 0}%`
+                    )}
+                  </div>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Beste Erfolgsquote</div>
+                  <div className="font-bold text-lg">
+                    {positionSizeLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      `${optimalPositionSize.winRate || 0}%`
+                    )}
+                  </div>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-1">Anzahl Trades</div>
+                  <div className="font-bold text-lg">
+                    {positionSizeLoading ? (
+                      <Skeleton className="h-7 w-20" />
+                    ) : (
+                      optimalPositionSize.count || 0
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Recommendations Tab */}
+          <TabsContent value="recommendations">
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-medium">Empfehlungen zur Risikominimierung</h3>
+
+              {recommendationsLoading ? (
+                <>
+                  <Skeleton className="h-24 w-full mb-2" />
+                  <Skeleton className="h-24 w-full mb-2" />
+                  <Skeleton className="h-24 w-full" />
+                </>
+              ) : riskRecommendations.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertCircle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
+                  <p>Keine Empfehlungen verfügbar. Füge mehr Trades hinzu für eine detaillierte Analyse.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {riskRecommendations.map((rec) => {
+                    const impact = getImpactColor(rec.impact);
+                    return (
+                      <div 
+                        key={rec.id} 
+                        className={`border border-border rounded-md p-4 ${impact.bg} ${impact.border}`}
+                      >
+                        <h4 className={`font-medium mb-1 ${impact.text}`}>{rec.recommendation}</h4>
+                        <p className="text-sm text-muted-foreground">{rec.explanation}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+}

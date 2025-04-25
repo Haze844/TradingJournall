@@ -12,11 +12,11 @@ import {
   Legend,
   Cell,
   AreaChart,
-  Area,
+  Area
 } from "recharts";
 import { format } from "date-fns";
 import { PerformanceData, SetupWinRate } from "@shared/schema";
-import ChartTypeSelector, { ChartType } from "@/components/ui/chart-type-selector";
+import { ChartTypeSelector, type ChartType } from "@/components/ui/chart-type-selector";
 
 // Performance Chart Component
 interface PerformanceChartProps {
