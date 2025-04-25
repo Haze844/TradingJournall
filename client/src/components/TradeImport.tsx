@@ -393,7 +393,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                             
                             // Für den internen Trend schauen wir nach Details in der Handelsdauer
                             if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
-                              internalTrend = "Scalp Long";
+                              internalTrend = "Long";
                             } else {
                               internalTrend = "Trend Long";
                             }
@@ -403,7 +403,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                             
                             // Für den internen Trend
                             if (row.duration && row.duration.includes("min") && parseInt(row.duration) < 15) {
-                              internalTrend = "Scalp Short";
+                              internalTrend = "Short";
                             } else {
                               internalTrend = "Trend Short";
                             }

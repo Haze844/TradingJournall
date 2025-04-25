@@ -22,7 +22,6 @@ export const setupTypes = ["BREAKER", "OZEM", "BZEM", "A OZEM", "A BZEM"] as con
 export const trendTypes = [
   "Long", "Short", 
   "Trend Long", "Trend Short", 
-  "Scalp Long", "Scalp Short", 
   "Neutral", "Range"
 ] as const;
 export const entryLevelTypes = ["50%", "67%"] as const;
