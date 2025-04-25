@@ -101,8 +101,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           deviceScaleFactor: 1.5
         });
         
-        // Get the full URL of the booklet page
-        const bookletUrl = `http://localhost:5000/booklet`;
+        // Get the full URL of the booklet page - use request host
+        const protocol = req.protocol;
+        const host = req.get('host');
+        const bookletUrl = `${protocol}://${host}/booklet`;
         
         await page.goto(bookletUrl, { 
           waitUntil: 'networkidle0',
@@ -129,6 +131,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break-inside: avoid;
               page-break-inside: avoid;
               margin-bottom: 15px;
+            }
+            header, nav, button, footer, .nonprintable {
+              display: none !important;
+            }
+            h1, h2, h3 {
+              color: black;
+              page-break-after: avoid;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+              page-break-inside: avoid;
+            }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              page-break-inside: avoid;
+            }
+            table, th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+            }
+            pre {
+              background-color: #f5f5f5;
+              padding: 10px;
+              border-radius: 4px;
+              overflow-x: auto;
+              page-break-inside: avoid;
             }
           `
         });
