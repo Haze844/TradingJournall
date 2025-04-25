@@ -104,7 +104,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </td>
                   <td className="p-3">{trade.rrAchieved}</td>
                   <td className="p-3">
-                    <span className={`${trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                    <span className={`${trade.profitLoss && trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss && trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
                       {trade.profitLoss ? `${trade.profitLoss > 0 ? '+' : ''}${trade.profitLoss.toFixed(2)}` : '-'}
                     </span>
                   </td>
@@ -116,7 +116,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
             ) : (
               // Empty state
               <tr>
-                <td colSpan={8} className="p-6 text-center text-muted-foreground">
+                <td colSpan={9} className="p-6 text-center text-muted-foreground">
                   Keine Trades gefunden
                 </td>
               </tr>
