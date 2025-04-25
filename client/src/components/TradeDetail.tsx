@@ -65,7 +65,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     setEditingMainTrend(selectedTrade.mainTrendM15);
     setEditingInternalTrend(selectedTrade.internalTrendM5);
     setEditingEntryLevel(selectedTrade.entryLevel);
-    setEditingProfitLoss(selectedTrade.profitLoss);
+    setEditingProfitLoss(selectedTrade.profitLoss || 0);
     setEditMode(true);
   };
 
@@ -281,6 +281,23 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             <div>
               <div className="text-sm text-muted-foreground mb-1">Status</div>
               <BadgeWinLoss isWin={selectedTrade.isWin} />
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Ergebnis in $</div>
+              {editMode ? (
+                <Input
+                  type="number"
+                  step="0.01"
+                  className="h-8"
+                  value={editingProfitLoss}
+                  onChange={(e) => setEditingProfitLoss(parseFloat(e.target.value))}
+                  placeholder="0.00"
+                />
+              ) : (
+                <div className={`font-bold ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                  {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}${selectedTrade.profitLoss.toFixed(2)} $` : '-'}
+                </div>
+              )}
             </div>
           </div>
 
