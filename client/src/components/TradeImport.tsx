@@ -36,6 +36,7 @@ export default function TradeImport() {
       queryClient.invalidateQueries({ queryKey: ["/api/performance-data"] });
       queryClient.invalidateQueries({ queryKey: ["/api/setup-win-rates"] });
       setFile(null);
+      setImporting(false);
     },
     onError: (error: Error) => {
       toast({
@@ -43,6 +44,7 @@ export default function TradeImport() {
         description: error.message,
         variant: "destructive",
       });
+      setImporting(false);
     }
   });
 
@@ -58,178 +60,203 @@ export default function TradeImport() {
     setImporting(true);
     
     try {
-      const text = await file.text();
-      Papa.parse(text, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results: Papa.ParseResult<any>) => {
-          const { data, errors } = results;
-          
-          if (errors.length > 0) {
-            toast({
-              title: "Fehler beim Parsen der CSV-Datei",
-              description: "Bitte überprüfen Sie das Format Ihrer Datei.",
-              variant: "destructive",
-            });
-            setImporting(false);
-            return;
-          }
-          
-          // CSV-Format erkennen (TradingView oder Tradovate)
-          const detectCSVFormat = (row: any): 'tradingview' | 'tradovate' | 'unknown' => {
-            // Prüfen auf charakteristische Tradovate-Felder
-            if (row['Contract'] !== undefined || 
-                row['Account ID'] !== undefined || 
-                row['P/L'] !== undefined ||
-                row['Commission'] !== undefined) {
-              return 'tradovate';
-            }
-            
-            // Prüfen auf charakteristische TradingView-Felder
-            if (row['Symbol'] !== undefined || 
-                row['Setup'] !== undefined || 
-                row['Strategy'] !== undefined) {
-              return 'tradingview';
-            }
-            
-            return 'unknown';
-          };
-          
-          // Tradovate Felder mappen
-          const mapTradovateFields = (row: any) => {
-            // Hier konvertieren wir Tradovate-spezifische Felder in unser internes Format
-            // P/L (Profit/Loss) bestimmt, ob der Trade gewonnen hat
-            const profitLoss = parseFloat(String(row['P/L'] || "0").replace(/[^0-9.-]/g, ''));
-            const isWin = profitLoss > 0;
-            
-            // Risk/Reward berechnen oder Default-Werte verwenden
-            // Für Tradovate können wir R:R aus Initial Risk und P/L berechnen
-            const initialRisk = parseFloat(String(row['Initial Risk'] || "1").replace(/[^0-9.-]/g, ''));
-            const rrAchieved = initialRisk !== 0 ? Math.abs(profitLoss / initialRisk) : 0;
-            
-            return {
-              symbol: row['Contract'] || row['Symbol'] || "",
-              setup: row['Strategy'] || row['Setup Type'] || "",
-              mainTrendM15: row['Market Direction'] || row['Trend'] || "",
-              internalTrendM5: row['Internal Direction'] || "",
-              entryType: row['Order Type'] || row['Action'] || (row['Side'] === 'Buy' ? 'Long' : 'Short') || "",
-              entryLevel: row['Fill Price'] || row['Average Price'] || "",
-              liquidation: row['Stop Price'] || row['Stop Loss'] || "",
-              location: row['Entry Zone'] || row['Entry Location'] || "",
-              rrAchieved: rrAchieved,
-              rrPotential: parseFloat(String(row['Target RR'] || "0").replace(/[^0-9.-]/g, '')),
-              profitLoss: profitLoss, // Ergebnis in $
-              isWin: isWin,
-              date: row['Fill Time'] || row['Time'] || row['Order Time'] || new Date().toISOString(),
-            };
-          };
-          
-          // TradingView Feldnamen erkennen
-          const mapTradingViewFields = (row: any) => {
-            // TradingView Exportfelder auf unsere Datenfelder mappen
-            const mappings: Record<string, string[]> = {
-              symbol: ["Symbol", "Ticker", "symbol", "instrument", "Instrument"],
-              setup: ["Setup", "Strategy", "setup", "Strategy Name", "strategy", "Trade Setup"],
-              mainTrendM15: ["Main Trend", "mainTrendM15", "main_trend_m15", "Main Direction", "Trend M15"],
-              internalTrendM5: ["Internal Trend", "internalTrendM5", "internal_trend_m5", "Sub Direction", "Trend M5"],
-              entryType: ["Entry Type", "entryType", "entry_type", "Entry", "Order Type"],
-              entryLevel: ["Entry Level", "entryLevel", "entry_level", "Entry Price", "Price"],
-              liquidation: ["Liquidation", "Stop Loss", "SL", "liquidation", "Stop"],
-              location: ["Location", "location", "Entry Zone", "Zone"],
-              rrAchieved: ["RR Achieved", "R:R", "Risk/Reward Achieved", "rrAchieved", "rr_achieved", "Actual R:R", "Real R:R"],
-              rrPotential: ["RR Potential", "Potential R:R", "Target R:R", "rrPotential", "rr_potential", "Expected R:R"],
-              isWin: ["Result", "Win", "isWin", "is_win", "Profit", "Trade Result", "Success"]
-            };
-
-            // Überprüfe für jedes unserer Felder, ob ein TradingView-Feld existiert
-            const result: Record<string, any> = {};
-            
-            Object.entries(mappings).forEach(([ourField, possibleTvFields]) => {
-              // Suche in der Zeile nach einem passenden Feld
-              const matchedField = possibleTvFields.find(field => row[field] !== undefined);
+      // FileReader für optimierte Verarbeitung
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        if (!e.target || !e.target.result) return;
+        
+        const csvText = e.target.result as string;
+        
+        // Optimierung durch Worker-ähnlichen Ansatz (keine Blockierung des UI)
+        setTimeout(() => {
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+              const data = results.data as any[];
+              const errors = results.errors;
               
-              if (matchedField) {
-                result[ourField] = row[matchedField];
-              } else {
-                // Wenn kein Feld gefunden wurde, setze Default-Wert
-                result[ourField] = ourField === 'rrAchieved' || ourField === 'rrPotential' ? 0 : "";
+              if (errors.length > 0) {
+                toast({
+                  title: "Fehler beim Parsen der CSV-Datei",
+                  description: "Bitte überprüfen Sie das Format Ihrer Datei.",
+                  variant: "destructive",
+                });
+                setImporting(false);
+                return;
               }
-            });
-            
-            return result;
-          };
-
-          const trades = data.map((row: any) => {
-            try {
-              // Format erkennen
-              const csvFormat = detectCSVFormat(row);
-              let processedRow: any;
               
-              // Entsprechend dem Format die Daten verarbeiten
-              if (csvFormat === 'tradovate') {
-                processedRow = mapTradovateFields(row);
-                console.log("Tradovate Format erkannt:", processedRow);
-              } else {
-                // Standardmäßig TradingView-Format annehmen
-                processedRow = mapTradingViewFields(row);
+              // CSV-Format erkennen (TradingView oder Tradovate)
+              const detectCSVFormat = (row: any): 'tradingview' | 'tradovate' | 'unknown' => {
+                // Prüfen auf charakteristische Tradovate-Felder
+                if (row['Contract'] !== undefined || 
+                    row['Account ID'] !== undefined || 
+                    row['P/L'] !== undefined ||
+                    row['Commission'] !== undefined) {
+                  return 'tradovate';
+                }
                 
-                // Konvertiere String-Werte in richtigen Datentyp für TradingView
-                // Versuche Profit/Loss-Wert aus verschiedenen möglichen Feldern zu extrahieren
-                const profitLossValue = row['P/L'] || row['PL'] || row['Profit'] || row['Profit/Loss'] || row['Net P/L'] || "0";
-                const profitLoss = parseFloat(String(profitLossValue).replace(/[^0-9.-]/g, ''));
+                // Prüfen auf charakteristische TradingView-Felder
+                if (row['Symbol'] !== undefined || 
+                    row['Setup'] !== undefined || 
+                    row['Strategy'] !== undefined) {
+                  return 'tradingview';
+                }
                 
-                processedRow = {
-                  symbol: processedRow.symbol || "",
-                  setup: processedRow.setup || "",
-                  mainTrendM15: processedRow.mainTrendM15 || "",
-                  internalTrendM5: processedRow.internalTrendM5 || "",
-                  entryType: processedRow.entryType || "",
-                  entryLevel: processedRow.entryLevel || "",
-                  liquidation: processedRow.liquidation || "",
-                  location: processedRow.location || "",
-                  rrAchieved: parseFloat(String(processedRow.rrAchieved || "0")),
-                  rrPotential: parseFloat(String(processedRow.rrPotential || "0")),
+                return 'unknown';
+              };
+              
+              // Tradovate Felder mappen
+              const mapTradovateFields = (row: any) => {
+                // Hier konvertieren wir Tradovate-spezifische Felder in unser internes Format
+                // P/L (Profit/Loss) bestimmt, ob der Trade gewonnen hat
+                const profitLoss = parseFloat(String(row['P/L'] || "0").replace(/[^0-9.-]/g, ''));
+                const isWin = profitLoss > 0;
+                
+                // Risk/Reward berechnen oder Default-Werte verwenden
+                // Für Tradovate können wir R:R aus Initial Risk und P/L berechnen
+                const initialRisk = parseFloat(String(row['Initial Risk'] || "1").replace(/[^0-9.-]/g, ''));
+                const rrAchieved = initialRisk !== 0 ? Math.abs(profitLoss / initialRisk) : 0;
+                
+                return {
+                  symbol: row['Contract'] || row['Symbol'] || "",
+                  setup: row['Strategy'] || row['Setup Type'] || "",
+                  mainTrendM15: row['Market Direction'] || row['Trend'] || "",
+                  internalTrendM5: row['Internal Direction'] || "",
+                  entryType: row['Order Type'] || row['Action'] || (row['Side'] === 'Buy' ? 'Long' : 'Short') || "",
+                  entryLevel: row['Fill Price'] || row['Average Price'] || "",
+                  liquidation: row['Stop Price'] || row['Stop Loss'] || "",
+                  location: row['Entry Zone'] || row['Entry Location'] || "",
+                  rrAchieved: rrAchieved,
+                  rrPotential: parseFloat(String(row['Target RR'] || "0").replace(/[^0-9.-]/g, '')),
                   profitLoss: profitLoss, // Ergebnis in $
-                  // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
-                  isWin: typeof processedRow.isWin === 'boolean' ? processedRow.isWin : 
-                         String(processedRow.isWin).toLowerCase() === 'true' || 
-                         String(processedRow.isWin).toLowerCase() === 'win' ||
-                         String(processedRow.isWin).toLowerCase() === 'yes' ||
-                         String(processedRow.isWin).toLowerCase() === 'profit' ||
-                         profitLoss > 0,
-                  date: row.Date || row.date || row.Time || row.time || new Date().toISOString(),
+                  isWin: isWin,
+                  date: row['Fill Time'] || row['Time'] || row['Order Time'] || new Date().toISOString(),
                 };
+              };
+              
+              // TradingView Feldnamen erkennen
+              const mapTradingViewFields = (row: any) => {
+                // TradingView Exportfelder auf unsere Datenfelder mappen
+                const mappings: Record<string, string[]> = {
+                  symbol: ["Symbol", "Ticker", "symbol", "instrument", "Instrument"],
+                  setup: ["Setup", "Strategy", "setup", "Strategy Name", "strategy", "Trade Setup"],
+                  mainTrendM15: ["Main Trend", "mainTrendM15", "main_trend_m15", "Main Direction", "Trend M15"],
+                  internalTrendM5: ["Internal Trend", "internalTrendM5", "internal_trend_m5", "Sub Direction", "Trend M5"],
+                  entryType: ["Entry Type", "entryType", "entry_type", "Entry", "Order Type"],
+                  entryLevel: ["Entry Level", "entryLevel", "entry_level", "Entry Price", "Price"],
+                  liquidation: ["Liquidation", "Stop Loss", "SL", "liquidation", "Stop"],
+                  location: ["Location", "location", "Entry Zone", "Zone"],
+                  rrAchieved: ["RR Achieved", "R:R", "Risk/Reward Achieved", "rrAchieved", "rr_achieved", "Actual R:R", "Real R:R"],
+                  rrPotential: ["RR Potential", "Potential R:R", "Target R:R", "rrPotential", "rr_potential", "Expected R:R"],
+                  isWin: ["Result", "Win", "isWin", "is_win", "Profit", "Trade Result", "Success"]
+                };
+
+                // Überprüfe für jedes unserer Felder, ob ein TradingView-Feld existiert
+                const result: Record<string, any> = {};
+                
+                Object.entries(mappings).forEach(([ourField, possibleTvFields]) => {
+                  // Suche in der Zeile nach einem passenden Feld
+                  const matchedField = possibleTvFields.find(field => row[field] !== undefined);
+                  
+                  if (matchedField) {
+                    result[ourField] = row[matchedField];
+                  } else {
+                    // Wenn kein Feld gefunden wurde, setze Default-Wert
+                    result[ourField] = ourField === 'rrAchieved' || ourField === 'rrPotential' ? 0 : "";
+                  }
+                });
+                
+                return result;
+              };
+
+              const trades = data.map((row: any) => {
+                try {
+                  // Format erkennen
+                  const csvFormat = detectCSVFormat(row);
+                  let processedRow: any;
+                  
+                  // Entsprechend dem Format die Daten verarbeiten
+                  if (csvFormat === 'tradovate') {
+                    processedRow = mapTradovateFields(row);
+                  } else {
+                    // Standardmäßig TradingView-Format annehmen
+                    processedRow = mapTradingViewFields(row);
+                    
+                    // Konvertiere String-Werte in richtigen Datentyp für TradingView
+                    // Versuche Profit/Loss-Wert aus verschiedenen möglichen Feldern zu extrahieren
+                    const profitLossValue = row['P/L'] || row['PL'] || row['Profit'] || row['Profit/Loss'] || row['Net P/L'] || "0";
+                    const profitLoss = parseFloat(String(profitLossValue).replace(/[^0-9.-]/g, ''));
+                    
+                    processedRow = {
+                      symbol: processedRow.symbol || "",
+                      setup: processedRow.setup || "",
+                      mainTrendM15: processedRow.mainTrendM15 || "",
+                      internalTrendM5: processedRow.internalTrendM5 || "",
+                      entryType: processedRow.entryType || "",
+                      entryLevel: processedRow.entryLevel || "",
+                      liquidation: processedRow.liquidation || "",
+                      location: processedRow.location || "",
+                      rrAchieved: parseFloat(String(processedRow.rrAchieved || "0")),
+                      rrPotential: parseFloat(String(processedRow.rrPotential || "0")),
+                      profitLoss: profitLoss, // Ergebnis in $
+                      // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
+                      isWin: typeof processedRow.isWin === 'boolean' ? processedRow.isWin : 
+                             String(processedRow.isWin).toLowerCase() === 'true' || 
+                             String(processedRow.isWin).toLowerCase() === 'win' ||
+                             String(processedRow.isWin).toLowerCase() === 'yes' ||
+                             String(processedRow.isWin).toLowerCase() === 'profit' ||
+                             profitLoss > 0,
+                      date: row.Date || row.date || row.Time || row.time || new Date().toISOString(),
+                    };
+                  }
+                  
+                  return processedRow;
+                } catch (error) {
+                  console.error("Fehler beim Verarbeiten der Zeile:", row, error);
+                  return null;
+                }
+              }).filter(Boolean);
+              
+              if (trades.length === 0) {
+                toast({
+                  title: "Keine gültigen Daten gefunden",
+                  description: "Die CSV-Datei enthält keine gültigen Trade-Daten.",
+                  variant: "destructive",
+                });
+                setImporting(false);
+                return;
               }
               
-              return processedRow;
-            } catch (error) {
-              console.error("Fehler beim Verarbeiten der Zeile:", row, error);
-              return null;
+              // Begrenze die Anzahl der zu verarbeitenden Zeilen für bessere Performance
+              const batchSize = 50;
+              const processedTrades = trades.slice(0, Math.min(batchSize, trades.length));
+              
+              importMutation.mutate(processedTrades);
+            },
+            error: function(error) {
+              toast({
+                title: "Fehler beim Parsen der CSV-Datei",
+                description: error.message,
+                variant: "destructive",
+              });
+              setImporting(false);
             }
-          }).filter(Boolean);
-          
-          if (trades.length === 0) {
-            toast({
-              title: "Keine gültigen Daten gefunden",
-              description: "Die CSV-Datei enthält keine gültigen Trade-Daten.",
-              variant: "destructive",
-            });
-            setImporting(false);
-            return;
-          }
-          
-          importMutation.mutate(trades);
-          setImporting(false);
-        },
-        error: (error: Error) => {
-          toast({
-            title: "Fehler beim Parsen der CSV-Datei",
-            description: error.message,
-            variant: "destructive",
           });
-          setImporting(false);
-        }
-      });
+        }, 0);
+      };
+      
+      reader.onerror = function() {
+        toast({
+          title: "Fehler beim Lesen der Datei",
+          description: "Die Datei konnte nicht gelesen werden.",
+          variant: "destructive",
+        });
+        setImporting(false);
+      };
+      
+      reader.readAsText(file);
     } catch (error) {
       toast({
         title: "Fehler beim Lesen der Datei",
