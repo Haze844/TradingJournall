@@ -499,13 +499,15 @@ export default function PersonalCoach() {
       </div>
       
       <Tabs defaultValue="daily" className="w-full">
-        <TabsList className="grid grid-cols-5 mb-6">
-          <TabsTrigger value="daily">Tägliche Ziele</TabsTrigger>
-          <TabsTrigger value="weekly">Wöchentliche Ziele</TabsTrigger>
-          <TabsTrigger value="monthly">Monatliche Ziele</TabsTrigger>
-          <TabsTrigger value="feedback">Coaching Feedback</TabsTrigger>
-          <TabsTrigger value="progress">Fortschritt</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-center w-full mb-6">
+          <TabsList className="grid grid-cols-5">
+            <TabsTrigger value="daily">Tägliche Ziele</TabsTrigger>
+            <TabsTrigger value="weekly">Wöchentliche Ziele</TabsTrigger>
+            <TabsTrigger value="monthly">Monatliche Ziele</TabsTrigger>
+            <TabsTrigger value="feedback">Coaching Feedback</TabsTrigger>
+            <TabsTrigger value="progress">Fortschritt</TabsTrigger>
+          </TabsList>
+        </div>
         
         <TabsContent value="daily" className="mt-0">
           <GoalsList type="daily" userId={user.id} />
