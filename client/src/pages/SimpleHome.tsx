@@ -100,7 +100,7 @@ export default function SimpleHome() {
         <TabsContent value="trades" className="mt-0">
           <div className="space-y-6">
             {/* Main Trade Table Section - Full Width */}
-            <div className="w-full">
+            <div className="w-full space-y-4">
               {/* Ein gemeinsames Element für Filter und Tabelle */}
               <div className="rocket-card rounded-xl p-0 overflow-hidden">
                 {/* Filter Bar als integrierter Teil des Elementes */}
@@ -115,6 +115,14 @@ export default function SimpleHome() {
                   />
                 </div>
               </div>
+              
+              {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
+              {selectedTrade && (
+                <div className="rocket-card rounded-xl p-4">
+                  <h3 className="text-lg font-bold moon-text mb-3">Trade Details</h3>
+                  <TradeDetail selectedTrade={selectedTrade} />
+                </div>
+              )}
             </div>
 
             {/* Two Column Grid for Details and Charts */}
@@ -160,14 +168,11 @@ export default function SimpleHome() {
                 </div>
               </div>
 
-              {/* Right Column - Details Panel */}
+              {/* Right Column - Tools Panel */}
               <div className="lg:col-span-1">
                 <div className="rocket-card rounded-xl">
-                  <Tabs defaultValue="details" className="p-4">
-                    <TabsList className="grid grid-cols-3 mb-4 bg-black/60">
-                      <TabsTrigger value="details" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                        Trade Details
-                      </TabsTrigger>
+                  <Tabs defaultValue="add" className="p-4">
+                    <TabsList className="grid grid-cols-2 mb-4 bg-black/60">
                       <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                         Hinzufügen
                       </TabsTrigger>
@@ -175,10 +180,6 @@ export default function SimpleHome() {
                         Import
                       </TabsTrigger>
                     </TabsList>
-                  
-                    <TabsContent value="details" className="mt-0">
-                      <TradeDetail selectedTrade={selectedTrade} />
-                    </TabsContent>
                     
                     <TabsContent value="add" className="mt-0">
                       <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
