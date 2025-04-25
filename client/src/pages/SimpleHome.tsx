@@ -83,11 +83,6 @@ export default function SimpleHome() {
       {/* Header */}
       <Header />
 
-      {/* Filter Bar - Wrapped in a styled card */}
-      <div className="rocket-card rounded-xl p-4 mb-6">
-        <FilterBar filters={filters} onFilterChange={handleFilterChange} />
-      </div>
-
       {/* Main Content Tabs - Vereinfacht und fokussiert */}
       <Tabs defaultValue="trades" className="mb-6">
         <TabsList className="w-full justify-start mb-4 overflow-x-auto bg-black/40 p-1 rounded-xl">
@@ -106,8 +101,13 @@ export default function SimpleHome() {
           <div className="space-y-6">
             {/* Main Trade Table Section - Full Width */}
             <div className="w-full">
-              {/* Trade Table */}
-              <div className="rocket-card rounded-xl p-4">
+              {/* Filter Bar - Integriert mit der Trade-Tabelle */}
+              <div className="rocket-card rounded-xl p-4 mb-0">
+                <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+              </div>
+              
+              {/* Trade Table - Direkt unter dem Filter ohne Abstand */}
+              <div className="rocket-card rounded-xl rounded-t-none border-t-0 p-4">
                 <TradeTable
                   trades={trades}
                   isLoading={tradesLoading}
