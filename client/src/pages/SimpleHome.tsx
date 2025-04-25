@@ -19,7 +19,7 @@ import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
-  Users, Download, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon
+  Users, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -74,8 +74,6 @@ export default function SimpleHome() {
     setFilters({ ...filters, ...newFilters });
   };
 
-  // Toggle function removed
-
   return (
     <div className="container mx-auto px-4 py-6 relative overflow-hidden">
       {/* Background Elements */}
@@ -105,9 +103,9 @@ export default function SimpleHome() {
         
         {/* Trades Tab */}
         <TabsContent value="trades" className="mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Trade Table Section */}
-            <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6">
+            {/* Main Trade Table Section - Full Width */}
+            <div className="w-full">
               {/* Trade Table */}
               <div className="rocket-card rounded-xl p-4">
                 <TradeTable
@@ -116,74 +114,80 @@ export default function SimpleHome() {
                   onTradeSelect={handleTradeSelect}
                 />
               </div>
-              
-              {/* TradingView Chart Display (wenn ein Trade ausgewählt ist) */}
-              {selectedTrade && selectedTrade.chartImage && (
-                <div className="rocket-card rounded-xl p-4">
-                  <h3 className="text-lg font-bold mb-4 flex items-center">
-                    <ImageIcon className="w-4 h-4 mr-2" /> 
-                    Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
-                  </h3>
-                  <div className="rounded-lg overflow-hidden border border-border">
-                    {selectedTrade.chartImage.startsWith('http') ? (
-                      // Externe URL (TradingView Link)
-                      <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
+            </div>
+
+            {/* Two Column Grid for Details and Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Charts and Weekly Summary */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* TradingView Chart Display (wenn ein Trade ausgewählt ist) */}
+                {selectedTrade && selectedTrade.chartImage && (
+                  <div className="rocket-card rounded-xl p-4">
+                    <h3 className="text-lg font-bold mb-4 flex items-center">
+                      <ImageIcon className="w-4 h-4 mr-2" /> 
+                      Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
+                    </h3>
+                    <div className="rounded-lg overflow-hidden border border-border">
+                      {selectedTrade.chartImage.startsWith('http') ? (
+                        // Externe URL (TradingView Link)
+                        <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
+                          <img 
+                            src={selectedTrade.chartImage} 
+                            alt={`Chart für ${selectedTrade.symbol}`}
+                            className="w-full h-auto max-h-[500px] object-contain"
+                          />
+                        </a>
+                      ) : (
+                        // Base64 Bild
                         <img 
                           src={selectedTrade.chartImage} 
                           alt={`Chart für ${selectedTrade.symbol}`}
                           className="w-full h-auto max-h-[500px] object-contain"
                         />
-                      </a>
-                    ) : (
-                      // Base64 Bild
-                      <img 
-                        src={selectedTrade.chartImage} 
-                        alt={`Chart für ${selectedTrade.symbol}`}
-                        className="w-full h-auto max-h-[500px] object-contain"
-                      />
-                    )}
+                      )}
+                    </div>
                   </div>
+                )}
+
+                {/* Weekly Summary */}
+                <div className="rocket-card rounded-xl p-4">
+                  <WeeklySummary
+                    userId={userId}
+                    weekStart={filters.startDate}
+                    weekEnd={filters.endDate}
+                  />
                 </div>
-              )}
-
-              {/* Weekly Summary */}
-              <div className="rocket-card rounded-xl p-4">
-                <WeeklySummary
-                  userId={userId}
-                  weekStart={filters.startDate}
-                  weekEnd={filters.endDate}
-                />
               </div>
-            </div>
 
-            {/* Side Panel */}
-            <div className="lg:col-span-1">
-              <div className="rocket-card rounded-xl">
-                <Tabs defaultValue="details" className="p-4">
-                  <TabsList className="grid grid-cols-3 mb-4 bg-black/60">
-                    <TabsTrigger value="details" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                      Trade Details
-                    </TabsTrigger>
-                    <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                      Hinzufügen
-                    </TabsTrigger>
-                    <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                      Import
-                    </TabsTrigger>
-                  </TabsList>
+              {/* Right Column - Details Panel */}
+              <div className="lg:col-span-1">
+                <div className="rocket-card rounded-xl">
+                  <Tabs defaultValue="details" className="p-4">
+                    <TabsList className="grid grid-cols-3 mb-4 bg-black/60">
+                      <TabsTrigger value="details" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                        Trade Details
+                      </TabsTrigger>
+                      <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                        Hinzufügen
+                      </TabsTrigger>
+                      <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                        Import
+                      </TabsTrigger>
+                    </TabsList>
                   
-                  <TabsContent value="details" className="mt-0">
-                    <TradeDetail selectedTrade={selectedTrade} />
-                  </TabsContent>
-                  
-                  <TabsContent value="add" className="mt-0">
-                    <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
-                  </TabsContent>
-                  
-                  <TabsContent value="import" className="mt-0">
-                    <TradeImport userId={userId} onImport={refetchTrades} />
-                  </TabsContent>
-                </Tabs>
+                    <TabsContent value="details" className="mt-0">
+                      <TradeDetail selectedTrade={selectedTrade} />
+                    </TabsContent>
+                    
+                    <TabsContent value="add" className="mt-0">
+                      <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
+                    </TabsContent>
+                    
+                    <TabsContent value="import" className="mt-0">
+                      <TradeImport userId={userId} onImport={refetchTrades} />
+                    </TabsContent>
+                  </Tabs>
+                </div>
               </div>
             </div>
           </div>
