@@ -17,7 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/generate-pdf", async (req: Request, res: Response) => {
     try {
       const browser = await puppeteer.launch({
-        headless: 'new',
+        headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
       const page = await browser.newPage();

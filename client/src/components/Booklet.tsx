@@ -40,7 +40,7 @@ export default function Booklet() {
           Willkommen zum kompakten LvlUp Trading Benutzerhandbuch. Hier findest du eine Übersicht aller Funktionen und Möglichkeiten der Anwendung.
         </p>
 
-        <div className="flex justify-end mb-6 gap-2">
+        <div className="flex justify-end mb-6">
           <a 
             href="/generate-pdf"
             className="flex items-center gap-2 pulse-btn bg-gradient-to-r from-primary to-primary/80 text-white py-2 px-4 rounded-md"
@@ -49,13 +49,6 @@ export default function Booklet() {
           >
             <Download className="h-5 w-5" /> PDF herunterladen
           </a>
-          <Button 
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => window.print()}
-          >
-            <Printer className="h-5 w-5" /> Drucken
-          </Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
