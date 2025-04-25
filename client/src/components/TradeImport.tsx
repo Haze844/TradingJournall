@@ -118,6 +118,7 @@ export default function TradeImport() {
               location: row['Entry Zone'] || row['Entry Location'] || "",
               rrAchieved: rrAchieved,
               rrPotential: parseFloat(String(row['Target RR'] || "0").replace(/[^0-9.-]/g, '')),
+              profitLoss: profitLoss, // Ergebnis in $
               isWin: isWin,
               date: row['Fill Time'] || row['Time'] || row['Order Time'] || new Date().toISOString(),
             };
