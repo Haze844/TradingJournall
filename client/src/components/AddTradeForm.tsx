@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ChartImageUpload from "./ChartImageUpload";
 import {
   insertTradeSchema,
   setupTypes,
@@ -31,7 +32,9 @@ import {
 // Erweitere das Schema für clientseitige Validierung
 const addTradeSchema = insertTradeSchema.extend({
   date: z.string().min(1, "Datum ist erforderlich"),
-  time: z.string().min(1, "Uhrzeit ist erforderlich")
+  time: z.string().min(1, "Uhrzeit ist erforderlich"),
+  profitLoss: z.number().optional(),
+  chartImage: z.string().optional()
 });
 
 type AddTradeFormData = z.infer<typeof addTradeSchema> & { time: string };
@@ -347,7 +350,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* R:R Informationen */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="rrAchieved">R:R Erreicht</Label>
               <Input
@@ -374,6 +377,20 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
                 <p className="text-xs text-red-500 mt-1">{errors.rrPotential.message}</p>
               )}
             </div>
+            <div>
+              <Label htmlFor="profitLoss">Ergebnis in $</Label>
+              <Input
+                id="profitLoss"
+                type="number"
+                step="0.01"
+                {...register("profitLoss", { valueAsNumber: true })}
+                className={errors.profitLoss ? "border-red-500" : ""}
+                placeholder="0.00"
+              />
+              {errors.profitLoss && (
+                <p className="text-xs text-red-500 mt-1">{errors.profitLoss.message}</p>
+              )}
+            </div>
           </div>
 
           {/* Win/Loss Status */}
@@ -385,6 +402,15 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
             />
             <Label htmlFor="isWin">Trade gewonnen</Label>
+          </div>
+
+          {/* Chart Image Upload */}
+          <div className="mb-4">
+            <Label htmlFor="chartImage">TradingView Chart</Label>
+            <ChartImageUpload 
+              existingImage={null} 
+              onChange={(base64Image) => setValue("chartImage", base64Image || "")}
+            />
           </div>
 
           <Button

@@ -38,6 +38,7 @@ export const trades = pgTable("trades", {
   location: text("location").notNull(),
   rrAchieved: real("rr_achieved").notNull(),
   rrPotential: real("rr_potential").notNull(),
+  profitLoss: real("profit_loss").default(0), // Gewinn/Verlust in $
   gptFeedback: text("gpt_feedback"),
   chartImage: text("chart_image"),
   isWin: boolean("is_win").notNull(),
