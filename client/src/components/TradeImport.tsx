@@ -283,9 +283,10 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     
                     // Spezielle Behandlung für datenquellenspezifische Felder
                     
-                    // Prüfen, ob dies eine CSV mit deinem speziellen Format ist (Symbol + pnl + timestamps)
+                    // Prüfen, ob dies eine CSV mit deinem speziellen Format ist (Symbol + pnl + timestamps + Preise)
                     const hasSpecialFormat = row.symbol && row.pnl !== undefined && 
-                                           (row.boughtTimestamp !== undefined || row.soldTimestamp !== undefined);
+                                           (row.boughtTimestamp !== undefined || row.soldTimestamp !== undefined) &&
+                                           (row.buyPrice !== undefined || row.sellPrice !== undefined);
                     
                     // Versuche Profit/Loss-Wert aus verschiedenen möglichen Feldern zu extrahieren
                     let profitLossValue;
@@ -345,6 +346,36 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     
                     console.log("Profit/Loss erkannt:", profitLossValue, "→", profitLoss);
                     
+                    // RR-Berechnung für Specicalformat mit Buy/Sell Price
+                    let rrAchieved = processedRow.rrAchieved || 0;
+                    let rrPotential = processedRow.rrPotential || 0;
+                    
+                    if (hasSpecialFormat && row.buyPrice && row.sellPrice && row.qty) {
+                      try {
+                        const buyPrice = parseFloat(row.buyPrice);
+                        const sellPrice = parseFloat(row.sellPrice);
+                        const qty = parseFloat(row.qty);
+                        
+                        // Standardmäßig nehmen wir 1:1 RR an (wenn keine bessere Info verfügbar ist)
+                        const defaultRiskPerContract = 100; // $100 Risiko pro Kontrakt als Beispiel
+                        const pointValue = 5; // $5 pro Punkt für MNQ als Beispiel
+                        
+                        const priceDifference = Math.abs(sellPrice - buyPrice);
+                        const profitPerContract = priceDifference * pointValue;
+                        const totalProfitLoss = profitPerContract * qty;
+                        
+                        // RR = Gewinn / Risiko
+                        const calculatedRR = totalProfitLoss / (defaultRiskPerContract * qty);
+                        
+                        rrAchieved = Math.round(calculatedRR * 100) / 100; // Auf 2 Stellen runden
+                        rrPotential = rrAchieved * 1.5; // Potentielles RR ist oft höher
+                        
+                        console.log("RR berechnet:", rrAchieved, "Potential:", rrPotential);
+                      } catch (err) {
+                        console.error("Fehler bei RR-Berechnung:", err);
+                      }
+                    }
+                    
                     processedRow = {
                       symbol: processedRow.symbol || "",
                       setup: processedRow.setup || "",
@@ -363,8 +394,8 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                         duration: row.duration
                       } : undefined,
                       location: processedRow.location || "",
-                      rrAchieved: parseFloat(String(processedRow.rrAchieved || "0")),
-                      rrPotential: parseFloat(String(processedRow.rrPotential || "0")),
+                      rrAchieved: rrAchieved || parseFloat(String(processedRow.rrAchieved || "0")),
+                      rrPotential: rrPotential || parseFloat(String(processedRow.rrPotential || "0")),
                       profitLoss: profitLoss, // Ergebnis in $
                       // Für den isWin-Wert prüfen wir verschiedene Möglichkeiten
                       isWin: typeof processedRow.isWin === 'boolean' ? processedRow.isWin : 
