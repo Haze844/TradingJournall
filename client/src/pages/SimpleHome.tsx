@@ -5,6 +5,7 @@ import TradeTable from "@/components/TradeTable";
 import WeeklySummary from "@/components/WeeklySummary";
 import TradeDetail from "@/components/TradeDetail";
 import TradeImport from "@/components/TradeImport";
+import AddTradeForm from "@/components/AddTradeForm";
 import TradingPatterns from "@/components/TradingPatterns";
 import AdvancedTradeAnalysis from "@/components/AdvancedTradeAnalysis";
 import RiskManagementDashboard from "@/components/RiskManagementDashboard";
@@ -130,9 +131,12 @@ export default function SimpleHome() {
             <div className="lg:col-span-1">
               <div className="rocket-card rounded-xl">
                 <Tabs defaultValue="details" className="p-4">
-                  <TabsList className="grid grid-cols-2 mb-4 bg-black/60">
+                  <TabsList className="grid grid-cols-3 mb-4 bg-black/60">
                     <TabsTrigger value="details" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                       Trade Details
+                    </TabsTrigger>
+                    <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                      Hinzufügen
                     </TabsTrigger>
                     <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                       Import
@@ -140,7 +144,11 @@ export default function SimpleHome() {
                   </TabsList>
                   
                   <TabsContent value="details" className="mt-0">
-                    <TradeDetail trade={selectedTrade} />
+                    <TradeDetail selectedTrade={selectedTrade} />
+                  </TabsContent>
+                  
+                  <TabsContent value="add" className="mt-0">
+                    <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
                   </TabsContent>
                   
                   <TabsContent value="import" className="mt-0">
