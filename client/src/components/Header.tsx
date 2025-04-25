@@ -35,7 +35,7 @@ export default function Header() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           
           {/* Logo und Titel - Verlinkt zur Hauptseite */}
-          <Link href="/" className="flex items-center gap-3 mb-4 md:mb-0 hover:opacity-80 transition-opacity">
+          <Link href="/" className="flex items-center gap-3 mb-4 md:mb-0 hover:opacity-80 transition-opacity whitespace-nowrap">
             <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-extrabold text-sm meme-logo shadow-lg">
               LVL<br />UP
             </div>
@@ -46,7 +46,7 @@ export default function Header() {
           </Link>
           
           {/* Hauptnavigation */}
-          <nav className="flex flex-wrap justify-center gap-3 mb-2 md:mb-0">
+          <nav className="flex flex-nowrap justify-center gap-3 mb-2 md:mb-0 whitespace-nowrap overflow-x-auto">
             {/* Dashboard Button - Immer zuerst */}
             <Button variant="ghost" size="sm" asChild>
               <Link href="/">
@@ -170,7 +170,7 @@ export default function Header() {
           </nav>
           
           {/* User-Menü rechts */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 whitespace-nowrap">
             {user ? (
               <>
                 <span className="text-sm text-muted-foreground mr-1">
