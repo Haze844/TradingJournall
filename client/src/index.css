@@ -124,4 +124,32 @@
     animation: pulse 1.5s ease-in-out infinite;
     box-shadow: 0 0 20px rgba(90, 140, 250, 0.6);
   }
+  
+  /* Header styling */
+  .main-header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(90, 140, 250, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Submenu styles */
+  .submenu-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    justify-content: center;
+  }
+  
+  .submenu-item {
+    font-size: 0.75rem;
+    height: 1.75rem;
+    padding: 0 0.5rem;
+    transition: all 0.2s ease;
+  }
+  
+  .submenu-item:hover {
+    background-color: rgba(90, 140, 250, 0.1);
+    color: rgb(90, 140, 250);
+  }
 }

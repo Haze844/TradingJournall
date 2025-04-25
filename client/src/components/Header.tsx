@@ -14,8 +14,9 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-black/50 backdrop-blur-sm border-b border-primary/20 shadow-lg mb-6">
+    <header className="w-full main-header mb-6">
       <div className="container mx-auto px-4 py-4">
+        {/* Hauptzeile mit Logo, Hauptmenü und Nutzerinfo */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           
           {/* Logo und Titel */}
@@ -25,6 +26,7 @@ export default function Header() {
             </div>
             <div>
               <h1 className="text-xl font-bold moon-text">LvlUp Trading</h1>
+              <p className="text-xs text-muted-foreground">Trading-Performance optimieren</p>
             </div>
           </div>
           
@@ -87,44 +89,79 @@ export default function Header() {
         </div>
         
         {/* Zweite Navigationszeile für Untermenüs */}
-        <div className="flex flex-wrap justify-center gap-1 text-xs mt-3 text-muted-foreground">
-          <Button variant="link" size="sm" className="text-xs h-7 px-2" asChild>
+        <div className="submenu-items mt-3 text-muted-foreground">
+          <Button variant="link" size="sm" className="submenu-item" asChild>
+            <Link href="/">
+              <BarChart2 className="w-3 h-3 mr-1" />
+              Dashboard
+            </Link>
+          </Button>
+          
+          <Button variant="link" size="sm" className="submenu-item" asChild>
             <Link href="/#trades">
               <BarChart2 className="w-3 h-3 mr-1" />
-              Trades
+              Trades Übersicht
             </Link>
           </Button>
           
-          <Button variant="link" size="sm" className="text-xs h-7 px-2" asChild>
+          <Button variant="link" size="sm" className="submenu-item" asChild>
             <Link href="/#import">
               <FileUp className="w-3 h-3 mr-1" />
-              Import
+              CSV Import
             </Link>
           </Button>
           
-          <Button variant="link" size="sm" className="text-xs h-7 px-2" asChild>
+          <Button variant="link" size="sm" className="submenu-item" asChild>
             <Link href="/#ai-analysis">
               <Brain className="w-3 h-3 mr-1" />
               KI-Analyse
             </Link>
           </Button>
           
-          <Button variant="link" size="sm" className="text-xs h-7 px-2" asChild>
+          <Button variant="link" size="sm" className="submenu-item" asChild>
             <Link href="/#risk-management">
               <AlertCircle className="w-3 h-3 mr-1" />
               Risikomanagement
             </Link>
           </Button>
           
-          <Button variant="link" size="sm" className="text-xs h-7 px-2" asChild>
+          <Button variant="link" size="sm" className="submenu-item" asChild>
             <Link href="/#market-phase">
               <Activity className="w-3 h-3 mr-1" />
               Marktphasen
             </Link>
           </Button>
           
-          <Button variant="link" size="sm" className="text-xs h-7 px-2" asChild>
-            <Link href="/lvlup-trading-handbuch-style.html">
+          <Button variant="link" size="sm" className="submenu-item" asChild>
+            <Link href="/coach">
+              <Trophy className="w-3 h-3 mr-1" />
+              Coach
+            </Link>
+          </Button>
+          
+          <Button variant="link" size="sm" className="submenu-item" asChild>
+            <Link href="/calendar">
+              <Calendar className="w-3 h-3 mr-1" />
+              Makro-Kalender
+            </Link>
+          </Button>
+          
+          <Button variant="link" size="sm" className="submenu-item" asChild>
+            <Link href="/social">
+              <Users className="w-3 h-3 mr-1" />
+              Social Trading
+            </Link>
+          </Button>
+          
+          <Button variant="link" size="sm" className="submenu-item" asChild>
+            <Link href="/booklet">
+              <BookOpen className="w-3 h-3 mr-1" />
+              Handbuch
+            </Link>
+          </Button>
+          
+          <Button variant="link" size="sm" className="submenu-item" asChild>
+            <Link href="/lvlup-trading-handbuch-style.html" target="_blank">
               <Download className="w-3 h-3 mr-1" />
               Handbuch PDF
             </Link>
