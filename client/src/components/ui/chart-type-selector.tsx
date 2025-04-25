@@ -1,35 +1,23 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { BarChart, CandlestickChart } from "lucide-react";
+import React from 'react';
+import { BarChart, LineChart } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
-export type ChartType = "line" | "candlestick";
+export type ChartType = 'line' | 'candle';
 
 interface ChartTypeSelectorProps {
   value: ChartType;
-  onChange: (type: ChartType) => void;
+  onChange: (value: ChartType) => void;
 }
 
-export default function ChartTypeSelector({ value, onChange }: ChartTypeSelectorProps) {
+export function ChartTypeSelector({ value, onChange }: ChartTypeSelectorProps) {
   return (
-    <div className="inline-flex items-center p-1 rounded-lg bg-muted/50">
-      <Button
-        variant={value === "line" ? "default" : "ghost"}
-        size="sm"
-        className={`h-8 ${value === "line" ? "bg-white text-primary" : "text-muted-foreground"}`}
-        onClick={() => onChange("line")}
-      >
-        <BarChart className="h-4 w-4 mr-2" />
-        Linie
-      </Button>
-      <Button
-        variant={value === "candlestick" ? "default" : "ghost"}
-        size="sm"
-        className={`h-8 ${value === "candlestick" ? "bg-white text-primary" : "text-muted-foreground"}`}
-        onClick={() => onChange("candlestick")}
-      >
-        <CandlestickChart className="h-4 w-4 mr-2" />
-        Kerzen
-      </Button>
-    </div>
+    <ToggleGroup type="single" value={value} onValueChange={(val) => val && onChange(val as ChartType)}>
+      <ToggleGroupItem value="line" aria-label="Liniendiagramm anzeigen" className="h-8 w-8">
+        <LineChart className="h-4 w-4" />
+      </ToggleGroupItem>
+      <ToggleGroupItem value="candle" aria-label="Kerzendiagramm anzeigen" className="h-8 w-8">
+        <BarChart className="h-4 w-4" />
+      </ToggleGroupItem>
+    </ToggleGroup>
   );
 }
