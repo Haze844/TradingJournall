@@ -34,8 +34,8 @@ export default function Header() {
         {/* Hauptzeile mit Logo, Hauptmenü und Nutzerinfo */}
         <div className="flex flex-col md:flex-row justify-between items-center">
           
-          {/* Logo und Titel */}
-          <div className="flex items-center gap-3 mb-4 md:mb-0">
+          {/* Logo und Titel - Verlinkt zur Hauptseite */}
+          <Link href="/" className="flex items-center gap-3 mb-4 md:mb-0 hover:opacity-80 transition-opacity">
             <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-extrabold text-sm meme-logo shadow-lg">
               LVL<br />UP
             </div>
@@ -43,7 +43,7 @@ export default function Header() {
               <h1 className="text-xl font-bold moon-text">LvlUp Trading</h1>
               <p className="text-xs text-muted-foreground">Trading-Performance optimieren</p>
             </div>
-          </div>
+          </Link>
           
           {/* Hauptnavigation */}
           <nav className="flex flex-wrap justify-center gap-3 mb-2 md:mb-0">
