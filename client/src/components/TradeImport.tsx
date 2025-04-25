@@ -316,8 +316,31 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     let tradeDate = row.Date || row.date || row.Time || row.time || new Date().toISOString();
                     if (hasSpecialFormat && (row.boughtTimestamp || row.soldTimestamp)) {
                       const timestamp = row.boughtTimestamp || row.soldTimestamp;
-                      tradeDate = new Date(Number(timestamp)).toISOString();
-                      console.log("Datum aus Timestamp gesetzt:", tradeDate);
+                      
+                      try {
+                        // Prüfen, ob es ein Unix-Timestamp oder ein formatiertes Datum ist
+                        if (!isNaN(Number(timestamp))) {
+                          // Unix-Timestamp (Zahl)
+                          tradeDate = new Date(Number(timestamp)).toISOString();
+                        } else {
+                          // Formatiertes Datum (z.B. "04/25/2025 15:53:36")
+                          const dateParts = timestamp.split(" ");
+                          if (dateParts.length === 2) {
+                            const [datePart, timePart] = dateParts;
+                            const [month, day, year] = datePart.split("/");
+                            // Format: MM/DD/YYYY HH:MM:SS -> YYYY-MM-DD HH:MM:SS
+                            const isoDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timePart}`;
+                            tradeDate = new Date(isoDateStr).toISOString();
+                          } else {
+                            // Direkter Versuch, das Datum zu parsen
+                            tradeDate = new Date(timestamp).toISOString();
+                          }
+                        }
+                        console.log("Datum aus Timestamp gesetzt:", timestamp, "→", tradeDate);
+                      } catch (err) {
+                        console.error("Fehler beim Parsen des Datums:", timestamp, err);
+                        tradeDate = new Date().toISOString();
+                      }
                     }
                     
                     console.log("Profit/Loss erkannt:", profitLossValue, "→", profitLoss);
@@ -328,8 +351,17 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                       mainTrendM15: processedRow.mainTrendM15 || "",
                       internalTrendM5: processedRow.internalTrendM5 || "",
                       entryType: entryType || processedRow.entryType || "",
-                      entryLevel: processedRow.entryLevel || "",
+                      entryLevel: hasSpecialFormat && row.buyPrice ? row.buyPrice : processedRow.entryLevel || "",
                       liquidation: processedRow.liquidation || "",
+                      // Zusätzliche Felder, die spezifisch für dein CSV-Format sind (für Debug/Analyse)
+                      extraInfo: hasSpecialFormat ? {
+                        buyPrice: row.buyPrice,
+                        sellPrice: row.sellPrice,
+                        buyFillId: row.buyFillId,
+                        sellFillId: row.sellFillId,
+                        qty: row.qty,
+                        duration: row.duration
+                      } : undefined,
                       location: processedRow.location || "",
                       rrAchieved: parseFloat(String(processedRow.rrAchieved || "0")),
                       rrPotential: parseFloat(String(processedRow.rrPotential || "0")),
