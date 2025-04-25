@@ -321,10 +321,10 @@ export default function TradeImport() {
               // Füge die userId zu jedem Trade hinzu
               const tradesWithUserId = processedTrades.map(trade => ({
                 ...trade,
-                userId: user?.id
+                userId: userId // Verwende die als Prop übergebene userId
               }));
               
-              console.log("CSV-Import mit userId:", user?.id, "für", tradesWithUserId.length, "Trades");
+              console.log("CSV-Import mit userId:", userId, "für", tradesWithUserId.length, "Trades");
               
               importMutation.mutate(tradesWithUserId);
             },

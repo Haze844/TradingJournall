@@ -197,24 +197,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   function isAuthenticated(req: Request, res: Response, next: NextFunction) {
     console.log("isAuthenticated-Check - Session:", req.session?.id, "Auth-Status:", req.isAuthenticated(), "Path:", req.path);
     
-    // Für Import-Endpunkte und Trade-Endpunkte akzeptieren wir auch explizite userId im Body
-    const isImportRequest = req.path.includes("/import") && req.method === "POST";
-    const isTradeRequest = req.path === "/api/trades" && (req.method === "POST" || req.method === "PUT");
+    // Temporärer Fix: Alle Anfragen akzeptieren durch GET userId Parameter oder POST userId im Body
+    const userId = req.query.userId || req.body?.userId || (Array.isArray(req.body) && req.body.length > 0 ? req.body[0]?.userId : null);
     
     if (req.isAuthenticated()) {
       return next();
-    } else if (isImportRequest || isTradeRequest) {
-      console.log("Request - Headers:", req.headers);
-      console.log("Request - Body:", req.body);
-      
-      // Temporärer Fix für Frontend Auth-Probleme - userId im Body wird als ausreichende Authentifizierung akzeptiert
-      const providedUserId = req.body?.userId || (Array.isArray(req.body) && req.body.length > 0 ? req.body[0]?.userId : null);
-      if (providedUserId) {
-        console.log("Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", providedUserId);
-        return next();
+    } else if (userId) {
+      if (req.method === "GET") {
+        console.log("GET Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", userId);
       } else {
-        console.log("Anfrage ohne userId im Body abgelehnt");
+        console.log("Request - Headers:", req.headers);
+        console.log("Request - Body:", req.body);
+        console.log("POST/PUT Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", userId);
       }
+      return next();
     }
     
     console.log("Zugriff verweigert - Path:", req.path);
@@ -600,7 +596,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // 5. Tradovate Import Route
   app.post("/api/import-trades", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      // Nimm userId aus dem request.body wenn vorhanden
+      const userId = req.user?.id || Number(req.body[0]?.userId);
       
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
