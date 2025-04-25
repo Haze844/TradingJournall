@@ -680,11 +680,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CSV Import route
   app.post("/api/import-csv", isAuthenticated, async (req: Request, res: Response) => {
     try {
-      const { trades, userId: clientUserId } = req.body;
+      // Prüfe, ob es ein Array von Trades ist oder ein Objekt mit trades und userId
+      let trades;
+      let clientUserId;
+      
+      if (Array.isArray(req.body)) {
+        // Format: [trade1, trade2, ...] mit optionaler userId in jedem Trade
+        trades = req.body;
+        clientUserId = trades[0]?.userId;
+        console.log("CSV-Import: Array-Format erkannt mit", trades.length, "Trades");
+      } else {
+        // Format: { trades: [...], userId: ... }
+        trades = req.body.trades || [];
+        clientUserId = req.body.userId;
+        console.log("CSV-Import: Objekt-Format erkannt mit", trades.length, "Trades");
+      }
+      
       // Bevorzuge die userId aus der Authentifizierung, prüfe aber auch auf explizit gesendete userId
       const userId = req.user?.id || clientUserId;
       
-      console.log("Import request with userId:", userId, "Auth status:", req.isAuthenticated());
+      console.log("CSV-Import: userId:", userId, "Auth status:", req.isAuthenticated(), "Client userId:", clientUserId);
       
       if (!userId) {
         return res.status(401).json({ message: "Bitte melden Sie sich an, um Trades zu importieren" });
