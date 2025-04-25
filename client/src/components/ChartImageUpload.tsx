@@ -1,7 +1,9 @@
 import { useState, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, X, RefreshCcw, Image as ImageIcon } from "lucide-react";
+import { Upload, X, RefreshCcw, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ChartImageUploadProps {
   existingImage?: string | null;
@@ -11,6 +13,8 @@ interface ChartImageUploadProps {
 export default function ChartImageUpload({ existingImage, onChange }: ChartImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(existingImage || null);
+  const [linkInput, setLinkInput] = useState<string>("");
+  const [linkError, setLinkError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Datei zu Base64 konvertieren
@@ -39,11 +43,11 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
       return;
     }
     
-    // Dateigröße prüfen (5MB Limit)
-    if (file.size > 5 * 1024 * 1024) {
+    // Dateigröße prüfen (10MB Limit)
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Bild zu groß",
-        description: "Maximale Bildgröße ist 5MB",
+        description: "Maximale Bildgröße ist 10MB",
         variant: "destructive"
       });
       return;
@@ -70,6 +74,51 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // TradingView Link Handler
+  const handleLinkSubmit = () => {
+    // Zurücksetzen des Fehlers
+    setLinkError(null);
+    
+    if (!linkInput.trim()) {
+      setLinkError("Bitte gib einen Link ein");
+      return;
+    }
+    
+    // Überprüfen, ob es ein gültiger Bildlink ist
+    if (!isValidImageUrl(linkInput)) {
+      setLinkError("Der Link muss mit http:// oder https:// beginnen und auf eine Bilddatei oder TradingView-URL verweisen");
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    // Direkte Verwendung der URL als Bildquelle
+    setPreview(linkInput);
+    onChange(linkInput);
+    
+    toast({
+      title: "Bild hinzugefügt",
+      description: "Der TradingView Chart wurde erfolgreich verknüpft"
+    });
+    
+    setIsUploading(false);
+    setLinkInput("");
+  };
+
+  // Überprüfung der Bild-URL
+  const isValidImageUrl = (url: string): boolean => {
+    // Überprüft, ob die URL mit http:// oder https:// beginnt
+    const hasValidProtocol = /^https?:\/\//i.test(url);
+    
+    // Überprüft, ob es sich um eine Bild-URL handelt (endet mit .jpg, .jpeg, .png, .gif) 
+    // oder eine TradingView-URL ist
+    const isImageOrTradingViewUrl = /\.(jpg|jpeg|png|gif)$/i.test(url) || 
+                                    /tradingview\.com/i.test(url) ||
+                                    /\.tradingstation\.com/i.test(url);
+    
+    return hasValidProtocol && isImageOrTradingViewUrl;
   };
 
   // Löschen des Bildes
@@ -101,42 +150,95 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
       
       {!preview ? (
         <div className="border-2 border-dashed border-primary/40 rounded-lg p-4 text-center hover:border-primary/60 transition-colors">
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <div className="bg-primary/10 rounded-full p-2">
-              <ImageIcon className="h-5 w-5 text-primary" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">TradingView Chart hinzufügen</p>
-              <p className="text-xs text-muted-foreground">
-                Füge einen Screenshot deines Charts hinzu
-              </p>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="relative"
-              disabled={isUploading}
-            >
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/gif"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
-              {isUploading ? (
-                <>
-                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                  Lade hoch...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Bild auswählen
-                </>
-              )}
-            </Button>
-          </div>
+          <Tabs defaultValue="link" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="link">Link</TabsTrigger>
+              <TabsTrigger value="upload">Upload</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="link" className="space-y-4">
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <div className="bg-primary/10 rounded-full p-2">
+                  <LinkIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">TradingView Chart Link einfügen</p>
+                  <p className="text-xs text-muted-foreground">
+                    Kopiere den Link zum Screenshot deines TradingView Charts
+                  </p>
+                </div>
+                <div className="w-full space-y-2">
+                  <Input
+                    type="url"
+                    placeholder="https://www.tradingview.com/x/..."
+                    value={linkInput}
+                    onChange={(e) => setLinkInput(e.target.value)}
+                    className={linkError ? "border-red-500" : ""}
+                  />
+                  {linkError && (
+                    <p className="text-xs text-red-500">{linkError}</p>
+                  )}
+                  <Button 
+                    onClick={handleLinkSubmit}
+                    disabled={isUploading}
+                    className="w-full"
+                    variant="default"
+                  >
+                    {isUploading ? (
+                      <>
+                        <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                        Verarbeite...
+                      </>
+                    ) : (
+                      <>
+                        <LinkIcon className="h-4 w-4 mr-2" />
+                        Link verwenden
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="upload" className="space-y-2">
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <div className="bg-primary/10 rounded-full p-2">
+                  <ImageIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">TradingView Chart hochladen</p>
+                  <p className="text-xs text-muted-foreground">
+                    Lade einen Screenshot deines Charts direkt hoch
+                  </p>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="relative"
+                  disabled={isUploading}
+                >
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleFileChange}
+                    disabled={isUploading}
+                  />
+                  {isUploading ? (
+                    <>
+                      <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                      Lade hoch...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Bild auswählen
+                    </>
+                  )}
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       ) : (
         <div className="rounded-lg overflow-hidden border border-border">
