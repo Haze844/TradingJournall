@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 interface BadgeWinLossProps {
-  isWin: boolean;
+  isWin: boolean | null;
   className?: string;
 }
 

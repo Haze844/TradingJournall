@@ -61,10 +61,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const startEditMode = () => {
     if (!selectedTrade) return;
     
-    setEditingSetup(selectedTrade.setup);
-    setEditingMainTrend(selectedTrade.mainTrendM15);
-    setEditingInternalTrend(selectedTrade.internalTrendM5);
-    setEditingEntryLevel(selectedTrade.entryLevel);
+    setEditingSetup(selectedTrade.setup || '');
+    setEditingMainTrend(selectedTrade.mainTrendM15 || '');
+    setEditingInternalTrend(selectedTrade.internalTrendM5 || '');
+    setEditingEntryLevel(selectedTrade.entryLevel || '');
     setEditingProfitLoss(selectedTrade.profitLoss || 0);
     setEditMode(true);
   };
@@ -190,8 +190,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             </div>
             <div>
               <div className="text-sm text-muted-foreground mb-1">Einstieg</div>
-              <div className={`font-bold ${getTrendColorClass(selectedTrade.entryType)}`}>
-                {selectedTrade.entryType}
+              <div className={`font-bold ${getTrendColorClass(selectedTrade.entryType || '')}`}>
+                {selectedTrade.entryType || '-'}
               </div>
             </div>
           </div>
@@ -213,8 +213,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                   </SelectContent>
                 </Select>
               ) : (
-                <div className={`font-bold ${getTrendColorClass(selectedTrade.mainTrendM15)}`}>
-                  {selectedTrade.mainTrendM15}
+                <div className={`font-bold ${getTrendColorClass(selectedTrade.mainTrendM15 || '')}`}>
+                  {selectedTrade.mainTrendM15 || '-'}
                 </div>
               )}
             </div>
@@ -234,8 +234,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                   </SelectContent>
                 </Select>
               ) : (
-                <div className={`font-bold ${getTrendColorClass(selectedTrade.internalTrendM5)}`}>
-                  {selectedTrade.internalTrendM5}
+                <div className={`font-bold ${getTrendColorClass(selectedTrade.internalTrendM5 || '')}`}>
+                  {selectedTrade.internalTrendM5 || '-'}
                 </div>
               )}
             </div>

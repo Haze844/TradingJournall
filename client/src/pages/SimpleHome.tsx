@@ -7,7 +7,7 @@ import TradeDetail from "@/components/TradeDetail";
 import TradeImport from "@/components/TradeImport";
 import AddTradeForm from "@/components/AddTradeForm";
 import TradingPatterns from "@/components/TradingPatterns";
-import AdvancedTradeAnalysis from "@/components/AdvancedTradeAnalysis";
+import AdvancedTradeAnalysisWrapper from "@/components/AdvancedTradeAnalysisWrapper";
 import RiskManagementDashboard from "@/components/RiskManagementDashboard";
 import MarketPhaseAnalysis from "@/components/MarketPhaseAnalysis";
 import Header from "@/components/Header";
@@ -234,7 +234,7 @@ export default function SimpleHome() {
             <TabsContent value="ai-assistant" className="mt-0">
               <div className="rocket-card rounded-xl p-2 sm:p-4">
                 <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center"><Activity className="w-4 h-4 mr-2" /> KI-Analyse</h2>
-                <AdvancedTradeAnalysis userId={userId} />
+                <AdvancedTradeAnalysisWrapper userId={userId} />
               </div>
             </TabsContent>
             

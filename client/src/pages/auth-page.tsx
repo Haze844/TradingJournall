@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "../hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,13 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  // Redirect if already logged in
-  if (user) {
-    navigate("/");
-    return null;
-  }
+  // Nutze einen useEffect Hook für Redirects
+  useEffect(() => {
+    // Redirect if already logged in
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen flex items-center relative overflow-hidden">
