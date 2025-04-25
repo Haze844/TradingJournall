@@ -14,6 +14,7 @@ import {
 import { Trade } from "@shared/schema";
 import { formatDate, formatTime } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
+import { BadgeTrend } from "@/components/ui/badge-trend";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Filter, SlidersHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -134,10 +135,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     });
   };
   
-  // Trend text color class
-  const getTrendColorClass = (trend: string) => {
-    return trend === "Long" ? "text-green-500" : "text-red-500";
-  };
+  // Die Funktion für Trend-Farben wurde zugunsten der BadgeTrend-Komponente entfernt
   
   return (
     <Card className="mb-6 bg-card overflow-hidden">
@@ -273,7 +271,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                                 onCheckedChange={() => toggleFilter('mainTrends', trend)}
                               />
                               <Label htmlFor={`main-${trend}`} className="text-sm cursor-pointer">
-                                <span className={getTrendColorClass(trend)}>{trend}</span>
+                                <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
                               </Label>
                             </div>
                           ))}
@@ -317,7 +315,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                                 onCheckedChange={() => toggleFilter('internalTrends', trend)}
                               />
                               <Label htmlFor={`intern-${trend}`} className="text-sm cursor-pointer">
-                                <span className={getTrendColorClass(trend)}>{trend}</span>
+                                <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
                               </Label>
                             </div>
                           ))}
@@ -361,7 +359,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                                 onCheckedChange={() => toggleFilter('entryTypes', entry)}
                               />
                               <Label htmlFor={`entry-${entry}`} className="text-sm cursor-pointer">
-                                <span className={getTrendColorClass(entry)}>{entry}</span>
+                                <BadgeTrend trend={entry} className="text-xs py-0 px-1" />
                               </Label>
                             </div>
                           ))}
@@ -470,13 +468,13 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <td className="p-3">{trade.symbol}</td>
                   <td className="p-3">{trade.setup}</td>
                   <td className="p-3">
-                    <span className={getTrendColorClass(trade.mainTrendM15 || '')}>{trade.mainTrendM15 || '-'}</span>
+                    {trade.mainTrendM15 ? <BadgeTrend trend={trade.mainTrendM15} /> : '-'}
                   </td>
                   <td className="p-3">
-                    <span className={getTrendColorClass(trade.internalTrendM5 || '')}>{trade.internalTrendM5 || '-'}</span>
+                    {trade.internalTrendM5 ? <BadgeTrend trend={trade.internalTrendM5} /> : '-'}
                   </td>
                   <td className="p-3">
-                    <span className={getTrendColorClass(trade.entryType || '')}>{trade.entryType || '-'}</span>
+                    {trade.entryType ? <BadgeTrend trend={trade.entryType} /> : '-'}
                   </td>
                   <td className="p-3">{trade.rrAchieved}</td>
                   <td className="p-3">
