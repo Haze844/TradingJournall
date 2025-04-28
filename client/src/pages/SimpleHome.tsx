@@ -110,9 +110,9 @@ export default function SimpleHome() {
                 {/* Filter Bar als integrierter Teil des Elementes */}
                 <FilterBar filters={filters} onFilterChange={handleFilterChange} />
                 
-                {/* Trade Table mit Add-Button */}
-                <div className="px-6 py-6">
-                  <div className="flex justify-between items-center mb-4">
+                {/* Header mit Add-Button */}
+                <div className="px-6 pt-6 pb-2">
+                  <div className="flex justify-between items-center">
                     <h3 className="text-lg font-bold moon-text">Trades</h3>
                     <Button 
                       onClick={() => setIsAddTradeVisible(!isAddTradeVisible)}
@@ -132,7 +132,42 @@ export default function SimpleHome() {
                       )}
                     </Button>
                   </div>
-                  
+                </div>
+                
+                {/* Kompaktes Hinzufügen Fenster - Erscheint nur wenn der Button geklickt wurde */}
+                {isAddTradeVisible && (
+                  <div className="px-6 pb-3">
+                    <div className="bg-black/20 rounded-lg border border-primary/30 p-3">
+                      <Tabs defaultValue="add" className="w-full">
+                        <TabsList className="w-full grid grid-cols-2 mb-3 bg-black/40">
+                          <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                            Trade manuell hinzufügen
+                          </TabsTrigger>
+                          <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                            CSV Import
+                          </TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="add" className="mt-0">
+                          <AddTradeForm userId={userId} onAddSuccess={() => {
+                            refetchTrades();
+                            setIsAddTradeVisible(false);
+                          }} />
+                        </TabsContent>
+                        
+                        <TabsContent value="import" className="mt-0">
+                          <TradeImport userId={userId} onImport={() => {
+                            refetchTrades();
+                            setIsAddTradeVisible(false);
+                          }} />
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Trade Table */}
+                <div className="px-6 pb-6">
                   <TradeTable
                     trades={trades}
                     isLoading={tradesLoading}
@@ -140,36 +175,6 @@ export default function SimpleHome() {
                   />
                 </div>
               </div>
-              
-              {/* Hinzufügen & Import Element - Erscheint nur wenn der Button geklickt wurde */}
-              {isAddTradeVisible && (
-                <div className="rocket-card rounded-xl overflow-hidden">
-                  <Tabs defaultValue="add" className="p-2 sm:p-4">
-                    <TabsList className="grid grid-cols-2 mb-2 sm:mb-4 bg-black/60">
-                      <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                        Hinzufügen
-                      </TabsTrigger>
-                      <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                        Import
-                      </TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="add" className="mt-0">
-                      <AddTradeForm userId={userId} onAddSuccess={() => {
-                        refetchTrades();
-                        setIsAddTradeVisible(false);
-                      }} />
-                    </TabsContent>
-                    
-                    <TabsContent value="import" className="mt-0">
-                      <TradeImport userId={userId} onImport={() => {
-                        refetchTrades();
-                        setIsAddTradeVisible(false);
-                      }} />
-                    </TabsContent>
-                  </Tabs>
-                </div>
-              )}
               
               {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
               {selectedTrade && (
