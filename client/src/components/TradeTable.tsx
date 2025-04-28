@@ -179,7 +179,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   return (
     <Card className="mb-6 bg-card overflow-hidden">
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
-        <CardTitle>Trades</CardTitle>
+        <div className="flex-1"></div>
         <div className="flex gap-2">
           <Button 
             variant="outline" 
