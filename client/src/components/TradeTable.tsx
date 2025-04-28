@@ -58,6 +58,17 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     endDate: new Date('2030-12-31')
   });
   
+  // Berechne den Gesamt-Profit/Loss
+  const calculateTotalPL = (trades: Trade[]): number => {
+    return trades.reduce((total, trade) => {
+      // Prüfen, ob profitLoss ein Wert ist
+      if (trade.profitLoss !== undefined && trade.profitLoss !== null) {
+        return total + Number(trade.profitLoss);
+      }
+      return total;
+    }, 0);
+  };
+  
   // Unique values for filters
   const uniqueValues = {
     symbols: Array.from(new Set(trades.map(t => t.symbol).filter(Boolean))) as string[],
@@ -211,7 +222,27 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   return (
     <Card className="mb-6 bg-card overflow-hidden">
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
-        <div className="flex-1"></div>
+        <div className="flex-1 flex items-center">
+          {/* Statistik-Box links */}
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-xs">Total Trades</span>
+              <span className="font-medium">{filteredTrades.length}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-xs">Win/Loss</span>
+              <span className="font-medium">
+                {filteredTrades.filter(t => t.isWin).length} / {filteredTrades.filter(t => t.isWin === false).length}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-xs">Profit/Loss</span>
+              <span className={`font-medium ${calculateTotalPL(filteredTrades) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                ${calculateTotalPL(filteredTrades).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
         <div className="flex gap-2">
           <Button
             size="sm"
