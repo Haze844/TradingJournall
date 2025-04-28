@@ -147,8 +147,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
   return (
     <div className="w-full">
       <div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
             {/* Datum und Uhrzeit */}
             <div>
               <Label htmlFor="date">Datum</Label>
@@ -177,7 +177,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* Symbol und Setup */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="symbol">Symbol</Label>
               <Input
@@ -213,7 +213,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* Trend Informationen */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="mainTrendM15">Haupttrend M15</Label>
               <Select
