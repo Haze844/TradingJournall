@@ -217,12 +217,14 @@ export default function SimpleHome() {
             <div className="flex justify-center items-center mb-5">
               <TabsList className="bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10">
                 <TabsTrigger 
+                  id="trades-tab"
                   value="trades" 
                   className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg"
                 >
                   <DollarSign className="w-4 h-4 mr-1.5" /> Trades
                 </TabsTrigger>
                 <TabsTrigger 
+                  id="ai-analysis-tab"
                   value="ai-analysis" 
                   className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg"
                 >
@@ -328,6 +330,21 @@ export default function SimpleHome() {
         
         {/* AI Analysis Tab - Mit Sub-Navigation */}
         <TabsContent value="ai-analysis" className="mt-0">
+          {/* Zurück zu Trades Button */}
+          <div className="flex justify-end mb-3">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                const tradesTab = document.getElementById('trades-tab') as HTMLElement;
+                if (tradesTab) tradesTab.click();
+              }}
+              className="text-primary border-primary/30 hover:bg-primary/10"
+            >
+              <DollarSign className="w-4 h-4 mr-1.5" /> Zurück zu Trades
+            </Button>
+          </div>
+
           {/* Unternavigation für Analyse mit Tabs */}
           <Tabs defaultValue="patterns" className="w-full">
             <div className="overflow-x-auto pb-2">

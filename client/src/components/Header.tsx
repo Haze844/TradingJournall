@@ -47,12 +47,17 @@ export default function Header() {
           
           {/* Hauptnavigation */}
           <nav className="flex flex-nowrap justify-center gap-3 mb-2 md:mb-0 whitespace-nowrap overflow-x-auto">
-            {/* Dashboard Button - Immer zuerst */}
+            {/* Dashboard Button - Zurück zu Trades Tabelle */}
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/">
+              <a href="#" onClick={(e) => {
+                e.preventDefault();
+                // Setze den aktiven Tab auf "trades"
+                const tradesTab = document.querySelector('[value="trades"]') as HTMLElement;
+                if (tradesTab) tradesTab.click();
+              }}>
                 <BarChart2 className="w-4 h-4 mr-2" />
                 Dashboard
-              </Link>
+              </a>
             </Button>
             
             {/* Trading Dropdown - Kern der Anwendung */}
