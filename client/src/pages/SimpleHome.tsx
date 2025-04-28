@@ -258,12 +258,19 @@ export default function SimpleHome() {
                           </TabsContent>
                           
                           <TabsContent value="manual" className="mt-0">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <AddTradeForm userId={userId} onAddSuccess={() => {
-                                // Trades neu laden und Dialog schließen
-                                refetchTrades();
-                                setIsAddTradeVisible(false);
-                              }} />
+                            <div className="grid grid-cols-1 gap-2 px-2">
+                              <div className="border-t border-border pt-2 mb-2">
+                                <h3 className="text-sm font-medium text-gray-400 mb-2">Manuellen Trade eingeben</h3>
+                                <p className="text-xs text-gray-500 mb-4">Der Dialog zeigt eine kompakte Version des Formulars. Nach Speichern wird der Trade in Ihrer Liste angezeigt.</p>
+                              </div>
+                              
+                              <div className="bg-card p-4 rounded-md">
+                                <AddTradeForm userId={userId} onAddSuccess={() => {
+                                  // Trades neu laden und Dialog schließen
+                                  refetchTrades();
+                                  setIsAddTradeVisible(false);
+                                }} />
+                              </div>
                             </div>
                           </TabsContent>
                         </Tabs>

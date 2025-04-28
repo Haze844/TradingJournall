@@ -259,7 +259,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* Entry Informationen */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <Label htmlFor="entryType">Einstiegstyp</Label>
               <Select
@@ -326,7 +326,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* Location und Kontoart */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="location">Location</Label>
               <Select
@@ -373,7 +373,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* R:R Informationen */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <Label htmlFor="rrAchieved">R:R Erreicht</Label>
               <Input
@@ -428,7 +428,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* Chart Image Upload */}
-          <div className="mb-4">
+          <div className="mb-2">
             <ChartImageUpload 
               existingImage={null} 
               onChange={(base64Image) => setValue("chartImage", base64Image || "")}

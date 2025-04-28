@@ -132,34 +132,34 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">TradingView Chart</p>
+        <p className="text-xs font-medium">TradingView Chart</p>
         {preview && (
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-7 px-2 text-red-500 hover:text-red-700 hover:bg-red-100"
+            className="h-5 px-2 text-red-500 hover:text-red-700 hover:bg-red-100 text-xs"
             onClick={handleRemoveImage}
           >
-            <X className="h-4 w-4 mr-1" />
+            <X className="h-3 w-3 mr-1" />
             Entfernen
           </Button>
         )}
       </div>
       
       {!preview ? (
-        <div className="border-2 border-dashed border-primary/40 rounded-lg p-4 text-center hover:border-primary/60 transition-colors">
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <div className="bg-primary/10 rounded-full p-2">
-              <LinkIcon className="h-5 w-5 text-primary" />
+        <div className="border-2 border-dashed border-primary/40 rounded-lg p-2 text-center hover:border-primary/60 transition-colors">
+          <div className="flex flex-col items-center justify-center space-y-1">
+            <div className="bg-primary/10 rounded-full p-1">
+              <LinkIcon className="h-4 w-4 text-primary" />
             </div>
-            <div className="space-y-1">
+            <div>
               <p className="text-xs text-muted-foreground">
                 Kopiere den Link zum Screenshot deines TradingView Charts
               </p>
             </div>
-            <div className="w-full space-y-2">
+            <div className="w-full space-y-1">
               <Input
                 type="url"
                 placeholder="https://www.tradingview.com/x/..."
