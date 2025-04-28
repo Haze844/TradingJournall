@@ -416,33 +416,28 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Kombinierter Bereich für TradingView Chart Link und Upload */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium">TradingView Chart direkt importieren</p>
-        
-        {/* Chart Link Eingabe */}
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-4">
+        {/* Linke Spalte - TradingView Chart Link Eingabe */}
         <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">TradingView Chart Link</p>
           <div className="flex items-center space-x-2">
             <Input
               placeholder="https://www.tradingview.com/x/..."
               value={linkInput}
               onChange={(e) => setLinkInput(e.target.value)}
-              className={linkError ? "border-red-500" : ""}
+              className={`h-8 text-sm ${linkError ? "border-red-500" : ""}`}
             />
             <Button 
               onClick={handleLinkImport}
-              className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-500 text-white flex-shrink-0"
+              className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-500 text-white flex-shrink-0 h-8 text-xs px-2"
               disabled={importing}
               size="sm"
             >
               {importing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                <>
-                  <LinkIcon className="mr-2 h-4 w-4" />
-                  Importieren
-                </>
+                <LinkIcon className="h-3 w-3" />
               )}
             </Button>
           </div>
@@ -450,78 +445,55 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
             <p className="text-xs text-red-500">{linkError}</p>
           )}
         </div>
-      </div>
-      
-      <div className="border-t border-border pt-3 mt-4">
-        <p className="text-sm font-medium mb-2">TradingView CSV importieren</p>
         
-        {/* CSV Dropzone */}
-        <div 
-          className={`border-2 ${file ? 'border-primary' : 'border-dashed border-primary/40'} rounded-lg p-6 text-center hover:border-primary/60 transition-colors`}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <div className="bg-primary/10 rounded-full p-2">
-              <Upload className="h-5 w-5 text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Ziehe deine CSV-Datei hierher oder klicke auf "Datei auswählen"
-            </p>
-            <Button variant="outline" className="relative" size="sm">
+        {/* Rechte Spalte - CSV Upload */}
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">CSV Upload</p>
+          <div className="flex items-center space-x-2">
+            <div 
+              className={`border border-dashed border-primary/40 rounded-md p-1 text-center hover:border-primary/60 transition-colors flex-grow h-8 flex items-center justify-center cursor-pointer`}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('csv-file-input')?.click()}
+            >
               <input
+                id="csv-file-input"
                 type="file"
                 accept=".csv"
-                className="absolute inset-0 opacity-0 cursor-pointer"
+                className="sr-only"
                 onChange={handleFileChange}
               />
-              Datei auswählen
-            </Button>
-          </div>
-        </div>
-        
-        {/* Datei ausgewählt */}
-        {file && (
-          <div className="mt-2 p-3 rounded-lg bg-muted flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="bg-primary/10 rounded-full p-2 mr-2">
-                <Upload className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {(file.size / 1024).toFixed(2)} KB
-                </p>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                {file ? file.name : "CSV-Datei auswählen oder hierher ziehen"}
+              </p>
             </div>
             <Button
-              variant="ghost"
+              onClick={handleImport}
+              className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-500 text-white h-8 text-xs px-2"
+              disabled={!file || importing}
               size="sm"
-              className="h-7 px-2 text-destructive"
-              onClick={() => setFile(null)}
             >
-              <X className="h-4 w-4" />
+              {importing ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Upload className="h-3 w-3" />
+              )}
             </Button>
           </div>
-        )}
-        
-        <Button
-          onClick={handleImport}
-          className="w-full bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-500 text-white font-bold mt-3"
-          disabled={!file || importing}
-        >
-          {importing ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Importiere Trades...
-            </>
-          ) : (
-            <>
-              <Upload className="mr-2 h-5 w-5" />
-              Trades importieren
-            </>
+          {file && (
+            <p className="text-xs text-muted-foreground">
+              {(file.size / 1024).toFixed(2)} KB
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-5 w-5 p-0 ml-1 text-destructive inline-flex items-center justify-center"
+                onClick={() => setFile(null)}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </p>
           )}
-        </Button>
+        </div>
       </div>
     </div>
   );

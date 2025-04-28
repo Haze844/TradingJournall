@@ -112,7 +112,7 @@ export default function SimpleHome() {
                 
                 {/* Header mit Add-Button */}
                 <div className="px-6 pt-6 pb-2">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold moon-text">Trades</h3>
                     <Button 
                       onClick={() => setIsAddTradeVisible(!isAddTradeVisible)}
@@ -132,47 +132,61 @@ export default function SimpleHome() {
                       )}
                     </Button>
                   </div>
-                </div>
-                
-                {/* Kompaktes Hinzufügen Fenster - Erscheint nur wenn der Button geklickt wurde */}
-                {isAddTradeVisible && (
-                  <div className="px-6 pb-3">
-                    <div className="bg-black/20 rounded-lg border border-primary/30 p-3">
-                      <Tabs defaultValue="add" className="w-full">
-                        <TabsList className="w-full grid grid-cols-2 mb-3 bg-black/40">
-                          <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                            Trade manuell hinzufügen
-                          </TabsTrigger>
-                          <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                            CSV Import
-                          </TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="add" className="mt-0">
-                          <AddTradeForm userId={userId} onAddSuccess={() => {
-                            refetchTrades();
-                            setIsAddTradeVisible(false);
-                          }} />
-                        </TabsContent>
-                        
-                        <TabsContent value="import" className="mt-0">
-                          <TradeImport userId={userId} onImport={() => {
-                            refetchTrades();
-                            setIsAddTradeVisible(false);
-                          }} />
-                        </TabsContent>
-                      </Tabs>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Trade Table */}
-                <div className="px-6 pb-6">
+                  
+                  {/* Trade Table - Immer sichtbar, auch bei Add-Fenster */}
                   <TradeTable
                     trades={trades}
                     isLoading={tradesLoading}
                     onTradeSelect={handleTradeSelect}
                   />
+                  
+                  {/* Kompaktes Hinzufügen Fenster - Erscheint als Float über der Tabelle */}
+                  {isAddTradeVisible && (
+                    <div className="absolute z-10 right-6 mt-2 w-[600px] max-w-[calc(100%-3rem)]">
+                      <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-3 shadow-xl">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="text-sm font-bold text-primary">Neuen Trade erstellen</h4>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-muted-foreground"
+                            onClick={() => setIsAddTradeVisible(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <Tabs defaultValue="import" className="w-full">
+                          <TabsList className="w-full grid grid-cols-2 mb-2 bg-black/60">
+                            <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-xs">
+                              CSV Import
+                            </TabsTrigger>
+                            <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-xs">
+                              Trade manuell hinzufügen
+                            </TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="add" className="mt-0">
+                            <div className="max-h-[60vh] overflow-y-auto">
+                              <AddTradeForm userId={userId} onAddSuccess={() => {
+                                refetchTrades();
+                                setIsAddTradeVisible(false);
+                              }} />
+                            </div>
+                          </TabsContent>
+                          
+                          <TabsContent value="import" className="mt-0">
+                            <div className="max-h-[60vh] overflow-y-auto">
+                              <TradeImport userId={userId} onImport={() => {
+                                refetchTrades();
+                                setIsAddTradeVisible(false);
+                              }} />
+                            </div>
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               
