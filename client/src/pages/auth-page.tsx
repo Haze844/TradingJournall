@@ -36,10 +36,10 @@ export default function AuthPage() {
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="bg-white text-black font-bold p-2 rounded-xl text-lg meme-logo">
-                LVL<br />UP
+                NXT<br />LVL
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold moon-text">LvlUp Tradingtagebuch</h1>
+                <h1 className="text-2xl font-extrabold moon-text">NXT LVL Tradingtagebuch</h1>
                 <p className="text-xs text-gray-400">Trading-Performance optimieren</p>
               </div>
             </div>

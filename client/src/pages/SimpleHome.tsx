@@ -225,31 +225,7 @@ export default function SimpleHome() {
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4" ref={tradesSectionRef}>
             
-            <div className="mb-2 sm:mb-3">
-              {/* Statistiken */}
-              {trades.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                    Trades: {tradeStats.count}
-                  </Badge>
-                  <Badge variant="outline" className="bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10">
-                    Gewinne: {tradeStats.wins}
-                  </Badge>
-                  <Badge variant="outline" className="bg-red-500/5 text-red-400 hover:bg-red-500/10">
-                    Verluste: {tradeStats.losses}
-                  </Badge>
-                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                    Win Rate: {tradeStats.winRate.toFixed(1)}%
-                  </Badge>
-                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                    P&L: ${tradeStats.totalPL.toFixed(2)}
-                  </Badge>
-                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                    Ø RR: {tradeStats.avgRR.toFixed(2)}
-                  </Badge>
-                </div>
-              )}
-            </div>
+
             
             <div className="relative">
               {/* Filter */}

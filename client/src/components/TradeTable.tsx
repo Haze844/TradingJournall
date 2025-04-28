@@ -5,6 +5,7 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Popover,
@@ -223,8 +224,27 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     <Card className="mb-6 bg-card overflow-hidden">
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
         <div className="flex-1 flex items-center">
-          {/* Für die Statistik-Komponente reservierter Bereich - SimpleHome wird diesen nutzen */}
-          <div id="stats-container" className="flex items-center"></div>
+          {/* Statistik-Panel */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+              Trades: {filteredTrades.length}
+            </Badge>
+            <Badge variant="outline" className="bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10">
+              Gewinne: {filteredTrades.filter(t => t.isWin).length}
+            </Badge>
+            <Badge variant="outline" className="bg-red-500/5 text-red-400 hover:bg-red-500/10">
+              Verluste: {filteredTrades.filter(t => t.isWin === false).length}
+            </Badge>
+            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+              Win Rate: {filteredTrades.length > 0 ? ((filteredTrades.filter(t => t.isWin).length / filteredTrades.length) * 100).toFixed(1) : '0.0'}%
+            </Badge>
+            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+              P&L: ${calculateTotalPL(filteredTrades).toFixed(2)}
+            </Badge>
+            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+              Ø RR: {calculateAverageRR(filteredTrades).toFixed(2)}
+            </Badge>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button
