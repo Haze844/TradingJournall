@@ -178,16 +178,6 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
         <div className="flex-1"></div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary border-0"
-            onClick={resetFilters}
-          >
-            <RefreshCw className="h-3 w-3" />
-            Filter zurücksetzen
-          </Button>
-          
           <Button
             size="sm"
             className="flex items-center gap-1 text-xs bg-primary/20 hover:bg-primary/30 text-primary border-0"
@@ -198,6 +188,16 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
           >
             <Plus className="h-3 w-3" />
             Trade hinzufügen
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary border-0"
+            onClick={resetFilters}
+          >
+            <RefreshCw className="h-3 w-3" />
+            Filter zurücksetzen
           </Button>
         </div>
       </CardHeader>
@@ -212,140 +212,134 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                 Datum
               </th>
               <th className="p-3 text-left whitespace-nowrap">
-                <div className="flex items-center gap-1">
-                  Kontoart
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
-                        <Filter className="h-3 w-3" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56" align="start">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Kontoart filtern</h4>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Kontoart
+                      <Filter className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Kontoart filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {accountTypes.map(type => (
+                          <div key={type} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`account-${type}`} 
+                              checked={filters.accountTypes.has(type)}
+                              onCheckedChange={() => toggleFilter('accountTypes', type)}
+                            />
+                            <Label htmlFor={`account-${type}`} className="text-sm cursor-pointer">
+                              {type}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.accountTypes.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, accountTypes: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Symbol
+                      <Filter className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Symbol filtern</h4>
+                      <ScrollArea className="h-48">
                         <div className="space-y-2 px-1">
-                          {accountTypes.map(type => (
-                            <div key={type} className="flex items-center space-x-2">
+                          {uniqueValues.symbols.map(symbol => (
+                            <div key={symbol} className="flex items-center space-x-2">
                               <Checkbox 
-                                id={`account-${type}`} 
-                                checked={filters.accountTypes.has(type)}
-                                onCheckedChange={() => toggleFilter('accountTypes', type)}
+                                id={`symbol-${symbol}`} 
+                                checked={filters.symbols.has(symbol)}
+                                onCheckedChange={() => toggleFilter('symbols', symbol)}
                               />
-                              <Label htmlFor={`account-${type}`} className="text-sm cursor-pointer">
-                                {type}
+                              <Label htmlFor={`symbol-${symbol}`} className="text-sm cursor-pointer">
+                                {symbol}
                               </Label>
                             </div>
                           ))}
                         </div>
-                        {filters.accountTypes.size > 0 && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="w-full text-xs"
-                            onClick={() => {
-                              setFilters({...filters, accountTypes: new Set()});
-                              setCurrentPage(1);
-                            }}
-                          >
-                            Filter zurücksetzen
-                          </Button>
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                      </ScrollArea>
+                      {filters.symbols.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, symbols: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </th>
               <th className="p-3 text-left whitespace-nowrap">
-                <div className="flex items-center gap-1">
-                  Symbol
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
-                        <Filter className="h-3 w-3" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56" align="start">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Symbol filtern</h4>
-                        <ScrollArea className="h-48">
-                          <div className="space-y-2 px-1">
-                            {uniqueValues.symbols.map(symbol => (
-                              <div key={symbol} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`symbol-${symbol}`} 
-                                  checked={filters.symbols.has(symbol)}
-                                  onCheckedChange={() => toggleFilter('symbols', symbol)}
-                                />
-                                <Label htmlFor={`symbol-${symbol}`} className="text-sm cursor-pointer">
-                                  {symbol}
-                                </Label>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                        {filters.symbols.size > 0 && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="w-full text-xs"
-                            onClick={() => {
-                              setFilters({...filters, symbols: new Set()});
-                              setCurrentPage(1);
-                            }}
-                          >
-                            Filter zurücksetzen
-                          </Button>
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <div className="flex items-center gap-1">
-                  Setup
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
-                        <Filter className="h-3 w-3" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56" align="start">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-sm">Setup filtern</h4>
-                        <ScrollArea className="h-48">
-                          <div className="space-y-2 px-1">
-                            {uniqueValues.setups.map(setup => (
-                              <div key={setup} className="flex items-center space-x-2">
-                                <Checkbox 
-                                  id={`setup-${setup}`} 
-                                  checked={filters.setups.has(setup)}
-                                  onCheckedChange={() => toggleFilter('setups', setup)}
-                                />
-                                <Label htmlFor={`setup-${setup}`} className="text-sm cursor-pointer">
-                                  {setup}
-                                </Label>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                        {filters.setups.size > 0 && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="w-full text-xs"
-                            onClick={() => {
-                              setFilters({...filters, setups: new Set()});
-                              setCurrentPage(1);
-                            }}
-                          >
-                            Filter zurücksetzen
-                          </Button>
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Setup
+                      <Filter className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Setup filtern</h4>
+                      <ScrollArea className="h-48">
+                        <div className="space-y-2 px-1">
+                          {uniqueValues.setups.map(setup => (
+                            <div key={setup} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`setup-${setup}`} 
+                                checked={filters.setups.has(setup)}
+                                onCheckedChange={() => toggleFilter('setups', setup)}
+                              />
+                              <Label htmlFor={`setup-${setup}`} className="text-sm cursor-pointer">
+                                {setup}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                      {filters.setups.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, setups: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </th>
               <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">

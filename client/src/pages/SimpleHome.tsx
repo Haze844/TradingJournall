@@ -209,39 +209,29 @@ export default function SimpleHome() {
       {/* Header */}
       <Header />
 
-      {/* Main Content Tabs - Vereinfacht und fokussiert */}
-      <Tabs defaultValue="trades" className="mb-4 sm:mb-6">
-        <div className="overflow-x-auto">
-          <TabsList className="mb-6 bg-black/40 p-1 rounded-xl w-full flex flex-nowrap justify-start sm:justify-center">
-            <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-              <DollarSign className="mr-2 h-4 w-4 md:inline hidden" />
-              Trades
-            </TabsTrigger>
-            <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-              <Brain className="mr-2 h-4 w-4 md:inline hidden" />
-              Analyse
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        
-        {/* Main Trades Tab */}
-        <TabsContent value="trades" className="mt-0">
-          <div className="space-y-4 sm:space-y-6">
-            {/* FilterBar und "Trade hinzufügen" Button in einem Card */}
-            <div className="flex flex-col space-y-4 sm:space-y-6">
-              <div className="rocket-card rounded-xl p-2 sm:p-4">
-                <div className="flex flex-col space-y-2 sm:space-y-3 mb-2 sm:mb-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold moon-text flex items-center">
-                      <DollarSign className="w-4 h-4 mr-2" /> Trades
-                      {trades.length > 0 && (
-                        <span className="ml-2 text-xs px-2 py-0.5 bg-primary/20 text-primary rounded-full">
-                          {formatDate(filters.startDate)}
-                        </span>
-                      )}
-                    </h3>
-                  </div>
-                  
+      {/* Main Content */}
+      <Tabs defaultValue="trades" className="w-full">
+        <div className="rocket-card rounded-xl p-2 sm:p-4">
+          {/* Überschrift mit Tabs nebeneinander */}
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-4">
+              <h3 className="text-lg font-bold moon-text flex items-center">
+                <DollarSign className="w-4 h-4 mr-2" /> Trades
+              </h3>
+              
+              <TabsList className="bg-black/40 p-1 rounded-lg h-8">
+                <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+                  Trades
+                </TabsTrigger>
+                <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+                  Analyse
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          
+          <TabsContent value="trades">
+                <div className="mb-2 sm:mb-3">
                   {/* Statistiken */}
                   {trades.length > 0 && (
                     <div className="flex flex-wrap gap-2">
@@ -339,6 +329,7 @@ export default function SimpleHome() {
               )}
             </div>
           </div>
+        </div>
         </TabsContent>
         
         {/* AI Analysis Tab - Mit Sub-Navigation */}
@@ -346,25 +337,25 @@ export default function SimpleHome() {
           {/* Unternavigation für Analyse mit Tabs */}
           <Tabs defaultValue="patterns" className="w-full">
             <div className="overflow-x-auto pb-2">
-              <TabsList className="mb-4 bg-black/40 p-1 rounded-xl w-full flex flex-nowrap justify-start sm:justify-center">
-                <TabsTrigger value="patterns" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-                  <Brain className="mr-2 h-4 w-4 md:inline hidden" />
+              <TabsList className="mb-4 bg-black/40 p-1 rounded-xl w-full flex justify-center">
+                <TabsTrigger value="patterns" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <Brain className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Muster
                 </TabsTrigger>
-                <TabsTrigger value="ai-assistant" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-                  <Activity className="mr-2 h-4 w-4 md:inline hidden" />
+                <TabsTrigger value="ai-assistant" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <Activity className="mr-1.5 h-4 w-4 md:inline hidden" />
                   KI-Analyse
                 </TabsTrigger>
-                <TabsTrigger value="risk" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-                  <AlertCircle className="mr-2 h-4 w-4 md:inline hidden" />
+                <TabsTrigger value="risk" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <AlertCircle className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Risiko
                 </TabsTrigger>
-                <TabsTrigger value="market-phases" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-                  <BarChart2 className="mr-2 h-4 w-4 md:inline hidden" />
+                <TabsTrigger value="market-phases" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <BarChart2 className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Marktphasen
                 </TabsTrigger>
-                <TabsTrigger value="performance" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-                  <Trophy className="mr-2 h-4 w-4 md:inline hidden" />
+                <TabsTrigger value="performance" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <Trophy className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Performance
                 </TabsTrigger>
               </TabsList>
