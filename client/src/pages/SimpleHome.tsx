@@ -271,7 +271,6 @@ export default function SimpleHome() {
           {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
           {selectedTrade && (
             <div className="rocket-card rounded-xl p-2 sm:p-4">
-              <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Trade Details</h3>
               <TradeDetail selectedTrade={selectedTrade} />
             </div>
           )}

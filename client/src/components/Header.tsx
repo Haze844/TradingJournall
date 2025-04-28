@@ -37,10 +37,10 @@ export default function Header() {
           {/* Logo und Titel - Verlinkt zur Hauptseite */}
           <Link href="/" className="flex items-center gap-3 mb-4 md:mb-0 hover:opacity-80 transition-opacity whitespace-nowrap">
             <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-extrabold text-sm meme-logo shadow-lg">
-              LVL<br />UP
+              NXT<br />LVL
             </div>
             <div>
-              <h1 className="text-xl font-bold moon-text">LvlUp Trading</h1>
+              <h1 className="text-xl font-bold moon-text">NXT LVL Trading</h1>
               <p className="text-xs text-muted-foreground">Trading-Performance optimieren</p>
             </div>
           </Link>
