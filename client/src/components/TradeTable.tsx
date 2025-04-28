@@ -144,6 +144,38 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   
   // Die Funktion für Trend-Farben wurde zugunsten der BadgeTrend-Komponente entfernt
   
+  // Funktion für renderung der Filter-Buttons
+  const renderFilterButtons = (filterType: 'accountTypes' | 'setups' | 'mainTrends' | 'internalTrends', options: string[], label: string) => {
+    return (
+      <div className="mb-3">
+        <div className="font-medium text-sm mb-1">{label}</div>
+        <div className="flex flex-wrap gap-1">
+          {options.map(option => {
+            const isActive = (filters[filterType] as Set<string>).has(option);
+            let content = option;
+            
+            // Spezial-Rendering für Trends
+            if (filterType === 'mainTrends' || filterType === 'internalTrends') {
+              content = <BadgeTrend trend={option} className="text-xs py-0 px-1" />;
+            }
+            
+            return (
+              <Button
+                key={option}
+                variant={isActive ? "default" : "outline"}
+                size="sm"
+                className={`text-xs ${isActive ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
+                onClick={() => toggleFilter(filterType, option)}
+              >
+                {content}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card className="mb-6 bg-card overflow-hidden">
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
@@ -160,6 +192,99 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
           </Button>
         </div>
       </CardHeader>
+      
+      {/* Filter-Leiste mit Buttons für alle Filter */}
+      <div className="p-4 border-b border-border bg-muted/20">
+        <details className="group">
+          <summary className="flex items-center gap-1 cursor-pointer font-medium text-sm">
+            <Filter className="h-4 w-4" />
+            Filter & Sortierung
+          </summary>
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Kontoart Filter */}
+            {renderFilterButtons('accountTypes', accountTypes, 'Kontoart')}
+            
+            {/* Symbol Filter - nicht als Buttons wegen potenzieller Größe */}
+            <div className="mb-3">
+              <div className="font-medium text-sm mb-1">Symbol</div>
+              <div className="flex flex-wrap gap-1">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs flex items-center gap-1">
+                      Symbole ({filters.symbols.size || "Alle"})
+                      <Filter className="h-3 w-3" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <ScrollArea className="h-48">
+                      <div className="space-y-2 px-1">
+                        {uniqueValues.symbols.map(symbol => (
+                          <div key={symbol} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`symbol-${symbol}`} 
+                              checked={filters.symbols.has(symbol)}
+                              onCheckedChange={() => toggleFilter('symbols', symbol)}
+                            />
+                            <Label htmlFor={`symbol-${symbol}`} className="text-sm cursor-pointer">
+                              {symbol}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+                
+                {filters.symbols.size > 0 && (
+                  <Button 
+                    variant="outline"
+                    size="sm" 
+                    className="text-xs"
+                    onClick={() => {
+                      setFilters({...filters, symbols: new Set()});
+                      setCurrentPage(1);
+                    }}
+                  >
+                    Zurücksetzen
+                  </Button>
+                )}
+              </div>
+            </div>
+            
+            {/* Setup Filter */}
+            {renderFilterButtons('setups', uniqueValues.setups, 'Setup')}
+            
+            {/* M15 Trend Filter */}
+            {renderFilterButtons('mainTrends', uniqueValues.mainTrends, 'M15 Trend')}
+            
+            {/* M5 Trend Filter */}
+            {renderFilterButtons('internalTrends', uniqueValues.internalTrends, 'M5 Trend')}
+            
+            {/* Win/Loss Filter */}
+            <div className="mb-3">
+              <div className="font-medium text-sm mb-1">Ergebnis</div>
+              <div className="flex flex-wrap gap-1">
+                <Button
+                  variant={filters.isWin === true ? "default" : "outline"}
+                  size="sm"
+                  className={`text-xs ${filters.isWin === true ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-background'}`}
+                  onClick={() => toggleWinLossFilter(true)}
+                >
+                  Win
+                </Button>
+                <Button
+                  variant={filters.isWin === false ? "default" : "outline"}
+                  size="sm"
+                  className={`text-xs ${filters.isWin === false ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-background'}`}
+                  onClick={() => toggleWinLossFilter(false)}
+                >
+                  Loss
+                </Button>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
       
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -519,6 +644,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <td className="p-3">
                     {formatDate(trade.date)} <span className="text-muted-foreground text-xs">{formatTime(trade.date)}</span>
                   </td>
+                  <td className="p-3">{trade.accountType || '-'}</td>
                   <td className="p-3">{trade.symbol}</td>
                   <td className="p-3">{trade.setup}</td>
                   <td className="p-3">
@@ -544,7 +670,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
             ) : (
               // Empty state
               <tr>
-                <td colSpan={9} className="p-6 text-center text-muted-foreground">
+                <td colSpan={10} className="p-6 text-center text-muted-foreground">
                   Keine Trades gefunden
                 </td>
               </tr>
