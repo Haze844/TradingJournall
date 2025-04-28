@@ -169,8 +169,12 @@ export default function SimpleHome() {
                           <TabsContent value="add" className="mt-0">
                             <div className="max-h-[60vh] overflow-y-auto">
                               <AddTradeForm userId={userId} onAddSuccess={() => {
-                                refetchTrades();
-                                setIsAddTradeVisible(false);
+                                console.log("AddTradeForm completed - fetching new trades");
+                                // Kurze Verzögerung, um sicherzustellen, dass Backend-Anfragen abgeschlossen sind
+                                setTimeout(() => {
+                                  refetchTrades();
+                                  setIsAddTradeVisible(false);
+                                }, 300);
                               }} />
                             </div>
                           </TabsContent>
@@ -178,8 +182,12 @@ export default function SimpleHome() {
                           <TabsContent value="import" className="mt-0">
                             <div className="max-h-[60vh] overflow-y-auto">
                               <TradeImport userId={userId} onImport={() => {
-                                refetchTrades();
-                                setIsAddTradeVisible(false);
+                                console.log("TradeImport completed callback - fetching new trades");
+                                // Explizites refetch mit Wartezeit
+                                setTimeout(() => {
+                                  refetchTrades();
+                                  setIsAddTradeVisible(false);
+                                }, 300);
                               }} />
                             </div>
                           </TabsContent>

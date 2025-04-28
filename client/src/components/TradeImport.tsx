@@ -28,24 +28,35 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
 
   const importMutation = useMutation({
     mutationFn: async (trades: any[]) => {
-      console.log("Importiere Trades mit userId:", user?.id);
+      console.log("Importiere Trades mit userId:", userId);
       const res = await apiRequest("POST", "/api/import-csv", { 
         trades,
         userId: userId // Verwende die über Props übergebene userId
       });
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Import erfolgreich",
-        description: "Ihre Trades wurden erfolgreich importiert.",
+        description: `${data.count || 'Ihre'} Trades wurden erfolgreich importiert.`,
       });
+      // Queries invalidieren
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades", userId] });
       queryClient.invalidateQueries({ queryKey: ["/api/weekly-summary"] });
       queryClient.invalidateQueries({ queryKey: ["/api/performance-data"] });
       queryClient.invalidateQueries({ queryKey: ["/api/setup-win-rates"] });
+      
+      // Form zurücksetzen
       setFile(null);
+      setLinkInput("");
       setImporting(false);
+      
+      console.log("Import abgeschlossen - Callback aufrufen:", Boolean(onImport));
+      // Callback aufrufen
+      if (onImport) {
+        onImport();
+      }
     },
     onError: (error: Error) => {
       toast({
