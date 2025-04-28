@@ -11,7 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from "@/components/ui/popover";
-import { Trade } from "@shared/schema";
+import { Trade, accountTypes } from "@shared/schema";
 import { formatDate, formatTime, getTodayDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
@@ -39,6 +39,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     mainTrends: new Set<string>(),
     internalTrends: new Set<string>(),
     entryTypes: new Set<string>(),
+    accountTypes: new Set<string>(),
     isWin: null as boolean | null,
     startDate: new Date(),
     endDate: new Date()
@@ -134,6 +135,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       mainTrends: new Set<string>(),
       internalTrends: new Set<string>(),
       entryTypes: new Set<string>(),
+      accountTypes: new Set<string>(),
       isWin: null,
       startDate: new Date(),
       endDate: new Date()
@@ -165,6 +167,50 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
             <tr>
               <th className="p-3 text-left whitespace-nowrap">
                 Datum
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <div className="flex items-center gap-1">
+                  Kontoart
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 ml-1">
+                        <Filter className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56" align="start">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Kontoart filtern</h4>
+                        <div className="space-y-2 px-1">
+                          {accountTypes.map(type => (
+                            <div key={type} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`account-${type}`} 
+                                checked={filters.accountTypes.has(type)}
+                                onCheckedChange={() => toggleFilter('accountTypes', type)}
+                              />
+                              <Label htmlFor={`account-${type}`} className="text-sm cursor-pointer">
+                                {type}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                        {filters.accountTypes.size > 0 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => {
+                              setFilters({...filters, accountTypes: new Set()});
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Filter zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </th>
               <th className="p-3 text-left whitespace-nowrap">
                 <div className="flex items-center gap-1">

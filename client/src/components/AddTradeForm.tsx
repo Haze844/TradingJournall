@@ -109,6 +109,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
         entryLevel: entryLevelTypes[0],
         liquidation: timeframeTypes[0],
         location: locationTypes[0],
+        accountType: accountTypes[0],
         rrAchieved: 0,
         rrPotential: 0,
         isWin: false,
@@ -327,27 +328,51 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             </div>
           </div>
 
-          {/* Location */}
-          <div>
-            <Label htmlFor="location">Location</Label>
-            <Select
-              defaultValue={locationTypes[0]}
-              onValueChange={(value) => setValue("location", value)}
-            >
-              <SelectTrigger className={errors.location ? "border-red-500" : ""}>
-                <SelectValue placeholder="Location auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {locationTypes.map((location) => (
-                  <SelectItem key={location} value={location}>
-                    {location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.location && (
-              <p className="text-xs text-red-500 mt-1">{errors.location.message}</p>
-            )}
+          {/* Location und Kontoart */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="location">Location</Label>
+              <Select
+                defaultValue={locationTypes[0]}
+                onValueChange={(value) => setValue("location", value)}
+              >
+                <SelectTrigger className={errors.location ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Location auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locationTypes.map((location) => (
+                    <SelectItem key={location} value={location}>
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.location && (
+                <p className="text-xs text-red-500 mt-1">{errors.location.message}</p>
+              )}
+            </div>
+            
+            <div>
+              <Label htmlFor="accountType">Kontoart</Label>
+              <Select
+                defaultValue={accountTypes[0]}
+                onValueChange={(value) => setValue("accountType", value)}
+              >
+                <SelectTrigger className={errors.accountType ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Kontoart auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accountTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.accountType && (
+                <p className="text-xs text-red-500 mt-1">{errors.accountType.message}</p>
+              )}
+            </div>
           </div>
 
           {/* R:R Informationen */}
