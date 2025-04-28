@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FilterBar from "@/components/FilterBar";
 import TradeTable from "@/components/TradeTable";
@@ -29,6 +29,7 @@ import { Link } from "wouter";
 export default function SimpleHome() {
   const { user } = useAuth();
   const userId = user?.id || 1; // Fallback to 1 only if user object isn't loaded yet
+  const tradesSectionRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   // State für die Sichtbarkeit des Add-Formulars
@@ -222,26 +223,7 @@ export default function SimpleHome() {
           </TabsList>
         </div>
         <TabsContent value="trades">
-          <div className="rocket-card rounded-xl p-2 sm:p-4">
-            {/* Tabs innerhalb der Card statt Überschrift */}
-            <div className="flex justify-center items-center mb-5">
-              <TabsList className="bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10">
-                <TabsTrigger 
-                  id="trades-tab"
-                  value="trades" 
-                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg"
-                >
-                  <DollarSign className="w-4 h-4 mr-1.5" /> Trades
-                </TabsTrigger>
-                <TabsTrigger 
-                  id="ai-analysis-tab"
-                  value="ai-analysis" 
-                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg"
-                >
-                  <Activity className="w-4 h-4 mr-1.5" /> Analyse
-                </TabsTrigger>
-              </TabsList>
-            </div>
+          <div className="rocket-card rounded-xl p-2 sm:p-4" ref={tradesSectionRef}>
             
             <div className="mb-2 sm:mb-3">
               {/* Statistiken */}
