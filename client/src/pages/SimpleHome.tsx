@@ -19,7 +19,8 @@ import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
-  Users, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon
+  Users, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon,
+  Plus, X
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -28,6 +29,7 @@ export default function SimpleHome() {
   const userId = user?.id || 1; // Fallback to 1 only if user object isn't loaded yet
   const { toast } = useToast();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
+  const [isAddTradeVisible, setIsAddTradeVisible] = useState(false);
   
   const [filters, setFilters] = useState({
     startDate: getWeekDates().weekStart,
