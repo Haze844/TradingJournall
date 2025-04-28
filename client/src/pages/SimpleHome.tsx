@@ -51,6 +51,19 @@ export default function SimpleHome() {
     };
   }, [isAddTradeVisible]);
   
+  // Event Listener für den "Trade hinzufügen" Button in der TradeTable
+  useEffect(() => {
+    const handleAddTradeClick = () => {
+      console.log("Event: add-trade-clicked empfangen");
+      setIsAddTradeVisible(true);
+    };
+    
+    window.addEventListener('add-trade-clicked', handleAddTradeClick);
+    return () => {
+      window.removeEventListener('add-trade-clicked', handleAddTradeClick);
+    };
+  }, []);
+  
   const [filters, setFilters] = useState({
     startDate: getTodayDates().startDate,
     endDate: getTodayDates().endDate,
@@ -245,11 +258,13 @@ export default function SimpleHome() {
                           </TabsContent>
                           
                           <TabsContent value="manual" className="mt-0">
-                            <AddTradeForm userId={userId} onAddSuccess={() => {
-                              // Trades neu laden und Dialog schließen
-                              refetchTrades();
-                              setIsAddTradeVisible(false);
-                            }} />
+                            <div className="max-h-[60vh] overflow-y-auto pr-2 pb-2">
+                              <AddTradeForm userId={userId} onAddSuccess={() => {
+                                // Trades neu laden und Dialog schließen
+                                refetchTrades();
+                                setIsAddTradeVisible(false);
+                              }} />
+                            </div>
                           </TabsContent>
                         </Tabs>
                       </div>
