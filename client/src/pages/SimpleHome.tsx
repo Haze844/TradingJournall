@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FilterBar from "@/components/FilterBar";
 import TradeTable from "@/components/TradeTable";
@@ -12,9 +12,10 @@ import RiskManagementDashboard from "@/components/RiskManagementDashboard";
 import MarketPhaseAnalysis from "@/components/MarketPhaseAnalysis";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { getWeekDates, formatDate } from "@/lib/utils";
+import { getWeekDates, getTodayDates, formatDate } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -38,8 +39,8 @@ export default function SimpleHome() {
   }, [isAddTradeVisible]);
   
   const [filters, setFilters] = useState({
-    startDate: getWeekDates().weekStart,
-    endDate: getWeekDates().weekEnd,
+    startDate: getTodayDates().startDate,
+    endDate: getTodayDates().endDate,
     symbol: "all",
     setup: "all",
     mainTrendM15: "all",

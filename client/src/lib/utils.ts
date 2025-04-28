@@ -21,6 +21,18 @@ export function formatTime(date: Date | string): string {
   return format(dateObj, "HH:mm");
 }
 
+export function getTodayDates(): { startDate: Date; endDate: Date } {
+  const today = new Date();
+  
+  const startDate = new Date(today);
+  startDate.setHours(0, 0, 0, 0);
+  
+  const endDate = new Date(today);
+  endDate.setHours(23, 59, 59, 999);
+  
+  return { startDate, endDate };
+}
+
 export function getWeekDates(): { weekStart: Date; weekEnd: Date } {
   const now = new Date();
   const dayOfWeek = now.getDay();
