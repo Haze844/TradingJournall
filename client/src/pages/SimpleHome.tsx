@@ -258,14 +258,12 @@ export default function SimpleHome() {
                           </TabsContent>
                           
                           <TabsContent value="manual" className="mt-0">
-                            <div className="max-h-[70vh] overflow-y-auto pr-2 pb-2">
-                              <div className="transform scale-[0.65] origin-top">
-                                <AddTradeForm userId={userId} onAddSuccess={() => {
-                                  // Trades neu laden und Dialog schließen
-                                  refetchTrades();
-                                  setIsAddTradeVisible(false);
-                                }} />
-                              </div>
+                            <div className="transform scale-[0.55] origin-top -mt-24 -mb-24">
+                              <AddTradeForm userId={userId} onAddSuccess={() => {
+                                // Trades neu laden und Dialog schließen
+                                refetchTrades();
+                                setIsAddTradeVisible(false);
+                              }} />
                             </div>
                           </TabsContent>
                         </Tabs>
