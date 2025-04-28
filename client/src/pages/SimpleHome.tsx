@@ -211,125 +211,118 @@ export default function SimpleHome() {
 
       {/* Main Content */}
       <Tabs defaultValue="trades" className="w-full">
-        <div className="rocket-card rounded-xl p-2 sm:p-4">
-          {/* Überschrift mit Tabs nebeneinander */}
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-4">
-              <h3 className="text-lg font-bold moon-text flex items-center">
-                <DollarSign className="w-4 h-4 mr-2" /> Trades
-              </h3>
-              
-              <TabsList className="bg-black/40 p-1 rounded-lg h-8">
-                <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-                  Trades
-                </TabsTrigger>
-                <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-                  Analyse
-                </TabsTrigger>
-              </TabsList>
-            </div>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-4">
+            <h3 className="text-lg font-bold moon-text flex items-center">
+              <DollarSign className="w-4 h-4 mr-2" /> Trades
+            </h3>
+            
+            <TabsList className="bg-black/40 p-1 rounded-lg h-8">
+              <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+                Trades
+              </TabsTrigger>
+              <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+                Analyse
+              </TabsTrigger>
+            </TabsList>
           </div>
+        </div>
           
-          <TabsContent value="trades">
-                <div className="mb-2 sm:mb-3">
-                  {/* Statistiken */}
-                  {trades.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                        Trades: {tradeStats.count}
-                      </Badge>
-                      <Badge variant="outline" className="bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10">
-                        Gewinne: {tradeStats.wins}
-                      </Badge>
-                      <Badge variant="outline" className="bg-red-500/5 text-red-400 hover:bg-red-500/10">
-                        Verluste: {tradeStats.losses}
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                        Win Rate: {tradeStats.winRate.toFixed(1)}%
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                        P&L: ${tradeStats.totalPL.toFixed(2)}
-                      </Badge>
-                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                        Ø RR: {tradeStats.avgRR.toFixed(2)}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="relative">
-                  {/* Filter */}
-                  <FilterBar
-                    userId={userId}
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                  />
-                  
-                  {/* Trade Tabelle */}
-                  <TradeTable
-                    trades={trades}
-                    isLoading={tradesLoading}
-                    onTradeSelect={handleTradeSelect}
-                  />
-                  
-                </div>
-                
-                {/* Trade Modal als separates Float-Element (nicht in der Tabelle integriert) */}
-              </div>
-              
-              {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
-              {selectedTrade && (
-                <div className="rocket-card rounded-xl p-2 sm:p-4">
-                  <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Trade Details</h3>
-                  <TradeDetail selectedTrade={selectedTrade} />
+        <TabsContent value="trades">
+          <div className="rocket-card rounded-xl p-2 sm:p-4">
+            <div className="mb-2 sm:mb-3">
+              {/* Statistiken */}
+              {trades.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                    Trades: {tradeStats.count}
+                  </Badge>
+                  <Badge variant="outline" className="bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10">
+                    Gewinne: {tradeStats.wins}
+                  </Badge>
+                  <Badge variant="outline" className="bg-red-500/5 text-red-400 hover:bg-red-500/10">
+                    Verluste: {tradeStats.losses}
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                    Win Rate: {tradeStats.winRate.toFixed(1)}%
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                    P&L: ${tradeStats.totalPL.toFixed(2)}
+                  </Badge>
+                  <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                    Ø RR: {tradeStats.avgRR.toFixed(2)}
+                  </Badge>
                 </div>
               )}
             </div>
+            
+            <div className="relative">
+              {/* Filter */}
+              <FilterBar
+                userId={userId}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+              />
+              
+              {/* Trade Tabelle */}
+              <TradeTable
+                trades={trades}
+                isLoading={tradesLoading}
+                onTradeSelect={handleTradeSelect}
+              />
+            </div>
+          </div>
+          
+          {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
+          {selectedTrade && (
+            <div className="rocket-card rounded-xl p-2 sm:p-4">
+              <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Trade Details</h3>
+              <TradeDetail selectedTrade={selectedTrade} />
+            </div>
+          )}
 
-            {/* TradingView Chart Display */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* TradingView Chart Display mit Tools darunter */}
-              {selectedTrade && selectedTrade.chartImage ? (
-                <div className="col-span-1 md:col-span-3 space-y-4">
-                  {/* Chart Image */}
-                  <div className="rocket-card rounded-xl p-2 sm:p-4">
-                    <h3 className="text-lg font-bold mb-2 sm:mb-4 flex items-center">
-                      <ImageIcon className="w-4 h-4 mr-2" /> 
-                      Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
-                    </h3>
-                    <div className="rounded-lg overflow-hidden border border-border">
-                      {selectedTrade.chartImage.startsWith('http') ? (
-                        // Externe URL (TradingView Link)
-                        <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
-                          <img 
-                            src={selectedTrade.chartImage} 
-                            alt={`Chart für ${selectedTrade.symbol}`}
-                            className="w-full h-auto max-h-[500px] object-contain"
-                          />
-                        </a>
-                      ) : (
-                        // Base64 Bild
+          {/* TradingView Chart Display */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* TradingView Chart Display mit Tools darunter */}
+            {selectedTrade && selectedTrade.chartImage ? (
+              <div className="col-span-1 md:col-span-3 space-y-4">
+                {/* Chart Image */}
+                <div className="rocket-card rounded-xl p-2 sm:p-4">
+                  <h3 className="text-lg font-bold mb-2 sm:mb-4 flex items-center">
+                    <ImageIcon className="w-4 h-4 mr-2" /> 
+                    Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
+                  </h3>
+                  <div className="rounded-lg overflow-hidden border border-border">
+                    {selectedTrade.chartImage.startsWith('http') ? (
+                      // Externe URL (TradingView Link)
+                      <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
                         <img 
                           src={selectedTrade.chartImage} 
                           alt={`Chart für ${selectedTrade.symbol}`}
                           className="w-full h-auto max-h-[500px] object-contain"
                         />
-                      )}
-                    </div>
+                      </a>
+                    ) : (
+                      // Base64 Bild
+                      <img 
+                        src={selectedTrade.chartImage} 
+                        alt={`Chart für ${selectedTrade.symbol}`}
+                        className="w-full h-auto max-h-[500px] object-contain"
+                      />
+                    )}
                   </div>
                 </div>
-              ) : (
-                <>
-                  {/* Placeholder für Chartanzeige, wenn kein Chart ausgewählt ist */}
-                  <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-3">
-                    <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Chart Analyse</h3>
-                    <p className="text-muted-foreground">Wähle einen Trade aus, um Details und Charts anzuzeigen.</p>
-                  </div>
-                </>
-              )}
-            </div>
+              </div>
+            ) : (
+              <>
+                {/* Placeholder für Chartanzeige, wenn kein Chart ausgewählt ist */}
+                <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-3">
+                  <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Chart Analyse</h3>
+                  <p className="text-muted-foreground">Wähle einen Trade aus, um Details und Charts anzuzeigen.</p>
+                </div>
+              </>
+            )}
           </div>
-        </div>
         </TabsContent>
         
         {/* AI Analysis Tab - Mit Sub-Navigation */}
