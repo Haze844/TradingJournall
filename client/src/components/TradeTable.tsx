@@ -223,25 +223,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     <Card className="mb-6 bg-card overflow-hidden">
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
         <div className="flex-1 flex items-center">
-          {/* Statistik-Box links */}
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex flex-col">
-              <span className="text-muted-foreground text-xs">Total Trades</span>
-              <span className="font-medium">{filteredTrades.length}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-muted-foreground text-xs">Win/Loss</span>
-              <span className="font-medium">
-                {filteredTrades.filter(t => t.isWin).length} / {filteredTrades.filter(t => t.isWin === false).length}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-muted-foreground text-xs">Profit/Loss</span>
-              <span className={`font-medium ${calculateTotalPL(filteredTrades) >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                ${calculateTotalPL(filteredTrades).toFixed(2)}
-              </span>
-            </div>
-          </div>
+          {/* Für die Statistik-Komponente reservierter Bereich - SimpleHome wird diesen nutzen */}
+          <div id="stats-container" className="flex items-center"></div>
         </div>
         <div className="flex gap-2">
           <Button
