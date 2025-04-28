@@ -26,7 +26,8 @@ import {
   trendTypes,
   entryLevelTypes,
   timeframeTypes,
-  locationTypes
+  locationTypes,
+  accountTypes
 } from "@shared/schema";
 
 // Erweitere das Schema für clientseitige Validierung

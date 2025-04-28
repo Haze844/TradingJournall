@@ -240,3 +240,9 @@ export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({
 
 export type InsertAppSettings = z.infer<typeof insertAppSettingsSchema>;
 export type AppSettings = typeof appSettings.$inferSelect;
+
+// Konstanten für Dropdown-Auswahlen
+export const accountTypes = [
+  "EVA",
+  "PA"
+];
