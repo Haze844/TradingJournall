@@ -23,6 +23,7 @@ import {
   Users, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon,
   Plus, X
 } from "lucide-react";
+
 import { Link } from "wouter";
 
 export default function SimpleHome() {
@@ -36,6 +37,18 @@ export default function SimpleHome() {
   // Debug-Ausgabe bei Änderung der Sichtbarkeit
   useEffect(() => {
     console.log("isAddTradeVisible geändert:", isAddTradeVisible);
+    
+    // Wenn der Dialog geöffnet wird, scrolle zum Anfang und verhindere Scrollen im Hintergrund
+    if (isAddTradeVisible) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    // Cleanup beim Unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isAddTradeVisible]);
   
   const [filters, setFilters] = useState({
@@ -210,25 +223,22 @@ export default function SimpleHome() {
                   
                 </div>
                 
-                {/* Kompaktes Hinzufügen Fenster - zentriert über der Seite */}
+                {/* Manuelles Modal mit absoluter Positionierung */}
                 {isAddTradeVisible && (
-                  <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9999 }}>
-                    <div className="bg-black/50 absolute inset-0" onClick={() => setIsAddTradeVisible(false)}></div>
-                    <div className="w-[520px] max-w-[95%] relative" style={{ zIndex: 10000 }}>
-                      <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-3 shadow-xl">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="text-base font-bold text-primary">Chart-Link hinzufügen</h4>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-white hover:bg-primary/20"
+                  <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-[9999]">
+                    <div className="absolute inset-0 bg-black/70" onClick={() => setIsAddTradeVisible(false)}></div>
+                    <div className="relative z-[10000] bg-black/90 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl max-w-[520px] w-full mx-4">
+                      <div className="p-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-lg font-bold text-primary">Chart-Link hinzufügen</h3>
+                          <button 
                             onClick={() => setIsAddTradeVisible(false)}
+                            className="h-8 w-8 rounded-md hover:bg-primary/20 flex items-center justify-center text-gray-400 hover:text-white"
                           >
-                            <X className="h-4 w-4" />
-                          </Button>
+                            <X className="h-5 w-5" />
+                          </button>
                         </div>
-                        
-                        <div className="max-h-[50vh] overflow-y-auto">
+                        <div>
                           <TradeImport userId={userId} onImport={() => {
                             console.log("TradeImport completed callback - fetching new trades");
                             // Explizites refetch mit Wartezeit
