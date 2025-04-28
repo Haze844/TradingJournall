@@ -150,95 +150,46 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
       
       {!preview ? (
         <div className="border-2 border-dashed border-primary/40 rounded-lg p-4 text-center hover:border-primary/60 transition-colors">
-          <Tabs defaultValue="link" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="link">Link</TabsTrigger>
-              <TabsTrigger value="upload">Upload</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="link" className="space-y-4">
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <div className="bg-primary/10 rounded-full p-2">
-                  <LinkIcon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">TradingView Chart Link einfügen</p>
-                  <p className="text-xs text-muted-foreground">
-                    Kopiere den Link zum Screenshot deines TradingView Charts
-                  </p>
-                </div>
-                <div className="w-full space-y-2">
-                  <Input
-                    type="url"
-                    placeholder="https://www.tradingview.com/x/..."
-                    value={linkInput}
-                    onChange={(e) => setLinkInput(e.target.value)}
-                    className={linkError ? "border-red-500" : ""}
-                  />
-                  {linkError && (
-                    <p className="text-xs text-red-500">{linkError}</p>
-                  )}
-                  <Button 
-                    onClick={handleLinkSubmit}
-                    disabled={isUploading}
-                    className="w-full"
-                    variant="default"
-                  >
-                    {isUploading ? (
-                      <>
-                        <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                        Verarbeite...
-                      </>
-                    ) : (
-                      <>
-                        <LinkIcon className="h-4 w-4 mr-2" />
-                        Link verwenden
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="upload" className="space-y-2">
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <div className="bg-primary/10 rounded-full p-2">
-                  <ImageIcon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">TradingView Chart hochladen</p>
-                  <p className="text-xs text-muted-foreground">
-                    Lade einen Screenshot deines Charts direkt hoch
-                  </p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="relative"
-                  disabled={isUploading}
-                >
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    onChange={handleFileChange}
-                    disabled={isUploading}
-                  />
-                  {isUploading ? (
-                    <>
-                      <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
-                      Lade hoch...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Bild auswählen
-                    </>
-                  )}
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <div className="bg-primary/10 rounded-full p-2">
+              <LinkIcon className="h-5 w-5 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Kopiere den Link zum Screenshot deines TradingView Charts
+              </p>
+            </div>
+            <div className="w-full space-y-2">
+              <Input
+                type="url"
+                placeholder="https://www.tradingview.com/x/..."
+                value={linkInput}
+                onChange={(e) => setLinkInput(e.target.value)}
+                className={linkError ? "border-red-500" : ""}
+              />
+              {linkError && (
+                <p className="text-xs text-red-500">{linkError}</p>
+              )}
+              <Button 
+                onClick={handleLinkSubmit}
+                disabled={isUploading}
+                className="w-full"
+                variant="default"
+              >
+                {isUploading ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Verarbeite...
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="h-4 w-4 mr-2" />
+                    Link verwenden
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="rounded-lg overflow-hidden border border-border">
