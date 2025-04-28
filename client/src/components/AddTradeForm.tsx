@@ -145,11 +145,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
   };
 
   return (
-    <Card className="w-full mb-6">
-      <CardHeader>
-        <CardTitle>Neuen Trade hinzufügen</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="w-full">
+      <div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             {/* Datum und Uhrzeit */}
@@ -453,7 +450,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             )}
           </Button>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

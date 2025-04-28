@@ -238,10 +238,13 @@ export default function SimpleHome() {
                             <X className="h-5 w-5" />
                           </button>
                         </div>
-                        <div className="space-y-4">
-                          {/* Trade Import */}
-                          <div>
-                            <h4 className="text-sm font-medium mb-2">Chart-Link importieren</h4>
+                        <Tabs defaultValue="link" className="w-full">
+                          <TabsList className="grid w-full grid-cols-2 mb-4">
+                            <TabsTrigger value="link">TradingView Link</TabsTrigger>
+                            <TabsTrigger value="manual">Manuell eingeben</TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="link" className="mt-0">
                             <TradeImport userId={userId} onImport={() => {
                               console.log("TradeImport completed callback - fetching new trades");
                               // Explizites refetch mit Wartezeit
@@ -250,18 +253,16 @@ export default function SimpleHome() {
                                 setIsAddTradeVisible(false);
                               }, 300);
                             }} />
-                          </div>
+                          </TabsContent>
                           
-                          {/* Trade manuell hinzufügen */}
-                          <div>
-                            <h4 className="text-sm font-medium mb-2">Trade manuell hinzufügen</h4>
+                          <TabsContent value="manual" className="mt-0">
                             <AddTradeForm userId={userId} onAddSuccess={() => {
                               // Trades neu laden und Dialog schließen
                               refetchTrades();
                               setIsAddTradeVisible(false);
                             }} />
-                          </div>
-                        </div>
+                          </TabsContent>
+                        </Tabs>
                       </div>
                     </div>
                   </div>
