@@ -210,7 +210,17 @@ export default function SimpleHome() {
       <Header />
 
       {/* Main Content */}
-      <Tabs defaultValue="trades" className="w-full">
+      <Tabs defaultValue="trades" className="w-full" id="main-tabs">
+        <div className="flex justify-center mb-4">
+          <TabsList className="main-tabs-list bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10">
+            <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
+              <DollarSign className="w-4 h-4 mr-1.5" /> Trades
+            </TabsTrigger>
+            <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
+              <Activity className="w-4 h-4 mr-1.5" /> Analyse
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4">
             {/* Tabs innerhalb der Card statt Überschrift */}
@@ -341,19 +351,46 @@ export default function SimpleHome() {
                   onClick={(e) => {
                     e.preventDefault(); // Verhindern, dass die Tabs-Aktion ausgeführt wird
                     
-                    // Erst den "trades" Tab der Hauptnavigation aktivieren
-                    const tradesTab = document.getElementById('trades-tab') as HTMLElement;
-                    if (tradesTab) {
-                      tradesTab.click();
+                    // Die Trades TabsTrigger in der Hauptnavigation suchen und aktivieren
+                    const mainTabsList = document.querySelector('.main-tabs-list');
+                    if (mainTabsList) {
+                      const mainTradesTrigger = mainTabsList.querySelector('[value="trades"]') as HTMLElement;
+                      if (mainTradesTrigger) {
+                        mainTradesTrigger.click();
+                        return;
+                      }
                     }
                     
-                    // Sicherstellen, dass wir zur Trades-Tabelle zurückkehren
-                    setTimeout(() => {
-                      const contentElement = document.querySelector('.rocket-card') as HTMLElement;
-                      if (contentElement) {
-                        contentElement.scrollIntoView({ behavior: 'smooth' });
+                    // Fallback, wenn wir die Hauptnavigation nicht finden
+                    const tradesTabContent = document.querySelector('[role="tabpanel"][data-state="active"]');
+                    if (tradesTabContent) {
+                      // Setze active state auf die Trades TabsContent
+                      const mainTabs = document.getElementById('main-tabs');
+                      if (mainTabs) {
+                        const tabsValues = mainTabs.querySelectorAll('[role="tab"]');
+                        tabsValues.forEach(tab => {
+                          if (tab.getAttribute('value') === 'trades') {
+                            tab.setAttribute('data-state', 'active');
+                          } else {
+                            tab.setAttribute('data-state', '');
+                          }
+                        });
+                        
+                        const tabPanels = mainTabs.querySelectorAll('[role="tabpanel"]');
+                        tabPanels.forEach(panel => {
+                          if (panel.getAttribute('value') === 'trades') {
+                            panel.setAttribute('data-state', 'active');
+                          } else {
+                            panel.setAttribute('data-state', '');
+                          }
+                        });
+                        
+                        // Zur Trades-Tabelle scrollen
+                        setTimeout(() => {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }, 50);
                       }
-                    }, 50);
+                    }
                   }}
                 >
                   <DollarSign className="mr-1.5 h-4 w-4 md:inline hidden" />
