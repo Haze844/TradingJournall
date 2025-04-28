@@ -145,8 +145,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
   };
 
   return (
-    <div className="w-full">
-      <div>
+    <div className="w-full max-w-none overflow-visible">
+      <div className="overflow-visible">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             {/* Datum und Uhrzeit */}

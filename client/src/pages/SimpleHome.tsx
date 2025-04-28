@@ -229,7 +229,7 @@ export default function SimpleHome() {
                 {isAddTradeVisible && (
                   <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-[9999]">
                     <div className="absolute inset-0 bg-black/70" onClick={() => setIsAddTradeVisible(false)}></div>
-                    <div className="relative z-[10000] bg-black/90 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl max-w-[800px] w-full mx-4 max-h-[90vh] overflow-auto">
+                    <div className="relative z-[10000] bg-black/90 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl max-w-[900px] w-full mx-4 min-h-[500px] flex flex-col">
                       <div className="p-4">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="text-lg font-bold text-primary">Trade hinzufügen</h3>
@@ -258,19 +258,17 @@ export default function SimpleHome() {
                           </TabsContent>
                           
                           <TabsContent value="manual" className="mt-0">
-                            <div className="grid grid-cols-1 gap-2 px-2">
-                              <div className="border-t border-border pt-2 mb-2">
-                                <h3 className="text-sm font-medium text-gray-400 mb-2">Manuellen Trade eingeben</h3>
-                                <p className="text-xs text-gray-500 mb-4">Der Dialog zeigt eine kompakte Version des Formulars. Nach Speichern wird der Trade in Ihrer Liste angezeigt.</p>
-                              </div>
-                              
-                              <div className="bg-card p-4 rounded-md">
-                                <AddTradeForm userId={userId} onAddSuccess={() => {
-                                  // Trades neu laden und Dialog schließen
-                                  refetchTrades();
-                                  setIsAddTradeVisible(false);
-                                }} />
-                              </div>
+                            <div className="border-t border-border pt-2 mb-2">
+                              <h3 className="text-sm font-medium text-gray-400 mb-2">Manuellen Trade eingeben</h3>
+                              <p className="text-xs text-gray-500 mb-2">Bitte füllen Sie alle Felder aus. Nach dem Speichern wird der Trade in Ihrer Liste angezeigt.</p>
+                            </div>
+                            
+                            <div className="overflow-visible p-4">
+                              <AddTradeForm userId={userId} onAddSuccess={() => {
+                                // Trades neu laden und Dialog schließen
+                                refetchTrades();
+                                setIsAddTradeVisible(false);
+                              }} />
                             </div>
                           </TabsContent>
                         </Tabs>
