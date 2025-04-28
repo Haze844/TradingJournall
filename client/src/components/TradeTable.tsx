@@ -70,6 +70,21 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     }, 0);
   };
   
+  // Berechne den durchschnittlichen Risk/Reward-Wert
+  const calculateAverageRR = (trades: Trade[]): number => {
+    if (trades.length === 0) return 0;
+    
+    const totalRR = trades.reduce((sum, trade) => {
+      // Prüfen, ob rrAchieved ein Wert ist
+      if (trade.rrAchieved !== undefined && trade.rrAchieved !== null) {
+        return sum + Number(trade.rrAchieved);
+      }
+      return sum;
+    }, 0);
+    
+    return totalRR / trades.length;
+  };
+  
   // Unique values for filters
   const uniqueValues = {
     symbols: Array.from(new Set(trades.map(t => t.symbol).filter(Boolean))) as string[],
