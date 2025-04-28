@@ -210,20 +210,18 @@ export default function SimpleHome() {
       <Header />
 
       {/* Main Content */}
-      {/* Tabs nach außen gezogen und zentriert */}
-      <div className="flex justify-center mb-4">
-        <TabsList className="bg-black/40 p-1 rounded-lg h-8">
-          <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-            Trades
-          </TabsTrigger>
-          <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-            Analyse
-          </TabsTrigger>
-        </TabsList>
-      </div>
-      
       <Tabs defaultValue="trades" className="w-full">
-        {/* Überschriften und Tabs innerhalb des rocket-card Elements */}
+        {/* Tabs zentriert */}
+        <div className="flex justify-center mb-4">
+          <TabsList className="bg-black/40 p-1 rounded-lg h-8">
+            <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+              Trades
+            </TabsTrigger>
+            <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+              Analyse
+            </TabsTrigger>
+          </TabsList>
+        </div>
           
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4">
