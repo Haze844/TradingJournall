@@ -40,6 +40,7 @@ export const trades = pgTable("trades", {
   entryLevel: text("entry_level").default(''),
   liquidation: text("liquidation").default(''),
   location: text("location").default(''),
+  accountType: text("account_type").default('PA'), // Kontoart: EVA oder PA
   rrAchieved: real("rr_achieved").default(0),
   rrPotential: real("rr_potential").default(0),
   profitLoss: real("profit_loss").default(0), // Gewinn/Verlust in $

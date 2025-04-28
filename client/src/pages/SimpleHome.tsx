@@ -230,7 +230,7 @@ export default function SimpleHome() {
                     <div className="relative z-[10000] bg-black/90 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl max-w-[520px] w-full mx-4">
                       <div className="p-4">
                         <div className="flex justify-between items-center mb-4">
-                          <h3 className="text-lg font-bold text-primary">Chart-Link hinzufügen</h3>
+                          <h3 className="text-lg font-bold text-primary">Trade hinzufügen</h3>
                           <button 
                             onClick={() => setIsAddTradeVisible(false)}
                             className="h-8 w-8 rounded-md hover:bg-primary/20 flex items-center justify-center text-gray-400 hover:text-white"
@@ -238,15 +238,29 @@ export default function SimpleHome() {
                             <X className="h-5 w-5" />
                           </button>
                         </div>
-                        <div>
-                          <TradeImport userId={userId} onImport={() => {
-                            console.log("TradeImport completed callback - fetching new trades");
-                            // Explizites refetch mit Wartezeit
-                            setTimeout(() => {
+                        <div className="space-y-4">
+                          {/* Trade Import */}
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Chart-Link importieren</h4>
+                            <TradeImport userId={userId} onImport={() => {
+                              console.log("TradeImport completed callback - fetching new trades");
+                              // Explizites refetch mit Wartezeit
+                              setTimeout(() => {
+                                refetchTrades();
+                                setIsAddTradeVisible(false);
+                              }, 300);
+                            }} />
+                          </div>
+                          
+                          {/* Trade manuell hinzufügen */}
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">Trade manuell hinzufügen</h4>
+                            <AddTradeForm userId={userId} onAddSuccess={() => {
+                              // Trades neu laden und Dialog schließen
                               refetchTrades();
                               setIsAddTradeVisible(false);
-                            }, 300);
-                          }} />
+                            }} />
+                          </div>
                         </div>
                       </div>
                     </div>

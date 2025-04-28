@@ -134,7 +134,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       mainTrends: new Set<string>(),
       internalTrends: new Set<string>(),
       entryTypes: new Set<string>(),
-      isWin: null
+      isWin: null,
+      startDate: new Date(),
+      endDate: new Date()
     });
   };
   
@@ -145,11 +147,14 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
         <CardTitle>Trades</CardTitle>
         <div className="flex gap-2">
-          <Button variant="secondary" size="icon">
-            <i className="fas fa-filter"></i>
-          </Button>
-          <Button variant="secondary" size="icon">
-            <i className="fas fa-download"></i>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary border-0"
+            onClick={resetFilters}
+          >
+            <RefreshCw className="h-3 w-3" />
+            Filter zurücksetzen
           </Button>
         </div>
       </CardHeader>
