@@ -110,8 +110,29 @@ export default function SimpleHome() {
                 {/* Filter Bar als integrierter Teil des Elementes */}
                 <FilterBar filters={filters} onFilterChange={handleFilterChange} />
                 
-                {/* Trade Table direkt angeschlossen */}
+                {/* Trade Table mit Add-Button */}
                 <div className="px-6 py-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold moon-text">Trades</h3>
+                    <Button 
+                      onClick={() => setIsAddTradeVisible(!isAddTradeVisible)}
+                      className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-500 text-white"
+                      size="sm"
+                    >
+                      {isAddTradeVisible ? (
+                        <>
+                          <X className="mr-2 h-4 w-4" />
+                          Schließen
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Trade hinzufügen
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
                   <TradeTable
                     trades={trades}
                     isLoading={tradesLoading}
@@ -119,6 +140,36 @@ export default function SimpleHome() {
                   />
                 </div>
               </div>
+              
+              {/* Hinzufügen & Import Element - Erscheint nur wenn der Button geklickt wurde */}
+              {isAddTradeVisible && (
+                <div className="rocket-card rounded-xl overflow-hidden">
+                  <Tabs defaultValue="add" className="p-2 sm:p-4">
+                    <TabsList className="grid grid-cols-2 mb-2 sm:mb-4 bg-black/60">
+                      <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                        Hinzufügen
+                      </TabsTrigger>
+                      <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                        Import
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="add" className="mt-0">
+                      <AddTradeForm userId={userId} onAddSuccess={() => {
+                        refetchTrades();
+                        setIsAddTradeVisible(false);
+                      }} />
+                    </TabsContent>
+                    
+                    <TabsContent value="import" className="mt-0">
+                      <TradeImport userId={userId} onImport={() => {
+                        refetchTrades();
+                        setIsAddTradeVisible(false);
+                      }} />
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              )}
               
               {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
               {selectedTrade && (
@@ -160,59 +211,13 @@ export default function SimpleHome() {
                       )}
                     </div>
                   </div>
-
-                  {/* Tools Panel direkt unter dem Chart */}
-                  <div className="rocket-card rounded-xl">
-                    <Tabs defaultValue="add" className="p-2 sm:p-4">
-                      <TabsList className="grid grid-cols-2 mb-2 sm:mb-4 bg-black/60">
-                        <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                          Hinzufügen
-                        </TabsTrigger>
-                        <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                          Import
-                        </TabsTrigger>
-                      </TabsList>
-                      
-                      <TabsContent value="add" className="mt-0">
-                        <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
-                      </TabsContent>
-                      
-                      <TabsContent value="import" className="mt-0">
-                        <TradeImport userId={userId} onImport={refetchTrades} />
-                      </TabsContent>
-                    </Tabs>
-                  </div>
                 </div>
               ) : (
                 <>
                   {/* Placeholder für Chartanzeige, wenn kein Chart ausgewählt ist */}
-                  <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-2">
+                  <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-3">
                     <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Chart Analyse</h3>
                     <p className="text-muted-foreground">Wähle einen Trade aus, um Details und Charts anzuzeigen.</p>
-                  </div>
-                  
-                  {/* Tools Panel, wenn kein Chart angezeigt wird */}
-                  <div className="col-span-1">
-                    <div className="rocket-card rounded-xl">
-                      <Tabs defaultValue="add" className="p-2 sm:p-4">
-                        <TabsList className="grid grid-cols-2 mb-2 sm:mb-4 bg-black/60">
-                          <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                            Hinzufügen
-                          </TabsTrigger>
-                          <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                            Import
-                          </TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="add" className="mt-0">
-                          <AddTradeForm userId={userId} onAddSuccess={refetchTrades} />
-                        </TabsContent>
-                        
-                        <TabsContent value="import" className="mt-0">
-                          <TradeImport userId={userId} onImport={refetchTrades} />
-                        </TabsContent>
-                      </Tabs>
-                    </div>
                   </div>
                 </>
               )}
