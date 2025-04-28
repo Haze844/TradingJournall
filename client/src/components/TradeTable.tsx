@@ -53,8 +53,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     entryTypes: new Set<string>(),
     accountTypes: new Set<string>(),
     isWin: null as boolean | null,
-    startDate: new Date(),
-    endDate: new Date()
+    // Standarddatum auf einen weiten Bereich setzen, damit alle Trades angezeigt werden
+    startDate: new Date('2020-01-01'),
+    endDate: new Date('2030-12-31')
   });
   
   // Unique values for filters
@@ -170,9 +171,10 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       entryTypes: new Set<string>(),
       accountTypes: new Set<string>(),
       isWin: null,
-      startDate: new Date(),
-      endDate: new Date()
+      startDate: new Date('2020-01-01'),
+      endDate: new Date('2030-12-31')
     });
+    setCurrentPage(1);
   };
   
   // Die Funktion für Trend-Farben wurde zugunsten der BadgeTrend-Komponente entfernt
@@ -310,7 +312,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs col-span-2"
+                          className="text-xs"
                           onClick={() => {
                             const {startDate, endDate} = getTodayDates();
                             setFilters({...filters, startDate, endDate});
@@ -318,6 +320,21 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                           }}
                         >
                           Heute
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs"
+                          onClick={() => {
+                            setFilters({
+                              ...filters, 
+                              startDate: new Date('2020-01-01'), 
+                              endDate: new Date('2030-12-31')
+                            });
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Alle Trades
                         </Button>
                       </div>
                     </div>
