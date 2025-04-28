@@ -16,7 +16,19 @@ import { formatDate, formatTime, getTodayDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Filter, SlidersHorizontal, RefreshCw, Plus } from "lucide-react";
+import { 
+  Filter, 
+  SlidersHorizontal, 
+  RefreshCw, 
+  Plus, 
+  CalendarDays, 
+  Wallet, 
+  BarChart4, 
+  LineChart, 
+  TrendingUp, 
+  ArrowUpDown, 
+  Award
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -209,14 +221,69 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
               <th className="p-3 text-left whitespace-nowrap">
-                Datum
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Datum
+                      <CalendarDays className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-4" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Zeitraum filtern</h4>
+                      <div className="grid gap-2">
+                        <div className="grid gap-1">
+                          <Label htmlFor="date-from" className="text-xs">Von</Label>
+                          <Input
+                            id="date-from"
+                            type="date"
+                            className="h-8"
+                            value={filters.startDate.toISOString().split('T')[0]}
+                            onChange={(e) => {
+                              const newDate = e.target.value ? new Date(e.target.value) : new Date();
+                              setFilters({...filters, startDate: newDate});
+                              setCurrentPage(1);
+                            }}
+                          />
+                        </div>
+                        <div className="grid gap-1">
+                          <Label htmlFor="date-to" className="text-xs">Bis</Label>
+                          <Input
+                            id="date-to"
+                            type="date"
+                            className="h-8"
+                            value={filters.endDate.toISOString().split('T')[0]}
+                            onChange={(e) => {
+                              const newDate = e.target.value ? new Date(e.target.value) : new Date();
+                              setFilters({...filters, endDate: newDate});
+                              setCurrentPage(1);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full text-xs mt-2"
+                        onClick={() => {
+                          const {startDate, endDate} = getTodayDates();
+                          setFilters({...filters, startDate, endDate});
+                          setCurrentPage(1);
+                        }}
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Zurücksetzen
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </th>
               <th className="p-3 text-left whitespace-nowrap">
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Kontoart
-                      <Filter className="h-3 w-3 ml-1" />
+                      <Wallet className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -258,7 +325,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Symbol
-                      <Filter className="h-3 w-3 ml-1" />
+                      <BarChart4 className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -302,7 +369,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Setup
-                      <Filter className="h-3 w-3 ml-1" />
+                      <LineChart className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -346,7 +413,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       M15 Trend
-                      <Filter className="h-3 w-3 ml-1" />
+                      <TrendingUp className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -388,7 +455,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       M5 Trend
-                      <Filter className="h-3 w-3 ml-1" />
+                      <TrendingUp className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -430,7 +497,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Einstieg
-                      <Filter className="h-3 w-3 ml-1" />
+                      <ArrowUpDown className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
