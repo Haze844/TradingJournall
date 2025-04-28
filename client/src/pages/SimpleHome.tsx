@@ -334,13 +334,26 @@ export default function SimpleHome() {
           <Tabs defaultValue="patterns" className="w-full">
             <div className="overflow-x-auto pb-2">
               <TabsList className="mb-4 bg-black/40 p-1 rounded-xl w-full flex justify-center">
-                {/* Trades Tab an erster Stelle */}
+                {/* Trades Tab an erster Stelle - Direkt zur Trades Tabelle zurückkehren */}
                 <TabsTrigger 
                   value="back-to-trades" 
                   className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault(); // Verhindern, dass die Tabs-Aktion ausgeführt wird
+                    
+                    // Erst den "trades" Tab der Hauptnavigation aktivieren
                     const tradesTab = document.getElementById('trades-tab') as HTMLElement;
-                    if (tradesTab) tradesTab.click();
+                    if (tradesTab) {
+                      tradesTab.click();
+                    }
+                    
+                    // Sicherstellen, dass wir zur Trades-Tabelle zurückkehren
+                    setTimeout(() => {
+                      const contentElement = document.querySelector('.rocket-card') as HTMLElement;
+                      if (contentElement) {
+                        contentElement.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }, 50);
                   }}
                 >
                   <DollarSign className="mr-1.5 h-4 w-4 md:inline hidden" />
