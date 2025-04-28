@@ -12,14 +12,15 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover";
 import { Trade } from "@shared/schema";
-import { formatDate, formatTime } from "@/lib/utils";
+import { formatDate, formatTime, getTodayDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Filter, SlidersHorizontal } from "lucide-react";
+import { Filter, SlidersHorizontal, RefreshCw } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 
 interface TradeTableProps {
   trades: Trade[];
@@ -38,7 +39,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     mainTrends: new Set<string>(),
     internalTrends: new Set<string>(),
     entryTypes: new Set<string>(),
-    isWin: null as boolean | null
+    isWin: null as boolean | null,
+    startDate: new Date(),
+    endDate: new Date()
   });
   
   // Unique values for filters
