@@ -211,25 +211,24 @@ export default function SimpleHome() {
 
       {/* Main Content */}
       <Tabs defaultValue="trades" className="w-full">
-        {/* Tabs zentriert */}
-        <div className="flex justify-center mb-4">
-          <TabsList className="bg-black/40 p-1 rounded-lg h-8">
-            <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-              Trades
-            </TabsTrigger>
-            <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-              Analyse
-            </TabsTrigger>
-          </TabsList>
-        </div>
-          
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4">
-            {/* Überschrift zentriert innerhalb der Card */}
-            <div className="flex justify-center items-center mb-4">
-              <h3 className="text-lg font-bold moon-text flex items-center">
-                <DollarSign className="w-4 h-4 mr-2" /> Trades
-              </h3>
+            {/* Tabs innerhalb der Card statt Überschrift */}
+            <div className="flex justify-center items-center mb-5">
+              <TabsList className="bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10">
+                <TabsTrigger 
+                  value="trades" 
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg"
+                >
+                  <DollarSign className="w-4 h-4 mr-1.5" /> Trades
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="ai-analysis" 
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg"
+                >
+                  <Activity className="w-4 h-4 mr-1.5" /> Analyse
+                </TabsTrigger>
+              </TabsList>
             </div>
             
             <div className="mb-2 sm:mb-3">
