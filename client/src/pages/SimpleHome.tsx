@@ -78,6 +78,38 @@ export default function SimpleHome() {
     setSelectedTrade(trade);
   };
 
+  // Berechne Statistiken für die angezeigten Trades
+  const tradeStats = useMemo(() => {
+    if (!trades || trades.length === 0) {
+      return {
+        count: 0,
+        wins: 0,
+        losses: 0,
+        winRate: 0,
+        totalPL: 0,
+        totalRR: 0,
+        avgRR: 0
+      };
+    }
+
+    const wins = trades.filter(trade => trade.isWin).length;
+    const losses = trades.length - wins;
+    const winRate = (wins / trades.length) * 100;
+    const totalPL = trades.reduce((sum, trade) => sum + (trade.profitLoss || 0), 0);
+    const totalRR = trades.reduce((sum, trade) => sum + (trade.rrAchieved || 0), 0);
+    const avgRR = totalRR / trades.length;
+
+    return {
+      count: trades.length,
+      wins,
+      losses,
+      winRate,
+      totalPL,
+      totalRR,
+      avgRR
+    };
+  }, [trades]);
+
   // Handle filter changes
   const handleFilterChange = (newFilters: any) => {
     setFilters({ ...filters, ...newFilters });
@@ -113,21 +145,52 @@ export default function SimpleHome() {
             {/* FilterBar und "Trade hinzufügen" Button in einem Card */}
             <div className="flex flex-col space-y-4 sm:space-y-6">
               <div className="rocket-card rounded-xl p-2 sm:p-4">
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <h3 className="text-lg font-bold moon-text flex items-center">
-                    <DollarSign className="w-4 h-4 mr-2" /> Trades
-                  </h3>
-                  <Button
-                    size="sm"
-                    className="bg-primary/20 hover:bg-primary/30 text-primary space-x-1 shadow-none px-3 h-8"
-                    onClick={() => {
-                      console.log("Trade hinzufügen geklickt");
-                      setIsAddTradeVisible(!isAddTradeVisible);
-                    }}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    <span>Trade hinzufügen</span>
-                  </Button>
+                <div className="flex flex-col space-y-2 sm:space-y-3 mb-2 sm:mb-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold moon-text flex items-center">
+                      <DollarSign className="w-4 h-4 mr-2" /> Trades
+                      {trades.length > 0 && (
+                        <span className="ml-2 text-xs px-2 py-0.5 bg-primary/20 text-primary rounded-full">
+                          {formatDate(filters.startDate)}
+                        </span>
+                      )}
+                    </h3>
+                    <Button
+                      size="sm"
+                      className="bg-primary/20 hover:bg-primary/30 text-primary space-x-1 shadow-none px-3 h-8"
+                      onClick={() => {
+                        console.log("Trade hinzufügen geklickt");
+                        setIsAddTradeVisible(!isAddTradeVisible);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      <span>Trade hinzufügen</span>
+                    </Button>
+                  </div>
+                  
+                  {/* Statistiken */}
+                  {trades.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                        Trades: {tradeStats.count}
+                      </Badge>
+                      <Badge variant="outline" className="bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10">
+                        Gewinne: {tradeStats.wins}
+                      </Badge>
+                      <Badge variant="outline" className="bg-red-500/5 text-red-400 hover:bg-red-500/10">
+                        Verluste: {tradeStats.losses}
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                        Win Rate: {tradeStats.winRate.toFixed(1)}%
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                        P&L: ${tradeStats.totalPL.toFixed(2)}
+                      </Badge>
+                      <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
+                        Ø RR: {tradeStats.avgRR.toFixed(2)}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="relative">
