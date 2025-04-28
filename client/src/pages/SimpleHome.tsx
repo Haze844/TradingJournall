@@ -210,26 +210,30 @@ export default function SimpleHome() {
       <Header />
 
       {/* Main Content */}
+      {/* Tabs nach außen gezogen und zentriert */}
+      <div className="flex justify-center mb-4">
+        <TabsList className="bg-black/40 p-1 rounded-lg h-8">
+          <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+            Trades
+          </TabsTrigger>
+          <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
+            Analyse
+          </TabsTrigger>
+        </TabsList>
+      </div>
+      
       <Tabs defaultValue="trades" className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-4">
-            <h3 className="text-lg font-bold moon-text flex items-center">
-              <DollarSign className="w-4 h-4 mr-2" /> Trades
-            </h3>
-            
-            <TabsList className="bg-black/40 p-1 rounded-lg h-8">
-              <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-                Trades
-              </TabsTrigger>
-              <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3">
-                Analyse
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
+        {/* Überschriften und Tabs innerhalb des rocket-card Elements */}
           
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4">
+            {/* Überschrift zentriert innerhalb der Card */}
+            <div className="flex justify-center items-center mb-4">
+              <h3 className="text-lg font-bold moon-text flex items-center">
+                <DollarSign className="w-4 h-4 mr-2" /> Trades
+              </h3>
+            </div>
+            
             <div className="mb-2 sm:mb-3">
               {/* Statistiken */}
               {trades.length > 0 && (
