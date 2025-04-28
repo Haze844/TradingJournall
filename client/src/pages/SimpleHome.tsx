@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FilterBar from "@/components/FilterBar";
 import TradeTable from "@/components/TradeTable";
@@ -29,7 +29,13 @@ export default function SimpleHome() {
   const userId = user?.id || 1; // Fallback to 1 only if user object isn't loaded yet
   const { toast } = useToast();
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
+  // State für die Sichtbarkeit des Add-Formulars
   const [isAddTradeVisible, setIsAddTradeVisible] = useState(false);
+  
+  // Debug-Ausgabe bei Änderung der Sichtbarkeit
+  useEffect(() => {
+    console.log("isAddTradeVisible geändert:", isAddTradeVisible);
+  }, [isAddTradeVisible]);
   
   const [filters, setFilters] = useState({
     startDate: getWeekDates().weekStart,
@@ -119,17 +125,16 @@ export default function SimpleHome() {
                       className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-500 text-white"
                       size="sm"
                     >
-                      {isAddTradeVisible ? (
+                      {isAddTradeVisible ? 
                         <>
                           <X className="mr-2 h-4 w-4" />
                           Schließen
-                        </>
-                      ) : (
+                        </> : 
                         <>
                           <Plus className="mr-2 h-4 w-4" />
                           Trade hinzufügen
                         </>
-                      )}
+                      }
                     </Button>
                   </div>
                   
@@ -140,9 +145,9 @@ export default function SimpleHome() {
                     onTradeSelect={handleTradeSelect}
                   />
                   
-                  {/* Kompaktes Hinzufügen Fenster - Erscheint als Float über der Tabelle */}
+                  {/* Kompaktes Hinzufügen Fenster */}
                   {isAddTradeVisible && (
-                    <div className="absolute z-10 right-6 mt-2 w-[600px] max-w-[calc(100%-3rem)]">
+                    <div className="absolute top-0 right-0 z-50 w-[600px] max-w-[calc(100%-3rem)]">
                       <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-3 shadow-xl">
                         <div className="flex justify-between items-center mb-2">
                           <h4 className="text-sm font-bold text-primary">Neuen Trade erstellen</h4>
