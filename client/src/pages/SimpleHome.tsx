@@ -229,7 +229,7 @@ export default function SimpleHome() {
                 {isAddTradeVisible && (
                   <div className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-[9999]">
                     <div className="absolute inset-0 bg-black/70" onClick={() => setIsAddTradeVisible(false)}></div>
-                    <div className="relative z-[10000] bg-black/90 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl max-w-[520px] w-full mx-4">
+                    <div className="relative z-[10000] bg-black/90 backdrop-blur-sm border border-primary/30 rounded-lg shadow-xl max-w-[800px] w-full mx-4 max-h-[90vh] overflow-auto">
                       <div className="p-4">
                         <div className="flex justify-between items-center mb-4">
                           <h3 className="text-lg font-bold text-primary">Trade hinzufügen</h3>
@@ -242,8 +242,8 @@ export default function SimpleHome() {
                         </div>
                         <Tabs defaultValue="link" className="w-full">
                           <TabsList className="grid w-full grid-cols-2 mb-4">
-                            <TabsTrigger value="link">TradingView Link</TabsTrigger>
-                            <TabsTrigger value="manual">Manuell eingeben</TabsTrigger>
+                            <TabsTrigger value="link" className="text-base">TradingView Link</TabsTrigger>
+                            <TabsTrigger value="manual" className="text-base">Manuell eingeben</TabsTrigger>
                           </TabsList>
                           
                           <TabsContent value="link" className="mt-0">
@@ -258,7 +258,7 @@ export default function SimpleHome() {
                           </TabsContent>
                           
                           <TabsContent value="manual" className="mt-0">
-                            <div className="transform scale-[0.55] origin-top -mt-24 -mb-24">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <AddTradeForm userId={userId} onAddSuccess={() => {
                                 // Trades neu laden und Dialog schließen
                                 refetchTrades();
