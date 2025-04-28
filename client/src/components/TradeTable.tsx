@@ -12,7 +12,7 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover";
 import { Trade, accountTypes } from "@shared/schema";
-import { formatDate, formatTime, getTodayDates } from "@/lib/utils";
+import { formatDate, formatTime, getTodayDates, getWeekDates, getLastMonthDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -93,9 +93,30 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       return false;
     }
     
+    // Account type filter
+    if (filters.accountTypes.size > 0 && trade.accountType && !filters.accountTypes.has(trade.accountType)) {
+      return false;
+    }
+    
     // Win/Loss filter
     if (filters.isWin !== null && trade.isWin !== filters.isWin) {
       return false;
+    }
+    
+    // Date range filter
+    if (trade.date) {
+      const tradeDate = new Date(trade.date);
+      
+      // Set time to midnight for pure date comparison
+      const startDate = new Date(filters.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(filters.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      
+      if (tradeDate < startDate || tradeDate > endDate) {
+        return false;
+      }
     }
     
     return true;
@@ -261,19 +282,44 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                           />
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="w-full text-xs mt-2"
-                        onClick={() => {
-                          const {startDate, endDate} = getTodayDates();
-                          setFilters({...filters, startDate, endDate});
-                          setCurrentPage(1);
-                        }}
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Zurücksetzen
-                      </Button>
+                      <div className="grid grid-cols-2 gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs"
+                          onClick={() => {
+                            const {startDate, endDate} = getLastMonthDates();
+                            setFilters({...filters, startDate, endDate});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Letzter Monat
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs"
+                          onClick={() => {
+                            const {weekStart, weekEnd} = getWeekDates();
+                            setFilters({...filters, startDate: weekStart, endDate: weekEnd});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Diese Woche
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs col-span-2"
+                          onClick={() => {
+                            const {startDate, endDate} = getTodayDates();
+                            setFilters({...filters, startDate, endDate});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Heute
+                        </Button>
+                      </div>
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -541,7 +587,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Status
-                      <Filter className="h-3 w-3 ml-1" />
+                      <Award className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">

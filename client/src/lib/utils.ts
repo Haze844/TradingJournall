@@ -48,6 +48,20 @@ export function getWeekDates(): { weekStart: Date; weekEnd: Date } {
   return { weekStart, weekEnd };
 }
 
+export function getLastMonthDates(): { startDate: Date; endDate: Date } {
+  const now = new Date();
+  
+  // Start date: First day of previous month
+  const startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  startDate.setHours(0, 0, 0, 0);
+  
+  // End date: Last day of previous month
+  const endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+  endDate.setHours(23, 59, 59, 999);
+  
+  return { startDate, endDate };
+}
+
 export function calculateWinRate(winCount: number, totalCount: number): number {
   if (totalCount === 0) return 0;
   return (winCount / totalCount) * 100;
