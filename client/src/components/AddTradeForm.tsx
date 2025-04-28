@@ -406,7 +406,6 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
 
           {/* Chart Image Upload */}
           <div className="mb-4">
-            <Label htmlFor="chartImage">TradingView Chart</Label>
             <ChartImageUpload 
               existingImage={null} 
               onChange={(base64Image) => setValue("chartImage", base64Image || "")}

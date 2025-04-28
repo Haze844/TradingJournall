@@ -150,10 +150,10 @@ export default function SimpleHome() {
                 {isAddTradeVisible && (
                   <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div className="bg-black/50 absolute inset-0" onClick={() => setIsAddTradeVisible(false)}></div>
-                    <div className="w-[700px] max-w-[95%] relative z-10">
-                      <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-4 shadow-xl">
-                        <div className="flex justify-between items-center mb-3">
-                          <h4 className="text-base font-bold text-primary">Neuen Trade erstellen</h4>
+                    <div className="w-[520px] max-w-[95%] relative z-10">
+                      <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-3 shadow-xl">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="text-base font-bold text-primary">Chart-Link hinzufügen</h4>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -164,42 +164,16 @@ export default function SimpleHome() {
                           </Button>
                         </div>
                         
-                        <Tabs defaultValue="import" className="w-full">
-                          <TabsList className="w-full grid grid-cols-2 mb-2 bg-black/60">
-                            <TabsTrigger value="import" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-xs">
-                              CSV Import
-                            </TabsTrigger>
-                            <TabsTrigger value="add" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-xs">
-                              Trade manuell hinzufügen
-                            </TabsTrigger>
-                          </TabsList>
-                          
-                          <TabsContent value="add" className="mt-0">
-                            <div className="max-h-[60vh] overflow-y-auto">
-                              <AddTradeForm userId={userId} onAddSuccess={() => {
-                                console.log("AddTradeForm completed - fetching new trades");
-                                // Kurze Verzögerung, um sicherzustellen, dass Backend-Anfragen abgeschlossen sind
-                                setTimeout(() => {
-                                  refetchTrades();
-                                  setIsAddTradeVisible(false);
-                                }, 300);
-                              }} />
-                            </div>
-                          </TabsContent>
-                          
-                          <TabsContent value="import" className="mt-0">
-                            <div className="max-h-[60vh] overflow-y-auto">
-                              <TradeImport userId={userId} onImport={() => {
-                                console.log("TradeImport completed callback - fetching new trades");
-                                // Explizites refetch mit Wartezeit
-                                setTimeout(() => {
-                                  refetchTrades();
-                                  setIsAddTradeVisible(false);
-                                }, 300);
-                              }} />
-                            </div>
-                          </TabsContent>
-                        </Tabs>
+                        <div className="max-h-[50vh] overflow-y-auto">
+                          <TradeImport userId={userId} onImport={() => {
+                            console.log("TradeImport completed callback - fetching new trades");
+                            // Explizites refetch mit Wartezeit
+                            setTimeout(() => {
+                              refetchTrades();
+                              setIsAddTradeVisible(false);
+                            }, 300);
+                          }} />
+                        </div>
                       </div>
                     </div>
                   </div>
