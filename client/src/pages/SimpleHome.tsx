@@ -212,9 +212,9 @@ export default function SimpleHome() {
                 
                 {/* Kompaktes Hinzufügen Fenster - zentriert über der Seite */}
                 {isAddTradeVisible && (
-                  <div className="fixed inset-0 flex items-center justify-center z-50">
+                  <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 9999 }}>
                     <div className="bg-black/50 absolute inset-0" onClick={() => setIsAddTradeVisible(false)}></div>
-                    <div className="w-[520px] max-w-[95%] relative z-10">
+                    <div className="w-[520px] max-w-[95%] relative" style={{ zIndex: 10000 }}>
                       <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-3 shadow-xl">
                         <div className="flex justify-between items-center mb-2">
                           <h4 className="text-base font-bold text-primary">Chart-Link hinzufügen</h4>
