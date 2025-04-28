@@ -94,9 +94,9 @@ export default function SimpleHome() {
       {/* Main Content Tabs - Vereinfacht und fokussiert */}
       <Tabs defaultValue="trades" className="mb-4 sm:mb-6">
         <div className="overflow-x-auto">
-          <TabsList className="w-full justify-start mb-4 overflow-x-auto bg-black/40 p-1 rounded-xl">
+          <TabsList className="mb-6 bg-black/40 p-1 rounded-xl w-full flex flex-nowrap justify-start sm:justify-center">
             <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
-              <BarChart2 className="mr-2 h-4 w-4 md:inline hidden" />
+              <DollarSign className="mr-2 h-4 w-4 md:inline hidden" />
               Trades
             </TabsTrigger>
             <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary whitespace-nowrap">
@@ -106,55 +106,58 @@ export default function SimpleHome() {
           </TabsList>
         </div>
         
-        {/* Trades Tab */}
+        {/* Main Trades Tab */}
         <TabsContent value="trades" className="mt-0">
-          <div className="space-y-6">
-            {/* Main Trade Table Section - Full Width */}
-            <div className="w-full space-y-4">
-              {/* Ein gemeinsames Element für Filter und Tabelle */}
-              <div className="rocket-card rounded-xl p-0 overflow-hidden">
-                {/* Filter Bar als integrierter Teil des Elementes */}
-                <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+          <div className="space-y-4 sm:space-y-6">
+            {/* FilterBar und "Trade hinzufügen" Button in einem Card */}
+            <div className="flex flex-col space-y-4 sm:space-y-6">
+              <div className="rocket-card rounded-xl p-2 sm:p-4">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <h3 className="text-lg font-bold moon-text flex items-center">
+                    <DollarSign className="w-4 h-4 mr-2" /> Trades
+                  </h3>
+                  <Button
+                    size="sm"
+                    className="bg-primary/20 hover:bg-primary/30 text-primary space-x-1 shadow-none px-3 h-8"
+                    onClick={() => {
+                      console.log("Trade hinzufügen geklickt");
+                      setIsAddTradeVisible(!isAddTradeVisible);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    <span>Trade hinzufügen</span>
+                  </Button>
+                </div>
                 
-                {/* Header mit Add-Button */}
-                <div className="px-6 pt-6 pb-2">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-bold moon-text">Trades</h3>
-                    <Button 
-                      onClick={() => setIsAddTradeVisible(!isAddTradeVisible)}
-                      className="bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-500 text-white"
-                      size="sm"
-                    >
-                      {isAddTradeVisible ? 
-                        <>
-                          <X className="mr-2 h-4 w-4" />
-                          Schließen
-                        </> : 
-                        <>
-                          <Plus className="mr-2 h-4 w-4" />
-                          Trade hinzufügen
-                        </>
-                      }
-                    </Button>
-                  </div>
+                <div className="relative">
+                  {/* Filter */}
+                  <FilterBar
+                    userId={userId}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                  />
                   
-                  {/* Trade Table - Immer sichtbar, auch bei Add-Fenster */}
+                  {/* Trade Tabelle */}
                   <TradeTable
                     trades={trades}
                     isLoading={tradesLoading}
                     onTradeSelect={handleTradeSelect}
                   />
                   
-                  {/* Kompaktes Hinzufügen Fenster */}
-                  {isAddTradeVisible && (
-                    <div className="absolute top-0 right-0 z-50 w-[600px] max-w-[calc(100%-3rem)]">
-                      <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-3 shadow-xl">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="text-sm font-bold text-primary">Neuen Trade erstellen</h4>
+                </div>
+                
+                {/* Kompaktes Hinzufügen Fenster - zentriert über der Seite */}
+                {isAddTradeVisible && (
+                  <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="bg-black/50 absolute inset-0" onClick={() => setIsAddTradeVisible(false)}></div>
+                    <div className="w-[700px] max-w-[95%] relative z-10">
+                      <div className="bg-black/90 backdrop-blur-sm rounded-lg border border-primary/30 p-4 shadow-xl">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="text-base font-bold text-primary">Neuen Trade erstellen</h4>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 text-muted-foreground"
+                            className="h-7 w-7 text-muted-foreground hover:text-white hover:bg-primary/20"
                             onClick={() => setIsAddTradeVisible(false)}
                           >
                             <X className="h-4 w-4" />
@@ -199,8 +202,8 @@ export default function SimpleHome() {
                         </Tabs>
                       </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
               
               {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
@@ -212,7 +215,7 @@ export default function SimpleHome() {
               )}
             </div>
 
-            {/* Two Column Grid for Details and Charts */}
+            {/* TradingView Chart Display */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* TradingView Chart Display mit Tools darunter */}
               {selectedTrade && selectedTrade.chartImage ? (
