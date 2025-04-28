@@ -16,7 +16,7 @@ import { formatDate, formatTime, getTodayDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Filter, SlidersHorizontal, RefreshCw } from "lucide-react";
+import { Filter, SlidersHorizontal, RefreshCw, Plus } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -186,6 +186,18 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
           >
             <RefreshCw className="h-3 w-3" />
             Filter zurücksetzen
+          </Button>
+          
+          <Button
+            size="sm"
+            className="flex items-center gap-1 text-xs bg-primary/20 hover:bg-primary/30 text-primary border-0"
+            onClick={() => {
+              const event = new CustomEvent('add-trade-clicked');
+              window.dispatchEvent(event);
+            }}
+          >
+            <Plus className="h-3 w-3" />
+            Trade hinzufügen
           </Button>
         </div>
       </CardHeader>

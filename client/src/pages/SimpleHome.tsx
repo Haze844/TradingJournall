@@ -168,17 +168,6 @@ export default function SimpleHome() {
                         </span>
                       )}
                     </h3>
-                    <Button
-                      size="sm"
-                      className="bg-primary/20 hover:bg-primary/30 text-primary space-x-1 shadow-none px-3 h-8"
-                      onClick={() => {
-                        console.log("Trade hinzufügen geklickt");
-                        setIsAddTradeVisible(!isAddTradeVisible);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      <span>Trade hinzufügen</span>
-                    </Button>
                   </div>
                   
                   {/* Statistiken */}
