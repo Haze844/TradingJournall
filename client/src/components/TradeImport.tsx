@@ -356,6 +356,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     profitLoss,
                     isWin,
                     date: tradeDate,
+                    chartImage: row.chartImage || linkInput || "",
                   };
                 } catch (error) {
                   console.error("Fehler beim Verarbeiten der Zeile:", error);
@@ -375,6 +376,7 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
                     rrPotential: 0,
                     isWin: false,
                     date: new Date().toISOString(),
+                    chartImage: row.chartImage || linkInput || "",
                   };
                 }
               });
