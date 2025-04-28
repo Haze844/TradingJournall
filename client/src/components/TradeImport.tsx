@@ -10,7 +10,7 @@ import { Loader2, Upload, RefreshCw, Link as LinkIcon } from "lucide-react";
 import Papa from "papaparse";
 import { Trade, insertTradeSchema } from "@shared/schema";
 import { z } from "zod";
-import { synchronizeTrades } from "@/lib/tradovate";
+// Tradovate Integration wurde entfernt
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -129,19 +129,33 @@ export default function TradeImport({ userId, onImport }: TradeImportProps) {
     
     setImporting(true);
     
-    console.log("Link-Import mit userId:", userId);
-    
-    // Speichere nur den Link selbst, keine weitere Daten
-    // Das setzt voraus, dass das Schema Null-Werte erlaubt
-    const emptyTrade = {
+    // Speichere nur den Link selbst, aber genug Daten, damit ein gültiger Trade erstellt wird
+    const minimalTrade = {
+      userId: userId,
       chartImage: linkInput,
-      userId: userId // Verwende die über Props übergebene userId
-      // Keine weiteren Felder, damit keine Standardwerte gesetzt werden
+      symbol: "TradingView",
+      setup: "",  // Leeres Setup
+      date: new Date().toISOString(),
+      // Setze Minimum an Pflichtfeldern, da das Schema sie erfordert
+      mainTrendM15: "", 
+      internalTrendM5: "",
+      entryType: "",
+      entryLevel: "",
+      liquidation: "",
+      location: "",
+      rrAchieved: 0,
+      rrPotential: 0,
+      isWin: false
     };
     
     // Speichere als neuen Trade mit dem Link als chartImage-Feld
-    importMutation.mutate([emptyTrade]);
+    importMutation.mutate([minimalTrade]);
     setLinkInput("");
+    
+    toast({
+      title: "TradingView-Link importiert",
+      description: "Der TradingView-Chart wurde als neuer Trade gespeichert. Sie können diesen nun bearbeiten, um weitere Details hinzuzufügen."
+    });
   };
 
   const handleImport = async () => {
