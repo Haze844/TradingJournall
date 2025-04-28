@@ -330,25 +330,22 @@ export default function SimpleHome() {
         
         {/* AI Analysis Tab - Mit Sub-Navigation */}
         <TabsContent value="ai-analysis" className="mt-0">
-          {/* Zurück zu Trades Button */}
-          <div className="flex justify-end mb-3">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                const tradesTab = document.getElementById('trades-tab') as HTMLElement;
-                if (tradesTab) tradesTab.click();
-              }}
-              className="text-primary border-primary/30 hover:bg-primary/10"
-            >
-              <DollarSign className="w-4 h-4 mr-1.5" /> Zurück zu Trades
-            </Button>
-          </div>
-
           {/* Unternavigation für Analyse mit Tabs */}
           <Tabs defaultValue="patterns" className="w-full">
             <div className="overflow-x-auto pb-2">
               <TabsList className="mb-4 bg-black/40 p-1 rounded-xl w-full flex justify-center">
+                {/* Trades Tab an erster Stelle */}
+                <TabsTrigger 
+                  value="back-to-trades" 
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2"
+                  onClick={() => {
+                    const tradesTab = document.getElementById('trades-tab') as HTMLElement;
+                    if (tradesTab) tradesTab.click();
+                  }}
+                >
+                  <DollarSign className="mr-1.5 h-4 w-4 md:inline hidden" />
+                  Trades
+                </TabsTrigger>
                 <TabsTrigger value="patterns" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
                   <Brain className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Muster
