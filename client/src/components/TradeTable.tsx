@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from "@/components/ui/popover";
-import { Trade, accountTypes } from "@shared/schema";
+import { Trade, accountTypes, sessionTypes } from "@shared/schema";
 import { formatDate, formatTime, getTodayDates, getWeekDates, getLastMonthDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
@@ -30,7 +30,8 @@ import {
   ArrowUpDown, 
   Award,
   Target,
-  DollarSign
+  DollarSign,
+  Clock
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -494,6 +495,48 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Session
+                      <Clock className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Session filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {sessionTypes.map(session => (
+                          <div key={session} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`session-${session}`} 
+                              checked={filters.sessions.has(session)}
+                              onCheckedChange={() => toggleFilter('sessions', session)}
+                            />
+                            <Label htmlFor={`session-${session}`} className="text-sm cursor-pointer">
+                              {session}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.sessions.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, sessions: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Symbol
                       <BarChart4 className="h-3 w-3 ml-1" />
                     </div>
@@ -923,6 +966,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                 <tr key={index} className="border-b border-border">
                   <td className="p-3"><Skeleton className="h-5 w-24" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-10" /></td>
+                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-16" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
@@ -944,6 +988,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     {formatDate(trade.date)} <span className="text-muted-foreground text-xs">{formatTime(trade.date)}</span>
                   </td>
                   <td className="p-3">{trade.accountType || '-'}</td>
+                  <td className="p-3">{trade.session || '-'}</td>
                   <td className="p-3">{trade.symbol}</td>
                   <td className="p-3">{trade.setup}</td>
                   <td className="p-3">
