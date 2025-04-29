@@ -1,7 +1,19 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trade, setupTypes, trendTypes, entryLevelTypes } from "@shared/schema";
+import { 
+  Trade, 
+  setupTypes, 
+  trendTypes, 
+  entryLevelTypes,
+  simpleTrendTypes,
+  structureTypes,
+  timeframeTypes,
+  liquidationTypes,
+  unmitZoneTypes,
+  marketPhaseTypes,
+  rrValues 
+} from "@shared/schema";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
 import { formatDate } from "@/lib/utils";
@@ -34,6 +46,19 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const [editingInternalTrend, setEditingInternalTrend] = useState("");
   const [editingEntryLevel, setEditingEntryLevel] = useState("");
   const [editingProfitLoss, setEditingProfitLoss] = useState<number | undefined>(undefined);
+  
+  // Neue Felder
+  const [editingTrend, setEditingTrend] = useState("");
+  const [editingInternalTrendNew, setEditingInternalTrendNew] = useState("");
+  const [editingMicroTrend, setEditingMicroTrend] = useState("");
+  const [editingStructure, setEditingStructure] = useState("");
+  const [editingTimeframeEntry, setEditingTimeframeEntry] = useState("");
+  const [editingLiquidation, setEditingLiquidation] = useState("");
+  const [editingUnmitZone, setEditingUnmitZone] = useState("");
+  const [editingRangePoints, setEditingRangePoints] = useState<number>(0);
+  const [editingMarketPhase, setEditingMarketPhase] = useState("");
+  const [editingRRAchieved, setEditingRRAchieved] = useState<number>(0);
+  const [editingRRPotential, setEditingRRPotential] = useState<number>(0);
 
   // Mutation für das Update der Trade-Daten
   const updateTradeMutation = useMutation({
@@ -62,11 +87,26 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const startEditMode = () => {
     if (!selectedTrade) return;
     
+    // Bestehende Felder
     setEditingSetup(selectedTrade.setup || '');
     setEditingMainTrend(selectedTrade.mainTrendM15 || '');
     setEditingInternalTrend(selectedTrade.internalTrendM5 || '');
     setEditingEntryLevel(selectedTrade.entryLevel || '');
     setEditingProfitLoss(selectedTrade.profitLoss || 0);
+    
+    // Neue Felder
+    setEditingTrend(selectedTrade.trend || '');
+    setEditingInternalTrendNew(selectedTrade.internalTrend || '');
+    setEditingMicroTrend(selectedTrade.microTrend || '');
+    setEditingStructure(selectedTrade.structure || '');
+    setEditingTimeframeEntry(selectedTrade.timeframeEntry || '');
+    setEditingLiquidation(selectedTrade.liquidation || '');
+    setEditingUnmitZone(selectedTrade.unmitZone || '');
+    setEditingRangePoints(selectedTrade.rangePoints || 0);
+    setEditingMarketPhase(selectedTrade.marketPhase || '');
+    setEditingRRAchieved(selectedTrade.rrAchieved || 0);
+    setEditingRRPotential(selectedTrade.rrPotential || 0);
+    
     setEditMode(true);
   };
 
@@ -81,11 +121,25 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     
     updateTradeMutation.mutate({
       id: selectedTrade.id,
+      // Bestehende Felder
       setup: editingSetup,
       mainTrendM15: editingMainTrend,
       internalTrendM5: editingInternalTrend,
       entryLevel: editingEntryLevel,
-      profitLoss: editingProfitLoss
+      profitLoss: editingProfitLoss,
+      
+      // Neue Felder
+      trend: editingTrend,
+      internalTrend: editingInternalTrendNew,
+      microTrend: editingMicroTrend,
+      structure: editingStructure,
+      timeframeEntry: editingTimeframeEntry,
+      liquidation: editingLiquidation,
+      unmitZone: editingUnmitZone,
+      rangePoints: editingRangePoints,
+      marketPhase: editingMarketPhase,
+      rrAchieved: editingRRAchieved,
+      rrPotential: editingRRPotential
     });
   };
 
@@ -261,14 +315,224 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             <div className="font-bold">{selectedTrade.location}</div>
           </div>
           
+          {/* Neue Trend-Felder */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Trend</div>
+              {editMode ? (
+                <Select value={editingTrend} onValueChange={setEditingTrend}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Trend auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {simpleTrendTypes.map((trend) => (
+                      <SelectItem key={trend} value={trend}>
+                        {trend}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <BadgeTrend trend={selectedTrade.trend || '-'} />
+              )}
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Int. Trend</div>
+              {editMode ? (
+                <Select value={editingInternalTrendNew} onValueChange={setEditingInternalTrendNew}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Trend auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {simpleTrendTypes.map((trend) => (
+                      <SelectItem key={trend} value={trend}>
+                        {trend}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <BadgeTrend trend={selectedTrade.internalTrend || '-'} />
+              )}
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Mic. Trend</div>
+              {editMode ? (
+                <Select value={editingMicroTrend} onValueChange={setEditingMicroTrend}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Trend auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {simpleTrendTypes.map((trend) => (
+                      <SelectItem key={trend} value={trend}>
+                        {trend}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <BadgeTrend trend={selectedTrade.microTrend || '-'} />
+              )}
+            </div>
+          </div>
+
+          {/* Struktur, Timeframe Entry und Liquidation */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Struktur</div>
+              {editMode ? (
+                <Select value={editingStructure} onValueChange={setEditingStructure}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Struktur auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {structureTypes.map((structure) => (
+                      <SelectItem key={structure} value={structure}>
+                        {structure}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="font-bold">{selectedTrade.structure || '-'}</div>
+              )}
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Timeframe Entry</div>
+              {editMode ? (
+                <Select value={editingTimeframeEntry} onValueChange={setEditingTimeframeEntry}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Timeframe auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeframeTypes.map((tf) => (
+                      <SelectItem key={tf} value={tf}>
+                        {tf}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="font-bold">{selectedTrade.timeframeEntry || '-'}</div>
+              )}
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Liquidation</div>
+              {editMode ? (
+                <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Liquidation auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {liquidationTypes.map((liq) => (
+                      <SelectItem key={liq} value={liq}>
+                        {liq}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="font-bold">{selectedTrade.liquidation || '-'}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Unmitigierte Zone, Range Punkte und Marktphase */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Unmitigierte Zone</div>
+              {editMode ? (
+                <Select value={editingUnmitZone} onValueChange={setEditingUnmitZone}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unmitZoneTypes.map((zone) => (
+                      <SelectItem key={zone} value={zone}>
+                        {zone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="font-bold">{selectedTrade.unmitZone || '-'}</div>
+              )}
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Range Punkte</div>
+              {editMode ? (
+                <Input
+                  type="number"
+                  min="0"
+                  max="300"
+                  className="h-8"
+                  value={editingRangePoints}
+                  onChange={(e) => setEditingRangePoints(parseInt(e.target.value))}
+                />
+              ) : (
+                <div className="font-bold">{selectedTrade.rangePoints || '-'}</div>
+              )}
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground mb-1">Marktphase</div>
+              {editMode ? (
+                <Select value={editingMarketPhase} onValueChange={setEditingMarketPhase}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Phase auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {marketPhaseTypes.map((phase) => (
+                      <SelectItem key={phase} value={phase}>
+                        {phase}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="font-bold">{selectedTrade.marketPhase || '-'}</div>
+              )}
+            </div>
+          </div>
+
+          {/* RR und Ergebnis */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <div className="text-sm text-muted-foreground mb-1">RR Erreicht</div>
-              <div className="font-bold">{selectedTrade.rrAchieved}</div>
+              {editMode ? (
+                <Select value={editingRRAchieved.toString()} onValueChange={(value) => setEditingRRAchieved(parseInt(value))}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="RR auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rrValues.map((rr) => (
+                      <SelectItem key={rr} value={rr.toString()}>
+                        {rr}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="font-bold">{selectedTrade.rrAchieved}</div>
+              )}
             </div>
             <div>
               <div className="text-sm text-muted-foreground mb-1">RR Potenzial</div>
-              <div className="font-bold">{selectedTrade.rrPotential}</div>
+              {editMode ? (
+                <Select value={editingRRPotential.toString()} onValueChange={(value) => setEditingRRPotential(parseInt(value))}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="RR auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rrValues.map((rr) => (
+                      <SelectItem key={rr} value={rr.toString()}>
+                        {rr}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="font-bold">{selectedTrade.rrPotential}</div>
+              )}
             </div>
             <div>
               <div className="text-sm text-muted-foreground mb-1">Status</div>
