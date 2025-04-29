@@ -47,13 +47,13 @@ export default function Header() {
           
           {/* Hauptnavigation */}
           <nav className="flex flex-nowrap justify-center gap-3 mb-2 md:mb-0 whitespace-nowrap overflow-x-auto">
-            {/* Dashboard Button - Zurück zu Trades Tabelle */}
+            {/* Dashboard Button - zum Dashboard navigieren */}
             <Button variant="ghost" size="sm" asChild>
               <a href="#" onClick={(e) => {
                 e.preventDefault();
-                // Setze den aktiven Tab auf "trades"
-                const tradesTab = document.querySelector('[value="trades"]') as HTMLElement;
-                if (tradesTab) tradesTab.click();
+                // Setze den aktiven Tab auf "dashboard"
+                const dashboardTab = document.querySelector('[value="dashboard"]') as HTMLElement;
+                if (dashboardTab) dashboardTab.click();
               }}>
                 <BarChart2 className="w-4 h-4 mr-2" />
                 Dashboard
@@ -75,10 +75,24 @@ export default function Header() {
                 <DropdownMenuGroup>
                   {/* Chronologisch nach Workflow geordnet */}
                   <DropdownMenuItem asChild>
-                    <Link href="/#trades">
+                    <a href="#" onClick={(e) => {
+                      e.preventDefault();
+                      const dashboardTab = document.querySelector('[value="dashboard"]') as HTMLElement;
+                      if (dashboardTab) dashboardTab.click();
+                    }}>
                       <BarChart2 className="w-4 h-4 mr-2" />
-                      <span>Trades Übersicht</span>
-                    </Link>
+                      <span>Dashboard</span>
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href="#" onClick={(e) => {
+                      e.preventDefault();
+                      const tradesTab = document.querySelector('[value="trades"]') as HTMLElement;
+                      if (tradesTab) tradesTab.click();
+                    }}>
+                      <DollarSign className="w-4 h-4 mr-2" />
+                      <span>Trades Liste</span>
+                    </a>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/#import">
