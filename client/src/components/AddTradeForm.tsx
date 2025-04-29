@@ -60,13 +60,13 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
     resolver: zodResolver(addTradeSchema),
     defaultValues: {
       symbol: "",
-      setup: setupTypes[0],
-      mainTrendM15: trendTypes[0],
-      internalTrendM5: trendTypes[0],
-      entryType: trendTypes[0],
-      entryLevel: entryLevelTypes[0],
-      liquidation: timeframeTypes[0],
-      location: locationTypes[0],
+      setup: "",
+      mainTrendM15: "",
+      internalTrendM5: "",
+      entryType: "",
+      entryLevel: "",
+      liquidation: "",
+      location: "",
       rrAchieved: 0,
       rrPotential: 0,
       isWin: false,
@@ -102,14 +102,14 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
       // Formular zurücksetzen
       reset({
         symbol: "",
-        setup: setupTypes[0],
-        mainTrendM15: trendTypes[0],
-        internalTrendM5: trendTypes[0],
-        entryType: trendTypes[0],
-        entryLevel: entryLevelTypes[0],
-        liquidation: timeframeTypes[0],
-        location: locationTypes[0],
-        accountType: accountTypes[0],
+        setup: "",
+        mainTrendM15: "",
+        internalTrendM5: "",
+        entryType: "",
+        entryLevel: "",
+        liquidation: "",
+        location: "",
+        accountType: "",
         rrAchieved: 0,
         rrPotential: 0,
         isWin: false,
@@ -192,7 +192,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="setup">Setup</Label>
               <Select
-                defaultValue={setupTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("setup", value)}
               >
                 <SelectTrigger className={errors.setup ? "border-red-500" : ""}>
