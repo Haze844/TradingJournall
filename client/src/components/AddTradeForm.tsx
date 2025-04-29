@@ -27,7 +27,8 @@ import {
   entryLevelTypes,
   timeframeTypes,
   locationTypes,
-  accountTypes
+  accountTypes,
+  sessionTypes
 } from "@shared/schema";
 
 // Erweitere das Schema für clientseitige Validierung
@@ -67,6 +68,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
       entryLevel: "",
       liquidation: "",
       location: "",
+      session: "",
       rrAchieved: 0,
       rrPotential: 0,
       isWin: false,
@@ -110,6 +112,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
         liquidation: "",
         location: "",
         accountType: "",
+        session: "",
         rrAchieved: 0,
         rrPotential: 0,
         isWin: false,
@@ -325,8 +328,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             </div>
           </div>
 
-          {/* Location und Kontoart */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* Location, Session und Kontoart */}
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <Label htmlFor="location">Location</Label>
               <Select
@@ -346,6 +349,28 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
               </Select>
               {errors.location && (
                 <p className="text-xs text-red-500 mt-1">{errors.location.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="session">Session</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("session", value)}
+              >
+                <SelectTrigger className={errors.session ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Session auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sessionTypes.map((session) => (
+                    <SelectItem key={session} value={session}>
+                      {session}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.session && (
+                <p className="text-xs text-red-500 mt-1">{errors.session.message}</p>
               )}
             </div>
             

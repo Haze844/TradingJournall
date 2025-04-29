@@ -27,6 +27,7 @@ export const trendTypes = [
 export const entryLevelTypes = ["50%", "67%"] as const;
 export const timeframeTypes = ["M1", "M5", "M15", "H1"] as const;
 export const locationTypes = ["FVG", "FVG Sweep", "Sweep", "HTF Breaker"] as const;
+export const sessionTypes = ["London", "London Neverland", "NY PM"] as const;
 
 // Trades schema
 export const trades = pgTable("trades", {
@@ -41,6 +42,7 @@ export const trades = pgTable("trades", {
   liquidation: text("liquidation").default(''),
   location: text("location").default(''),
   accountType: text("account_type").default('PA'), // Kontoart: EVA oder PA
+  session: text("session").default(''), // Handels-Session: London, London Neverland, NY PM
   rrAchieved: real("rr_achieved").default(0),
   rrPotential: real("rr_potential").default(0),
   profitLoss: real("profit_loss").default(0), // Gewinn/Verlust in $
