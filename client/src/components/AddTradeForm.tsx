@@ -24,10 +24,16 @@ import {
   insertTradeSchema,
   setupTypes,
   trendTypes,
+  simpleTrendTypes,
   entryLevelTypes,
   timeframeTypes,
   locationTypes,
   accountTypes,
+  structureTypes,
+  unmitZoneTypes,
+  marketPhaseTypes,
+  rrValues,
+  liquidationTypes,
   sessionTypes
 } from "@shared/schema";
 
@@ -73,7 +79,16 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
       rrPotential: 0,
       isWin: false,
       date: format(new Date(), "yyyy-MM-dd"),
-      time: format(new Date(), "HH:mm")
+      time: format(new Date(), "HH:mm"),
+      // Neue Felder
+      trend: "",
+      internalTrend: "",
+      microTrend: "",
+      structure: "",
+      timeframeEntry: "",
+      unmitZone: "",
+      rangePoints: 0,
+      marketPhase: ""
     }
   });
 
@@ -117,7 +132,16 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
         rrPotential: 0,
         isWin: false,
         date: format(new Date(), "yyyy-MM-dd"),
-        time: format(new Date(), "HH:mm")
+        time: format(new Date(), "HH:mm"),
+        // Neue Felder
+        trend: "",
+        internalTrend: "",
+        microTrend: "",
+        structure: "",
+        timeframeEntry: "",
+        unmitZone: "",
+        rangePoints: 0,
+        marketPhase: ""
       });
       
       // Cache invalidieren
@@ -315,9 +339,9 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
                   <SelectValue placeholder="Timeframe auswählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeframeTypes.map((tf) => (
-                    <SelectItem key={tf} value={tf}>
-                      {tf}
+                  {liquidationTypes.map((liq) => (
+                    <SelectItem key={liq} value={liq}>
+                      {liq}
                     </SelectItem>
                   ))}
                 </SelectContent>

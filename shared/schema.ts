@@ -24,10 +24,26 @@ export const trendTypes = [
   "Trend Long", "Trend Short", 
   "Neutral", "Range"
 ] as const;
+export const simpleTrendTypes = ["Long", "Short"] as const;
 export const entryLevelTypes = ["50%", "67%"] as const;
-export const timeframeTypes = ["M1", "M5", "M15", "H1"] as const;
-export const locationTypes = ["FVG", "FVG Sweep", "Sweep", "HTF Breaker"] as const;
+export const timeframeTypes = ["M1", "M5", "M15", "H1", "ALL TF"] as const;
+export const liquidationTypes = ["M1", "M5", "M15", "H1", "Low Resistance", "Equals"] as const;
+export const locationTypes = [
+  "FVG", 
+  "FVG Sweep", 
+  "ca. 50% HS", 
+  "ca. 67% HS", 
+  "Volumenzone", 
+  "Rangekanten", 
+  "Mitte der Range", 
+  "HTF OB", 
+  "Sweep"
+] as const;
+export const structureTypes = ["Hauptstruktur", "Internal", "Micro"] as const;
 export const sessionTypes = ["London", "London Neverland", "NY PM"] as const;
+export const unmitZoneTypes = ["Ja", "Nein", "Mehrere"] as const;
+export const marketPhaseTypes = ["Long", "stark Long", "Short", "stark Short", "Range"] as const;
+export const rrValues = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
 // Trades schema
 export const trades = pgTable("trades", {
@@ -50,6 +66,15 @@ export const trades = pgTable("trades", {
   chartImage: text("chart_image"),
   isWin: boolean("is_win").default(false),
   userId: integer("user_id").references(() => users.id),
+  // Neue Spalten
+  trend: text("trend").default(''), // Long oder Short
+  internalTrend: text("internal_trend").default(''), // Long oder Short
+  microTrend: text("micro_trend").default(''), // Long oder Short
+  structure: text("structure").default(''), // Hauptstruktur, Internal, Micro
+  timeframeEntry: text("timeframe_entry").default(''), // M1, M5, M15, ALL TF
+  unmitZone: text("unmit_zone").default(''), // Ja, Nein, Mehrere
+  rangePoints: integer("range_points").default(0), // Wert zwischen 0 und 300
+  marketPhase: text("market_phase").default(''), // Long, stark Long, Short, stark Short, Range
 });
 
 export const insertTradeSchema = createInsertSchema(trades).omit({
