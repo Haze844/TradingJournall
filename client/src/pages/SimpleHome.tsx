@@ -10,6 +10,7 @@ import TradingPatterns from "@/components/TradingPatterns";
 import AdvancedTradeAnalysisWrapper from "@/components/AdvancedTradeAnalysisWrapper";
 import RiskManagementDashboard from "@/components/RiskManagementDashboard";
 import MarketPhaseAnalysis from "@/components/MarketPhaseAnalysis";
+import TradeDashboard from "@/components/TradeDashboard";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -211,9 +212,12 @@ export default function SimpleHome() {
       <Header />
 
       {/* Main Content */}
-      <Tabs defaultValue="trades" className="w-full" id="main-tabs">
+      <Tabs defaultValue="dashboard" className="w-full" id="main-tabs">
         <div className="flex justify-center mb-4">
           <TabsList className="main-tabs-list bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
+              <BarChart2 className="w-4 h-4 mr-1.5" /> Dashboard
+            </TabsTrigger>
             <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
               <DollarSign className="w-4 h-4 mr-1.5" /> Trades
             </TabsTrigger>
@@ -222,6 +226,18 @@ export default function SimpleHome() {
             </TabsTrigger>
           </TabsList>
         </div>
+        
+        {/* Dashboard Tab - Umfassende Statistiken und Analysen */}
+        <TabsContent value="dashboard">
+          <div className="rocket-card rounded-xl p-2 sm:p-4">
+            <h2 className="text-xl font-bold mb-4 flex items-center">
+              <BarChart2 className="w-5 h-5 mr-2 text-primary" /> 
+              Trading Performance Dashboard
+            </h2>
+            <TradeDashboard trades={trades} />
+          </div>
+        </TabsContent>
+        
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4" ref={tradesSectionRef}>
             
