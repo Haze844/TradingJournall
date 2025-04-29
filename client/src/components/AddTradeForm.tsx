@@ -421,30 +421,219 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             </div>
           </div>
 
+          {/* Neue Trend-Spalten */}
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor="trend">Trend</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("trend", value)}
+              >
+                <SelectTrigger className={errors.trend ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Trend auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {simpleTrendTypes.map((trend) => (
+                    <SelectItem key={trend} value={trend}>
+                      {trend}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.trend && (
+                <p className="text-xs text-red-500 mt-1">{errors.trend.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="internalTrend">Int. Trend</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("internalTrend", value)}
+              >
+                <SelectTrigger className={errors.internalTrend ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Trend auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {simpleTrendTypes.map((trend) => (
+                    <SelectItem key={trend} value={trend}>
+                      {trend}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.internalTrend && (
+                <p className="text-xs text-red-500 mt-1">{errors.internalTrend.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="microTrend">Mic. Trend</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("microTrend", value)}
+              >
+                <SelectTrigger className={errors.microTrend ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Trend auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {simpleTrendTypes.map((trend) => (
+                    <SelectItem key={trend} value={trend}>
+                      {trend}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.microTrend && (
+                <p className="text-xs text-red-500 mt-1">{errors.microTrend.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Struktur und Timeframe Entry */}
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor="structure">Struktur</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("structure", value)}
+              >
+                <SelectTrigger className={errors.structure ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Struktur auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {structureTypes.map((structure) => (
+                    <SelectItem key={structure} value={structure}>
+                      {structure}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.structure && (
+                <p className="text-xs text-red-500 mt-1">{errors.structure.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="timeframeEntry">Timeframe Entry</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("timeframeEntry", value)}
+              >
+                <SelectTrigger className={errors.timeframeEntry ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Timeframe auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeframeTypes.map((tf) => (
+                    <SelectItem key={tf} value={tf}>
+                      {tf}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.timeframeEntry && (
+                <p className="text-xs text-red-500 mt-1">{errors.timeframeEntry.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="unmitZone">Unmetigierte Zone</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("unmitZone", value)}
+              >
+                <SelectTrigger className={errors.unmitZone ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unmitZoneTypes.map((zone) => (
+                    <SelectItem key={zone} value={zone}>
+                      {zone}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.unmitZone && (
+                <p className="text-xs text-red-500 mt-1">{errors.unmitZone.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Marktphase und Range Punkte */}
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor="marketPhase">Marktphase</Label>
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("marketPhase", value)}
+              >
+                <SelectTrigger className={errors.marketPhase ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Phase auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {marketPhaseTypes.map((phase) => (
+                    <SelectItem key={phase} value={phase}>
+                      {phase}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.marketPhase && (
+                <p className="text-xs text-red-500 mt-1">{errors.marketPhase.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="rangePoints">Range Punkte</Label>
+              <Input
+                id="rangePoints"
+                type="number"
+                min="0"
+                max="300"
+                {...register("rangePoints", { valueAsNumber: true })}
+                className={errors.rangePoints ? "border-red-500" : ""}
+              />
+              {errors.rangePoints && (
+                <p className="text-xs text-red-500 mt-1">{errors.rangePoints.message}</p>
+              )}
+            </div>
+          </div>
+
           {/* R:R Informationen */}
           <div className="grid grid-cols-3 gap-2">
             <div>
               <Label htmlFor="rrAchieved">R:R Erreicht</Label>
-              <Input
-                id="rrAchieved"
-                type="number"
-                step="0.1"
-                {...register("rrAchieved", { valueAsNumber: true })}
-                className={errors.rrAchieved ? "border-red-500" : ""}
-              />
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("rrAchieved", parseInt(value))}
+              >
+                <SelectTrigger className={errors.rrAchieved ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {rrValues.map((rr) => (
+                    <SelectItem key={rr} value={rr.toString()}>
+                      {rr}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.rrAchieved && (
                 <p className="text-xs text-red-500 mt-1">{errors.rrAchieved.message}</p>
               )}
             </div>
             <div>
               <Label htmlFor="rrPotential">R:R Potenzial</Label>
-              <Input
-                id="rrPotential"
-                type="number"
-                step="0.1"
-                {...register("rrPotential", { valueAsNumber: true })}
-                className={errors.rrPotential ? "border-red-500" : ""}
-              />
+              <Select
+                defaultValue=""
+                onValueChange={(value) => setValue("rrPotential", parseInt(value))}
+              >
+                <SelectTrigger className={errors.rrPotential ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  {rrValues.map((rr) => (
+                    <SelectItem key={rr} value={rr.toString()}>
+                      {rr}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {errors.rrPotential && (
                 <p className="text-xs text-red-500 mt-1">{errors.rrPotential.message}</p>
               )}
