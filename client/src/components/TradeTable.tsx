@@ -12,7 +12,18 @@ import {
   PopoverContent,
   PopoverTrigger
 } from "@/components/ui/popover";
-import { Trade, accountTypes, sessionTypes } from "@shared/schema";
+import { 
+  Trade, 
+  accountTypes, 
+  sessionTypes, 
+  simpleTrendTypes,
+  structureTypes,
+  timeframeTypes,
+  liquidationTypes,
+  unmitZoneTypes,
+  marketPhaseTypes,
+  rrValues
+} from "@shared/schema";
 import { formatDate, formatTime, getTodayDates, getWeekDates, getLastMonthDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
@@ -60,6 +71,16 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     rrRanges: new Set<string>(),  // Neuer Filter für Risk/Reward-Ranges
     plRanges: new Set<string>(),  // Neuer Filter für Profit/Loss-Ranges
     isWin: null as boolean | null,
+    // Neue Filter
+    trends: new Set<string>(),
+    internalTrendsNew: new Set<string>(),
+    microTrends: new Set<string>(),
+    structures: new Set<string>(),
+    timeframeEntries: new Set<string>(),
+    liquidations: new Set<string>(),
+    locations: new Set<string>(),
+    unmitZones: new Set<string>(),
+    marketPhases: new Set<string>(),
     // Standarddatum auf einen weiten Bereich setzen, damit alle Trades angezeigt werden
     startDate: new Date('2020-01-01'),
     endDate: new Date('2030-12-31')
@@ -98,7 +119,17 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     mainTrends: Array.from(new Set(trades.map(t => t.mainTrendM15).filter(Boolean))) as string[],
     internalTrends: Array.from(new Set(trades.map(t => t.internalTrendM5).filter(Boolean))) as string[],
     entryTypes: Array.from(new Set(trades.map(t => t.entryType).filter(Boolean))) as string[],
-    sessions: Array.from(new Set(trades.map(t => t.session).filter(Boolean))) as string[]
+    sessions: Array.from(new Set(trades.map(t => t.session).filter(Boolean))) as string[],
+    // Neue Filteroptionen
+    trends: Array.from(new Set(trades.map(t => t.trend).filter(Boolean))) as string[],
+    internalTrendsNew: Array.from(new Set(trades.map(t => t.internalTrend).filter(Boolean))) as string[],
+    microTrends: Array.from(new Set(trades.map(t => t.microTrend).filter(Boolean))) as string[],
+    structures: Array.from(new Set(trades.map(t => t.structure).filter(Boolean))) as string[],
+    timeframeEntries: Array.from(new Set(trades.map(t => t.timeframeEntry).filter(Boolean))) as string[],
+    liquidations: Array.from(new Set(trades.map(t => t.liquidation).filter(Boolean))) as string[],
+    locations: Array.from(new Set(trades.map(t => t.location).filter(Boolean))) as string[],
+    unmitZones: Array.from(new Set(trades.map(t => t.unmitZone).filter(Boolean))) as string[],
+    marketPhases: Array.from(new Set(trades.map(t => t.marketPhase).filter(Boolean))) as string[]
   };
   
   // Apply filters
@@ -257,6 +288,17 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       rrRanges: new Set<string>(),
       plRanges: new Set<string>(),
       isWin: null,
+      // Neue Filter zurücksetzen
+      trends: new Set<string>(),
+      internalTrendsNew: new Set<string>(),
+      microTrends: new Set<string>(),
+      structures: new Set<string>(),
+      timeframeEntries: new Set<string>(),
+      liquidations: new Set<string>(),
+      locations: new Set<string>(),
+      unmitZones: new Set<string>(),
+      marketPhases: new Set<string>(),
+      // Datum zurücksetzen
       startDate: new Date('2020-01-01'),
       endDate: new Date('2030-12-31')
     });
@@ -695,6 +737,166 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                           className="w-full text-xs"
                           onClick={() => {
                             setFilters({...filters, internalTrends: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              {/* Neue Spalten */}
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Trend
+                      <TrendingUp className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Trend filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {uniqueValues.trends.length > 0 ? uniqueValues.trends.map(trend => (
+                          <div key={trend} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`trend-${trend}`} 
+                              checked={filters.trends.has(trend)}
+                              onCheckedChange={() => toggleFilter('trends', trend)}
+                            />
+                            <Label htmlFor={`trend-${trend}`} className="text-sm cursor-pointer">
+                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
+                            </Label>
+                          </div>
+                        )) : simpleTrendTypes.map(trend => (
+                          <div key={trend} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`trend-${trend}`} 
+                              checked={filters.trends.has(trend)}
+                              onCheckedChange={() => toggleFilter('trends', trend)}
+                            />
+                            <Label htmlFor={`trend-${trend}`} className="text-sm cursor-pointer">
+                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.trends.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, trends: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Int. Trend
+                      <TrendingUp className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Int. Trend filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {uniqueValues.internalTrendsNew.length > 0 ? uniqueValues.internalTrendsNew.map(trend => (
+                          <div key={trend} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`internNew-${trend}`} 
+                              checked={filters.internalTrendsNew.has(trend)}
+                              onCheckedChange={() => toggleFilter('internalTrendsNew', trend)}
+                            />
+                            <Label htmlFor={`internNew-${trend}`} className="text-sm cursor-pointer">
+                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
+                            </Label>
+                          </div>
+                        )) : simpleTrendTypes.map(trend => (
+                          <div key={trend} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`internNew-${trend}`} 
+                              checked={filters.internalTrendsNew.has(trend)}
+                              onCheckedChange={() => toggleFilter('internalTrendsNew', trend)}
+                            />
+                            <Label htmlFor={`internNew-${trend}`} className="text-sm cursor-pointer">
+                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.internalTrendsNew.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, internalTrendsNew: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Mic. Trend
+                      <TrendingUp className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Mic. Trend filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {uniqueValues.microTrends.length > 0 ? uniqueValues.microTrends.map(trend => (
+                          <div key={trend} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`micro-${trend}`} 
+                              checked={filters.microTrends.has(trend)}
+                              onCheckedChange={() => toggleFilter('microTrends', trend)}
+                            />
+                            <Label htmlFor={`micro-${trend}`} className="text-sm cursor-pointer">
+                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
+                            </Label>
+                          </div>
+                        )) : simpleTrendTypes.map(trend => (
+                          <div key={trend} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`micro-${trend}`} 
+                              checked={filters.microTrends.has(trend)}
+                              onCheckedChange={() => toggleFilter('microTrends', trend)}
+                            />
+                            <Label htmlFor={`micro-${trend}`} className="text-sm cursor-pointer">
+                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.microTrends.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, microTrends: new Set()});
                             setCurrentPage(1);
                           }}
                         >
