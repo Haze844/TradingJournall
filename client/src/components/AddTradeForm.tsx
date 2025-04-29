@@ -217,7 +217,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="mainTrendM15">Haupttrend M15</Label>
               <Select
-                defaultValue={trendTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("mainTrendM15", value)}
               >
                 <SelectTrigger className={errors.mainTrendM15 ? "border-red-500" : ""}>
@@ -238,7 +238,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="internalTrendM5">Interner Trend M5</Label>
               <Select
-                defaultValue={trendTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("internalTrendM5", value)}
               >
                 <SelectTrigger className={errors.internalTrendM5 ? "border-red-500" : ""}>
@@ -263,7 +263,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="entryType">Einstiegstyp</Label>
               <Select
-                defaultValue={trendTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("entryType", value)}
               >
                 <SelectTrigger className={errors.entryType ? "border-red-500" : ""}>
@@ -284,7 +284,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="entryLevel">Einstiegslevel</Label>
               <Select
-                defaultValue={entryLevelTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("entryLevel", value)}
               >
                 <SelectTrigger className={errors.entryLevel ? "border-red-500" : ""}>
@@ -305,7 +305,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="liquidation">Liquidation</Label>
               <Select
-                defaultValue={timeframeTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("liquidation", value)}
               >
                 <SelectTrigger className={errors.liquidation ? "border-red-500" : ""}>
@@ -330,7 +330,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="location">Location</Label>
               <Select
-                defaultValue={locationTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("location", value)}
               >
                 <SelectTrigger className={errors.location ? "border-red-500" : ""}>
@@ -352,7 +352,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
             <div>
               <Label htmlFor="accountType">Kontoart</Label>
               <Select
-                defaultValue={accountTypes[0]}
+                defaultValue=""
                 onValueChange={(value) => setValue("accountType", value)}
               >
                 <SelectTrigger className={errors.accountType ? "border-red-500" : ""}>
