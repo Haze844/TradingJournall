@@ -1199,6 +1199,16 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <td className="p-3">
                     {trade.internalTrendM5 ? <BadgeTrend trend={trade.internalTrendM5} /> : '-'}
                   </td>
+                  {/* Neue Spalten */}
+                  <td className="p-3">
+                    {trade.trend ? <BadgeTrend trend={trade.trend} /> : '-'}
+                  </td>
+                  <td className="p-3">
+                    {trade.internalTrend ? <BadgeTrend trend={trade.internalTrend} /> : '-'}
+                  </td>
+                  <td className="p-3">
+                    {trade.microTrend ? <BadgeTrend trend={trade.microTrend} /> : '-'}
+                  </td>
                   <td className="p-3">
                     {trade.entryType ? <BadgeTrend trend={trade.entryType} /> : '-'}
                   </td>
