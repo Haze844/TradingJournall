@@ -55,6 +55,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     internalTrends: new Set<string>(),
     entryTypes: new Set<string>(),
     accountTypes: new Set<string>(),
+    sessions: new Set<string>(),  // Neuer Filter für Sessions
     rrRanges: new Set<string>(),  // Neuer Filter für Risk/Reward-Ranges
     plRanges: new Set<string>(),  // Neuer Filter für Profit/Loss-Ranges
     isWin: null as boolean | null,
@@ -95,7 +96,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     setups: Array.from(new Set(trades.map(t => t.setup).filter(Boolean))) as string[],
     mainTrends: Array.from(new Set(trades.map(t => t.mainTrendM15).filter(Boolean))) as string[],
     internalTrends: Array.from(new Set(trades.map(t => t.internalTrendM5).filter(Boolean))) as string[],
-    entryTypes: Array.from(new Set(trades.map(t => t.entryType).filter(Boolean))) as string[]
+    entryTypes: Array.from(new Set(trades.map(t => t.entryType).filter(Boolean))) as string[],
+    sessions: Array.from(new Set(trades.map(t => t.session).filter(Boolean))) as string[]
   };
   
   // Apply filters
@@ -127,6 +129,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     
     // Account type filter
     if (filters.accountTypes.size > 0 && trade.accountType && !filters.accountTypes.has(trade.accountType)) {
+      return false;
+    }
+    
+    // Session filter
+    if (filters.sessions.size > 0 && trade.session && !filters.sessions.has(trade.session)) {
       return false;
     }
     
@@ -245,6 +252,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       internalTrends: new Set<string>(),
       entryTypes: new Set<string>(),
       accountTypes: new Set<string>(),
+      sessions: new Set<string>(),
       rrRanges: new Set<string>(),
       plRanges: new Set<string>(),
       isWin: null,
@@ -257,7 +265,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   // Die Funktion für Trend-Farben wurde zugunsten der BadgeTrend-Komponente entfernt
   
   // Type für die Filter-Buttons verbessert
-  const renderFilterButtons = (filterType: 'accountTypes' | 'setups' | 'mainTrends' | 'internalTrends' | 'entryTypes', options: string[], label: string) => {
+  const renderFilterButtons = (filterType: 'accountTypes' | 'setups' | 'mainTrends' | 'internalTrends' | 'entryTypes' | 'sessions', options: string[], label: string) => {
     return (
       <div className="mb-3">
         <div className="font-medium text-sm mb-1">{label}</div>
