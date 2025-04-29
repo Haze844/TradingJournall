@@ -28,7 +28,9 @@ import {
   LineChart, 
   TrendingUp, 
   ArrowUpDown, 
-  Award
+  Award,
+  Target,
+  DollarSign
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -53,6 +55,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     internalTrends: new Set<string>(),
     entryTypes: new Set<string>(),
     accountTypes: new Set<string>(),
+    rrRanges: new Set<string>(),  // Neuer Filter für Risk/Reward-Ranges
+    plRanges: new Set<string>(),  // Neuer Filter für Profit/Loss-Ranges
     isWin: null as boolean | null,
     // Standarddatum auf einen weiten Bereich setzen, damit alle Trades angezeigt werden
     startDate: new Date('2020-01-01'),
@@ -131,6 +135,50 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       return false;
     }
     
+    // RR range filter
+    if (filters.rrRanges.size > 0 && trade.rrAchieved !== undefined) {
+      const rr = Number(trade.rrAchieved);
+      let matchesAnyRange = false;
+      
+      if (filters.rrRanges.has('< 1') && rr < 1) {
+        matchesAnyRange = true;
+      } else if (filters.rrRanges.has('1-2') && rr >= 1 && rr < 2) {
+        matchesAnyRange = true;
+      } else if (filters.rrRanges.has('2-3') && rr >= 2 && rr < 3) {
+        matchesAnyRange = true;
+      } else if (filters.rrRanges.has('3+') && rr >= 3) {
+        matchesAnyRange = true;
+      }
+      
+      if (!matchesAnyRange) {
+        return false;
+      }
+    }
+    
+    // P/L range filter
+    if (filters.plRanges.size > 0 && trade.profitLoss !== undefined) {
+      const pl = Number(trade.profitLoss);
+      let matchesAnyRange = false;
+      
+      if (filters.plRanges.has('< -1000') && pl < -1000) {
+        matchesAnyRange = true;
+      } else if (filters.plRanges.has('-1000 to -500') && pl >= -1000 && pl < -500) {
+        matchesAnyRange = true;
+      } else if (filters.plRanges.has('-500 to 0') && pl >= -500 && pl < 0) {
+        matchesAnyRange = true;
+      } else if (filters.plRanges.has('0 to 500') && pl >= 0 && pl < 500) {
+        matchesAnyRange = true;
+      } else if (filters.plRanges.has('500 to 1000') && pl >= 500 && pl < 1000) {
+        matchesAnyRange = true;
+      } else if (filters.plRanges.has('> 1000') && pl >= 1000) {
+        matchesAnyRange = true;
+      }
+      
+      if (!matchesAnyRange) {
+        return false;
+      }
+    }
+    
     // Date range filter
     if (trade.date) {
       const tradeDate = new Date(trade.date);
@@ -197,6 +245,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       internalTrends: new Set<string>(),
       entryTypes: new Set<string>(),
       accountTypes: new Set<string>(),
+      rrRanges: new Set<string>(),
+      plRanges: new Set<string>(),
       isWin: null,
       startDate: new Date('2020-01-01'),
       endDate: new Date('2030-12-31')
@@ -646,8 +696,166 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </PopoverContent>
                 </Popover>
               </th>
-              <th className="p-3 text-left whitespace-nowrap">RR</th>
-              <th className="p-3 text-left whitespace-nowrap">P/L ($)</th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      RR
+                      <Target className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Risk/Reward filtern</h4>
+                      <div className="space-y-2 px-1">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="rr-lt-1" 
+                            checked={filters.rrRanges.has('< 1')}
+                            onCheckedChange={() => toggleFilter('rrRanges', '< 1')}
+                          />
+                          <Label htmlFor="rr-lt-1" className="text-sm cursor-pointer">
+                            &lt; 1R
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="rr-1-2" 
+                            checked={filters.rrRanges.has('1-2')}
+                            onCheckedChange={() => toggleFilter('rrRanges', '1-2')}
+                          />
+                          <Label htmlFor="rr-1-2" className="text-sm cursor-pointer">
+                            1R - 2R
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="rr-2-3" 
+                            checked={filters.rrRanges.has('2-3')}
+                            onCheckedChange={() => toggleFilter('rrRanges', '2-3')}
+                          />
+                          <Label htmlFor="rr-2-3" className="text-sm cursor-pointer">
+                            2R - 3R
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="rr-3-plus" 
+                            checked={filters.rrRanges.has('3+')}
+                            onCheckedChange={() => toggleFilter('rrRanges', '3+')}
+                          />
+                          <Label htmlFor="rr-3-plus" className="text-sm cursor-pointer">
+                            3R+
+                          </Label>
+                        </div>
+                      </div>
+                      {filters.rrRanges.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, rrRanges: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      P/L ($)
+                      <DollarSign className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">P/L filtern</h4>
+                      <div className="space-y-2 px-1">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="pl-neg-1000" 
+                            checked={filters.plRanges.has('< -1000')}
+                            onCheckedChange={() => toggleFilter('plRanges', '< -1000')}
+                          />
+                          <Label htmlFor="pl-neg-1000" className="text-sm cursor-pointer text-red-500">
+                            &lt; -$1000
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="pl-neg-500-1000" 
+                            checked={filters.plRanges.has('-1000 to -500')}
+                            onCheckedChange={() => toggleFilter('plRanges', '-1000 to -500')}
+                          />
+                          <Label htmlFor="pl-neg-500-1000" className="text-sm cursor-pointer text-red-400">
+                            -$1000 bis -$500
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="pl-neg-500-0" 
+                            checked={filters.plRanges.has('-500 to 0')}
+                            onCheckedChange={() => toggleFilter('plRanges', '-500 to 0')}
+                          />
+                          <Label htmlFor="pl-neg-500-0" className="text-sm cursor-pointer text-red-300">
+                            -$500 bis $0
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="pl-0-500" 
+                            checked={filters.plRanges.has('0 to 500')}
+                            onCheckedChange={() => toggleFilter('plRanges', '0 to 500')}
+                          />
+                          <Label htmlFor="pl-0-500" className="text-sm cursor-pointer text-green-300">
+                            $0 bis $500
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="pl-500-1000" 
+                            checked={filters.plRanges.has('500 to 1000')}
+                            onCheckedChange={() => toggleFilter('plRanges', '500 to 1000')}
+                          />
+                          <Label htmlFor="pl-500-1000" className="text-sm cursor-pointer text-green-400">
+                            $500 bis $1000
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="pl-1000-plus" 
+                            checked={filters.plRanges.has('> 1000')}
+                            onCheckedChange={() => toggleFilter('plRanges', '> 1000')}
+                          />
+                          <Label htmlFor="pl-1000-plus" className="text-sm cursor-pointer text-green-500">
+                            &gt; $1000
+                          </Label>
+                        </div>
+                      </div>
+                      {filters.plRanges.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, plRanges: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
               <th className="p-3 text-left whitespace-nowrap">
                 <Popover>
                   <PopoverTrigger asChild>
