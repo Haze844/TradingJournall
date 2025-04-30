@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, X, RefreshCcw, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,11 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
   const [linkInput, setLinkInput] = useState<string>("");
   const [linkError, setLinkError] = useState<string | null>(null);
   const { toast } = useToast();
+  
+  // Wenn der existingImage ändert sich, dann ändert sich auch der Preview
+  useEffect(() => {
+    setPreview(existingImage || null);
+  }, [existingImage]);
 
   // Datei zu Base64 konvertieren
   const fileToBase64 = (file: File): Promise<string> => {
