@@ -69,44 +69,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 5;
   
-  // State für Compact-View
-  const [compactView, setCompactView] = useState(true);
-  
-  // Effekt zum Optimieren der Tabellenbreiten
-  useEffect(() => {
-    // Spaltenbreiten optimieren
-    const optimizeColumnWidths = () => {
-      // Spaltenbreiten festlegen
-      const columnWidths: Record<string, string> = {
-        '0': '80px',  // Datum
-        '1': '60px',  // Account
-        '2': '60px',  // Session
-        '3': '60px',  // Symbol
-        '4': '70px',  // Setup
-        '5': '50px',  // Trend
-        '6': '50px',  // Int. Trend
-        '7': '50px',  // Micro Trend
-        '8': '60px',  // Struktur
-        '9': '60px',  // Location
-        '10': '50px', // TF Entry
-        '11': '40px', // RR
-        '12': '50px', // P/L
-        '13': '50px'  // Status
-      };
-      
-      // Spaltenbreiten anwenden
-      document.querySelectorAll('th').forEach((el, index) => {
-        const indexKey = index.toString();
-        if (columnWidths[indexKey]) {
-          el.style.width = columnWidths[indexKey];
-          el.style.maxWidth = columnWidths[indexKey];
-        }
-      });
-    };
-    
-    // Ausführen nach dem Rendern
-    setTimeout(optimizeColumnWidths, 500);
-  }, []);
+
+
   
   // Filter state
   const [filters, setFilters] = useState({
@@ -406,70 +370,12 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
             </p>
           </div>
           
-          <div className="flex gap-2 md:ml-auto flex-wrap md:flex-nowrap">
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-xs h-8"
-                onClick={() => {
-                  // Compact-Modus umschalten
-                  const table = document.querySelector('.trade-table');
-                  if (table) {
-                    table.classList.toggle('compact-mode');
-                  }
-                }}
-              >
-                <MinusCircle className="h-3 w-3 mr-1" />
-                Kompakte Ansicht
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-xs h-8"
-                onClick={() => {
-                  // Multi-Zeilen Ansicht aktivieren
-                  const table = document.querySelector('.trade-table');
-                  if (table) {
-                    table.classList.toggle('multi-row-mode');
 
-                    // TD data-title Attribute hinzufügen
-                    if (!table.classList.contains('data-attrs-added')) {
-                      const columnHeaders: string[] = [];
-                      
-                      // Header-Texte sammeln
-                      document.querySelectorAll('th').forEach(th => {
-                        const headerText = th.textContent?.trim() || '';
-                        columnHeaders.push(headerText);
-                      });
-                      
-                      // Zellen mit data-title versehen
-                      document.querySelectorAll('tr.trade-row').forEach(tr => {
-                        const cells = tr.querySelectorAll('td');
-                        cells.forEach((td, index) => {
-                          if (columnHeaders[index]) {
-                            td.setAttribute('data-title', columnHeaders[index]);
-                            td.classList.add('trade-cell');
-                          }
-                        });
-                      });
-                      
-                      table.classList.add('data-attrs-added');
-                    }
-                  }
-                }}
-              >
-                <Layers className="h-3 w-3 mr-1" />
-                Multi-Zeilen Ansicht
-              </Button>
-            </div>
-          </div>
         </div>
       </CardHeader>
       
       <div className="overflow-x-auto">
-        <table className="w-full text-xs table-fixed trade-table compact-mode">
+        <table className="w-full text-xs">
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
               <th className="p-3 text-left whitespace-nowrap w-24" style={{width: "90px", maxWidth: "90px"}}>
@@ -1413,7 +1319,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
               currentTrades.map((trade) => (
                 <tr 
                   key={trade.id} 
-                  className="border-b border-border hover:bg-muted/50 cursor-pointer trade-row" 
+                  className="border-b border-border hover:bg-muted/50 cursor-pointer" 
                   onClick={() => onTradeSelect(trade)}
                 >
                   <td className="p-1.5 text-xs">
