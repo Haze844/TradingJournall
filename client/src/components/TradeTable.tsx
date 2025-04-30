@@ -390,19 +390,6 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
         <div className="flex flex-wrap md:flex-nowrap justify-between gap-2 items-start">
           <div>
             <CardTitle className="text-lg font-bold">Trades</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              {filteredTrades.length} Trades gefunden 
-              {filteredTrades.length > 0 && (
-                <>
-                  {' • '} 
-                  Gesamt P/L: <span className={calculateTotalPL(filteredTrades) > 0 ? 'text-green-500' : 'text-red-500'}>
-                    {calculateTotalPL(filteredTrades).toFixed(2)}$
-                  </span>
-                  {' • '}
-                  Durchschnitt RR: <span>{calculateAverageRR(filteredTrades).toFixed(2)}</span>
-                </>
-              )}
-            </p>
           </div>
           
           <div className="flex gap-2 md:ml-auto flex-nowrap">
