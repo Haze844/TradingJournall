@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogTitle
 } from "@/components/ui/dialog";
 
 interface ChartImageUploadProps {
@@ -211,7 +212,10 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <DialogTrigger asChild>
-                <button className="absolute opacity-0 group-hover:opacity-100 transition-opacity inset-0 w-full h-full bg-black/30 flex items-center justify-center">
+                <button 
+                  className="absolute opacity-0 group-hover:opacity-100 transition-opacity inset-0 w-full h-full bg-black/30 flex items-center justify-center"
+                  aria-label="Bild vergrößern"
+                >
                   <Maximize className="w-8 h-8 text-white" />
                 </button>
               </DialogTrigger>
@@ -221,20 +225,24 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
               <span className="text-xs text-muted-foreground/80 italic">Klicken zum Vergrößern</span>
             </div>
           </div>
-          <DialogContent className="w-screen h-screen max-w-none max-h-none p-0 m-0 border-none" aria-labelledby="dialog-title">
-            <div className="sr-only" id="dialog-title">TradingView Chart Vollbild</div>
+          <DialogContent 
+            className="w-screen h-screen max-w-none max-h-none p-0 m-0 border-none" 
+            aria-labelledby="dialog-title"
+            onInteractOutside={(e) => {
+              // Schließen, wenn außerhalb des Bildes geklickt wird
+              const closeBtn = document.querySelector('[data-dialog-close]');
+              if (closeBtn && 'click' in closeBtn) {
+                (closeBtn as HTMLElement).click();
+              }
+            }}
+          >
+            <DialogTitle className="sr-only">TradingView Chart Vollbild</DialogTitle>
             <div className="w-full h-full flex items-center justify-center bg-black/90">
               <img 
                 src={preview} 
                 alt="TradingView Chart Vollbild" 
                 className="max-w-full max-h-full object-contain"
               />
-              <button 
-                onClick={() => document.querySelector('[data-dialog-close]')?.click()}
-                className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 p-2 rounded-full"
-              >
-                <X className="h-6 w-6" />
-              </button>
             </div>
           </DialogContent>
         </Dialog>
