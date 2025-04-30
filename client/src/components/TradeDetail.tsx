@@ -551,7 +551,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                         min="0"
                       />
                     ) : (
-                      <div className="font-medium text-sm">{selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null ? selectedTrade.rangePoints : '-'}</div>
+                      <div className="font-medium text-sm">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
                     )}
                   </div>
                 </div>
