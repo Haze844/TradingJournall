@@ -985,6 +985,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to generate market phase recommendations" });
     }
   });
+  
+  // Performance-Heatmap-Daten
+  app.get("/api/performance-heatmap", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+      
+      // Holen Sie alle Trades des Benutzers
+      const trades = await storage.getTrades(userId);
+      
+      if (!trades || trades.length === 0) {
+        return res.json({ days: [], timeframe: [], data: [] });
+      }
+      
+      // Tage der Woche
+      const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+      
+      // Handelszeiträume für die Heatmap (Tageszeiten)
+      const timeframe = ["04-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-22"];
+      
+      // Erstelle die Datenstruktur für die Heatmap
+      const heatmapData = [];
+      
+      // Hilfsfunktion, um den Stunden-Zeitraum eines Trades zu bestimmen
+      const getTimeframeForHour = (hour: number): string => {
+        if (hour >= 4 && hour < 8) return "04-08";
+        if (hour >= 8 && hour < 10) return "08-10";
+        if (hour >= 10 && hour < 12) return "10-12";
+        if (hour >= 12 && hour < 14) return "12-14";
+        if (hour >= 14 && hour < 16) return "14-16";
+        if (hour >= 16 && hour < 18) return "16-18";
+        if (hour >= 18 && hour < 22) return "18-22";
+        return "other";
+      };
+      
+      // Gruppieren der Trades nach Wochentag und Zeitraum
+      const groupedTrades: Record<string, Record<string, any[]>> = {};
+      
+      // Initialisiere die Gruppenstruktur
+      days.forEach(day => {
+        groupedTrades[day] = {};
+        timeframe.forEach(time => {
+          groupedTrades[day][time] = [];
+        });
+      });
+      
+      // Füge Trades zu den entsprechenden Gruppen hinzu
+      for (const trade of trades) {
+        if (!trade.date) continue;
+        
+        const tradeDate = new Date(trade.date);
+        const dayOfWeek = tradeDate.getDay(); // 0 (Sonntag) bis 6 (Samstag)
+        
+        // Wir ignorieren Wochenende (0 = Sonntag, 6 = Samstag)
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+        
+        // Konvertierung von 0-basiertem Tag zu unserem Format
+        const dayIndex = dayOfWeek - 1; // 0 = Montag, ..., 4 = Freitag
+        const day = days[dayIndex];
+        
+        const hour = tradeDate.getHours();
+        const timeframeSlot = getTimeframeForHour(hour);
+        
+        // Ignoriere Zeitslots außerhalb unserer definierten Zeitrahmen
+        if (timeframeSlot === "other") continue;
+        
+        if (groupedTrades[day] && groupedTrades[day][timeframeSlot]) {
+          groupedTrades[day][timeframeSlot].push(trade);
+        }
+      }
+      
+      // Erstelle die Heatmap-Daten mit Performance-Metriken
+      days.forEach(day => {
+        timeframe.forEach(time => {
+          const tradesInSlot = groupedTrades[day][time];
+          
+          if (tradesInSlot.length > 0) {
+            // Berechne Win-Rate für diesen Slot
+            const wins = tradesInSlot.filter(t => t.isWin).length;
+            const winRate = tradesInSlot.length > 0 ? (wins / tradesInSlot.length) * 100 : 0;
+            
+            // Berechne durchschnittliches RR für diesen Slot
+            const totalRR = tradesInSlot.reduce((sum, t) => sum + (t.rrAchieved || 0), 0);
+            const avgRR = tradesInSlot.length > 0 ? totalRR / tradesInSlot.length : 0;
+            
+            // Berechne Gesamt-PnL für diesen Slot
+            const totalPnL = tradesInSlot.reduce((sum, t) => sum + (t.profitLoss || 0), 0);
+            
+            heatmapData.push({
+              day,
+              timeframe: time,
+              value: winRate, // Primärwert für die Heatmap-Farbe
+              tradeCount: tradesInSlot.length,
+              winRate: Math.round(winRate),
+              avgRR: avgRR.toFixed(2),
+              totalPnL: totalPnL.toFixed(2),
+            });
+          } else {
+            // Leere Slots auch hinzufügen mit Nullwerten
+            heatmapData.push({
+              day,
+              timeframe: time,
+              value: 0,
+              tradeCount: 0,
+              winRate: 0,
+              avgRR: "0.00",
+              totalPnL: "0.00",
+            });
+          }
+        });
+      });
+      
+      res.json({
+        days,
+        timeframe,
+        data: heatmapData
+      });
+    } catch (error) {
+      console.error("Error generating performance heatmap data:", error);
+      res.status(500).json({ error: "Failed to generate performance heatmap data" });
+    }
+  });
 
   // Coaching-Routen
   app.get("/api/coaching/goals", isAuthenticated, async (req: Request, res: Response) => {
