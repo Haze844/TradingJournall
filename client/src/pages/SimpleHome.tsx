@@ -12,6 +12,7 @@ import RiskManagementDashboard from "@/components/RiskManagementDashboard";
 import MarketPhaseAnalysis from "@/components/MarketPhaseAnalysis";
 import TradeDashboard from "@/components/TradeDashboard";
 import PerformanceHeatmap from "@/components/PerformanceHeatmap";
+import TradingStreakTracker from "@/components/TradingStreakTracker";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
   Users, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon,
-  Plus, X
+  Plus, X, Flame
 } from "lucide-react";
 
 import { Link } from "wouter";
@@ -391,6 +392,10 @@ export default function SimpleHome() {
                   <Trophy className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Performance
                 </TabsTrigger>
+                <TabsTrigger value="streaks" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <Flame className="mr-1.5 h-4 w-4 md:inline hidden" />
+                  Streak Tracker
+                </TabsTrigger>
               </TabsList>
             </div>
             
@@ -442,6 +447,14 @@ export default function SimpleHome() {
                 <div className="rocket-card rounded-xl p-2 sm:p-4">
                   <PerformanceHeatmap />
                 </div>
+              </div>
+            </TabsContent>
+            
+            {/* Trading Streak Tracker Tab */}
+            <TabsContent value="streaks" className="mt-0">
+              <div className="rocket-card rounded-xl p-2 sm:p-4">
+                <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center"><Flame className="w-4 h-4 mr-2" /> Trading Streak Tracker</h2>
+                <TradingStreakTracker userId={userId} />
               </div>
             </TabsContent>
           </Tabs>
