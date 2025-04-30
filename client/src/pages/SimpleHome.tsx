@@ -308,45 +308,7 @@ export default function SimpleHome() {
 
           {/* TradingView Chart Display */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* TradingView Chart Display mit Tools darunter */}
-            {selectedTrade && selectedTrade.chartImage ? (
-              <div className="col-span-1 md:col-span-3 space-y-4">
-                {/* Chart Image */}
-                <div className="rocket-card rounded-xl p-2 sm:p-4">
-                  <h3 className="text-lg font-bold mb-2 sm:mb-4 flex items-center">
-                    <ImageIcon className="w-4 h-4 mr-2" /> 
-                    Chart für {selectedTrade.symbol} ({formatDate(selectedTrade.date)})
-                  </h3>
-                  <div className="rounded-lg overflow-hidden border border-border">
-                    {selectedTrade.chartImage.startsWith('http') ? (
-                      // Externe URL (TradingView Link)
-                      <a href={selectedTrade.chartImage} target="_blank" rel="noopener noreferrer" className="block">
-                        <img 
-                          src={selectedTrade.chartImage} 
-                          alt={`Chart für ${selectedTrade.symbol}`}
-                          className="w-full h-auto max-h-[500px] object-contain"
-                        />
-                      </a>
-                    ) : (
-                      // Base64 Bild
-                      <img 
-                        src={selectedTrade.chartImage} 
-                        alt={`Chart für ${selectedTrade.symbol}`}
-                        className="w-full h-auto max-h-[500px] object-contain"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Placeholder für Chartanzeige, wenn kein Chart ausgewählt ist */}
-                <div className="rocket-card rounded-xl p-2 sm:p-4 col-span-1 md:col-span-3">
-                  <h3 className="text-lg font-bold moon-text mb-2 sm:mb-3">Chart Analyse</h3>
-                  <p className="text-muted-foreground">Wähle einen Trade aus, um Details und Charts anzuzeigen.</p>
-                </div>
-              </>
-            )}
+            {/* Bereich für die Wochenanalyse, der Chart Bereich wurde auf Wunsch entfernt */}
           </div>
         </TabsContent>
         

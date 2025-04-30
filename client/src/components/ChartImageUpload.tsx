@@ -221,15 +221,20 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
               <span className="text-xs text-muted-foreground/80 italic">Klicken zum Vergrößern</span>
             </div>
           </div>
-          <DialogContent className="max-w-[90vw] max-h-[90vh] w-full p-0 sm:p-1" aria-labelledby="dialog-title">
-            <div className="sr-only" id="dialog-title">TradingView Chart Großansicht</div>
-            <div className="w-full h-full overflow-auto">
+          <DialogContent className="w-screen h-screen max-w-none max-h-none p-0 m-0 border-none" aria-labelledby="dialog-title">
+            <div className="sr-only" id="dialog-title">TradingView Chart Vollbild</div>
+            <div className="w-full h-full flex items-center justify-center bg-black/90">
               <img 
                 src={preview} 
                 alt="TradingView Chart Vollbild" 
-                className="w-full h-auto max-h-[85vh] object-contain"
-                style={{ maxWidth: "100%" }}
+                className="max-w-full max-h-full object-contain"
               />
+              <button 
+                onClick={() => document.querySelector('[data-dialog-close]')?.click()}
+                className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 p-2 rounded-full"
+              >
+                <X className="h-6 w-6" />
+              </button>
             </div>
           </DialogContent>
         </Dialog>
