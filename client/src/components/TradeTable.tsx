@@ -28,7 +28,8 @@ import {
   liquidationTypes,
   unmitZoneTypes,
   marketPhaseTypes,
-  rrValues
+  rrValues,
+  setupTypes
 } from "@shared/schema";
 import { formatDate, formatTime, getTodayDates, getWeekDates, getLastMonthDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
@@ -674,7 +675,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                       <h4 className="font-medium text-sm">Setup filtern</h4>
                       <ScrollArea className="h-48">
                         <div className="space-y-2 px-1">
-                          {uniqueValues.setups.map(setup => (
+                          {setupTypes.map(setup => (
                             <div key={setup} className="flex items-center space-x-2">
                               <Checkbox 
                                 id={`setup-${setup}`} 
