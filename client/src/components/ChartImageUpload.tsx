@@ -221,12 +221,14 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
               <span className="text-xs text-muted-foreground/80 italic">Klicken zum Vergrößern</span>
             </div>
           </div>
-          <DialogContent className="max-w-4xl w-full p-1">
-            <div className="w-full h-full">
+          <DialogContent className="max-w-[90vw] max-h-[90vh] w-full p-0 sm:p-1" aria-labelledby="dialog-title">
+            <div className="sr-only" id="dialog-title">TradingView Chart Großansicht</div>
+            <div className="w-full h-full overflow-auto">
               <img 
                 src={preview} 
                 alt="TradingView Chart Vollbild" 
-                className="w-full h-auto"
+                className="w-full h-auto max-h-[85vh] object-contain"
+                style={{ maxWidth: "100%" }}
               />
             </div>
           </DialogContent>
