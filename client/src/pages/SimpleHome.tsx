@@ -241,7 +241,46 @@ export default function SimpleHome() {
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4" ref={tradesSectionRef}>
             
-
+            {/* Statistik Panel */}
+            <div className="mb-4 bg-black/30 rounded-xl p-3 border border-primary/10">
+              <div className="flex flex-wrap gap-4 justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1">Trades</h3>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-xl font-bold">{tradeStats.count}</span>
+                    <div className="text-xs bg-primary/10 rounded px-2 py-0.5 text-muted-foreground">
+                      {tradeStats.wins} Wins / {tradeStats.losses} Losses
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1">Win Rate</h3>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-xl font-bold">{tradeStats.winRate.toFixed(1)}%</span>
+                    <div className={`text-xs rounded px-2 py-0.5 ${tradeStats.winRate >= 50 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                      {tradeStats.winRate >= 50 ? 'Profitabel' : 'Verlust'}
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1">Gesamt P/L</h3>
+                  <div className="flex gap-2 items-center">
+                    <span className={`text-xl font-bold ${tradeStats.totalPL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {tradeStats.totalPL >= 0 ? '+' : ''}{tradeStats.totalPL.toFixed(2)}$
+                    </span>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-1">Durchschnitt RR</h3>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-xl font-bold">{tradeStats.avgRR.toFixed(2)}R</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <div className="relative">
               {/* Filter */}
