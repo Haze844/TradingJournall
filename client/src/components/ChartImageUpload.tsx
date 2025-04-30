@@ -5,11 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogTitle
-} from "@/components/ui/dialog";
+  FullscreenDialog as Dialog,
+  FullscreenDialogContent as DialogContent,
+  FullscreenDialogTrigger as DialogTrigger,
+} from "@/components/ui/fullscreen-dialog";
 
 interface ChartImageUploadProps {
   existingImage?: string | null;
@@ -226,18 +225,9 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
             </div>
           </div>
           <DialogContent 
-            className="w-screen h-screen max-w-none max-h-none p-0 m-0 border-none" 
-            aria-labelledby="dialog-title"
-            onInteractOutside={(e) => {
-              // Schließen, wenn außerhalb des Bildes geklickt wird
-              const closeBtn = document.querySelector('[data-dialog-close]');
-              if (closeBtn && 'click' in closeBtn) {
-                (closeBtn as HTMLElement).click();
-              }
-            }}
+            className="w-screen h-screen max-w-none max-h-none p-0 m-0 border-none"
           >
-            <DialogTitle className="sr-only">TradingView Chart Vollbild</DialogTitle>
-            <div className="w-full h-full flex items-center justify-center bg-black/90">
+            <div className="w-full h-full flex items-center justify-center">
               <img 
                 src={preview} 
                 alt="TradingView Chart Vollbild" 
