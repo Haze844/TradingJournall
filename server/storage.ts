@@ -554,6 +554,13 @@ export class MemStorage implements IStorage {
     this.tradingStrategies = new Map();
     this.strategyComments = new Map();
     this.appSettings = new Map();
+    this.tradingStreaks = new Map();
+    this.coachingGoals = new Map();
+    this.coachingFeedback = new Map();
+    this.macroEconomicEvents = new Map();
+    this.tradingStrategies = new Map();
+    this.strategyComments = new Map();
+    this.appSettings = new Map();
     
     this.userIdCounter = 1;
     this.tradeIdCounter = 1;
@@ -566,6 +573,219 @@ export class MemStorage implements IStorage {
     this.tradingStrategyIdCounter = 1;
     this.strategyCommentIdCounter = 1;
     this.appSettingsIdCounter = 1;
+    this.tradingStreakIdCounter = 1;
+  }
+  
+  // Trading Streak Methoden
+  async getTradingStreak(userId: number): Promise<TradingStreak | undefined> {
+    return Array.from(this.tradingStreaks.values()).find(
+      (streak) => streak.userId === userId
+    );
+  }
+
+  async createTradingStreak(streak: InsertTradingStreak & { userId: number }): Promise<TradingStreak> {
+    const id = this.tradingStreakIdCounter++;
+    
+    // Standardwerte hinzufügen, falls nicht definiert
+    const newStreak: TradingStreak = {
+      id,
+      userId: streak.userId,
+      currentStreak: streak.currentStreak || 0,
+      longestStreak: streak.longestStreak || 0,
+      currentLossStreak: streak.currentLossStreak || 0,
+      longestLossStreak: streak.longestLossStreak || 0,
+      totalTrades: streak.totalTrades || 0,
+      totalWins: streak.totalWins || 0,
+      lastTradeDate: streak.lastTradeDate || new Date(),
+      lastUpdated: new Date(),
+      streakLevel: streak.streakLevel || 1,
+      experiencePoints: streak.experiencePoints || 0,
+      badges: streak.badges || []
+    };
+    
+    this.tradingStreaks.set(id, newStreak);
+    return newStreak;
+  }
+
+  async updateTradingStreak(userId: number, streakUpdate: Partial<TradingStreak>): Promise<TradingStreak | undefined> {
+    const existingStreak = await this.getTradingStreak(userId);
+    
+    if (!existingStreak) {
+      return undefined;
+    }
+    
+    const updatedStreak = { 
+      ...existingStreak, 
+      ...streakUpdate,
+      lastUpdated: new Date()
+    };
+    
+    this.tradingStreaks.set(existingStreak.id, updatedStreak);
+    return updatedStreak;
+  }
+
+  async updateStreakOnTradeResult(userId: number, isWin: boolean): Promise<TradingStreak> {
+    let streak = await this.getTradingStreak(userId);
+    
+    // Erstelle einen neuen Streak-Eintrag, falls noch keiner existiert
+    if (!streak) {
+      streak = await this.createTradingStreak({
+        userId,
+        currentStreak: 0,
+        longestStreak: 0,
+        currentLossStreak: 0,
+        longestLossStreak: 0,
+        totalTrades: 0,
+        totalWins: 0,
+        lastTradeDate: new Date(),
+        streakLevel: 1,
+        experiencePoints: 0,
+        badges: []
+      });
+    }
+    
+    // Aktualisiere den Streak basierend auf dem Handelsergebnis
+    const updatedStreak = { ...streak };
+    updatedStreak.totalTrades += 1;
+    updatedStreak.lastTradeDate = new Date();
+    
+    if (isWin) {
+      // Gewinn-Fall
+      updatedStreak.totalWins += 1;
+      updatedStreak.currentStreak += 1;
+      updatedStreak.currentLossStreak = 0;
+      updatedStreak.experiencePoints += 10; // Basispunkte für einen Gewinn
+      
+      // Bonuspunkte für Streak-Fortsetzung
+      if (updatedStreak.currentStreak > 1) {
+        updatedStreak.experiencePoints += Math.min(updatedStreak.currentStreak * 2, 20); // Max 20 Bonuspunkte
+      }
+      
+      // Aktualisiere längste Gewinnsträhne
+      if (updatedStreak.currentStreak > updatedStreak.longestStreak) {
+        updatedStreak.longestStreak = updatedStreak.currentStreak;
+        
+        // Prüfe Streak-Badges
+        if (updatedStreak.longestStreak >= 5 && !updatedStreak.badges.includes("winning_streak_5")) {
+          updatedStreak.badges.push("winning_streak_5");
+          updatedStreak.experiencePoints += 50;
+        }
+        
+        if (updatedStreak.longestStreak >= 10 && !updatedStreak.badges.includes("winning_streak_10")) {
+          updatedStreak.badges.push("winning_streak_10");
+          updatedStreak.experiencePoints += 100;
+        }
+        
+        if (updatedStreak.longestStreak >= 20 && !updatedStreak.badges.includes("winning_streak_20")) {
+          updatedStreak.badges.push("winning_streak_20");
+          updatedStreak.experiencePoints += 200;
+        }
+      }
+    } else {
+      // Verlust-Fall
+      updatedStreak.currentStreak = 0;
+      updatedStreak.currentLossStreak += 1;
+      
+      // Aktualisiere längste Verluststrähne
+      if (updatedStreak.currentLossStreak > updatedStreak.longestLossStreak) {
+        updatedStreak.longestLossStreak = updatedStreak.currentLossStreak;
+      }
+      
+      // Comeback King Badge - Nach einer Verluststrähne von 3 oder mehr folgt ein Gewinn
+      if (updatedStreak.currentLossStreak >= 3 && isWin && !updatedStreak.badges.includes("comeback_king")) {
+        updatedStreak.badges.push("comeback_king");
+        updatedStreak.experiencePoints += 75;
+      }
+    }
+    
+    // Erster Trade Badge
+    if (updatedStreak.totalTrades === 1 && !updatedStreak.badges.includes("first_trade")) {
+      updatedStreak.badges.push("first_trade");
+      updatedStreak.experiencePoints += 25;
+    }
+    
+    // Trade Master Badges
+    if (updatedStreak.totalTrades >= 50 && !updatedStreak.badges.includes("trade_master_50")) {
+      updatedStreak.badges.push("trade_master_50");
+      updatedStreak.experiencePoints += 100;
+    }
+    
+    if (updatedStreak.totalTrades >= 100 && !updatedStreak.badges.includes("trade_master_100")) {
+      updatedStreak.badges.push("trade_master_100");
+      updatedStreak.experiencePoints += 200;
+    }
+    
+    // Berechne das Streak-Level (steigt alle 100 XP)
+    updatedStreak.streakLevel = Math.floor(updatedStreak.experiencePoints / 100) + 1;
+    
+    // Speichere den aktualisierten Streak
+    return this.updateTradingStreak(userId, updatedStreak) as Promise<TradingStreak>;
+  }
+
+  async getTopStreaks(): Promise<TradingStreak[]> {
+    // Sortiere nach höchstem Streak und längster Strähne
+    return Array.from(this.tradingStreaks.values())
+      .sort((a, b) => b.longestStreak - a.longestStreak || b.currentStreak - a.currentStreak || b.experiencePoints - a.experiencePoints);
+  }
+
+  async earnBadge(userId: number, badgeType: typeof badgeTypes[number]): Promise<TradingStreak | undefined> {
+    const existingStreak = await this.getTradingStreak(userId);
+    
+    if (!existingStreak) {
+      return undefined;
+    }
+    
+    // Prüfe, ob das Badge bereits vorhanden ist
+    if (existingStreak.badges.includes(badgeType)) {
+      return existingStreak; // Keine Änderung, wenn das Badge bereits vorhanden ist
+    }
+    
+    // Füge das neue Badge hinzu
+    const updatedBadges = [...existingStreak.badges, badgeType];
+    
+    // Füge XP basierend auf Badge-Typ hinzu
+    let additionalXP = 0;
+    
+    switch (badgeType) {
+      case "winning_streak_5":
+        additionalXP = 50;
+        break;
+      case "winning_streak_10":
+        additionalXP = 100;
+        break;
+      case "winning_streak_20":
+        additionalXP = 200;
+        break;
+      case "perfect_week":
+        additionalXP = 150;
+        break;
+      case "comeback_king":
+        additionalXP = 75;
+        break;
+      case "first_trade":
+        additionalXP = 25;
+        break;
+      case "trade_master_50":
+        additionalXP = 100;
+        break;
+      case "trade_master_100":
+        additionalXP = 200;
+        break;
+      default:
+        additionalXP = 10;
+    }
+    
+    // Aktualisiere Streak mit neuem Badge und XP
+    const updatedStreak = { 
+      ...existingStreak,
+      badges: updatedBadges,
+      experiencePoints: existingStreak.experiencePoints + additionalXP,
+      streakLevel: Math.floor((existingStreak.experiencePoints + additionalXP) / 100) + 1,
+      lastUpdated: new Date()
+    };
+    
+    this.tradingStreaks.set(existingStreak.id, updatedStreak);
+    return updatedStreak;
   }
 
   // User methods
