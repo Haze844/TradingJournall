@@ -337,7 +337,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   };
 
   return (
-    <Card className="mb-6 bg-card overflow-hidden">
+    <Card className="mb-6 bg-card overflow-hidden w-full max-w-[1600px] mx-auto">
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
         <div className="flex-1 flex items-center">
           {/* Statistik-Panel */}
@@ -390,7 +390,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       {/* Wir entfernen die Filter-Leiste und konzentrieren uns auf die Tabellenfilter */}
       
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-xs whitespace-nowrap">
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
               <th className="p-3 text-left whitespace-nowrap">
