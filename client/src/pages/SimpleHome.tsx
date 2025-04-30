@@ -279,6 +279,29 @@ export default function SimpleHome() {
                     <span className="text-xl font-bold">{tradeStats.avgRR.toFixed(2)}R</span>
                   </div>
                 </div>
+                
+                <div className="self-end">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={() => {
+                      // Aktuelle Einstellungen auf Standard zurücksetzen
+                      setFilters({
+                        startDate: getTodayDates().startDate,
+                        endDate: getTodayDates().endDate,
+                        symbol: "all",
+                        setup: "all",
+                        mainTrendM15: "all",
+                        internalTrendM5: "all",
+                        entryType: "all"
+                      });
+                    }}
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Statistik zurücksetzen
+                  </Button>
+                </div>
               </div>
             </div>
             
