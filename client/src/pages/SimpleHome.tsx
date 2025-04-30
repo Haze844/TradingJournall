@@ -11,6 +11,7 @@ import AdvancedTradeAnalysisWrapper from "@/components/AdvancedTradeAnalysisWrap
 import RiskManagementDashboard from "@/components/RiskManagementDashboard";
 import MarketPhaseAnalysis from "@/components/MarketPhaseAnalysis";
 import TradeDashboard from "@/components/TradeDashboard";
+import PerformanceHeatmap from "@/components/PerformanceHeatmap";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -425,15 +426,22 @@ export default function SimpleHome() {
               </div>
             </TabsContent>
             
-            {/* Performance Tab mit Wochenanalyse */}
+            {/* Performance Tab mit Wochenanalyse und Heatmap */}
             <TabsContent value="performance" className="mt-0">
-              <div className="rocket-card rounded-xl p-2 sm:p-4">
-                <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center"><Trophy className="w-4 h-4 mr-2" /> Performance-Analyse</h2>
-                <WeeklySummary
-                  userId={userId}
-                  weekStart={filters.startDate}
-                  weekEnd={filters.endDate}
-                />
+              <div className="space-y-6">
+                <div className="rocket-card rounded-xl p-2 sm:p-4">
+                  <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center"><Trophy className="w-4 h-4 mr-2" /> Performance-Analyse</h2>
+                  <WeeklySummary
+                    userId={userId}
+                    weekStart={filters.startDate}
+                    weekEnd={filters.endDate}
+                  />
+                </div>
+                
+                {/* Performance Heatmap */}
+                <div className="rocket-card rounded-xl p-2 sm:p-4">
+                  <PerformanceHeatmap />
+                </div>
               </div>
             </TabsContent>
           </Tabs>
