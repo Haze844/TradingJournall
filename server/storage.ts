@@ -614,11 +614,18 @@ export class MemStorage implements IStorage {
       rrPotential: 0,
       isWin: false,
       profitLoss: 0,
-      ...trade, // Von Client übergebene Werte überschreiben Standardwerte
+      // Wichtig: Hier setzen wir keinen Standardwert für rangePoints, damit undefined-Werte nicht zu 0 werden
       id,
       date: trade.date ? new Date(trade.date) : new Date(),
       gptFeedback: trade.gptFeedback || ""
     };
+    
+    // Wir fügen die übergebenen Trade-Daten hinzu, aber nur wenn sie nicht undefined sind
+    for (const key of Object.keys(trade)) {
+      if (trade[key as keyof typeof trade] !== undefined) {
+        (newTrade as any)[key] = trade[key as keyof typeof trade];
+      }
+    }
     
     this.trades.set(id, newTrade);
     
@@ -644,7 +651,17 @@ export class MemStorage implements IStorage {
       return undefined;
     }
     
-    const updatedTrade = { ...existingTrade, ...tradeUpdate };
+    // Beim Aktualisieren müssen wir sicherstellen, dass undefined-Werte korrekt behandelt werden
+    // Insbesondere bei rangePoints wollen wir vermeiden, dass es auf 0 zurückgesetzt wird
+    const updatedTrade = { ...existingTrade };
+    
+    // Nur die Felder kopieren, die in tradeUpdate nicht undefined sind
+    Object.keys(tradeUpdate).forEach(key => {
+      if (tradeUpdate[key as keyof Partial<Trade>] !== undefined) {
+        updatedTrade[key as keyof Trade] = tradeUpdate[key as keyof Partial<Trade>] as any;
+      }
+    });
+    
     this.trades.set(id, updatedTrade);
     
     // Update statistics after updating a trade
