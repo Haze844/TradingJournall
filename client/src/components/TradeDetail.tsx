@@ -562,14 +562,14 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">RR Achieved</div>
                       {editMode ? (
-                        <div className="flex gap-1">
-                          {[1, 2, 3].map(val => (
+                        <div className="flex gap-1 flex-wrap">
+                          {[-1, 1, 2, 3, 4, 5, 6, 7].map(val => (
                             <Button
                               key={val}
                               type="button"
                               variant={editingRRAchieved === val ? "default" : "outline"}
                               size="sm"
-                              className="p-1 h-6 text-[10px] flex-1"
+                              className={`p-1 h-6 text-[10px] flex-1 ${val === -1 ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : ''}`}
                               onClick={() => setEditingRRAchieved(val)}
                             >
                               {val}R
@@ -583,8 +583,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">RR Potential</div>
                       {editMode ? (
-                        <div className="flex gap-1">
-                          {[1, 2, 3].map(val => (
+                        <div className="flex gap-1 flex-wrap">
+                          {[1, 2, 3, 4, 5, 6, 7].map(val => (
                             <Button
                               key={val}
                               type="button"
