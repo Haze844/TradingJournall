@@ -48,7 +48,6 @@ import {
   DollarSign,
   Clock,
   Plus,
-  Info,
   X
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -837,17 +836,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      <AnimierterTooltip 
-                        inhalt="Ordnet den Trade einer spezifischen Marktstruktur zu (Hauptstruktur, Mittelstruktur, etc.)"
-                        seite="rechts"
-                        ausrichtung="anfang"
-                        className="inline-flex items-center"
-                      >
-                        <div className="flex items-center gap-1">
-                          Struktur
-                          <Info className="h-3 w-3 ml-1 text-muted-foreground" />
-                        </div>
-                      </AnimierterTooltip>
+                      Struktur
                       <Award className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
