@@ -73,7 +73,7 @@ export const trades = pgTable("trades", {
   structure: text("structure").default(''), // Hauptstruktur, Internal, Micro
   timeframeEntry: text("timeframe_entry").default(''), // M1, M5, M15, ALL TF
   unmitZone: text("unmit_zone").default(''), // Ja, Nein, Mehrere
-  rangePoints: integer("range_points").default(0), // Wert zwischen 0 und 300
+  rangePoints: integer("range_points"), // Wert zwischen 0 und 300
   marketPhase: text("market_phase").default(''), // Long, stark Long, Short, stark Short, Range
 });
 
