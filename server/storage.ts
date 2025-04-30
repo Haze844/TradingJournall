@@ -9,7 +9,9 @@ import {
   macroEconomicEvents, type MacroEconomicEvent, type InsertMacroEconomicEvent,
   tradingStrategies, type TradingStrategy, type InsertTradingStrategy,
   strategyComments, type StrategyComment, type InsertStrategyComment,
-  appSettings, type AppSettings, type InsertAppSettings
+  appSettings, type AppSettings, type InsertAppSettings,
+  tradingStreaks, type TradingStreak, type InsertTradingStreak,
+  badgeTypes
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -62,6 +64,14 @@ export interface IStorage {
   acknowledgeCoachingFeedback(id: number): Promise<CoachingFeedback | undefined>;
   generateCoachingFeedback(userId: number): Promise<CoachingFeedback[]>;
   
+  // Trading Streak operations
+  getTradingStreak(userId: number): Promise<TradingStreak | undefined>;
+  createTradingStreak(streak: InsertTradingStreak & { userId: number }): Promise<TradingStreak>;
+  updateTradingStreak(userId: number, streak: Partial<TradingStreak>): Promise<TradingStreak | undefined>;
+  updateStreakOnTradeResult(userId: number, isWin: boolean): Promise<TradingStreak>;
+  getTopStreaks(): Promise<TradingStreak[]>;
+  earnBadge(userId: number, badgeType: typeof badgeTypes[number]): Promise<TradingStreak | undefined>;
+
   // Macroeconomic Events operations
   getMacroEconomicEvents(startDate: Date, endDate: Date): Promise<MacroEconomicEvent[]>;
   getMacroEconomicEventById(id: number): Promise<MacroEconomicEvent | undefined>;
@@ -101,6 +111,7 @@ export class MemStorage implements IStorage {
   private tradingStrategies: Map<number, TradingStrategy>;
   private strategyComments: Map<number, StrategyComment>;
   private appSettings: Map<number, AppSettings>;
+  private tradingStreaks: Map<number, TradingStreak>;
   
   private userIdCounter: number;
   private tradeIdCounter: number;
@@ -113,6 +124,7 @@ export class MemStorage implements IStorage {
   private tradingStrategyIdCounter: number;
   private strategyCommentIdCounter: number;
   private appSettingsIdCounter: number;
+  private tradingStreakIdCounter: number;
   
   // Coaching Goals operations
   async getCoachingGoals(userId: number, completed?: boolean): Promise<CoachingGoal[]> {

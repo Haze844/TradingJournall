@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, real, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -246,6 +246,44 @@ export const insertStrategyCommentSchema = createInsertSchema(strategyComments).
 
 export type InsertStrategyComment = z.infer<typeof insertStrategyCommentSchema>;
 export type StrategyComment = typeof strategyComments.$inferSelect;
+
+// Trading Streak Tabelle
+export const tradingStreaks = pgTable("trading_streaks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  currentLossStreak: integer("current_loss_streak").default(0),
+  longestLossStreak: integer("longest_loss_streak").default(0),
+  totalTrades: integer("total_trades").default(0),
+  totalWins: integer("total_wins").default(0),
+  lastTradeDate: date("last_trade_date"),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  // Gamification Elemente
+  streakLevel: integer("streak_level").default(1),
+  experiencePoints: integer("experience_points").default(0),
+  badges: text("badges").array(),
+});
+
+export const insertTradingStreakSchema = createInsertSchema(tradingStreaks).omit({
+  id: true,
+  lastUpdated: true
+});
+
+export type InsertTradingStreak = z.infer<typeof insertTradingStreakSchema>;
+export type TradingStreak = typeof tradingStreaks.$inferSelect;
+
+// Badge Definitionen für Gamifizierung
+export const badgeTypes = [
+  "winning_streak_5", 
+  "winning_streak_10", 
+  "winning_streak_20",
+  "perfect_week",
+  "comeback_king",
+  "first_trade",
+  "trade_master_50",
+  "trade_master_100"
+] as const;
 
 // App Settings für Multi-Device Sync
 export const appSettings = pgTable("app_settings", {
