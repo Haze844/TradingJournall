@@ -873,6 +873,11 @@ export class MemStorage implements IStorage {
     await this.calculateWeeklySummary(trade.userId, monday, sunday);
     await this.calculateSetupWinRates(trade.userId);
     
+    // Aktualisiere auch den Trading Streak basierend auf dem Handelsergebnis
+    if (newTrade.isWin !== undefined) {
+      await this.updateStreakOnTradeResult(trade.userId, newTrade.isWin);
+    }
+    
     return newTrade;
   }
 
@@ -908,6 +913,11 @@ export class MemStorage implements IStorage {
     await this.calculateWeeklySummary(updatedTrade.userId, monday, sunday);
     await this.calculateSetupWinRates(updatedTrade.userId);
     
+    // Wenn sich der isWin-Status geändert hat, müssen wir den Trading Streak aktualisieren
+    if (tradeUpdate.isWin !== undefined && tradeUpdate.isWin !== existingTrade.isWin) {
+      await this.updateStreakOnTradeResult(updatedTrade.userId, tradeUpdate.isWin);
+    }
+    
     return updatedTrade;
   }
 
@@ -933,6 +943,14 @@ export class MemStorage implements IStorage {
       
       await this.calculateWeeklySummary(userId, monday, sunday);
       await this.calculateSetupWinRates(userId);
+      
+      // Da ein Trade gelöscht wurde, sollten wir die Streak überprüfen und aktualisieren
+      const streak = await this.getTradingStreak(userId);
+      if (streak) {
+        // Hier könnten wir potentiell die Streak neu berechnen, aber für jetzt
+        // werden wir keine automatische Anpassung vornehmen und der Benutzer kann sie manuell anpassen
+        // Es ist schwierig zu bestimmen, ob der gelöschte Trade Teil der aktuellen Streak war
+      }
     }
     
     return success;

@@ -1533,6 +1533,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to sync settings" });
     }
   });
+  
+  // Trading Streak Routes
+  app.get("/api/trading-streak", async (req: Request, res: Response) => {
+    try {
+      // Unterstützt sowohl authentifizierte als auch nicht-authentifizierte Anfragen
+      const userId = req.isAuthenticated() ? req.user!.id : parseInt(req.query.userId as string);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Gültige User-ID erforderlich" });
+      }
+      
+      const streak = await storage.getTradingStreak(userId);
+      
+      if (!streak) {
+        // Es ist kein Fehler, wenn keine Streak existiert; gibt einfach null zurück
+        return res.json(null);
+      }
+      
+      res.json(streak);
+    } catch (error) {
+      console.error("Fehler beim Abrufen der Trading Streak:", error);
+      res.status(500).json({ error: "Trading Streak konnte nicht abgerufen werden" });
+    }
+  });
+  
+  app.post("/api/trading-streak", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Überprüfe, ob bereits eine Streak für diesen Benutzer existiert
+      const existingStreak = await storage.getTradingStreak(userId);
+      
+      if (existingStreak) {
+        return res.status(400).json({ error: "Trading Streak existiert bereits für diesen Benutzer" });
+      }
+      
+      const streak = {
+        ...req.body,
+        userId
+      };
+      
+      const newStreak = await storage.createTradingStreak(streak);
+      res.status(201).json(newStreak);
+    } catch (error) {
+      console.error("Fehler beim Erstellen der Trading Streak:", error);
+      res.status(500).json({ error: "Trading Streak konnte nicht erstellt werden" });
+    }
+  });
+  
+  app.put("/api/trading-streak/:userId", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Ungültige User-ID" });
+      }
+      
+      // Überprüfe, ob der Benutzer seine eigene Streak oder als Admin eine andere Streak aktualisiert
+      if (req.user!.id !== userId && req.user!.username !== "admin") {
+        return res.status(403).json({ error: "Nicht berechtigt, diese Trading Streak zu aktualisieren" });
+      }
+      
+      const streakUpdate = req.body;
+      const updatedStreak = await storage.updateTradingStreak(userId, streakUpdate);
+      
+      if (!updatedStreak) {
+        return res.status(404).json({ error: "Trading Streak nicht gefunden" });
+      }
+      
+      res.json(updatedStreak);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren der Trading Streak:", error);
+      res.status(500).json({ error: "Trading Streak konnte nicht aktualisiert werden" });
+    }
+  });
+  
+  app.post("/api/trading-streak/:userId/badge", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Ungültige User-ID" });
+      }
+      
+      // Überprüfe, ob der Benutzer seine eigene Streak oder als Admin eine andere Streak aktualisiert
+      if (req.user!.id !== userId && req.user!.username !== "admin") {
+        return res.status(403).json({ error: "Nicht berechtigt, Badges für diese Trading Streak hinzuzufügen" });
+      }
+      
+      const { badgeType } = req.body;
+      
+      // Definiere die erlaubten Badge-Typen direkt hier, damit wir nicht die Schema-Datei importieren müssen
+      const allowedBadgeTypes = [
+        "winning_streak_5", 
+        "winning_streak_10", 
+        "winning_streak_20", 
+        "perfect_week", 
+        "comeback_king", 
+        "first_trade", 
+        "trade_master_50", 
+        "trade_master_100"
+      ];
+      
+      if (!badgeType || !allowedBadgeTypes.includes(badgeType)) {
+        return res.status(400).json({ error: "Ungültiger Badge-Typ" });
+      }
+      
+      const updatedStreak = await storage.earnBadge(userId, badgeType);
+      
+      if (!updatedStreak) {
+        return res.status(404).json({ error: "Trading Streak nicht gefunden" });
+      }
+      
+      res.json(updatedStreak);
+    } catch (error) {
+      console.error("Fehler beim Hinzufügen des Badges:", error);
+      res.status(500).json({ error: "Badge konnte nicht hinzugefügt werden" });
+    }
+  });
+  
+  app.post("/api/trading-streak/trade-result", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      const { isWin } = req.body;
+      
+      if (typeof isWin !== 'boolean') {
+        return res.status(400).json({ error: "isWin muss ein boolean-Wert sein" });
+      }
+      
+      const updatedStreak = await storage.updateStreakOnTradeResult(userId, isWin);
+      res.json(updatedStreak);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren des Trade-Ergebnisses:", error);
+      res.status(500).json({ error: "Trade-Ergebnis konnte nicht aktualisiert werden" });
+    }
+  });
+  
+  app.get("/api/trading-streak/top", async (req: Request, res: Response) => {
+    try {
+      // Limitiert die Anzahl der zurückgegebenen Streaks
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      
+      const topStreaks = await storage.getTopStreaks();
+      
+      // Gib nur die angeforderte Anzahl zurück
+      res.json(topStreaks.slice(0, limit));
+    } catch (error) {
+      console.error("Fehler beim Abrufen der Top Streaks:", error);
+      res.status(500).json({ error: "Top Streaks konnten nicht abgerufen werden" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
