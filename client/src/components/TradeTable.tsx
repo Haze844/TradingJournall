@@ -46,7 +46,8 @@ import {
   Target,
   DollarSign,
   Clock,
-  Plus
+  Plus,
+  X
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
