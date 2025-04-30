@@ -362,6 +362,15 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
               variant="outline" 
               size="sm"
               className="text-xs h-8"
+              onClick={resetFilters}
+            >
+              <X className="h-3 w-3 mr-1" />
+              Filter zurücksetzen
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-xs h-8"
               onClick={() => {
                 // Ein neues Event erstellen und dispatchen
                 const event = new CustomEvent('add-trade-clicked');
