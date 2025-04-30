@@ -103,7 +103,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     setEditingTimeframeEntry(selectedTrade.timeframeEntry || '');
     setEditingLiquidation(selectedTrade.liquidation || '');
     setEditingUnmitZone(selectedTrade.unmitZone || '');
-    setEditingRangePoints(selectedTrade.rangePoints);
+    // Wichtig: Hier prüfen wir, ob rangePoints einen definierten Wert hat
+    setEditingRangePoints(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null ? selectedTrade.rangePoints : undefined);
     setEditingMarketPhase(selectedTrade.marketPhase || '');
     setEditingRRAchieved(selectedTrade.rrAchieved || 0);
     setEditingRRPotential(selectedTrade.rrPotential || 0);
@@ -550,7 +551,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                         min="0"
                       />
                     ) : (
-                      <div className="font-medium text-sm">{selectedTrade.rangePoints || '-'}</div>
+                      <div className="font-medium text-sm">{selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null ? selectedTrade.rangePoints : '-'}</div>
                     )}
                   </div>
                 </div>
