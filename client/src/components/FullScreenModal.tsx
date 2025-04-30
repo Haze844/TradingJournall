@@ -15,6 +15,9 @@ export function FullScreenModal({ isOpen, onClose, image }: FullScreenModalProps
 
     // Animation starten
     setIsVisible(true);
+    
+    // Verhindere Scrolling des Body während Modal offen ist
+    document.body.style.overflow = 'hidden';
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -22,8 +25,12 @@ export function FullScreenModal({ isOpen, onClose, image }: FullScreenModalProps
 
     // Event-Listener hinzufügen
     window.addEventListener("keydown", handleEscape);
-    // Event-Listener entfernen
-    return () => window.removeEventListener("keydown", handleEscape);
+    
+    // Event-Listener entfernen beim Cleanup
+    return () => {
+      window.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = '';
+    };
   }, [isOpen, onClose]);
 
   // Wenn das Modal nicht geöffnet ist, nichts rendern
@@ -31,14 +38,14 @@ export function FullScreenModal({ isOpen, onClose, image }: FullScreenModalProps
 
   return (
     <div 
-      className={`fixed inset-0 z-[1000] flex items-center justify-center bg-black transition-opacity duration-300
+      className={`fixed inset-0 z-[1000] flex items-center justify-center bg-black transition-opacity duration-300 p-0 m-0
                  ${isVisible ? 'opacity-100' : 'opacity-0'}`}
       onClick={onClose}
     >
       <img 
         src={image} 
         alt="Vollbild Ansicht" 
-        className="max-w-full max-h-full cursor-pointer object-contain" 
+        className="w-full h-full cursor-pointer object-contain p-0 m-0" 
         onClick={(e) => {
           e.stopPropagation(); // Verhindert Bubbling, so dass der Klick auf das Bild nicht das Modal schließt
           onClose(); // Trotzdem schließen, da wir es so wollen
