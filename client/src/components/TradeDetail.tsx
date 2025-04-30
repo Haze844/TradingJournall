@@ -58,6 +58,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const [editingRangePoints, setEditingRangePoints] = useState<number>(0);
   const [editingMarketPhase, setEditingMarketPhase] = useState("");
   const [editingRRAchieved, setEditingRRAchieved] = useState<number>(0);
+  const [editingLocation, setEditingLocation] = useState("");
   const [editingRRPotential, setEditingRRPotential] = useState<number>(0);
 
   // Mutation für das Update der Trade-Daten
@@ -106,6 +107,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     setEditingMarketPhase(selectedTrade.marketPhase || '');
     setEditingRRAchieved(selectedTrade.rrAchieved || 0);
     setEditingRRPotential(selectedTrade.rrPotential || 0);
+    setEditingLocation(selectedTrade.location || '');
     
     setEditMode(true);
   };
@@ -139,7 +141,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       rangePoints: editingRangePoints,
       marketPhase: editingMarketPhase,
       rrAchieved: editingRRAchieved,
-      rrPotential: editingRRPotential
+      rrPotential: editingRRPotential,
+      location: editingLocation
     });
   };
 
@@ -398,229 +401,220 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             {/* Spalte 3: Location und Liquidation */}
             <div>
               <div className="bg-muted/30 rounded-md p-2 mb-2">
-                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Position</div>
+                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Position &amp; Struktur</div>
                 <div className="space-y-1.5">
-                  <div>
-                    <div className="text-xs text-muted-foreground">Location</div>
-                    {editMode ? (
-                      <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
-                        <SelectTrigger className="h-7 text-xs">
-                          <SelectValue placeholder="Location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {['FVG', 'FVG Sweep', 'Micro FVG', 'Micro FVG Sweep', 'Wick', 'BOS', 'Delivery'].map((loc) => (
-                            <SelectItem key={loc} value={loc}>
-                              {loc}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="font-medium text-sm">{selectedTrade.location || '-'}</div>
-                    )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Location</div>
+                      {editMode ? (
+                        <Select value={editingLocation} onValueChange={setEditingLocation}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {['FVG', 'FVG Sweep', 'Micro FVG', 'Micro FVG Sweep', 'Wick', 'BOS', 'Delivery'].map((loc) => (
+                              <SelectItem key={loc} value={loc}>
+                                {loc}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.location || '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Struktur</div>
+                      {editMode ? (
+                        <Select value={editingStructure} onValueChange={setEditingStructure}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Struktur" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {structureTypes.map((structure) => (
+                              <SelectItem key={structure} value={structure}>
+                                {structure}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.structure || '-'}</div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Liquidation</div>
-                    {editMode ? (
-                      <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
-                        <SelectTrigger className="h-7 text-xs">
-                          <SelectValue placeholder="Liquidation" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {liquidationTypes.map((liq) => (
-                            <SelectItem key={liq} value={liq}>
-                              {liq}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="font-medium text-sm">{selectedTrade.liquidation || '-'}</div>
-                    )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Liquidation</div>
+                      {editMode ? (
+                        <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Liquidation" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {liquidationTypes.map((liq) => (
+                              <SelectItem key={liq} value={liq}>
+                                {liq}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.liquidation || '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">TF Entry</div>
+                      {editMode ? (
+                        <Select value={editingTimeframeEntry} onValueChange={setEditingTimeframeEntry}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="TF Entry" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeframeTypes.map((tf) => (
+                              <SelectItem key={tf} value={tf}>
+                                {tf}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.timeframeEntry || '-'}</div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Struktur, Timeframe Entry und Liquidation */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          {/* Weitere Details in 2 Spalten */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Linke Spalte - Marktzonen */}
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Struktur</div>
-              {editMode ? (
-                <Select value={editingStructure} onValueChange={setEditingStructure}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Struktur auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {structureTypes.map((structure) => (
-                      <SelectItem key={structure} value={structure}>
-                        {structure}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.structure || '-'}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Timeframe Entry</div>
-              {editMode ? (
-                <Select value={editingTimeframeEntry} onValueChange={setEditingTimeframeEntry}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Timeframe auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeframeTypes.map((tf) => (
-                      <SelectItem key={tf} value={tf}>
-                        {tf}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.timeframeEntry || '-'}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Liquidation</div>
-              {editMode ? (
-                <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Liquidation auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {liquidationTypes.map((liq) => (
-                      <SelectItem key={liq} value={liq}>
-                        {liq}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.liquidation || '-'}</div>
-              )}
-            </div>
-          </div>
-
-          {/* Unmitigierte Zone, Range Punkte und Marktphase */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Unmitigierte Zone</div>
-              {editMode ? (
-                <Select value={editingUnmitZone} onValueChange={setEditingUnmitZone}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {unmitZoneTypes.map((zone) => (
-                      <SelectItem key={zone} value={zone}>
-                        {zone}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.unmitZone || '-'}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Range Punkte</div>
-              {editMode ? (
-                <Input
-                  type="number"
-                  min="0"
-                  max="300"
-                  className="h-8"
-                  value={editingRangePoints}
-                  onChange={(e) => setEditingRangePoints(parseInt(e.target.value))}
-                />
-              ) : (
-                <div className="font-bold">{selectedTrade.rangePoints || '-'}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Marktphase</div>
-              {editMode ? (
-                <Select value={editingMarketPhase} onValueChange={setEditingMarketPhase}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Phase auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {marketPhaseTypes.map((phase) => (
-                      <SelectItem key={phase} value={phase}>
-                        {phase}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.marketPhase || '-'}</div>
-              )}
-            </div>
-          </div>
-
-          {/* RR und Ergebnis */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">RR Erreicht</div>
-              {editMode ? (
-                <Select value={editingRRAchieved.toString()} onValueChange={(value) => setEditingRRAchieved(parseInt(value))}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="RR auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {rrValues.map((rr) => (
-                      <SelectItem key={rr} value={rr.toString()}>
-                        {rr}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.rrAchieved}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">RR Potenzial</div>
-              {editMode ? (
-                <Select value={editingRRPotential.toString()} onValueChange={(value) => setEditingRRPotential(parseInt(value))}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="RR auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {rrValues.map((rr) => (
-                      <SelectItem key={rr} value={rr.toString()}>
-                        {rr}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.rrPotential}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Status</div>
-              <BadgeWinLoss isWin={selectedTrade.isWin} />
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Ergebnis in $</div>
-              {editMode ? (
-                <Input
-                  type="number"
-                  step="0.01"
-                  className="h-8"
-                  value={editingProfitLoss}
-                  onChange={(e) => setEditingProfitLoss(parseFloat(e.target.value))}
-                  placeholder="0.00"
-                />
-              ) : (
-                <div className={`font-bold ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
-                  {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}${selectedTrade.profitLoss.toFixed(2)} $` : '-'}
+              <div className="bg-muted/30 rounded-md p-2 mb-2">
+                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Marktzonen</div>
+                <div className="space-y-1.5">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Marktphase</div>
+                      {editMode ? (
+                        <Select value={editingMarketPhase} onValueChange={setEditingMarketPhase}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Phase" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {marketPhaseTypes.map((phase) => (
+                              <SelectItem key={phase} value={phase}>
+                                {phase}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.marketPhase || '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Unmit. Zone</div>
+                      {editMode ? (
+                        <Select value={editingUnmitZone} onValueChange={setEditingUnmitZone}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Zone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {unmitZoneTypes.map((zone) => (
+                              <SelectItem key={zone} value={zone}>
+                                {zone}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.unmitZone || '-'}</div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Range Punkte</div>
+                    {editMode ? (
+                      <Input
+                        type="number"
+                        value={editingRangePoints}
+                        onChange={(e) => setEditingRangePoints(parseInt(e.target.value) || 0)}
+                        className="h-7 text-xs"
+                      />
+                    ) : (
+                      <div className="font-medium text-sm">{selectedTrade.rangePoints || '-'}</div>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
+            </div>
+            
+            {/* Rechte Spalte - Ergebnis */}
+            <div>
+              <div className="bg-muted/30 rounded-md p-2 mb-2">
+                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Ergebnis &amp; RR</div>
+                <div className="space-y-1.5">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="text-xs text-muted-foreground">RR Achieved</div>
+                      {editMode ? (
+                        <div className="flex gap-1">
+                          {[1, 2, 3].map(val => (
+                            <Button
+                              key={val}
+                              type="button"
+                              variant={editingRRAchieved === val ? "default" : "outline"}
+                              size="sm"
+                              className="p-1 h-6 text-[10px] flex-1"
+                              onClick={() => setEditingRRAchieved(val)}
+                            >
+                              {val}R
+                            </Button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.rrAchieved ? `${selectedTrade.rrAchieved}R` : '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">RR Potential</div>
+                      {editMode ? (
+                        <div className="flex gap-1">
+                          {[1, 2, 3].map(val => (
+                            <Button
+                              key={val}
+                              type="button"
+                              variant={editingRRPotential === val ? "default" : "outline"}
+                              size="sm"
+                              className="p-1 h-6 text-[10px] flex-1"
+                              onClick={() => setEditingRRPotential(val)}
+                            >
+                              {val}R
+                            </Button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.rrPotential ? `${selectedTrade.rrPotential}R` : '-'}</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Ergebnis</div>
+                      <div className={`font-medium text-sm ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                        {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}${selectedTrade.profitLoss.toFixed(2)} $` : '-'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Status</div>
+                      <BadgeWinLoss isWin={selectedTrade.isWin} size="sm" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
