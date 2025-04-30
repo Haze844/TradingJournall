@@ -1,14 +1,9 @@
 import { useState, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, X, RefreshCcw, Image as ImageIcon, Link as LinkIcon, Maximize } from "lucide-react";
+import { Upload, X, RefreshCcw, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  FullscreenDialog as Dialog,
-  FullscreenDialogContent as DialogContent,
-  FullscreenDialogTrigger as DialogTrigger,
-} from "@/components/ui/fullscreen-dialog";
+import ImagePreview from "@/components/ImagePreview";
 
 interface ChartImageUploadProps {
   existingImage?: string | null;
@@ -202,54 +197,12 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
           </div>
         </div>
       ) : (
-        <Dialog>
-          <div className="rounded-lg overflow-hidden border border-border relative group">
-            <div className="relative pb-[60%] w-full">
-              <img 
-                src={preview} 
-                alt="TradingView Chart" 
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <DialogTrigger asChild>
-                <button 
-                  className="absolute opacity-0 group-hover:opacity-100 transition-opacity inset-0 w-full h-full bg-black/30 flex items-center justify-center"
-                  aria-label="Bild vergrößern"
-                >
-                  <Maximize className="w-8 h-8 text-white" />
-                </button>
-              </DialogTrigger>
-            </div>
-            <div className="p-2 bg-muted/30 text-xs text-center text-muted-foreground flex justify-between items-center">
-              <span>TradingView Chart</span>
-              <span className="text-xs text-muted-foreground/80 italic">Klicken zum Vergrößern</span>
-            </div>
-          </div>
-          <DialogContent 
-            className="w-screen h-screen max-w-none max-h-none p-0 m-0 border-none"
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <img 
-                src={preview} 
-                alt="TradingView Chart Vollbild" 
-                className="max-w-full max-h-full object-contain cursor-pointer" 
-                onClick={() => {
-                  // Bild schließen bei Klick auf das Bild
-                  const closeBtn = document.querySelector('[data-dialog-close]');
-                  if (closeBtn && 'click' in closeBtn) {
-                    (closeBtn as HTMLElement).click();
-                  }
-                }}
-                onWheel={() => {
-                  // Bild schließen beim Scrollen 
-                  const closeBtn = document.querySelector('[data-dialog-close]');
-                  if (closeBtn && 'click' in closeBtn) {
-                    (closeBtn as HTMLElement).click();
-                  }
-                }}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+        <>
+          <ImagePreview 
+            image={preview} 
+            alt="TradingView Chart" 
+          />
+        </>  
       )}
     </div>
   );
