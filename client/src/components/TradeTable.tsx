@@ -1177,7 +1177,22 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     {trade.structure || '-'}
                   </td>
                   <td className="p-3 text-xs">
+                    {trade.timeframeEntry || '-'}
+                  </td>
+                  <td className="p-3 text-xs">
                     {trade.location || '-'}
+                  </td>
+                  <td className="p-3 text-xs">
+                    {trade.liquidation || '-'}
+                  </td>
+                  <td className="p-3 text-xs">
+                    {trade.unmitZone || '-'}
+                  </td>
+                  <td className="p-3 text-xs">
+                    {trade.rangePoints || '-'}
+                  </td>
+                  <td className="p-3 text-xs">
+                    {trade.marketPhase || '-'}
                   </td>
                   <td className="p-3 text-xs">
                     {trade.entryType ? <BadgeTrend trend={trade.entryType} size="xs" /> : '-'}
@@ -1196,7 +1211,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
             ) : (
               // Empty state
               <tr>
-                <td colSpan={10} className="p-6 text-center text-muted-foreground">
+                <td colSpan={19} className="p-6 text-center text-muted-foreground">
                   Keine Trades gefunden
                 </td>
               </tr>
