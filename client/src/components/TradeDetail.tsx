@@ -55,7 +55,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const [editingTimeframeEntry, setEditingTimeframeEntry] = useState("");
   const [editingLiquidation, setEditingLiquidation] = useState("");
   const [editingUnmitZone, setEditingUnmitZone] = useState("");
-  const [editingRangePoints, setEditingRangePoints] = useState<number>(0);
+  const [editingRangePoints, setEditingRangePoints] = useState<number | undefined>(undefined);
   const [editingMarketPhase, setEditingMarketPhase] = useState("");
   const [editingRRAchieved, setEditingRRAchieved] = useState<number>(0);
   const [editingLocation, setEditingLocation] = useState("");
@@ -103,7 +103,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     setEditingTimeframeEntry(selectedTrade.timeframeEntry || '');
     setEditingLiquidation(selectedTrade.liquidation || '');
     setEditingUnmitZone(selectedTrade.unmitZone || '');
-    setEditingRangePoints(selectedTrade.rangePoints || 0);
+    setEditingRangePoints(selectedTrade.rangePoints);
     setEditingMarketPhase(selectedTrade.marketPhase || '');
     setEditingRRAchieved(selectedTrade.rrAchieved || 0);
     setEditingRRPotential(selectedTrade.rrPotential || 0);
@@ -541,9 +541,9 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     {editMode ? (
                       <Input
                         type="number"
-                        value={editingRangePoints}
+                        value={editingRangePoints === undefined ? "" : editingRangePoints}
                         onChange={(e) => {
-                          const value = e.target.value ? parseInt(e.target.value) : 0;
+                          const value = e.target.value === "" ? undefined : parseInt(e.target.value);
                           setEditingRangePoints(value);
                         }}
                         className="h-7 text-xs"
