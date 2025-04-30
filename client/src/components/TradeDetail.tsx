@@ -212,167 +212,234 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             )}
           </div>
           
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Datum</div>
-              <div className="font-bold">{formatDate(selectedTrade.date)}</div>
+          {/* Hauptinformationen in einer Zeile */}
+          <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
+            <div className="flex items-center space-x-3">
+              <div>
+                <div className="text-xs text-muted-foreground">Datum</div>
+                <div className="font-bold text-sm">{formatDate(selectedTrade.date)}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Symbol</div>
+                <div className="font-bold text-sm">{selectedTrade.symbol}</div>
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">RR</div>
+                <div className="font-bold text-sm">{selectedTrade.rrAchieved || '-'}</div>
+              </div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Symbol</div>
-              <div className="font-bold">{selectedTrade.symbol}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Setup</div>
-              {editMode ? (
-                <Select value={editingSetup} onValueChange={setEditingSetup}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Setup auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {setupTypes.map((setup) => (
-                      <SelectItem key={setup} value={setup}>
-                        {setup}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.setup}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Einstieg</div>
-              <BadgeTrend trend={selectedTrade.entryType || '-'} />
+              <BadgeWinLoss isWin={selectedTrade.isWin} />
+              <span className={`ml-2 font-bold ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
+              </span>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          {/* Drei Spalten für die wichtigsten Informationen */}
+          <div className="grid grid-cols-3 gap-3 mb-3">
+            {/* Spalte 1: Setup und Trends */}
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Haupttrend M15</div>
-              {editMode ? (
-                <Select value={editingMainTrend} onValueChange={setEditingMainTrend}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Trend auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {trendTypes.map((trend) => (
-                      <SelectItem key={trend} value={trend}>
-                        {trend}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <BadgeTrend trend={selectedTrade.mainTrendM15 || '-'} />
-              )}
+              <div className="bg-muted/30 rounded-md p-2 mb-2">
+                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Setup &amp; Einstieg</div>
+                <div className="space-y-1.5">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Setup</div>
+                    {editMode ? (
+                      <Select value={editingSetup} onValueChange={setEditingSetup}>
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue placeholder="Setup auswählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {setupTypes.map((setup) => (
+                            <SelectItem key={setup} value={setup}>
+                              {setup}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="font-medium text-sm">{selectedTrade.setup}</div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Einstieg</div>
+                    {editMode ? (
+                      <Select value={editingEntryLevel} onValueChange={setEditingEntryLevel}>
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue placeholder="Level auswählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {entryLevelTypes.map((level) => (
+                            <SelectItem key={level} value={level}>
+                              {level}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="font-medium text-sm">
+                        <BadgeTrend trend={selectedTrade.entryType || '-'} size="sm" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
+            
+            {/* Spalte 2: Trends */}
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Interner Trend M5</div>
-              {editMode ? (
-                <Select value={editingInternalTrend} onValueChange={setEditingInternalTrend}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Trend auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {trendTypes.map((trend) => (
-                      <SelectItem key={trend} value={trend}>
-                        {trend}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <BadgeTrend trend={selectedTrade.internalTrendM5 || '-'} />
-              )}
+              <div className="bg-muted/30 rounded-md p-2 mb-2">
+                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Trends</div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Trend</div>
+                      {editMode ? (
+                        <Select value={editingTrend} onValueChange={setEditingTrend}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Trend" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {simpleTrendTypes.map((trend) => (
+                              <SelectItem key={trend} value={trend}>
+                                {trend}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <BadgeTrend trend={selectedTrade.trend || '-'} size="sm" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Int.</div>
+                      {editMode ? (
+                        <Select value={editingInternalTrendNew} onValueChange={setEditingInternalTrendNew}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Int." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {simpleTrendTypes.map((trend) => (
+                              <SelectItem key={trend} value={trend}>
+                                {trend}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <BadgeTrend trend={selectedTrade.internalTrend || '-'} size="sm" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Micro</div>
+                      {editMode ? (
+                        <Select value={editingMicroTrend} onValueChange={setEditingMicroTrend}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="Micro" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {simpleTrendTypes.map((trend) => (
+                              <SelectItem key={trend} value={trend}>
+                                {trend}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <BadgeTrend trend={selectedTrade.microTrend || '-'} size="sm" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div>
+                      <div className="text-xs text-muted-foreground">M15</div>
+                      {editMode ? (
+                        <Select value={editingMainTrend} onValueChange={setEditingMainTrend}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="M15" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {trendTypes.map((trend) => (
+                              <SelectItem key={trend} value={trend}>
+                                {trend}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <BadgeTrend trend={selectedTrade.mainTrendM15 || '-'} size="sm" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">M5</div>
+                      {editMode ? (
+                        <Select value={editingInternalTrend} onValueChange={setEditingInternalTrend}>
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue placeholder="M5" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {trendTypes.map((trend) => (
+                              <SelectItem key={trend} value={trend}>
+                                {trend}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <BadgeTrend trend={selectedTrade.internalTrendM5 || '-'} size="sm" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+            
+            {/* Spalte 3: Location und Liquidation */}
             <div>
-              <div className="text-sm text-muted-foreground mb-1">Einstiegslvl</div>
-              {editMode ? (
-                <Select value={editingEntryLevel} onValueChange={setEditingEntryLevel}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Level auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {entryLevelTypes.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="font-bold">{selectedTrade.entryLevel}</div>
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Liquidation</div>
-              <div className="font-bold">{selectedTrade.liquidation}</div>
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <div className="text-sm text-muted-foreground mb-1">Location</div>
-            <div className="font-bold">{selectedTrade.location}</div>
-          </div>
-          
-          {/* Neue Trend-Felder */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Trend</div>
-              {editMode ? (
-                <Select value={editingTrend} onValueChange={setEditingTrend}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Trend auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {simpleTrendTypes.map((trend) => (
-                      <SelectItem key={trend} value={trend}>
-                        {trend}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <BadgeTrend trend={selectedTrade.trend || '-'} />
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Int. Trend</div>
-              {editMode ? (
-                <Select value={editingInternalTrendNew} onValueChange={setEditingInternalTrendNew}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Trend auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {simpleTrendTypes.map((trend) => (
-                      <SelectItem key={trend} value={trend}>
-                        {trend}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <BadgeTrend trend={selectedTrade.internalTrend || '-'} />
-              )}
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-1">Mic. Trend</div>
-              {editMode ? (
-                <Select value={editingMicroTrend} onValueChange={setEditingMicroTrend}>
-                  <SelectTrigger className="h-8">
-                    <SelectValue placeholder="Trend auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {simpleTrendTypes.map((trend) => (
-                      <SelectItem key={trend} value={trend}>
-                        {trend}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <BadgeTrend trend={selectedTrade.microTrend || '-'} />
-              )}
+              <div className="bg-muted/30 rounded-md p-2 mb-2">
+                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Position</div>
+                <div className="space-y-1.5">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Location</div>
+                    {editMode ? (
+                      <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue placeholder="Location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['FVG', 'FVG Sweep', 'Micro FVG', 'Micro FVG Sweep', 'Wick', 'BOS', 'Delivery'].map((loc) => (
+                            <SelectItem key={loc} value={loc}>
+                              {loc}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="font-medium text-sm">{selectedTrade.location || '-'}</div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Liquidation</div>
+                    {editMode ? (
+                      <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue placeholder="Liquidation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {liquidationTypes.map((liq) => (
+                            <SelectItem key={liq} value={liq}>
+                              {liq}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="font-medium text-sm">{selectedTrade.liquidation || '-'}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
