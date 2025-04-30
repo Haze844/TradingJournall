@@ -48,6 +48,7 @@ import {
   ArrowUpDown, 
   Award,
   Target,
+  MinusCircle,
   DollarSign,
   Clock,
   Layers,
@@ -67,6 +68,9 @@ interface TradeTableProps {
 export default function TradeTable({ trades = [], isLoading, onTradeSelect }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 5;
+  
+  // State für Compact-View
+  const [compactView, setCompactView] = useState(true);
   
   // Effekt zum Optimieren der Tabellenbreiten
   useEffect(() => {
@@ -380,83 +384,43 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       </div>
     );
   };
-
+  
   return (
-    <Card className="mb-6 bg-card overflow-hidden w-full mx-auto">
-      <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
-        <div className="flex-1 flex items-center">
-          {/* Statistik-Panel */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-              Trades: {filteredTrades.length}
-            </Badge>
-            <Badge variant="outline" className="bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10">
-              Gewinne: {filteredTrades.filter(t => t.isWin).length}
-            </Badge>
-            <Badge variant="outline" className="bg-red-500/5 text-red-400 hover:bg-red-500/10">
-              Verluste: {filteredTrades.filter(t => t.isWin === false).length}
-            </Badge>
-            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-              Win Rate: {filteredTrades.length > 0 ? ((filteredTrades.filter(t => t.isWin).length / filteredTrades.length) * 100).toFixed(1) : '0.0'}%
-            </Badge>
-            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-              P&L: ${calculateTotalPL(filteredTrades).toFixed(2)}
-            </Badge>
-            <Badge variant="outline" className="bg-primary/5 hover:bg-primary/10">
-              Ø RR: {calculateAverageRR(filteredTrades).toFixed(2)}
-            </Badge>
+    <Card className="bg-card/50 backdrop-blur border-primary/10 shadow-md">
+      <CardHeader className="pb-0">
+        <div className="flex flex-wrap md:flex-nowrap justify-between gap-2 items-start">
+          <div>
+            <CardTitle className="text-lg font-bold">Trades</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {filteredTrades.length} Trades gefunden 
+              {filteredTrades.length > 0 && (
+                <>
+                  {' • '} 
+                  Gesamt P/L: <span className={calculateTotalPL(filteredTrades) > 0 ? 'text-green-500' : 'text-red-500'}>
+                    {calculateTotalPL(filteredTrades).toFixed(2)}$
+                  </span>
+                  {' • '}
+                  Durchschnitt RR: <span>{calculateAverageRR(filteredTrades).toFixed(2)}</span>
+                </>
+              )}
+            </p>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            className="flex items-center gap-1 text-xs bg-primary/20 hover:bg-primary/30 text-primary border-0"
-            onClick={() => {
-              const event = new CustomEvent('add-trade-clicked');
-              window.dispatchEvent(event);
-            }}
-          >
-            <Plus className="h-3 w-3" />
-            Trade hinzufügen
-          </Button>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary border-0"
-            onClick={resetFilters}
-          >
-            <RefreshCw className="h-3 w-3" />
-            Filter zurücksetzen
-          </Button>
-        </div>
-      </CardHeader>
-      
-      {/* Kompakte Ansicht-Schalter */}
-      <div className="px-4 py-2 flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col">
-            <div className="text-xs font-medium text-muted-foreground mb-1">Tabellenansicht</div>
-            <div className="flex items-center gap-2">
+          <div className="flex gap-2 md:ml-auto flex-wrap md:flex-nowrap">
+            <div className="flex gap-2">
               <Button 
                 variant="outline" 
-                size="sm" 
+                size="sm"
                 className="text-xs h-8"
                 onClick={() => {
-                  // Kompakte Ansicht
-                  document.querySelectorAll('.trade-table').forEach(el => {
-                    el.classList.toggle('compact-mode');
-                  });
-                  
-                  // Klassische Spalten ein-/ausblenden
-                  document.querySelectorAll('th:nth-child(n+7), td:nth-child(n+7)').forEach(el => {
-                    const display = (el as HTMLElement).style.display;
-                    (el as HTMLElement).style.display = 
-                      display === 'none' ? '' : 'none';
-                  });
+                  // Compact-Modus umschalten
+                  const table = document.querySelector('.trade-table');
+                  if (table) {
+                    table.classList.toggle('compact-mode');
+                  }
                 }}
               >
-                <LayoutList className="h-3 w-3 mr-1" />
+                <MinusCircle className="h-3 w-3 mr-1" />
                 Kompakte Ansicht
               </Button>
               
@@ -469,23 +433,30 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   const table = document.querySelector('.trade-table');
                   if (table) {
                     table.classList.toggle('multi-row-mode');
-                    
-                    // Multirow-Klassen umschalten
-                    document.querySelectorAll('tr.trade-row').forEach(tr => {
-                      tr.classList.toggle('grid');
-                      tr.classList.toggle('grid-cols-4');
-                      tr.classList.toggle('gap-2');
-                    });
-                    
-                    // TD-Styling umschalten
-                    document.querySelectorAll('td.trade-cell').forEach(td => {
-                      td.classList.toggle('flex');
-                      td.classList.toggle('flex-col');
-                      td.classList.toggle('border');
-                      td.classList.toggle('rounded');
-                      td.classList.toggle('p-2');
-                      td.classList.toggle('mb-2');
-                    });
+
+                    // TD data-title Attribute hinzufügen
+                    if (!table.classList.contains('data-attrs-added')) {
+                      const columnHeaders: string[] = [];
+                      
+                      // Header-Texte sammeln
+                      document.querySelectorAll('th').forEach(th => {
+                        const headerText = th.textContent?.trim() || '';
+                        columnHeaders.push(headerText);
+                      });
+                      
+                      // Zellen mit data-title versehen
+                      document.querySelectorAll('tr.trade-row').forEach(tr => {
+                        const cells = tr.querySelectorAll('td');
+                        cells.forEach((td, index) => {
+                          if (columnHeaders[index]) {
+                            td.setAttribute('data-title', columnHeaders[index]);
+                            td.classList.add('trade-cell');
+                          }
+                        });
+                      });
+                      
+                      table.classList.add('data-attrs-added');
+                    }
                   }
                 }}
               >
@@ -495,10 +466,10 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
             </div>
           </div>
         </div>
-      </div>
+      </CardHeader>
       
       <div className="overflow-x-auto">
-        <table className="w-full text-xs table-fixed trade-table">
+        <table className="w-full text-xs table-fixed trade-table compact-mode">
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
               <th className="p-3 text-left whitespace-nowrap w-24" style={{width: "90px", maxWidth: "90px"}}>
@@ -771,7 +742,6 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </PopoverContent>
                 </Popover>
               </th>
-              {/* Trendspalten in logischer Reihenfolge */}
               <th className="p-3 text-left whitespace-nowrap">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -784,18 +754,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">Trend filtern</h4>
                       <div className="space-y-2 px-1">
-                        {uniqueValues.trends.length > 0 ? uniqueValues.trends.map(trend => (
-                          <div key={trend} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`trend-${trend}`} 
-                              checked={filters.trends.has(trend)}
-                              onCheckedChange={() => toggleFilter('trends', trend)}
-                            />
-                            <Label htmlFor={`trend-${trend}`} className="text-sm cursor-pointer">
-                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
-                            </Label>
-                          </div>
-                        )) : simpleTrendTypes.map(trend => (
+                        {simpleTrendTypes.map(trend => (
                           <div key={trend} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`trend-${trend}`} 
@@ -835,27 +794,16 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
                     <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Int. Trend filtern</h4>
+                      <h4 className="font-medium text-sm">Internen Trend filtern</h4>
                       <div className="space-y-2 px-1">
-                        {uniqueValues.internalTrendsNew.length > 0 ? uniqueValues.internalTrendsNew.map(trend => (
+                        {simpleTrendTypes.map(trend => (
                           <div key={trend} className="flex items-center space-x-2">
                             <Checkbox 
-                              id={`internNew-${trend}`} 
+                              id={`int-trend-${trend}`} 
                               checked={filters.internalTrendsNew.has(trend)}
                               onCheckedChange={() => toggleFilter('internalTrendsNew', trend)}
                             />
-                            <Label htmlFor={`internNew-${trend}`} className="text-sm cursor-pointer">
-                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
-                            </Label>
-                          </div>
-                        )) : simpleTrendTypes.map(trend => (
-                          <div key={trend} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`internNew-${trend}`} 
-                              checked={filters.internalTrendsNew.has(trend)}
-                              onCheckedChange={() => toggleFilter('internalTrendsNew', trend)}
-                            />
-                            <Label htmlFor={`internNew-${trend}`} className="text-sm cursor-pointer">
+                            <Label htmlFor={`int-trend-${trend}`} className="text-sm cursor-pointer">
                               <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
                             </Label>
                           </div>
@@ -882,33 +830,22 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Mic. Trend
+                      Micro Trend
                       <TrendingUp className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
                     <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Mic. Trend filtern</h4>
+                      <h4 className="font-medium text-sm">Micro Trend filtern</h4>
                       <div className="space-y-2 px-1">
-                        {uniqueValues.microTrends.length > 0 ? uniqueValues.microTrends.map(trend => (
+                        {simpleTrendTypes.map(trend => (
                           <div key={trend} className="flex items-center space-x-2">
                             <Checkbox 
-                              id={`micro-${trend}`} 
+                              id={`micro-trend-${trend}`} 
                               checked={filters.microTrends.has(trend)}
                               onCheckedChange={() => toggleFilter('microTrends', trend)}
                             />
-                            <Label htmlFor={`micro-${trend}`} className="text-sm cursor-pointer">
-                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
-                            </Label>
-                          </div>
-                        )) : simpleTrendTypes.map(trend => (
-                          <div key={trend} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`micro-${trend}`} 
-                              checked={filters.microTrends.has(trend)}
-                              onCheckedChange={() => toggleFilter('microTrends', trend)}
-                            />
-                            <Label htmlFor={`micro-${trend}`} className="text-sm cursor-pointer">
+                            <Label htmlFor={`micro-trend-${trend}`} className="text-sm cursor-pointer">
                               <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
                             </Label>
                           </div>
@@ -943,14 +880,14 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">M15 Trend filtern</h4>
                       <div className="space-y-2 px-1">
-                        {uniqueValues.mainTrends.map(trend => (
+                        {simpleTrendTypes.map(trend => (
                           <div key={trend} className="flex items-center space-x-2">
                             <Checkbox 
-                              id={`main-${trend}`} 
+                              id={`m15-trend-${trend}`} 
                               checked={filters.mainTrends.has(trend)}
                               onCheckedChange={() => toggleFilter('mainTrends', trend)}
                             />
-                            <Label htmlFor={`main-${trend}`} className="text-sm cursor-pointer">
+                            <Label htmlFor={`m15-trend-${trend}`} className="text-sm cursor-pointer">
                               <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
                             </Label>
                           </div>
@@ -985,14 +922,14 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">M5 Trend filtern</h4>
                       <div className="space-y-2 px-1">
-                        {uniqueValues.internalTrends.map(trend => (
+                        {simpleTrendTypes.map(trend => (
                           <div key={trend} className="flex items-center space-x-2">
                             <Checkbox 
-                              id={`intern-${trend}`} 
+                              id={`m5-trend-${trend}`} 
                               checked={filters.internalTrends.has(trend)}
                               onCheckedChange={() => toggleFilter('internalTrends', trend)}
                             />
-                            <Label htmlFor={`intern-${trend}`} className="text-sm cursor-pointer">
+                            <Label htmlFor={`m5-trend-${trend}`} className="text-sm cursor-pointer">
                               <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
                             </Label>
                           </div>
@@ -1020,37 +957,28 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Struktur
-                      <LineChart className="h-3 w-3 ml-1" />
+                      <Award className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">Struktur filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {uniqueValues.structures.length > 0 ? uniqueValues.structures.map(structure => (
-                          <div key={structure} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`structure-${structure}`} 
-                              checked={filters.structures.has(structure)}
-                              onCheckedChange={() => toggleFilter('structures', structure)}
-                            />
-                            <Label htmlFor={`structure-${structure}`} className="text-sm cursor-pointer">
-                              {structure}
-                            </Label>
-                          </div>
-                        )) : structureTypes.map(structure => (
-                          <div key={structure} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`structure-${structure}`} 
-                              checked={filters.structures.has(structure)}
-                              onCheckedChange={() => toggleFilter('structures', structure)}
-                            />
-                            <Label htmlFor={`structure-${structure}`} className="text-sm cursor-pointer">
-                              {structure}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
+                      <ScrollArea className="h-48">
+                        <div className="space-y-2 px-1">
+                          {structureTypes.map(structure => (
+                            <div key={structure} className="flex items-center space-x-2">
+                              <Checkbox 
+                                id={`structure-${structure}`} 
+                                checked={filters.structures.has(structure)}
+                                onCheckedChange={() => toggleFilter('structures', structure)}
+                              />
+                              <Label htmlFor={`structure-${structure}`} className="text-sm cursor-pointer">
+                                {structure}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
                       {filters.structures.size > 0 && (
                         <Button 
                           variant="ghost" 
@@ -1073,7 +1001,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Location
-                      <BarChart4 className="h-3 w-3 ml-1" />
+                      <Target className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -1091,18 +1019,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                               {location}
                             </Label>
                           </div>
-                        )) : ['FVG', 'FVG Sweep', 'Micro FVG', 'Micro FVG Sweep', 'Wick', 'BOS', 'Delivery'].map(location => (
-                          <div key={location} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`location-${location}`} 
-                              checked={filters.locations.has(location)}
-                              onCheckedChange={() => toggleFilter('locations', location)}
-                            />
-                            <Label htmlFor={`location-${location}`} className="text-sm cursor-pointer">
-                              {location}
-                            </Label>
+                        )) : (
+                          <div className="text-sm text-muted-foreground">
+                            Keine Locations verfügbar
                           </div>
-                        ))}
+                        )}
                       </div>
                       {filters.locations.size > 0 && (
                         <Button 
@@ -1125,26 +1046,15 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      TF Entry
+                      Timeframe
                       <Clock className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
                     <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Timeframe Entry filtern</h4>
+                      <h4 className="font-medium text-sm">Timeframe filtern</h4>
                       <div className="space-y-2 px-1">
-                        {uniqueValues.timeframeEntries.length > 0 ? uniqueValues.timeframeEntries.map(tf => (
-                          <div key={tf} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`tf-${tf}`} 
-                              checked={filters.timeframeEntries.has(tf)}
-                              onCheckedChange={() => toggleFilter('timeframeEntries', tf)}
-                            />
-                            <Label htmlFor={`tf-${tf}`} className="text-sm cursor-pointer">
-                              {tf}
-                            </Label>
-                          </div>
-                        )) : timeframeTypes.map(tf => (
+                        {timeframeTypes.map(tf => (
                           <div key={tf} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`tf-${tf}`} 
@@ -1434,7 +1344,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Status
-                      <Award className="h-3 w-3 ml-1" />
+                      <Filter className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -1503,7 +1413,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
               currentTrades.map((trade) => (
                 <tr 
                   key={trade.id} 
-                  className="border-b border-border hover:bg-muted/50 cursor-pointer" 
+                  className="border-b border-border hover:bg-muted/50 cursor-pointer trade-row" 
                   onClick={() => onTradeSelect(trade)}
                 >
                   <td className="p-1.5 text-xs">
