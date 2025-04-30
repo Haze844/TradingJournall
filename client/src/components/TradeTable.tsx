@@ -159,6 +159,52 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       return false;
     }
     
+    // Neue Filter
+    // Trend filter
+    if (filters.trends.size > 0 && trade.trend && !filters.trends.has(trade.trend)) {
+      return false;
+    }
+    
+    // Internal trend neue Filter
+    if (filters.internalTrendsNew.size > 0 && trade.internalTrend && !filters.internalTrendsNew.has(trade.internalTrend)) {
+      return false;
+    }
+    
+    // Micro trend filter
+    if (filters.microTrends.size > 0 && trade.microTrend && !filters.microTrends.has(trade.microTrend)) {
+      return false;
+    }
+    
+    // Structure filter
+    if (filters.structures.size > 0 && trade.structure && !filters.structures.has(trade.structure)) {
+      return false;
+    }
+    
+    // Timeframe Entry filter
+    if (filters.timeframeEntries.size > 0 && trade.timeframeEntry && !filters.timeframeEntries.has(trade.timeframeEntry)) {
+      return false;
+    }
+    
+    // Location filter
+    if (filters.locations.size > 0 && trade.location && !filters.locations.has(trade.location)) {
+      return false;
+    }
+    
+    // Liquidation filter
+    if (filters.liquidations.size > 0 && trade.liquidation && !filters.liquidations.has(trade.liquidation)) {
+      return false;
+    }
+    
+    // Unmittelbare Zone filter
+    if (filters.unmitZones.size > 0 && trade.unmitZone && !filters.unmitZones.has(trade.unmitZone)) {
+      return false;
+    }
+    
+    // Marktphase filter
+    if (filters.marketPhases.size > 0 && trade.marketPhase && !filters.marketPhases.has(trade.marketPhase)) {
+      return false;
+    }
+    
     // Entry type filter
     if (filters.entryTypes.size > 0 && trade.entryType && !filters.entryTypes.has(trade.entryType)) {
       return false;
@@ -833,6 +879,48 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      TF Entry
+                      <Clock className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">TF Entry filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {timeframeTypes.map(tf => (
+                          <div key={tf} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`timeframe-${tf}`} 
+                              checked={filters.timeframeEntries.has(tf)}
+                              onCheckedChange={() => toggleFilter('timeframeEntries', tf)}
+                            />
+                            <Label htmlFor={`timeframe-${tf}`} className="text-sm cursor-pointer">
+                              {tf}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.timeframeEntries.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, timeframeEntries: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       Location
                       <Target className="h-3 w-3 ml-1" />
                     </div>
@@ -865,6 +953,137 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                           className="w-full text-xs"
                           onClick={() => {
                             setFilters({...filters, locations: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Liquidation
+                      <Target className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Liquidation filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {liquidationTypes.map(liq => (
+                          <div key={liq} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`liquidation-${liq}`} 
+                              checked={filters.liquidations.has(liq)}
+                              onCheckedChange={() => toggleFilter('liquidations', liq)}
+                            />
+                            <Label htmlFor={`liquidation-${liq}`} className="text-sm cursor-pointer">
+                              {liq}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.liquidations.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, liquidations: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Unmit. Zone
+                      <Target className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Unmit. Zone filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {unmitZoneTypes.map(zone => (
+                          <div key={zone} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`unmitZone-${zone}`} 
+                              checked={filters.unmitZones.has(zone)}
+                              onCheckedChange={() => toggleFilter('unmitZones', zone)}
+                            />
+                            <Label htmlFor={`unmitZone-${zone}`} className="text-sm cursor-pointer">
+                              {zone}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.unmitZones.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, unmitZones: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                  Range Pkt.
+                </div>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Marktphase
+                      <BarChart4 className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Marktphase filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {marketPhaseTypes.map(phase => (
+                          <div key={phase} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`marketPhase-${phase}`} 
+                              checked={filters.marketPhases.has(phase)}
+                              onCheckedChange={() => toggleFilter('marketPhases', phase)}
+                            />
+                            <Label htmlFor={`marketPhase-${phase}`} className="text-sm cursor-pointer">
+                              {phase}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.marketPhases.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, marketPhases: new Set()});
                             setCurrentPage(1);
                           }}
                         >
