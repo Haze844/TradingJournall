@@ -542,8 +542,12 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                       <Input
                         type="number"
                         value={editingRangePoints}
-                        onChange={(e) => setEditingRangePoints(parseInt(e.target.value) || 0)}
+                        onChange={(e) => {
+                          const value = e.target.value ? parseInt(e.target.value) : 0;
+                          setEditingRangePoints(value);
+                        }}
                         className="h-7 text-xs"
+                        min="0"
                       />
                     ) : (
                       <div className="font-medium text-sm">{selectedTrade.rangePoints || '-'}</div>
