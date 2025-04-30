@@ -231,7 +231,21 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
               <img 
                 src={preview} 
                 alt="TradingView Chart Vollbild" 
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full max-h-full object-contain cursor-pointer" 
+                onClick={() => {
+                  // Bild schließen bei Klick auf das Bild
+                  const closeBtn = document.querySelector('[data-dialog-close]');
+                  if (closeBtn && 'click' in closeBtn) {
+                    (closeBtn as HTMLElement).click();
+                  }
+                }}
+                onWheel={() => {
+                  // Bild schließen beim Scrollen 
+                  const closeBtn = document.querySelector('[data-dialog-close]');
+                  if (closeBtn && 'click' in closeBtn) {
+                    (closeBtn as HTMLElement).click();
+                  }
+                }}
               />
             </div>
           </DialogContent>
