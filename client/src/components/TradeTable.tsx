@@ -67,8 +67,42 @@ interface TradeTableProps {
 export default function TradeTable({ trades = [], isLoading, onTradeSelect }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 5;
-  const [isCompactMode, setIsCompactMode] = useState(false);
-  const [visibleColumns, setVisibleColumns] = useState<string>("standard");
+  
+  // Effekt zum Optimieren der Tabellenbreiten
+  useEffect(() => {
+    // Spaltenbreiten optimieren
+    const optimizeColumnWidths = () => {
+      // Spaltenbreiten festlegen
+      const columnWidths: Record<string, string> = {
+        '0': '80px',  // Datum
+        '1': '60px',  // Account
+        '2': '60px',  // Session
+        '3': '60px',  // Symbol
+        '4': '70px',  // Setup
+        '5': '50px',  // Trend
+        '6': '50px',  // Int. Trend
+        '7': '50px',  // Micro Trend
+        '8': '60px',  // Struktur
+        '9': '60px',  // Location
+        '10': '50px', // TF Entry
+        '11': '40px', // RR
+        '12': '50px', // P/L
+        '13': '50px'  // Status
+      };
+      
+      // Spaltenbreiten anwenden
+      document.querySelectorAll('th').forEach((el, index) => {
+        const indexKey = index.toString();
+        if (columnWidths[indexKey]) {
+          el.style.width = columnWidths[indexKey];
+          el.style.maxWidth = columnWidths[indexKey];
+        }
+      });
+    };
+    
+    // Ausführen nach dem Rendern
+    setTimeout(optimizeColumnWidths, 500);
+  }, []);
   
   // Filter state
   const [filters, setFilters] = useState({
@@ -401,46 +435,70 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       {/* Kompakte Ansicht-Schalter */}
       <div className="px-4 py-2 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-xs"
-            onClick={() => {
-              // Spalten reduzieren für bessere Übersicht
-              document.querySelectorAll('th:nth-child(n+7):nth-child(-n+14)')
-                .forEach(el => {
-                  (el as HTMLElement).style.display = 
-                    (el as HTMLElement).style.display === 'none' ? '' : 'none';
-                });
-              document.querySelectorAll('td:nth-child(n+7):nth-child(-n+14)')
-                .forEach(el => {
-                  (el as HTMLElement).style.display = 
-                    (el as HTMLElement).style.display === 'none' ? '' : 'none';
-                });
-            }}
-          >
-            <LayoutList className="h-3 w-3 mr-1" />
-            Spalten umschalten
-          </Button>
+          <div className="flex flex-col">
+            <div className="text-xs font-medium text-muted-foreground mb-1">Tabellenansicht</div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs h-8"
+                onClick={() => {
+                  // Kompakte Ansicht
+                  document.querySelectorAll('.trade-table').forEach(el => {
+                    el.classList.toggle('compact-mode');
+                  });
+                  
+                  // Klassische Spalten ein-/ausblenden
+                  document.querySelectorAll('th:nth-child(n+7), td:nth-child(n+7)').forEach(el => {
+                    const display = (el as HTMLElement).style.display;
+                    (el as HTMLElement).style.display = 
+                      display === 'none' ? '' : 'none';
+                  });
+                }}
+              >
+                <LayoutList className="h-3 w-3 mr-1" />
+                Kompakte Ansicht
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => {
+                  // Multi-Zeilen Ansicht aktivieren
+                  const table = document.querySelector('.trade-table');
+                  if (table) {
+                    table.classList.toggle('multi-row-mode');
+                    
+                    // Multirow-Klassen umschalten
+                    document.querySelectorAll('tr.trade-row').forEach(tr => {
+                      tr.classList.toggle('grid');
+                      tr.classList.toggle('grid-cols-4');
+                      tr.classList.toggle('gap-2');
+                    });
+                    
+                    // TD-Styling umschalten
+                    document.querySelectorAll('td.trade-cell').forEach(td => {
+                      td.classList.toggle('flex');
+                      td.classList.toggle('flex-col');
+                      td.classList.toggle('border');
+                      td.classList.toggle('rounded');
+                      td.classList.toggle('p-2');
+                      td.classList.toggle('mb-2');
+                    });
+                  }
+                }}
+              >
+                <Layers className="h-3 w-3 mr-1" />
+                Multi-Zeilen Ansicht
+              </Button>
+            </div>
+          </div>
         </div>
-        
-        <Button 
-          variant="ghost" 
-          size="sm"
-          className="text-xs"
-          onClick={() => {
-            document.querySelectorAll('th, td').forEach(el => {
-              (el as HTMLElement).style.width = 'auto';
-              (el as HTMLElement).style.maxWidth = '100px';
-            });
-          }}
-        >
-          Spaltenbreite optimieren
-        </Button>
       </div>
       
       <div className="overflow-x-auto">
-        <table className="w-full text-xs table-fixed">
+        <table className="w-full text-xs table-fixed trade-table">
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
               <th className="p-3 text-left whitespace-nowrap w-24" style={{width: "90px", maxWidth: "90px"}}>
