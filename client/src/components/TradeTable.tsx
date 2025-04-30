@@ -1398,52 +1398,54 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   className="border-b border-border hover:bg-muted/50 cursor-pointer" 
                   onClick={() => onTradeSelect(trade)}
                 >
-                  <td className="p-3">
-                    {formatDate(trade.date)} <span className="text-muted-foreground text-xs">{formatTime(trade.date)}</span>
+                  <td className="p-1.5 text-xs">
+                    <div className="flex flex-col">
+                      <span>{formatDate(trade.date)}</span>
+                      <span className="text-[10px] text-muted-foreground">{formatTime(trade.date)}</span>
+                    </div>
                   </td>
-                  <td className="p-3">{trade.accountType || '-'}</td>
-                  <td className="p-3">{trade.session || '-'}</td>
-                  <td className="p-3">{trade.symbol}</td>
-                  <td className="p-3">{trade.setup}</td>
-                  <td className="p-3">
-                    {trade.mainTrendM15 ? <BadgeTrend trend={trade.mainTrendM15} /> : '-'}
+                  <td className="p-1.5 text-xs">{trade.accountType || '-'}</td>
+                  <td className="p-1.5 text-xs">{trade.session || '-'}</td>
+                  <td className="p-1.5 text-xs">{trade.symbol}</td>
+                  <td className="p-1.5 text-xs">{trade.setup}</td>
+                  <td className="p-1.5 text-xs">
+                    {trade.trend ? <BadgeTrend trend={trade.trend} size="xs" /> : '-'}
                   </td>
-                  <td className="p-3">
-                    {trade.internalTrendM5 ? <BadgeTrend trend={trade.internalTrendM5} /> : '-'}
+                  <td className="p-1.5 text-xs">
+                    {trade.internalTrend ? <BadgeTrend trend={trade.internalTrend} size="xs" /> : '-'}
                   </td>
-                  {/* Neue Spalten */}
-                  <td className="p-3">
-                    {trade.trend ? <BadgeTrend trend={trade.trend} /> : '-'}
+                  <td className="p-1.5 text-xs">
+                    {trade.microTrend ? <BadgeTrend trend={trade.microTrend} size="xs" /> : '-'}
                   </td>
-                  <td className="p-3">
-                    {trade.internalTrend ? <BadgeTrend trend={trade.internalTrend} /> : '-'}
+                  <td className="p-1.5 text-xs">
+                    {trade.mainTrendM15 ? <BadgeTrend trend={trade.mainTrendM15} size="xs" /> : '-'}
                   </td>
-                  <td className="p-3">
-                    {trade.microTrend ? <BadgeTrend trend={trade.microTrend} /> : '-'}
+                  <td className="p-1.5 text-xs">
+                    {trade.internalTrendM5 ? <BadgeTrend trend={trade.internalTrendM5} size="xs" /> : '-'}
                   </td>
-                  <td className="p-3">
+                  <td className="p-1.5 text-xs">
                     {trade.structure || '-'}
                   </td>
-                  <td className="p-3">
+                  <td className="p-1.5 text-xs">
                     {trade.location || '-'}
                   </td>
-                  <td className="p-3">
+                  <td className="p-1.5 text-xs">
                     {trade.timeframeEntry || '-'}
                   </td>
-                  <td className="p-3">
+                  <td className="p-1.5 text-xs">
                     {trade.liquidation || '-'}
                   </td>
-                  <td className="p-3">
-                    {trade.entryType ? <BadgeTrend trend={trade.entryType} /> : '-'}
+                  <td className="p-1.5 text-xs">
+                    {trade.entryType ? <BadgeTrend trend={trade.entryType} size="xs" /> : '-'}
                   </td>
-                  <td className="p-3">{trade.rrAchieved}</td>
-                  <td className="p-3">
+                  <td className="p-1.5 text-xs">{trade.rrAchieved}</td>
+                  <td className="p-1.5 text-xs">
                     <span className={`${trade.profitLoss && trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss && trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
                       {trade.profitLoss ? `${trade.profitLoss > 0 ? '+' : ''}${trade.profitLoss.toFixed(2)}` : '-'}
                     </span>
                   </td>
-                  <td className="p-3">
-                    <BadgeWinLoss isWin={trade.isWin} />
+                  <td className="p-1.5 text-xs">
+                    <BadgeWinLoss isWin={trade.isWin} size="xs" />
                   </td>
                 </tr>
               ))
