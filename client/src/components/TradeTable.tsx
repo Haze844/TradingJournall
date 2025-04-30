@@ -1107,7 +1107,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">Einstieg filtern</h4>
                       <div className="space-y-2 px-1">
-                        {uniqueValues.entryTypes.map(entry => (
+                        {simpleTrendTypes.map(entry => (
                           <div key={entry} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`entry-${entry}`} 
