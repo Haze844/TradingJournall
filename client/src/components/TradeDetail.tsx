@@ -148,8 +148,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
 
   // Mutation für das Update des Charts
   const updateChartImageMutation = useMutation({
-    mutationFn: async ({ id, chartImage }: { id: number, chartImage: string | null }) => {
-      await apiRequest("PUT", `/api/trades/${id}`, { chartImage });
+    mutationFn: async ({ id, chartImage, userId }: { id: number, chartImage: string | null, userId: number }) => {
+      await apiRequest("PUT", `/api/trades/${id}`, { chartImage, userId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
@@ -173,7 +173,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     
     updateChartImageMutation.mutate({
       id: selectedTrade.id,
-      chartImage: base64Image
+      chartImage: base64Image,
+      userId: selectedTrade.userId // Wichtig: userId hinzufügen, damit das Bild nur für diesen Trade aktualisiert wird
     });
   };
 

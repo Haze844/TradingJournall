@@ -1,9 +1,14 @@
 import { useState, ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, X, RefreshCcw, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
+import { Upload, X, RefreshCcw, Image as ImageIcon, Link as LinkIcon, Maximize } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface ChartImageUploadProps {
   existingImage?: string | null;
@@ -197,18 +202,35 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
           </div>
         </div>
       ) : (
-        <div className="rounded-lg overflow-hidden border border-border">
-          <div className="relative pb-[60%] w-full">
-            <img 
-              src={preview} 
-              alt="TradingView Chart" 
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+        <Dialog>
+          <div className="rounded-lg overflow-hidden border border-border relative group">
+            <div className="relative pb-[60%] w-full">
+              <img 
+                src={preview} 
+                alt="TradingView Chart" 
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <DialogTrigger asChild>
+                <button className="absolute opacity-0 group-hover:opacity-100 transition-opacity inset-0 w-full h-full bg-black/30 flex items-center justify-center">
+                  <Maximize className="w-8 h-8 text-white" />
+                </button>
+              </DialogTrigger>
+            </div>
+            <div className="p-2 bg-muted/30 text-xs text-center text-muted-foreground flex justify-between items-center">
+              <span>TradingView Chart</span>
+              <span className="text-xs text-muted-foreground/80 italic">Klicken zum Vergrößern</span>
+            </div>
           </div>
-          <div className="p-2 bg-muted/30 text-xs text-center text-muted-foreground">
-            TradingView Chart Snapshot
-          </div>
-        </div>
+          <DialogContent className="max-w-4xl w-full p-1">
+            <div className="w-full h-full">
+              <img 
+                src={preview} 
+                alt="TradingView Chart Vollbild" 
+                className="w-full h-auto"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
