@@ -13,6 +13,13 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover";
 import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
   Trade, 
   accountTypes, 
   sessionTypes, 
@@ -42,7 +49,9 @@ import {
   Award,
   Target,
   DollarSign,
-  Clock
+  Clock,
+  Layers,
+  LayoutList
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -58,6 +67,8 @@ interface TradeTableProps {
 export default function TradeTable({ trades = [], isLoading, onTradeSelect }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 5;
+  const [isCompactMode, setIsCompactMode] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState<string>("standard");
   
   // Filter state
   const [filters, setFilters] = useState({
@@ -337,7 +348,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
   };
 
   return (
-    <Card className="mb-6 bg-card overflow-hidden w-full max-w-[1600px] mx-auto">
+    <Card className="mb-6 bg-card overflow-hidden w-full mx-auto">
       <CardHeader className="flex-row justify-between items-center py-4 border-b border-border">
         <div className="flex-1 flex items-center">
           {/* Statistik-Panel */}
@@ -387,13 +398,52 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
         </div>
       </CardHeader>
       
-      {/* Wir entfernen die Filter-Leiste und konzentrieren uns auf die Tabellenfilter */}
+      {/* Kompakte Ansicht-Schalter */}
+      <div className="px-4 py-2 flex items-center justify-between border-b border-border">
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs"
+            onClick={() => {
+              // Spalten reduzieren für bessere Übersicht
+              document.querySelectorAll('th:nth-child(n+7):nth-child(-n+14)')
+                .forEach(el => {
+                  (el as HTMLElement).style.display = 
+                    (el as HTMLElement).style.display === 'none' ? '' : 'none';
+                });
+              document.querySelectorAll('td:nth-child(n+7):nth-child(-n+14)')
+                .forEach(el => {
+                  (el as HTMLElement).style.display = 
+                    (el as HTMLElement).style.display === 'none' ? '' : 'none';
+                });
+            }}
+          >
+            <LayoutList className="h-3 w-3 mr-1" />
+            Spalten umschalten
+          </Button>
+        </div>
+        
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="text-xs"
+          onClick={() => {
+            document.querySelectorAll('th, td').forEach(el => {
+              (el as HTMLElement).style.width = 'auto';
+              (el as HTMLElement).style.maxWidth = '100px';
+            });
+          }}
+        >
+          Spaltenbreite optimieren
+        </Button>
+      </div>
       
       <div className="overflow-x-auto">
-        <table className="w-full text-xs whitespace-nowrap">
+        <table className="w-full text-xs table-fixed">
           <thead className="bg-muted/50 sticky top-0 z-10">
             <tr>
-              <th className="p-3 text-left whitespace-nowrap">
+              <th className="p-3 text-left whitespace-nowrap w-24" style={{width: "90px", maxWidth: "90px"}}>
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
