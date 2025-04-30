@@ -389,15 +389,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tradeUpdate = req.body;
       
       // Wenn nur das Chart-Bild aktualisiert wird, kein GPT-Feedback generieren
-      if (Object.keys(tradeUpdate).length === 1 && 'chartImage' in tradeUpdate) {
-        // Nur Chart-Update
-        const updatedTrade = await storage.updateTrade(tradeId, tradeUpdate);
-        
-        if (!updatedTrade) {
-          return res.status(404).json({ message: "Trade not found" });
+      if ('chartImage' in tradeUpdate) {
+        console.log("PUT Request Body:", req.body);
+        // Sicherstellen, dass nur der eigene Trade aktualisiert wird
+        if ('userId' in req.body) {
+          // Chart-Update mit Benutzer-ID
+          const updatedTrade = await storage.updateTrade(tradeId, { 
+            chartImage: tradeUpdate.chartImage,
+            userId: req.body.userId 
+          });
+          
+          if (!updatedTrade) {
+            return res.status(404).json({ message: "Trade not found" });
+          }
+          
+          return res.status(200).json(updatedTrade);
+        } else {
+          // Altes Verhalten beibehalten falls kein userId übergeben wurde
+          const updatedTrade = await storage.updateTrade(tradeId, { chartImage: tradeUpdate.chartImage });
+          
+          if (!updatedTrade) {
+            return res.status(404).json({ message: "Trade not found" });
+          }
+          
+          return res.status(200).json(updatedTrade);
         }
-        
-        return res.status(200).json(updatedTrade);
       }
       
       // Normale Trade-Update-Logik
