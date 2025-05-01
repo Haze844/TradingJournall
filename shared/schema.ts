@@ -44,6 +44,8 @@ export const sessionTypes = ["London", "London Neverland", "NY PM"] as const;
 export const unmitZoneTypes = ["Ja", "Nein", "Mehrere"] as const;
 export const marketPhaseTypes = ["Long", "stark Long", "Short", "stark Short", "Range"] as const;
 export const rrValues = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+export const slTypes = ["Sweep", "zerstört"] as const;
+export const slPointsValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30] as const;
 
 // Trades schema
 export const trades = pgTable("trades", {
@@ -75,6 +77,8 @@ export const trades = pgTable("trades", {
   unmitZone: text("unmit_zone").default(''), // Ja, Nein, Mehrere
   rangePoints: integer("range_points"), // Wert zwischen 0 und 300
   marketPhase: text("market_phase").default(''), // Long, stark Long, Short, stark Short, Range
+  slType: text("sl_type").default(''), // Sweep oder zerstört
+  slPoints: integer("sl_points") // Wert zwischen 1 und 30
 });
 
 export const insertTradeSchema = createInsertSchema(trades).omit({
