@@ -87,6 +87,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     locations: new Set<string>(),
     unmitZones: new Set<string>(),
     marketPhases: new Set<string>(),
+    // SL Filter
+    slTypes: new Set<string>(),
+    slPointsRanges: new Set<string>(),
     // Standarddatum auf einen weiten Bereich setzen, damit alle Trades angezeigt werden
     startDate: new Date('2020-01-01'),
     endDate: new Date('2030-12-31')
@@ -135,7 +138,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     liquidations: Array.from(new Set(trades.map(t => t.liquidation).filter(Boolean))) as string[],
     locations: Array.from(new Set(trades.map(t => t.location).filter(Boolean))) as string[],
     unmitZones: Array.from(new Set(trades.map(t => t.unmitZone).filter(Boolean))) as string[],
-    marketPhases: Array.from(new Set(trades.map(t => t.marketPhase).filter(Boolean))) as string[]
+    marketPhases: Array.from(new Set(trades.map(t => t.marketPhase).filter(Boolean))) as string[],
+    // SL-Werte
+    slTypes: Array.from(new Set(trades.map(t => t.slType).filter(Boolean))) as string[]
   };
   
   // Apply filters
@@ -348,6 +353,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
       locations: new Set<string>(),
       unmitZones: new Set<string>(),
       marketPhases: new Set<string>(),
+      // SL Filter zurücksetzen
+      slTypes: new Set<string>(),
+      slPointsRanges: new Set<string>(),
       // Datum zurücksetzen
       startDate: new Date('2020-01-01'),
       endDate: new Date('2030-12-31')
@@ -1334,6 +1342,108 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   </PopoverContent>
                 </Popover>
               </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      SL
+                      <Shield className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">SL-Typ filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {slTypes.map(type => (
+                          <div key={type} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`sl-type-${type}`} 
+                              checked={filters.slTypes.has(type)}
+                              onCheckedChange={() => toggleFilter('slTypes', type)}
+                            />
+                            <Label htmlFor={`sl-type-${type}`} className="text-sm cursor-pointer">
+                              {type}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.slTypes.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, slTypes: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      SL Punkte
+                      <CircleDot className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">SL-Punkte filtern</h4>
+                      <div className="space-y-2 px-1">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="sl-points-1-10" 
+                            checked={filters.slPointsRanges.has('1-10')}
+                            onCheckedChange={() => toggleFilter('slPointsRanges', '1-10')}
+                          />
+                          <Label htmlFor="sl-points-1-10" className="text-sm cursor-pointer">
+                            1-10
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="sl-points-11-20" 
+                            checked={filters.slPointsRanges.has('11-20')}
+                            onCheckedChange={() => toggleFilter('slPointsRanges', '11-20')}
+                          />
+                          <Label htmlFor="sl-points-11-20" className="text-sm cursor-pointer">
+                            11-20
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="sl-points-21-30" 
+                            checked={filters.slPointsRanges.has('21-30')}
+                            onCheckedChange={() => toggleFilter('slPointsRanges', '21-30')}
+                          />
+                          <Label htmlFor="sl-points-21-30" className="text-sm cursor-pointer">
+                            21-30
+                          </Label>
+                        </div>
+                      </div>
+                      {filters.slPointsRanges.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, slPointsRanges: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -1409,6 +1519,12 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                     <span className={`${trade.profitLoss && trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss && trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
                       {trade.profitLoss ? `${trade.profitLoss > 0 ? '+' : ''}${trade.profitLoss.toFixed(2)}` : '-'}
                     </span>
+                  </td>
+                  <td className="p-3 text-xs">
+                    {trade.slType || '-'}
+                  </td>
+                  <td className="p-3 text-xs">
+                    {trade.slPoints || '-'}
                   </td>
                   <td className="p-3 text-xs">
                     <BadgeWinLoss isWin={trade.isWin} size="xs" />
