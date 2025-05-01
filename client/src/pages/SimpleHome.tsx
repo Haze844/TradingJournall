@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import FilterBar from "@/components/FilterBar";
 import TradeTable from "@/components/TradeTable";
@@ -169,9 +169,9 @@ export default function SimpleHome() {
   const [filteredTrades, setFilteredTrades] = useState<Trade[]>([]);
 
   // Handler für gefilterte Trades aus der TradeTable-Komponente
-  const handleFilteredTradesChange = (newFilteredTrades: Trade[]) => {
+  const handleFilteredTradesChange = useCallback((newFilteredTrades: Trade[]) => {
     setFilteredTrades(newFilteredTrades);
-  };
+  }, []);
 
   // Berechne Statistiken für die angezeigten Trades (basierend auf gefilterten Trades)
   const tradeStats = useMemo(() => {
