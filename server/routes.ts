@@ -987,7 +987,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Performance-Heatmap-Daten
-  app.get("/api/performance-heatmap", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/performance-heatmap", async (req: Request, res: Response) => {
     try {
       const userId = parseInt(req.query.userId as string);
       if (isNaN(userId)) {

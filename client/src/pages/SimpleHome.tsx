@@ -517,7 +517,7 @@ export default function SimpleHome() {
                 </div>
                 
                 {/* Performance Heatmap */}
-                <div className="rocket-card rounded-xl p-2 sm:p-4">
+                <div>
                   <PerformanceHeatmap />
                 </div>
               </div>

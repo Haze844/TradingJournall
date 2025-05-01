@@ -92,7 +92,14 @@ export default function PerformanceHeatmap() {
   
   // Daten aus der API abrufen
   const { data: heatmapData, isLoading, error } = useQuery<HeatmapData>({
-    queryKey: ["/api/performance-heatmap", { userId: 2 }], // Standardmäßig userId 2 für 'mo'
+    queryKey: ["/api/performance-heatmap"],
+    queryFn: async () => {
+      const response = await fetch(`/api/performance-heatmap?userId=2`);
+      if (!response.ok) {
+        throw new Error('Fehler beim Laden der Heatmap-Daten');
+      }
+      return response.json();
+    },
     staleTime: 60000, // 1 Minute Cache
   });
 
