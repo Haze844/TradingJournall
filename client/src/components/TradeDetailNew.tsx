@@ -193,7 +193,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   };
 
   return (
-    <Card className="bg-card overflow-hidden mb-6 sticky top-4 w-full max-w-6xl mx-auto shadow-lg">
+    <Card className="bg-card overflow-hidden mb-6 sticky top-4 w-full max-w-[90vw] mx-auto shadow-lg">
       <CardHeader className="border-b border-border flex flex-row items-center justify-between">
         <CardTitle>Trade Details</CardTitle>
         
@@ -215,7 +215,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       ) : (
         // Trade details
         <CardContent 
-          className={`p-4 px-6 ${editMode ? 'cursor-pointer' : ''}`} 
+          className={`p-4 px-6 ${editMode ? 'cursor-pointer' : ''} max-h-[80vh] overflow-auto`} 
           ref={cardRef} 
           onClick={handleCardClick}>
           
