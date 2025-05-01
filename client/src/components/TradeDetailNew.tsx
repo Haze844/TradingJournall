@@ -694,7 +694,6 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
           
           {/* TradingView Chart Upload */}
           <div className="mt-4">
-            <h3 className="text-sm font-medium mb-2">TradingView Chart</h3>
             <ChartImageUpload 
               existingImage={selectedTrade.chartImage} 
               onChange={handleChartImageChange} 
