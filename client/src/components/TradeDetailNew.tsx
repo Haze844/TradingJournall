@@ -197,24 +197,11 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       <CardHeader className="border-b border-border flex flex-row items-center justify-between">
         <CardTitle>Trade Details</CardTitle>
         
-        {/* Edit-Buttons in der Kopfzeile */}
-        {selectedTrade && !editMode && (
-          <Button variant="ghost" size="sm" onClick={startEditMode}>
-            <Pencil className="h-4 w-4 mr-1" />
-            Bearbeiten
-          </Button>
-        )}
-        
+        {/* Hinweis zur Bearbeitung im Edit-Modus */}
         {selectedTrade && editMode && (
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={cancelEditMode}>
-              <X className="h-4 w-4 mr-1" />
-              Abbrechen
-            </Button>
-            <Button variant="default" size="sm" onClick={saveChanges}>
-              <Save className="h-4 w-4 mr-1" />
-              Speichern
-            </Button>
+          <div className="text-xs text-muted-foreground flex items-center">
+            <Pencil className="h-3 w-3 mr-1" />
+            Bearbeitungsmodus aktiv - Klicke auf eine leere Fläche zum Speichern
           </div>
         )}
       </CardHeader>
@@ -227,7 +214,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
         </div>
       ) : (
         // Trade details
-        <CardContent className="p-4 px-6" ref={cardRef} onClick={handleCardClick}>
+        <CardContent 
+          className={`p-4 px-6 ${editMode ? 'cursor-pointer' : ''}`} 
+          ref={cardRef} 
+          onClick={handleCardClick}>
           
           {/* Entfernt: Hauptinformationen in einer Zeile */}
           
@@ -716,19 +706,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             />
           </div>
           
-          {/* Aktionsleiste am Ende des Dialogs */}
-          {editMode && (
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={cancelEditMode}>
-                <X className="h-4 w-4 mr-1" />
-                Abbrechen
-              </Button>
-              <Button variant="default" onClick={saveChanges}>
-                <Check className="h-4 w-4 mr-1" />
-                Speichern
-              </Button>
-            </div>
-          )}
+          {/* Aktionsleiste entfernt, da automatisches Speichern bei Klick auf leere Fläche */}
         </CardContent>
       )}
     </Card>
