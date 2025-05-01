@@ -194,8 +194,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
 
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4 w-full max-w-[90vw] mx-auto shadow-lg">
-      <CardHeader className="border-b border-border flex flex-row items-center justify-between">
-        <CardTitle>Trade Details</CardTitle>
+      <CardHeader className="border-b border-border flex flex-row items-center justify-between py-3">
+        <CardTitle className="text-sm font-medium">Trade Details</CardTitle>
         
         {/* Hinweis zur Bearbeitung im Edit-Modus */}
         {selectedTrade && editMode && (

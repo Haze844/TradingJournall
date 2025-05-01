@@ -154,7 +154,6 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium">TradingView Chart</p>
         {preview && (
           <Button 
             variant="ghost" 
