@@ -96,8 +96,21 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 };
 
 // Benutzerdefinierter Punkt (Rechteck) für die Heatmap
-const CustomPoint = (props: any) => {
-  const { x, y, width, height, value } = props;
+interface CustomPointProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  value: number;
+  tradeCount: number;
+  day: string;
+  timeframe: string;
+  isSelected: boolean;
+  onClick: (data: HeatmapDataPoint) => void;
+}
+
+const CustomPoint = (props: CustomPointProps) => {
+  const { x, y, width, height, value, isSelected, onClick } = props;
   
   // Farbskala für die Heatmap 
   // Grün für gute Performance, Rot für schlechte, Grau für keine Daten
@@ -121,6 +134,20 @@ const CustomPoint = (props: any) => {
     return 1;
   };
 
+  const handleClick = () => {
+    onClick({
+      day: props.day,
+      timeframe: props.timeframe,
+      value: props.value,
+      tradeCount: props.tradeCount,
+      winRate: props.value, // In diesem Fall ist es gleich, aber könnte unterschiedlich sein
+      avgRR: "0", // Wird später überschrieben mit tatsächlichen Daten
+      totalPnL: "0", // Wird später überschrieben mit tatsächlichen Daten
+      x: props.x,
+      y: props.y
+    });
+  };
+
   return (
     <Rectangle
       x={x}
@@ -129,12 +156,18 @@ const CustomPoint = (props: any) => {
       height={height}
       fill={getColor(value, props.tradeCount)}
       opacity={getOpacity(props.tradeCount)}
+      stroke={isSelected ? "#ffffff" : "none"}
+      strokeWidth={isSelected ? 2 : 0}
+      style={{ cursor: 'pointer' }}
+      onClick={handleClick}
     />
   );
 };
 
 export default function PerformanceHeatmap() {
   const [dataType, setDataType] = useState<"winRate" | "avgRR" | "pnl">("winRate");
+  const [selectedCell, setSelectedCell] = useState<HeatmapDataPoint | null>(null);
+  const [interactionMode, setInteractionMode] = useState<"hover" | "click">("hover");
   const { toast } = useToast();
   
   // Daten aus der API abrufen
@@ -261,42 +294,118 @@ export default function PerformanceHeatmap() {
         </Select>
       </CardHeader>
       <CardContent>
-        <div className="relative h-[350px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart
-              margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-            >
-              <XAxis 
-                type="number" 
-                dataKey="x" 
-                name="Uhrzeit" 
-                domain={[0, heatmapData.timeframe.length - 1]} 
-                ticks={Array.from({ length: heatmapData.timeframe.length }, (_, i) => i)} 
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => heatmapData.timeframe[value]}
-              />
-              <YAxis 
-                type="number" 
-                dataKey="y" 
-                name="Wochentag" 
-                domain={[0, heatmapData.days.length - 1]} 
-                ticks={Array.from({ length: heatmapData.days.length }, (_, i) => i)} 
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => heatmapData.days[value]}
-              />
-              <RechartsTooltip content={<CustomTooltip />} />
-              <Scatter 
-                data={transformedData.current} 
-                shape={<CustomPoint />}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative h-[350px] w-full md:w-8/12">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart
+                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
               >
-                {transformedData.current.map((entry, index) => (
-                  <Cell key={`cell-${index}`} />
-                ))}
-              </Scatter>
-            </ScatterChart>
-          </ResponsiveContainer>
+                <XAxis 
+                  type="number" 
+                  dataKey="x" 
+                  name="Uhrzeit" 
+                  domain={[0, heatmapData.timeframe.length - 1]} 
+                  ticks={Array.from({ length: heatmapData.timeframe.length }, (_, i) => i)} 
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => heatmapData.timeframe[value]}
+                />
+                <YAxis 
+                  type="number" 
+                  dataKey="y" 
+                  name="Wochentag" 
+                  domain={[0, heatmapData.days.length - 1]} 
+                  ticks={Array.from({ length: heatmapData.days.length }, (_, i) => i)} 
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => heatmapData.days[value]}
+                />
+                <RechartsTooltip content={interactionMode === 'hover' ? <CustomTooltip /> : <div className="hidden" />} />
+                <Scatter 
+                  data={transformedData.current}
+                  shape={(props: any) => (
+                    <CustomPoint 
+                      x={props.x}
+                      y={props.y}
+                      width={props.width}
+                      height={props.height}
+                      value={props.payload.value}
+                      tradeCount={props.payload.tradeCount}
+                      day={props.payload.day}
+                      timeframe={props.payload.timeframe}
+                      isSelected={selectedCell ? 
+                        selectedCell.day === props.payload.day && 
+                        selectedCell.timeframe === props.payload.timeframe 
+                        : false}
+                      onClick={setSelectedCell}
+                    />
+                  )}
+                >
+                  {transformedData.current.map((entry, index) => (
+                    <Cell key={`cell-${index}`} />
+                  ))}
+                </Scatter>
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+          
+          {/* Detailansicht der ausgewählten Zelle */}
+          <div className="md:w-4/12 bg-muted/30 rounded-md p-4">
+            {selectedCell ? (
+              <div className="space-y-3">
+                <h3 className="font-bold text-primary">
+                  {selectedCell.day}, {selectedCell.timeframe} Uhr
+                </h3>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-background/50 rounded-sm p-2">
+                      <div className="text-xs text-muted-foreground font-medium">Trades</div>
+                      <div className="font-medium">{selectedCell.tradeCount}</div>
+                    </div>
+                    <div className="bg-background/50 rounded-sm p-2">
+                      <div className="text-xs text-muted-foreground font-medium">Win-Rate</div>
+                      <div className="font-medium">{selectedCell.winRate}%</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-background/50 rounded-sm p-2">
+                    <div className="text-xs text-muted-foreground font-medium">Durchschn. RR</div>
+                    <div className="font-medium">{selectedCell.avgRR}</div>
+                  </div>
+                  
+                  <div className="bg-background/50 rounded-sm p-2">
+                    <div className="text-xs text-muted-foreground font-medium">Gesamt P/L</div>
+                    <div className={`font-medium ${parseFloat(selectedCell.totalPnL) > 0 ? 'text-green-500' : parseFloat(selectedCell.totalPnL) < 0 ? 'text-red-500' : ''}`}>
+                      {parseFloat(selectedCell.totalPnL) > 0 ? '+' : ''}{selectedCell.totalPnL}$
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-3 text-sm text-muted-foreground">
+                  <p>Dies zeigt deine Performance für diesen Zeitraum. Klicke auf einen anderen Bereich der Heatmap, um weitere Zeitfenster zu untersuchen.</p>
+                </div>
+                
+                <button 
+                  className="w-full bg-background hover:bg-primary/10 transition-colors text-primary text-sm font-medium py-1.5 rounded-sm"
+                  onClick={() => setSelectedCell(null)}
+                >
+                  Auswahl zurücksetzen
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-muted-foreground">
+                  <p className="mb-2">Wähle einen Bereich in der Heatmap, um Details zu sehen</p>
+                  <div className="flex justify-center">
+                    <div className="bg-primary/20 text-primary text-xs rounded-full px-3 py-1">
+                      Klick auf eine Zelle für Details
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="mt-4 grid grid-cols-7 gap-1">
+        
+        <div className="mt-6 grid grid-cols-7 gap-1">
           <div className="text-xs text-center text-muted-foreground">Sehr schlecht</div>
           <div className="text-xs text-center text-muted-foreground">Schlecht</div>
           <div className="text-xs text-center text-muted-foreground">Mäßig</div>
