@@ -161,19 +161,35 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     });
   };
 
-  // Klick-Handler zum Starten des Edit-Modus (wenn nicht bereits im Edit-Modus)
+  // Klick-Handler zum Starten oder Beenden des Edit-Modus
   const handleCardClick = (e: React.MouseEvent) => {
-    if (editMode || 
-        e.target instanceof HTMLButtonElement || 
-        e.target instanceof HTMLInputElement || 
-        e.target instanceof HTMLSelectElement ||
-        (e.target as HTMLElement).closest('button') ||
-        (e.target as HTMLElement).closest('select') ||
-        (e.target as HTMLElement).closest('input')) {
-      return;
+    // Prüfe, ob auf ein Interaktionselement geklickt wurde
+    const isInteractiveElement = 
+      e.target instanceof HTMLButtonElement || 
+      e.target instanceof HTMLInputElement || 
+      e.target instanceof HTMLSelectElement ||
+      (e.target as HTMLElement).closest('button') ||
+      (e.target as HTMLElement).closest('select') ||
+      (e.target as HTMLElement).closest('input');
+    
+    // Wenn im Edit-Modus und auf den Hintergrund geklickt wurde
+    if (editMode && !isInteractiveElement) {
+      // Prüfe, ob das Klick-Element der Hintergrund selbst ist oder direkt darunter
+      const isBackgroundClick = 
+        e.target === e.currentTarget || 
+        (e.target as HTMLElement).tagName === 'DIV';
+      
+      if (isBackgroundClick) {
+        // Speichere vorhandene Änderungen
+        saveChanges();
+        return;
+      }
     }
     
-    startEditMode();
+    // Ansonsten starte den Edit-Modus (wenn nicht bereits im Edit-Modus und kein Interaktionselement)
+    if (!editMode && !isInteractiveElement) {
+      startEditMode();
+    }
   };
 
   return (
