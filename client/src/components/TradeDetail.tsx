@@ -72,11 +72,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
-      toast({
-        title: "Trade aktualisiert",
-        description: "Die Trade-Daten wurden erfolgreich aktualisiert."
-      });
-      setEditMode(false);
+      // Keine Toast-Nachricht für jede einzelne Änderung, um nicht zu stören
+      // Bearbeitungsmodus bleibt aktiv, bis explizit beendet
     },
     onError: (error: Error) => {
       toast({
@@ -188,10 +185,19 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
 
   // Funktion entfernt, da wir jetzt BadgeTrend verwenden
   
-  // Funktion zum automatischen Speichern
+  // Funktion zum automatischen Speichern und Beenden des Bearbeitungsmodus
   const autoSave = () => {
     if (editMode && selectedTrade) {
       saveChanges();
+      
+      // Bearbeitungsmodus erst nach dem Speichern beenden und Toast anzeigen
+      setTimeout(() => {
+        setEditMode(false);
+        toast({
+          title: "Änderungen gespeichert",
+          description: "Die Trade-Daten wurden erfolgreich aktualisiert."
+        });
+      }, 100);
     }
   };
 
