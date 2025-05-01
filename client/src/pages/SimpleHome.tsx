@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates, getTodayDates, formatDate } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
   Users, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon,
@@ -301,12 +302,12 @@ export default function SimpleHome() {
             </div>
           </div>
           
-          {/* Trade Details - Erscheint unter der Tabelle, wenn ein Trade ausgewählt ist */}
-          {selectedTrade && (
-            <div className="rocket-card rounded-xl p-2 sm:p-4">
-              <TradeDetail selectedTrade={selectedTrade} />
-            </div>
-          )}
+          {/* Trade Details - Erscheint als Modal */}
+          <Dialog open={!!selectedTrade} onOpenChange={(open) => !open && setSelectedTrade(null)}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-black/95 border border-primary/30 shadow-xl">
+              {selectedTrade && <TradeDetail selectedTrade={selectedTrade} />}
+            </DialogContent>
+          </Dialog>
 
           {/* TradingView Chart Display */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
