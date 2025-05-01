@@ -177,7 +177,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   };
 
   return (
-    <Card className="bg-card overflow-hidden mb-6 sticky top-4">
+    <Card className="bg-card overflow-hidden mb-6 sticky top-4 w-full max-w-6xl mx-auto shadow-lg">
       <CardHeader className="border-b border-border flex flex-row items-center justify-between">
         <CardTitle>Trade Details</CardTitle>
         
@@ -211,15 +211,15 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
         </div>
       ) : (
         // Trade details
-        <CardContent className="p-4" ref={cardRef} onClick={handleCardClick}>
+        <CardContent className="p-4 px-6" ref={cardRef} onClick={handleCardClick}>
           
           {/* Entfernt: Hauptinformationen in einer Zeile */}
           
           {/* Drei Spalten für die wichtigsten Informationen (auf Mobilgeräten 1 Spalte) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             {/* Spalte 1: Setup und Einstieg */}
-            <div>
-              <div className="bg-muted/30 rounded-md p-2 mb-2">
+            <div className="flex flex-col h-full">
+              <div className="bg-muted/30 rounded-md p-2 mb-2 h-full">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-1.5">
                   <div className="flex justify-between items-center mb-1">
@@ -289,8 +289,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             </div>
             
             {/* Spalte 2: Trends */}
-            <div>
-              <div className="bg-muted/30 rounded-md p-2 mb-2">
+            <div className="flex flex-col h-full">
+              <div className="bg-muted/30 rounded-md p-2 mb-2 h-full">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Trends</div>
                 <div className="space-y-1.5">
                   <div className="flex justify-between">
@@ -412,8 +412,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             </div>
             
             {/* Spalte 3: Location und Struktur */}
-            <div>
-              <div className="bg-muted/30 rounded-md p-2 mb-2">
+            <div className="flex flex-col h-full">
+              <div className="bg-muted/30 rounded-md p-2 mb-2 h-full">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Position &amp; Struktur</div>
                 <div className="space-y-1.5">
                   <div className="grid grid-cols-2 gap-2">
@@ -514,10 +514,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
           </div>
 
           {/* Weitere Details in 2 Spalten */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Linke Spalte - Marktzonen */}
-            <div>
-              <div className="bg-muted/30 rounded-md p-2 mb-2">
+            <div className="flex flex-col h-full">
+              <div className="bg-muted/30 rounded-md p-2 mb-2 h-full">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Marktzonen</div>
                 <div className="space-y-1.5">
                   <div className="grid grid-cols-2 gap-2">
@@ -588,8 +588,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             </div>
             
             {/* Rechte Spalte - Ergebnis */}
-            <div>
-              <div className="bg-muted/30 rounded-md p-2 mb-2">
+            <div className="flex flex-col h-full">
+              <div className="bg-muted/30 rounded-md p-2 mb-2 h-full">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Ergebnis &amp; RR</div>
                 <div className="space-y-1.5">
                   <div className="grid grid-cols-2 gap-2">
