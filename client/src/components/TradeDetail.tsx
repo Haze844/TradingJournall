@@ -84,34 +84,38 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     }
   });
 
+  // Effekt zum Aktualisieren der Bearbeitungsfelder wenn sich der ausgewählte Trade ändert
+  useEffect(() => {
+    if (selectedTrade) {
+      // Bestehende Felder
+      setEditingSetup(selectedTrade.setup || '');
+      setEditingMainTrend(selectedTrade.mainTrendM15 || '');
+      setEditingInternalTrend(selectedTrade.internalTrendM5 || '');
+      setEditingEntryLevel(selectedTrade.entryLevel || '');
+      setEditingProfitLoss(selectedTrade.profitLoss || 0);
+      
+      // Neue Felder
+      setEditingTrend(selectedTrade.trend || '');
+      setEditingInternalTrendNew(selectedTrade.internalTrend || '');
+      setEditingMicroTrend(selectedTrade.microTrend || '');
+      setEditingStructure(selectedTrade.structure || '');
+      setEditingTimeframeEntry(selectedTrade.timeframeEntry || '');
+      setEditingLiquidation(selectedTrade.liquidation || '');
+      setEditingUnmitZone(selectedTrade.unmitZone || '');
+      // Wichtig: Hier prüfen wir, ob rangePoints einen definierten Wert hat
+      setEditingRangePoints(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null ? selectedTrade.rangePoints : undefined);
+      setEditingMarketPhase(selectedTrade.marketPhase || '');
+      setEditingRRAchieved(selectedTrade.rrAchieved || 0);
+      setEditingRRPotential(selectedTrade.rrPotential || 0);
+      setEditingLocation(selectedTrade.location || '');
+      setEditingSlType(selectedTrade.slType || '');
+      setEditingSlPoints(selectedTrade.slPoints !== undefined && selectedTrade.slPoints !== null ? selectedTrade.slPoints : undefined);
+    }
+  }, [selectedTrade]);
+
   // Starte den Edit-Modus
   const startEditMode = () => {
     if (!selectedTrade) return;
-    
-    // Bestehende Felder
-    setEditingSetup(selectedTrade.setup || '');
-    setEditingMainTrend(selectedTrade.mainTrendM15 || '');
-    setEditingInternalTrend(selectedTrade.internalTrendM5 || '');
-    setEditingEntryLevel(selectedTrade.entryLevel || '');
-    setEditingProfitLoss(selectedTrade.profitLoss || 0);
-    
-    // Neue Felder
-    setEditingTrend(selectedTrade.trend || '');
-    setEditingInternalTrendNew(selectedTrade.internalTrend || '');
-    setEditingMicroTrend(selectedTrade.microTrend || '');
-    setEditingStructure(selectedTrade.structure || '');
-    setEditingTimeframeEntry(selectedTrade.timeframeEntry || '');
-    setEditingLiquidation(selectedTrade.liquidation || '');
-    setEditingUnmitZone(selectedTrade.unmitZone || '');
-    // Wichtig: Hier prüfen wir, ob rangePoints einen definierten Wert hat
-    setEditingRangePoints(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null ? selectedTrade.rangePoints : undefined);
-    setEditingMarketPhase(selectedTrade.marketPhase || '');
-    setEditingRRAchieved(selectedTrade.rrAchieved || 0);
-    setEditingRRPotential(selectedTrade.rrPotential || 0);
-    setEditingLocation(selectedTrade.location || '');
-    setEditingSlType(selectedTrade.slType || '');
-    setEditingSlPoints(selectedTrade.slPoints !== undefined && selectedTrade.slPoints !== null ? selectedTrade.slPoints : undefined);
-    
     setEditMode(true);
   };
 
@@ -123,6 +127,16 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   // Speichern der Änderungen
   const saveChanges = () => {
     if (!selectedTrade) return;
+    
+    // Konsolenausgabe für Debugging
+    console.log("Speichere Änderungen:", {
+      id: selectedTrade.id,
+      setup: editingSetup,
+      rrAchieved: editingRRAchieved,
+      rrPotential: editingRRPotential,
+      slType: editingSlType,
+      slPoints: editingSlPoints
+    });
     
     updateTradeMutation.mutate({
       id: selectedTrade.id,
@@ -185,8 +199,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
 
   // Funktion entfernt, da wir jetzt BadgeTrend verwenden
   
+  // Referenz für das geöffnete Select-Menü
+  const [menuOpen, setMenuOpen] = useState(false);
+  
   // Funktion zum automatischen Speichern und Beenden des Bearbeitungsmodus
   const autoSave = () => {
+    // Nicht speichern/abbrechen wenn gerade ein Menü geöffnet ist
+    if (menuOpen) {
+      console.log("Menü ist offen, keine Aktion");
+      return;
+    }
+    
     if (editMode && selectedTrade) {
       saveChanges();
       
@@ -218,29 +241,61 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     startEditMode();
   };
   
+  // Flag, um zu verfolgen, ob gerade ein DOM-Event verarbeitet wird
+  const [processingEvent, setProcessingEvent] = useState(false);
+  
   // Event-Listener für Klicks außerhalb der Karte hinzufügen (zum automatischen Speichern)
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (cardRef.current && !cardRef.current.contains(event.target as Node) && editMode) {
-        autoSave();
+    // Wichtig: Diese Funktion wird nur beim Mounten/Unmounten des Komponenten ausgeführt
+    function handleClickOutside(event: MouseEvent) {
+      // Verhindere die Verarbeitung, wenn bereits ein Event verarbeitet wird
+      // oder wenn ein Menü offen ist (wichtig für Dropdown-Auswahlen)
+      if (processingEvent || menuOpen) {
+        console.log("Event wird ignoriert - Verarbeitung oder Menü offen", { processingEvent, menuOpen });
+        return;
       }
-    };
+      
+      // Prüft, ob der Klick außerhalb des Cards war und wir im Bearbeitungsmodus sind
+      if (cardRef.current && !cardRef.current.contains(event.target as Node) && editMode) {
+        console.log("Klick außerhalb erkannt - speichere Änderungen");
+        setProcessingEvent(true);
+        
+        // Event-Queue nutzen um zu vermeiden, dass das Event noch vor Dropdown-Schließen verarbeitet wird
+        setTimeout(() => {
+          autoSave();
+          // Nach kurzer Verzögerung können wir wieder Events verarbeiten
+          setTimeout(() => {
+            setProcessingEvent(false);
+          }, 200);
+        }, 100);
+      }
+    }
     
     // Escape-Taste zum Speichern
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && editMode) {
-        autoSave();
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.key === 'Escape' && editMode && !processingEvent) {
+        console.log("Escape-Taste gedrückt - speichere Änderungen");
+        setProcessingEvent(true);
+        
+        setTimeout(() => {
+          autoSave();
+          setTimeout(() => {
+            setProcessingEvent(false);
+          }, 200);
+        }, 100);
       }
-    };
+    }
 
+    // Event-Listener für Klicks und Escape-Taste
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscapeKey);
     
+    // Cleanup-Funktion
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [editMode, selectedTrade]);
+  }, [editMode, menuOpen, processingEvent]);
 
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4">
@@ -290,7 +345,14 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                   <div>
                     <div className="text-xs text-muted-foreground">Setup</div>
                     {editMode ? (
-                      <Select value={editingSetup} onValueChange={setEditingSetup}>
+                      <Select 
+                        value={editingSetup} 
+                        onValueChange={setEditingSetup} 
+                        onOpenChange={(open) => {
+                          console.log("Setup select menu open:", open);
+                          setMenuOpen(open);
+                        }}
+                      >
                         <SelectTrigger className="h-7 text-xs">
                           <SelectValue placeholder="Setup auswählen" />
                         </SelectTrigger>
