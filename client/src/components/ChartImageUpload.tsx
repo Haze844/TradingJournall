@@ -170,14 +170,6 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
       {!preview ? (
         <div className="border-2 border-dashed border-primary/40 rounded-lg p-2 text-center hover:border-primary/60 transition-colors">
           <div className="flex flex-col items-center justify-center space-y-1">
-            <div className="bg-primary/10 rounded-full p-1">
-              <LinkIcon className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">
-                Kopiere den Link zum Screenshot deines TradingView Charts
-              </p>
-            </div>
             <div className="w-full space-y-1">
               <Input
                 type="url"
