@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Card, 
   CardContent, 
@@ -322,9 +322,16 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
   });
   
   // Benachrichtige übergeordnete Komponente über Änderungen an gefilterten Trades
+  // Verwende useEffect mit einer Zustandsprüfung, um Endlosschleifen zu vermeiden
+  const prevFilteredTradesRef = useRef<Trade[]>([]);
+  
   useEffect(() => {
-    // Sende die gefilterten Trades an die übergeordnete Komponente
-    if (onFilteredTradesChange) {
+    // Nur benachrichtigen, wenn sich die Trades wirklich geändert haben (nicht bei jedem Render)
+    if (onFilteredTradesChange && 
+        (prevFilteredTradesRef.current.length !== filteredTrades.length || 
+         JSON.stringify(prevFilteredTradesRef.current) !== JSON.stringify(filteredTrades))) {
+      
+      prevFilteredTradesRef.current = [...filteredTrades];
       onFilteredTradesChange(filteredTrades);
     }
   }, [filteredTrades, onFilteredTradesChange]);

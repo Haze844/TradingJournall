@@ -116,10 +116,16 @@ export default function SimpleHome() {
   useEffect(() => {
     const handleAddTradeClick = () => {
       console.log("Event: add-trade-clicked empfangen");
-      setIsAddTradeVisible(true);
+      // Verzögerung hinzufügen, um sicherzustellen, dass der Event nicht mehrfach verarbeitet wird
+      setTimeout(() => {
+        setIsAddTradeVisible(true);
+      }, 10);
     };
     
+    // Event-Listener registrieren
     window.addEventListener('add-trade-clicked', handleAddTradeClick);
+    
+    // Cleanup beim Unmount
     return () => {
       window.removeEventListener('add-trade-clicked', handleAddTradeClick);
     };
