@@ -188,6 +188,13 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
 
   // Funktion entfernt, da wir jetzt BadgeTrend verwenden
   
+  // Funktion zum automatischen Speichern
+  const autoSave = () => {
+    if (editMode && selectedTrade) {
+      saveChanges();
+    }
+  };
+
   // Klick-Handler zum Umschalten des Bearbeitungsmodus
   const handleCardClick = (e: React.MouseEvent) => {
     // Wenn wir bereits im Bearbeitungsmodus sind, oder wenn angeklickte Element ein Button oder ein anderes interaktives Element ist, nichts tun
@@ -204,6 +211,30 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     // Sonst in den Edit-Modus wechseln
     startEditMode();
   };
+  
+  // Event-Listener für Klicks außerhalb der Karte hinzufügen (zum automatischen Speichern)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node) && editMode) {
+        autoSave();
+      }
+    };
+    
+    // Escape-Taste zum Speichern
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && editMode) {
+        autoSave();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [editMode, selectedTrade]);
 
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4">
@@ -220,21 +251,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       ) : (
         // Trade details
         <CardContent className="p-4" ref={cardRef} onClick={handleCardClick}>
-          {/* Action Buttons - nur im Bearbeitungsmodus sichtbar */}
-          <div className="flex justify-end mb-4">
-            {editMode && (
-              <div className="flex gap-2">
-                <Button variant="default" size="sm" onClick={saveChanges} className="flex items-center">
-                  <Save className="h-4 w-4 mr-1" />
-                  Speichern
-                </Button>
-                <Button variant="outline" size="sm" onClick={cancelEditMode} className="flex items-center">
-                  <X className="h-4 w-4 mr-1" />
-                  Abbrechen
-                </Button>
-              </div>
-            )}
-          </div>
+
           
           {/* Hauptinformationen in einer Zeile */}
           <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
