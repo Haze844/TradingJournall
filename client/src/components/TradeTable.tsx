@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Card, 
   CardContent, 
@@ -62,9 +62,10 @@ interface TradeTableProps {
   trades: Trade[];
   isLoading: boolean;
   onTradeSelect: (trade: Trade) => void;
+  onFilteredTradesChange?: (filteredTrades: Trade[]) => void;
 }
 
-export default function TradeTable({ trades = [], isLoading, onTradeSelect }: TradeTableProps) {
+export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFilteredTradesChange }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 5;
   
@@ -146,7 +147,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     slTypes: Array.from(new Set(trades.map(t => t.slType).filter(Boolean))) as string[]
   };
   
-  // Apply filters
+  // Apply filters and notify parent component of changes when filtered trades change
   const filteredTrades = trades.filter(trade => {
     // Symbol filter
     if (filters.symbols.size > 0 && trade.symbol && !filters.symbols.has(trade.symbol)) {
@@ -320,6 +321,14 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     return true;
   });
   
+  // Benachrichtige übergeordnete Komponente über Änderungen an gefilterten Trades
+  useEffect(() => {
+    // Sende die gefilterten Trades an die übergeordnete Komponente
+    if (onFilteredTradesChange) {
+      onFilteredTradesChange(filteredTrades);
+    }
+  }, [filteredTrades, onFilteredTradesChange]);
+
   // Calculate pagination for filtered trades
   const indexOfLastTrade = currentPage * tradesPerPage;
   const indexOfFirstTrade = indexOfLastTrade - tradesPerPage;
