@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import FilterBar from "@/components/FilterBar";
 import TradeTable from "@/components/TradeTable";
 import WeeklySummary from "@/components/WeeklySummary";
-import TradeDetail from "@/components/TradeDetail";
+import TradeDetail from "@/components/TradeDetailNew";
 import TradeImport from "@/components/TradeImport";
 import AddTradeForm from "@/components/AddTradeForm";
 import TradingPatterns from "@/components/TradingPatterns";

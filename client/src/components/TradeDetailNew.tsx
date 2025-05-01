@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Trade, 
@@ -12,19 +12,18 @@ import {
   liquidationTypes,
   unmitZoneTypes,
   marketPhaseTypes,
-  rrValues 
+  rrValues,
+  slTypes
 } from "@shared/schema";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
 import { formatDate } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import ChartImageUpload from "./ChartImageUpload";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Pencil, Save, X } from "lucide-react";
+import { Pencil, Save, X, Check } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -43,14 +42,9 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const [editMode, setEditMode] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   
-  // Status für die bearbeiteten Felder, wird nur initialisiert, wenn selectedTrade sich ändert oder Edit-Modus gestartet wird
+  // Nur ein einziger State für alle Bearbeitungen
   const [editData, setEditData] = useState<Partial<Trade>>({});
   
-  // Helfer-Funktion zum Aktualisieren einzelner Felder
-  const updateField = (field: string, value: any) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
-  };
-
   // Mutation für das Update der Trade-Daten
   const updateTradeMutation = useMutation({
     mutationFn: async (updateData: Partial<Trade> & { id: number }) => {
@@ -59,8 +53,11 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
-      // Keine Toast-Nachricht für jede einzelne Änderung, um nicht zu stören
-      // Bearbeitungsmodus bleibt aktiv, bis explizit beendet
+      toast({
+        title: "Trade aktualisiert",
+        description: "Die Trade-Daten wurden erfolgreich aktualisiert."
+      });
+      setEditMode(false);
     },
     onError: (error: Error) => {
       toast({
@@ -71,19 +68,16 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     }
   });
 
-  // Effekt zum Initialisieren der Bearbeitungsfelder wenn der Bearbeitungsmodus gestartet wird
+  // Initialisierung der Edit-Daten, wenn der Edit-Modus gestartet wird
   useEffect(() => {
     if (selectedTrade && editMode) {
-      // Alle aktuellen Werte in den editData-Zustand kopieren
+      // Kopiere alle relevanten Werte aus selectedTrade
       setEditData({
-        // Bestehende Felder
         setup: selectedTrade.setup || '',
         mainTrendM15: selectedTrade.mainTrendM15 || '',
         internalTrendM5: selectedTrade.internalTrendM5 || '',
         entryLevel: selectedTrade.entryLevel || '',
         profitLoss: selectedTrade.profitLoss || 0,
-        
-        // Neue Felder
         trend: selectedTrade.trend || '',
         internalTrend: selectedTrade.internalTrend || '',
         microTrend: selectedTrade.microTrend || '',
@@ -93,61 +87,49 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
         unmitZone: selectedTrade.unmitZone || '',
         rangePoints: selectedTrade.rangePoints,
         marketPhase: selectedTrade.marketPhase || '',
-        rrAchieved: selectedTrade.rrAchieved || 0,
-        rrPotential: selectedTrade.rrPotential || 0,
+        rrAchieved: selectedTrade.rrAchieved ?? 0,
+        rrPotential: selectedTrade.rrPotential ?? 0,
         location: selectedTrade.location || '',
         slType: selectedTrade.slType || '',
         slPoints: selectedTrade.slPoints
       });
-    } else if (!editMode) {
-      // Wenn der Bearbeitungsmodus beendet wird, setze editData zurück
-      setEditData({});
     }
   }, [selectedTrade, editMode]);
 
-  // Starte den Edit-Modus
+  // Update-Funktion für Felder
+  const updateField = <K extends keyof Trade>(field: K, value: Trade[K]) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Start Edit Mode
   const startEditMode = () => {
     if (!selectedTrade) return;
     setEditMode(true);
   };
 
-  // Abbrechen des Bearbeitungsmodus ohne zu speichern
+  // Abbrechen des Edit-Modus
   const cancelEditMode = () => {
     setEditMode(false);
     setEditData({});
-    toast({
-      title: "Bearbeitung abgebrochen",
-      description: "Die Änderungen wurden verworfen."
-    });
   };
 
   // Speichern der Änderungen
   const saveChanges = () => {
     if (!selectedTrade) return;
     
-    // Konsolenausgabe für Debugging
     console.log("Speichere Änderungen:", {
       id: selectedTrade.id,
       ...editData
     });
     
-    // Werte aus editData mit der ID kombinieren und an die Mutation übergeben
     updateTradeMutation.mutate({
       id: selectedTrade.id,
       ...editData,
-      // userId ist wichtig, damit die API weiß, zu welchem Benutzer der Trade gehört
       userId: selectedTrade.userId || 2
-    });
-    
-    // Bearbeitungsmodus beenden und Toast anzeigen
-    setEditMode(false);
-    toast({
-      title: "Änderungen gespeichert",
-      description: "Die Trade-Daten wurden erfolgreich aktualisiert."
     });
   };
 
-  // Mutation für das Update des Charts
+  // Chart-Upload Mutation
   const updateChartImageMutation = useMutation({
     mutationFn: async ({ id, chartImage, userId }: { id: number, chartImage: string | null, userId: number | null }) => {
       await apiRequest("PUT", `/api/trades/${id}`, { chartImage, userId: userId || 2 });
@@ -175,40 +157,12 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     updateChartImageMutation.mutate({
       id: selectedTrade.id,
       chartImage: base64Image,
-      userId: selectedTrade.userId || 2 // Wichtig: userId hinzufügen, Fallback auf 2 (Mo) falls nicht gesetzt
+      userId: selectedTrade.userId || 2
     });
   };
 
-  // Funktion entfernt, da wir jetzt BadgeTrend verwenden
-  
-  // Referenz für das geöffnete Select-Menü
-  const [menuOpen, setMenuOpen] = useState(false);
-  
-  // Funktion zum automatischen Speichern und Beenden des Bearbeitungsmodus
-  const autoSave = () => {
-    // Nicht speichern/abbrechen wenn gerade ein Menü geöffnet ist
-    if (menuOpen) {
-      console.log("Menü ist offen, keine Aktion");
-      return;
-    }
-    
-    if (editMode && selectedTrade) {
-      saveChanges();
-      
-      // Bearbeitungsmodus erst nach dem Speichern beenden und Toast anzeigen
-      setTimeout(() => {
-        setEditMode(false);
-        toast({
-          title: "Änderungen gespeichert",
-          description: "Die Trade-Daten wurden erfolgreich aktualisiert."
-        });
-      }, 100);
-    }
-  };
-
-  // Klick-Handler zum Umschalten des Bearbeitungsmodus
+  // Klick-Handler zum Starten des Edit-Modus (wenn nicht bereits im Edit-Modus)
   const handleCardClick = (e: React.MouseEvent) => {
-    // Wenn wir bereits im Bearbeitungsmodus sind, oder wenn angeklickte Element ein Button oder ein anderes interaktives Element ist, nichts tun
     if (editMode || 
         e.target instanceof HTMLButtonElement || 
         e.target instanceof HTMLInputElement || 
@@ -219,70 +173,34 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       return;
     }
     
-    // Sonst in den Edit-Modus wechseln
     startEditMode();
   };
-  
-  // Flag, um zu verfolgen, ob gerade ein DOM-Event verarbeitet wird
-  const [processingEvent, setProcessingEvent] = useState(false);
-  
-  // Event-Listener für Klicks außerhalb der Karte hinzufügen (zum automatischen Speichern)
-  useEffect(() => {
-    // Wichtig: Diese Funktion wird nur beim Mounten/Unmounten des Komponenten ausgeführt
-    function handleClickOutside(event: MouseEvent) {
-      // Verhindere die Verarbeitung, wenn bereits ein Event verarbeitet wird
-      // oder wenn ein Menü offen ist (wichtig für Dropdown-Auswahlen)
-      if (processingEvent || menuOpen) {
-        console.log("Event wird ignoriert - Verarbeitung oder Menü offen", { processingEvent, menuOpen });
-        return;
-      }
-      
-      // Prüft, ob der Klick außerhalb des Cards war und wir im Bearbeitungsmodus sind
-      if (cardRef.current && !cardRef.current.contains(event.target as Node) && editMode) {
-        console.log("Klick außerhalb erkannt - speichere Änderungen");
-        setProcessingEvent(true);
-        
-        // Event-Queue nutzen um zu vermeiden, dass das Event noch vor Dropdown-Schließen verarbeitet wird
-        setTimeout(() => {
-          autoSave();
-          // Nach kurzer Verzögerung können wir wieder Events verarbeiten
-          setTimeout(() => {
-            setProcessingEvent(false);
-          }, 200);
-        }, 100);
-      }
-    }
-    
-    // Escape-Taste zum Speichern
-    function handleEscapeKey(event: KeyboardEvent) {
-      if (event.key === 'Escape' && editMode && !processingEvent) {
-        console.log("Escape-Taste gedrückt - speichere Änderungen");
-        setProcessingEvent(true);
-        
-        setTimeout(() => {
-          autoSave();
-          setTimeout(() => {
-            setProcessingEvent(false);
-          }, 200);
-        }, 100);
-      }
-    }
-
-    // Event-Listener für Klicks und Escape-Taste
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscapeKey);
-    
-    // Cleanup-Funktion
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscapeKey);
-    };
-  }, [editMode, menuOpen, processingEvent]);
 
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4">
-      <CardHeader className="border-b border-border">
+      <CardHeader className="border-b border-border flex flex-row items-center justify-between">
         <CardTitle>Trade Details</CardTitle>
+        
+        {/* Edit-Buttons in der Kopfzeile */}
+        {selectedTrade && !editMode && (
+          <Button variant="ghost" size="sm" onClick={startEditMode}>
+            <Pencil className="h-4 w-4 mr-1" />
+            Bearbeiten
+          </Button>
+        )}
+        
+        {selectedTrade && editMode && (
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={cancelEditMode}>
+              <X className="h-4 w-4 mr-1" />
+              Abbrechen
+            </Button>
+            <Button variant="default" size="sm" onClick={saveChanges}>
+              <Save className="h-4 w-4 mr-1" />
+              Speichern
+            </Button>
+          </div>
+        )}
       </CardHeader>
 
       {!selectedTrade ? (
@@ -294,7 +212,6 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       ) : (
         // Trade details
         <CardContent className="p-4" ref={cardRef} onClick={handleCardClick}>
-
           
           {/* Hauptinformationen in einer Zeile */}
           <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
@@ -307,9 +224,9 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             </div>
           </div>
           
-          {/* Drei Spalten für die wichtigsten Informationen */}
-          <div className="grid grid-cols-3 gap-3 mb-3">
-            {/* Spalte 1: Setup und Trends */}
+          {/* Drei Spalten für die wichtigsten Informationen (auf Mobilgeräten 1 Spalte) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            {/* Spalte 1: Setup und Einstieg */}
             <div>
               <div className="bg-muted/30 rounded-md p-2 mb-2">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Setup &amp; Einstieg</div>
@@ -328,12 +245,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div className="text-xs text-muted-foreground">Setup</div>
                     {editMode ? (
                       <Select 
-                        value={editingSetup} 
-                        onValueChange={setEditingSetup} 
-                        onOpenChange={(open) => {
-                          console.log("Setup select menu open:", open);
-                          setMenuOpen(open);
-                        }}
+                        value={editData.setup} 
+                        onValueChange={val => updateField('setup', val)}
                       >
                         <SelectTrigger className="h-7 text-xs">
                           <SelectValue placeholder="Setup auswählen" />
@@ -353,7 +266,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                   <div>
                     <div className="text-xs text-muted-foreground">Einstieg</div>
                     {editMode ? (
-                      <Select value={editingEntryLevel} onValueChange={setEditingEntryLevel}>
+                      <Select 
+                        value={editData.entryLevel} 
+                        onValueChange={val => updateField('entryLevel', val)}
+                      >
                         <SelectTrigger className="h-7 text-xs">
                           <SelectValue placeholder="Level auswählen" />
                         </SelectTrigger>
@@ -384,7 +300,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Trend</div>
                       {editMode ? (
-                        <Select value={editingTrend} onValueChange={setEditingTrend}>
+                        <Select 
+                          value={editData.trend} 
+                          onValueChange={val => updateField('trend', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Trend" />
                           </SelectTrigger>
@@ -403,7 +322,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Int.</div>
                       {editMode ? (
-                        <Select value={editingInternalTrendNew} onValueChange={setEditingInternalTrendNew}>
+                        <Select 
+                          value={editData.internalTrend} 
+                          onValueChange={val => updateField('internalTrend', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Int." />
                           </SelectTrigger>
@@ -422,7 +344,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Micro</div>
                       {editMode ? (
-                        <Select value={editingMicroTrend} onValueChange={setEditingMicroTrend}>
+                        <Select 
+                          value={editData.microTrend} 
+                          onValueChange={val => updateField('microTrend', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Micro" />
                           </SelectTrigger>
@@ -443,7 +368,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">M15</div>
                       {editMode ? (
-                        <Select value={editingMainTrend} onValueChange={setEditingMainTrend}>
+                        <Select 
+                          value={editData.mainTrendM15} 
+                          onValueChange={val => updateField('mainTrendM15', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="M15" />
                           </SelectTrigger>
@@ -462,7 +390,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">M5</div>
                       {editMode ? (
-                        <Select value={editingInternalTrend} onValueChange={setEditingInternalTrend}>
+                        <Select 
+                          value={editData.internalTrendM5} 
+                          onValueChange={val => updateField('internalTrendM5', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="M5" />
                           </SelectTrigger>
@@ -483,7 +414,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
               </div>
             </div>
             
-            {/* Spalte 3: Location und Liquidation */}
+            {/* Spalte 3: Location und Struktur */}
             <div>
               <div className="bg-muted/30 rounded-md p-2 mb-2">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Position &amp; Struktur</div>
@@ -492,7 +423,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Location</div>
                       {editMode ? (
-                        <Select value={editingLocation} onValueChange={setEditingLocation}>
+                        <Select 
+                          value={editData.location} 
+                          onValueChange={val => updateField('location', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Location" />
                           </SelectTrigger>
@@ -511,7 +445,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Struktur</div>
                       {editMode ? (
-                        <Select value={editingStructure} onValueChange={setEditingStructure}>
+                        <Select 
+                          value={editData.structure} 
+                          onValueChange={val => updateField('structure', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Struktur" />
                           </SelectTrigger>
@@ -532,7 +469,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Liquidation</div>
                       {editMode ? (
-                        <Select value={editingLiquidation} onValueChange={setEditingLiquidation}>
+                        <Select 
+                          value={editData.liquidation} 
+                          onValueChange={val => updateField('liquidation', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Liquidation" />
                           </SelectTrigger>
@@ -551,7 +491,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">TF Entry</div>
                       {editMode ? (
-                        <Select value={editingTimeframeEntry} onValueChange={setEditingTimeframeEntry}>
+                        <Select 
+                          value={editData.timeframeEntry} 
+                          onValueChange={val => updateField('timeframeEntry', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="TF Entry" />
                           </SelectTrigger>
@@ -584,7 +527,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Marktphase</div>
                       {editMode ? (
-                        <Select value={editingMarketPhase} onValueChange={setEditingMarketPhase}>
+                        <Select 
+                          value={editData.marketPhase} 
+                          onValueChange={val => updateField('marketPhase', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Phase" />
                           </SelectTrigger>
@@ -603,7 +549,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">Unmit. Zone</div>
                       {editMode ? (
-                        <Select value={editingUnmitZone} onValueChange={setEditingUnmitZone}>
+                        <Select 
+                          value={editData.unmitZone} 
+                          onValueChange={val => updateField('unmitZone', val)}
+                        >
                           <SelectTrigger className="h-7 text-xs">
                             <SelectValue placeholder="Zone" />
                           </SelectTrigger>
@@ -625,10 +574,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     {editMode ? (
                       <Input
                         type="number"
-                        value={editingRangePoints === undefined ? "" : editingRangePoints}
+                        value={editData.rangePoints === undefined ? "" : editData.rangePoints}
                         onChange={(e) => {
                           const value = e.target.value === "" ? undefined : parseInt(e.target.value);
-                          setEditingRangePoints(value);
+                          updateField('rangePoints', value);
                         }}
                         className="h-7 text-xs"
                         min="0"
@@ -651,14 +600,14 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                       <div className="text-xs text-muted-foreground">RR Achieved</div>
                       {editMode ? (
                         <div className="flex gap-1 flex-wrap">
-                          {[-1, 1, 2, 3, 4, 5, 6, 7].map(val => (
+                          {[-1, ...[1, 2, 3, 4, 5, 6, 7]].map(val => (
                             <Button
                               key={val}
                               type="button"
-                              variant={editingRRAchieved === val ? "default" : "outline"}
+                              variant={editData.rrAchieved === val ? "default" : "outline"}
                               size="sm"
                               className={`p-1 h-6 text-[10px] flex-1 ${val === -1 ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : ''}`}
-                              onClick={() => setEditingRRAchieved(val)}
+                              onClick={() => updateField('rrAchieved', val)}
                             >
                               {val}R
                             </Button>
@@ -676,10 +625,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                             <Button
                               key={val}
                               type="button"
-                              variant={editingRRPotential === val ? "default" : "outline"}
+                              variant={editData.rrPotential === val ? "default" : "outline"}
                               size="sm"
                               className="p-1 h-6 text-[10px] flex-1"
-                              onClick={() => setEditingRRPotential(val)}
+                              onClick={() => updateField('rrPotential', val)}
                             >
                               {val}R
                             </Button>
@@ -690,21 +639,21 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
                       <div className="text-xs text-muted-foreground">SL Typ</div>
                       {editMode ? (
                         <div className="flex gap-1 flex-wrap">
-                          {["Sweep", "zerstört"].map(val => (
+                          {slTypes.map((type) => (
                             <Button
-                              key={val}
+                              key={type}
                               type="button"
-                              variant={editingSlType === val ? "default" : "outline"}
+                              variant={editData.slType === type ? "default" : "outline"}
                               size="sm"
                               className="p-1 h-6 text-[10px] flex-1"
-                              onClick={() => setEditingSlType(val)}
+                              onClick={() => updateField('slType', type)}
                             >
-                              {val}
+                              {type}
                             </Button>
                           ))}
                         </div>
@@ -715,25 +664,19 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                     <div>
                       <div className="text-xs text-muted-foreground">SL Punkte</div>
                       {editMode ? (
-                        <div>
-                          <Select 
-                            value={editingSlPoints?.toString() || ''}
-                            onValueChange={(value) => setEditingSlPoints(Number(value))}
-                          >
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue placeholder="Punkte wählen" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Array.from({ length: 30 }, (_, i) => i + 1).map((val) => (
-                                <SelectItem key={val} value={val.toString()} className="text-xs">
-                                  {val}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <Input
+                          type="number"
+                          value={editData.slPoints === undefined ? "" : editData.slPoints}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? undefined : parseInt(e.target.value);
+                            updateField('slPoints', value);
+                          }}
+                          className="h-7 text-xs"
+                          min="0"
+                          max="30"
+                        />
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.slPoints || '-'}</div>
+                        <div className="font-medium text-sm">{selectedTrade.slPoints !== undefined ? selectedTrade.slPoints : '-'}</div>
                       )}
                     </div>
                   </div>
@@ -741,21 +684,29 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
               </div>
             </div>
           </div>
-
-          <div className="mb-4">
-            <div className="text-sm text-muted-foreground mb-2">GPT Feedback</div>
-            <div className="bg-muted p-3 rounded-lg text-sm">
-              {selectedTrade.gptFeedback || "Kein Feedback verfügbar."}
-            </div>
-          </div>
           
           {/* TradingView Chart Upload */}
-          <div className="border-t border-border pt-4 mt-6">
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">TradingView Chart</h3>
             <ChartImageUpload 
-              existingImage={selectedTrade.chartImage || null} 
-              onChange={handleChartImageChange}
+              existingImage={selectedTrade.chartImage} 
+              onChange={handleChartImageChange} 
             />
           </div>
+          
+          {/* Aktionsleiste am Ende des Dialogs */}
+          {editMode && (
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={cancelEditMode}>
+                <X className="h-4 w-4 mr-1" />
+                Abbrechen
+              </Button>
+              <Button variant="default" onClick={saveChanges}>
+                <Check className="h-4 w-4 mr-1" />
+                Speichern
+              </Button>
+            </div>
+          )}
         </CardContent>
       )}
     </Card>
