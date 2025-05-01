@@ -150,8 +150,8 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
   useEffect(() => {
     // Win/Loss-Verhältnis
     setWinLossData([
-      { name: 'Gewonnen', value: winningTrades, color: '#10b981' },
-      { name: 'Verloren', value: losingTrades, color: '#ef4444' }
+      { name: 'Gewonnen', value: winningTrades, color: COLORS.profit },
+      { name: 'Verloren', value: losingTrades, color: COLORS.loss }
     ]);
     
     // Performance nach Symbol
@@ -417,7 +417,26 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     return maxCount;
   }
 
-  const COLORS = ['#10b981', '#ef4444', '#0ea5e9', '#f59e0b', '#8b5cf6', '#ec4899'];
+  // Erweiterte Farbpalette für Diagramme
+  const COLORS = {
+    // Hauptfarben
+    profit: '#10b981',      // Grün für Gewinn/positive Werte
+    loss: '#ef4444',        // Rot für Verlust/negative Werte
+    primary: '#3b82f6',     // Blau (Primary)
+    secondary: '#8b5cf6',   // Lila (Secondary)
+    accent: '#f59e0b',      // Orange (Accent)
+    
+    // Erweiterte Palette
+    series1: '#0ea5e9',     // Hellblau
+    series2: '#ec4899',     // Pink
+    series3: '#14b8a6',     // Türkis
+    series4: '#a855f7',     // Lila
+    series5: '#f97316',     // Orange
+    
+    // Helligkeitsvarianten
+    primaryLight: '#60a5fa',
+    primaryDark: '#2563eb'
+  };
 
   return (
     <div className="space-y-6">
@@ -639,13 +658,50 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
                       data={profitLossDistribution}
                       margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="group" />
-                      <YAxis />
-                      <Tooltip formatter={(value, name) => [name === 'count' ? `${value} Trades` : `$${value.toFixed(2)}`, name === 'count' ? 'Anzahl' : 'Durchschnitt']} />
-                      <Legend />
-                      <Bar dataKey="count" fill="#9ca3af" name="Anzahl" />
-                      <Bar dataKey="avgProfit" fill="#3b82f6" name="Durchschnitt" />
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis 
+                        dataKey="group" 
+                        tick={{ fill: '#e5e7eb', fontSize: 11 }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                      />
+                      <YAxis 
+                        tick={{ fill: '#e5e7eb', fontSize: 11 }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                      />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          name === 'count' ? `${value} Trades` : `$${Number(value).toFixed(2)}`, 
+                          name === 'count' ? 'Anzahl' : 'Durchschnitt'
+                        ]} 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                          borderColor: COLORS.primaryLight,
+                          borderRadius: '8px' 
+                        }}
+                        labelStyle={{ fontWeight: 'bold', color: '#e5e7eb' }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: 15 }}
+                        iconType="circle"
+                      />
+                      <Bar 
+                        dataKey="count" 
+                        name="Anzahl Trades" 
+                        fill={COLORS.primary}
+                        radius={[4, 4, 0, 0]}
+                      />
+                      <Bar 
+                        dataKey="avgProfit" 
+                        name="Durchschnitt P&L" 
+                        radius={[4, 4, 0, 0]}
+                      >
+                        {profitLossDistribution.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.avgProfit >= 0 ? COLORS.profit : COLORS.loss} 
+                          />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -666,18 +722,75 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
                       data={tradeTypeData}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="type" />
-                      <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" />
-                      <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
-                      <Tooltip formatter={(value, name) => {
-                        if (name === 'profit') return [`$${value.toFixed(2)}`, 'Gesamtgewinn'];
-                        if (name === 'winRate') return [`${value.toFixed(1)}%`, 'Win Rate'];
-                        return [value, name];
-                      }} />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="profit" fill="#3b82f6" name="Gesamtgewinn" />
-                      <Bar yAxisId="right" dataKey="winRate" fill="#10b981" name="Win Rate (%)" />
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis 
+                        dataKey="type" 
+                        tick={{ fill: '#e5e7eb', fontSize: 12 }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                      />
+                      <YAxis 
+                        yAxisId="left" 
+                        orientation="left" 
+                        stroke={COLORS.primary}
+                        tick={{ fill: '#e5e7eb', fontSize: 11 }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                        label={{ 
+                          value: 'Gewinn/Verlust ($)', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fill: '#e5e7eb', fontSize: 12 }
+                        }}
+                      />
+                      <YAxis 
+                        yAxisId="right" 
+                        orientation="right" 
+                        stroke={COLORS.profit}
+                        tick={{ fill: '#e5e7eb', fontSize: 11 }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                        label={{ 
+                          value: 'Win Rate (%)', 
+                          angle: 90, 
+                          position: 'insideRight',
+                          style: { textAnchor: 'middle', fill: '#e5e7eb', fontSize: 12 }
+                        }}
+                      />
+                      <Tooltip 
+                        formatter={(value, name) => {
+                          if (name === 'profit') return [`$${Number(value).toFixed(2)}`, 'Gesamtgewinn'];
+                          if (name === 'winRate') return [`${Number(value).toFixed(1)}%`, 'Win Rate'];
+                          return [value, name];
+                        }}
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                          borderColor: COLORS.primaryLight,
+                          borderRadius: '8px' 
+                        }}
+                        labelStyle={{ fontWeight: 'bold', color: '#e5e7eb' }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: 15 }}
+                        iconType="circle"
+                      />
+                      <Bar 
+                        yAxisId="left" 
+                        dataKey="profit" 
+                        name="Gesamtgewinn" 
+                        radius={[4, 4, 0, 0]}
+                      >
+                        {tradeTypeData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.profit >= 0 ? COLORS.profit : COLORS.loss} 
+                          />
+                        ))}
+                      </Bar>
+                      <Bar 
+                        yAxisId="right" 
+                        dataKey="winRate" 
+                        name="Win Rate (%)" 
+                        fill={COLORS.secondary}
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -695,39 +808,103 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={trades.map((trade, index) => {
-                        const totalUpToIndex = trades
+                      data={filteredTrades.map((trade, index) => {
+                        const totalUpToIndex = filteredTrades
                           .slice(0, index + 1)
                           .reduce((sum, t) => sum + (t.profitLoss || 0), 0);
                           
                         return {
                           index: index + 1,
                           totalPL: totalUpToIndex,
-                          tradeResult: trade.profitLoss
+                          tradeResult: trade.profitLoss,
+                          isWin: trade.isWin
                         };
                       })}
                       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="index" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => [`$${value}`, '']} />
-                      <Legend />
-                      <Line 
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                      <XAxis 
+                        dataKey="index" 
+                        tick={{ fill: '#e5e7eb', fontSize: 11 }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                        label={{ 
+                          value: 'Trade Nummer', 
+                          position: 'insideBottom',
+                          offset: -5,
+                          style: { textAnchor: 'middle', fill: '#e5e7eb', fontSize: 12 }
+                        }}
+                      />
+                      <YAxis 
+                        tick={{ fill: '#e5e7eb', fontSize: 11 }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                        label={{ 
+                          value: 'Profit/Loss ($)', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fill: '#e5e7eb', fontSize: 12 }
+                        }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`$${Number(value).toFixed(2)}`, '']}
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                          borderColor: COLORS.primaryLight,
+                          borderRadius: '8px' 
+                        }}
+                        labelStyle={{ fontWeight: 'bold', color: '#e5e7eb' }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: 15 }}
+                        iconType="circle"
+                      />
+                      <defs>
+                        <linearGradient id="colorPL" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={COLORS.primaryLight} stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.2}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
                         type="monotone" 
                         dataKey="totalPL" 
-                        stroke="#3b82f6" 
-                        dot={{ r: 3 }} 
-                        activeDot={{ r: 5 }}
-                        name="Gesamt P&L" 
+                        name="Gesamt P&L"
+                        stroke={COLORS.primary} 
+                        fill="url(#colorPL)"
+                        dot={{ r: 2 }} 
+                        activeDot={{ r: 5, strokeWidth: 1 }}
                       />
                       <Line 
                         type="monotone" 
                         dataKey="tradeResult" 
-                        stroke="#10b981" 
-                        dot={{ r: 3 }} 
-                        activeDot={{ r: 5 }}
-                        name="Trade Resultat" 
+                        name="Trade Ergebnis"
+                        stroke={COLORS.accent}
+                        strokeWidth={2}
+                        dot={(props) => {
+                          const { cx, cy, payload } = props;
+                          const isWin = payload.isWin;
+                          return (
+                            <circle 
+                              cx={cx} 
+                              cy={cy} 
+                              r={4} 
+                              fill={isWin ? COLORS.profit : COLORS.loss}
+                              stroke="none"
+                            />
+                          );
+                        }}
+                        activeDot={(props) => {
+                          const { cx, cy, payload } = props;
+                          const isWin = payload.isWin;
+                          return (
+                            <circle 
+                              cx={cx} 
+                              cy={cy} 
+                              r={6} 
+                              fill={isWin ? COLORS.profit : COLORS.loss}
+                              stroke="white"
+                              strokeWidth={2}
+                            />
+                          );
+                        }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
