@@ -421,6 +421,38 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
 
   return (
     <div className="space-y-6">
+      {/* Setup Filter */}
+      <div className="bg-black/30 border border-primary/10 rounded-xl p-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Dashboard nach Setup filtern:</span>
+          </div>
+          <Select 
+            value={selectedSetup} 
+            onValueChange={setSelectedSetup}
+          >
+            <SelectTrigger className="w-[200px] bg-black/50">
+              <SelectValue placeholder="Setup auswählen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Setups</SelectItem>
+              {availableSetups.map((setup) => (
+                <SelectItem key={setup} value={setup}>
+                  {setup || "Unbekannt"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {selectedSetup !== "all" && (
+            <Badge className="px-2 py-1 bg-primary/20 text-primary" variant="outline">
+              {filteredTrades.length} Trades mit Setup: {selectedSetup || "Unbekannt"}
+            </Badge>
+          )}
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
