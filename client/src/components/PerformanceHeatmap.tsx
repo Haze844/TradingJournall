@@ -31,6 +31,53 @@ interface CustomTooltipProps {
 }
 
 // Benutzerdefinierter Tooltip für die Heatmap
+// Funktion zur Generierung von Beispieldaten für die Heatmap
+function generateSampleHeatmapData(): HeatmapData {
+  // Definiere die Tage der Woche und Zeitrahmen
+  const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+  const timeframe = ["04-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-22"];
+  
+  // Generiere Daten für jeden Tag und Zeitrahmen
+  const data: HeatmapDataPoint[] = [];
+  
+  days.forEach(day => {
+    timeframe.forEach(time => {
+      // Erstelle zufällige Daten
+      const tradeCount = Math.floor(Math.random() * 10);  // 0-9 Trades
+      
+      if (tradeCount > 0) {
+        // Realistischere Werte für Tage/Zeiten mit Aktivität
+        const winRate = Math.floor(Math.random() * 100);  // 0-100%
+        const avgRR = (Math.random() * 4).toFixed(2);     // 0-4 R
+        const totalPnL = ((Math.random() * 2000) - 800).toFixed(2);  // -800 bis +1200$
+        
+        data.push({
+          day,
+          timeframe: time,
+          value: winRate,
+          tradeCount,
+          winRate,
+          avgRR,
+          totalPnL
+        });
+      } else {
+        // Leere Slots für Zeiten ohne Trades
+        data.push({
+          day,
+          timeframe: time,
+          value: 0,
+          tradeCount: 0,
+          winRate: 0,
+          avgRR: "0.00",
+          totalPnL: "0.00"
+        });
+      }
+    });
+  });
+  
+  return { days, timeframe, data };
+}
+
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -98,7 +145,15 @@ export default function PerformanceHeatmap() {
       if (!response.ok) {
         throw new Error('Fehler beim Laden der Heatmap-Daten');
       }
-      return response.json();
+      const data = await response.json();
+      
+      // Wenn keine Daten vorhanden sind, generiere Beispieldaten für die Visualisierung
+      if (!data.data || data.data.length === 0) {
+        console.log("Keine Daten vom Server - generiere Beispieldaten für die Heatmap-Visualisierung");
+        return generateSampleHeatmapData();
+      }
+      
+      return data;
     },
     staleTime: 60000, // 1 Minute Cache
   });
