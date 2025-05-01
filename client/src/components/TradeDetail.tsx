@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -41,6 +41,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [editMode, setEditMode] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [editingSetup, setEditingSetup] = useState("");
   const [editingMainTrend, setEditingMainTrend] = useState("");
   const [editingInternalTrend, setEditingInternalTrend] = useState("");
@@ -186,6 +187,23 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   };
 
   // Funktion entfernt, da wir jetzt BadgeTrend verwenden
+  
+  // Klick-Handler zum Umschalten des Bearbeitungsmodus
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Wenn wir bereits im Bearbeitungsmodus sind, oder wenn angeklickte Element ein Button oder ein anderes interaktives Element ist, nichts tun
+    if (editMode || 
+        e.target instanceof HTMLButtonElement || 
+        e.target instanceof HTMLInputElement || 
+        e.target instanceof HTMLSelectElement ||
+        (e.target as HTMLElement).closest('button') ||
+        (e.target as HTMLElement).closest('select') ||
+        (e.target as HTMLElement).closest('input')) {
+      return;
+    }
+    
+    // Sonst in den Edit-Modus wechseln
+    startEditMode();
+  };
 
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4">
@@ -201,15 +219,10 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
         </div>
       ) : (
         // Trade details
-        <CardContent className="p-4">
-          {/* Action Buttons */}
+        <CardContent className="p-4" ref={cardRef} onClick={handleCardClick}>
+          {/* Action Buttons - nur im Bearbeitungsmodus sichtbar */}
           <div className="flex justify-end mb-4">
-            {!editMode ? (
-              <Button variant="outline" size="sm" onClick={startEditMode} className="flex items-center">
-                <Pencil className="h-4 w-4 mr-1" />
-                Bearbeiten
-              </Button>
-            ) : (
+            {editMode && (
               <div className="flex gap-2">
                 <Button variant="default" size="sm" onClick={saveChanges} className="flex items-center">
                   <Save className="h-4 w-4 mr-1" />
