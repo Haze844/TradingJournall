@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trade } from "@shared/schema";
@@ -30,8 +30,16 @@ import {
   Clock,
   Target,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Filter
 } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 interface TradeDashboardProps {
   trades: Trade[];
@@ -46,33 +54,53 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
   const [profitLossDistribution, setProfitLossDistribution] = useState<any[]>([]);
   const [tradeTypeData, setTradeTypeData] = useState<any[]>([]);
   const [setupPerformance, setSetupPerformance] = useState<any[]>([]);
+  const [selectedSetup, setSelectedSetup] = useState<string>("all");
   
-  // Statistik-Werte
-  const totalTrades = trades.length;
-  const winningTrades = trades.filter(t => t.isWin).length;
-  const losingTrades = trades.filter(t => t.isWin === false).length;
+  // Verfügbare Setups aus den Trades extrahieren
+  const availableSetups = useMemo(() => {
+    const setups = new Set<string>();
+    trades.forEach((trade) => {
+      if (trade.setup) {
+        setups.add(trade.setup);
+      }
+    });
+    return Array.from(setups);
+  }, [trades]);
+  
+  // Gefilterte Trades basierend auf ausgewähltem Setup
+  const filteredTrades = useMemo(() => {
+    if (selectedSetup === "all") {
+      return trades;
+    }
+    return trades.filter(trade => trade.setup === selectedSetup);
+  }, [trades, selectedSetup]);
+  
+  // Statistik-Werte basierend auf gefilterten Trades
+  const totalTrades = filteredTrades.length;
+  const winningTrades = filteredTrades.filter(t => t.isWin).length;
+  const losingTrades = filteredTrades.filter(t => t.isWin === false).length;
   const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
   
-  const totalPL = trades.reduce((sum, trade) => {
+  const totalPL = filteredTrades.reduce((sum, trade) => {
     return sum + (trade.profitLoss || 0);
   }, 0);
   
   const averageWin = winningTrades > 0 
-    ? trades.filter(t => t.isWin).reduce((sum, t) => sum + (t.profitLoss || 0), 0) / winningTrades 
+    ? filteredTrades.filter(t => t.isWin).reduce((sum, t) => sum + (t.profitLoss || 0), 0) / winningTrades 
     : 0;
     
   const averageLoss = losingTrades > 0 
-    ? Math.abs(trades.filter(t => !t.isWin).reduce((sum, t) => sum + (t.profitLoss || 0), 0)) / losingTrades 
+    ? Math.abs(filteredTrades.filter(t => !t.isWin).reduce((sum, t) => sum + (t.profitLoss || 0), 0)) / losingTrades 
     : 0;
     
   const profitFactor = averageLoss > 0 ? averageWin / averageLoss : 0;
   
-  const averageRR = trades.length > 0 
-    ? trades.reduce((sum, trade) => sum + (trade.rrAchieved || 0), 0) / trades.length 
+  const averageRR = filteredTrades.length > 0 
+    ? filteredTrades.reduce((sum, trade) => sum + (trade.rrAchieved || 0), 0) / filteredTrades.length 
     : 0;
   
-  const consecutiveWins = getMaxConsecutiveCount(trades, true);
-  const consecutiveLosses = getMaxConsecutiveCount(trades, false);
+  const consecutiveWins = getMaxConsecutiveCount(filteredTrades, true);
+  const consecutiveLosses = getMaxConsecutiveCount(filteredTrades, false);
   
   // Profitable Tage berechnen
   const dayPerformance = trades.reduce((acc, trade) => {
@@ -127,7 +155,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     ]);
     
     // Performance nach Symbol
-    const symbolData = trades.reduce((acc, trade) => {
+    const symbolData = filteredTrades.reduce((acc, trade) => {
       const symbol = trade.symbol || 'Unbekannt';
       
       if (!acc[symbol]) {
@@ -158,7 +186,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     );
     
     // Performance nach Tag
-    const dayData = trades.reduce((acc, trade) => {
+    const dayData = filteredTrades.reduce((acc, trade) => {
       if (!trade.date) return acc;
       
       const date = new Date(trade.date);
@@ -191,7 +219,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     );
     
     // Performance nach Uhrzeit
-    const timeData = trades.reduce((acc, trade) => {
+    const timeData = filteredTrades.reduce((acc, trade) => {
       if (!trade.date) return acc;
       
       const date = new Date(trade.date);
@@ -226,7 +254,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     );
     
     // Risk/Reward-Verteilung
-    const rrGroups = trades.reduce((acc, trade) => {
+    const rrGroups = filteredTrades.reduce((acc, trade) => {
       if (trade.rrAchieved === undefined || trade.rrAchieved === null) return acc;
       
       let group;
@@ -263,7 +291,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     );
     
     // Profit/Loss-Verteilung
-    const plGroups = trades.reduce((acc, trade) => {
+    const plGroups = filteredTrades.reduce((acc, trade) => {
       if (trade.profitLoss === undefined || trade.profitLoss === null) return acc;
       
       let group;
@@ -301,7 +329,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     );
     
     // Long vs. Short Performance
-    const typeData = trades.reduce((acc, trade) => {
+    const typeData = filteredTrades.reduce((acc, trade) => {
       const type = trade.entryType || 'Unbekannt';
       
       if (!acc[type]) {
@@ -331,7 +359,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
       }))
     );
     
-    // Setup Performance
+    // Setup Performance (immer alle anzeigen, unabhängig vom Filter)
     const setupData = trades.reduce((acc, trade) => {
       const setup = trade.setup || 'Unbekannt';
       
@@ -364,7 +392,7 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
         }))
     );
     
-  }, [trades, winningTrades, losingTrades]);
+  }, [filteredTrades, trades, winningTrades, losingTrades, selectedSetup]);
 
   // Hilfsfunktion für maximale Folge von Gewinnen/Verlusten
   function getMaxConsecutiveCount(trades: Trade[], isWin: boolean): number {
