@@ -21,7 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates, getTodayDates, formatDate } from "@/lib/utils";
 import { Trade } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
   Users, TrendingDown, DollarSign, AlertCircle, Image as ImageIcon,
@@ -303,11 +303,17 @@ export default function SimpleHome() {
           </div>
           
           {/* Trade Details - Erscheint als Modal */}
-          <Dialog open={!!selectedTrade} onOpenChange={(open) => !open && setSelectedTrade(null)}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-black/95 border border-primary/30 shadow-xl">
-              {selectedTrade && <TradeDetail selectedTrade={selectedTrade} />}
-            </DialogContent>
-          </Dialog>
+          {selectedTrade && (
+            <Dialog open={true} onOpenChange={(open) => !open && setSelectedTrade(null)}>
+              <DialogContent className="max-w-7xl w-[90vw] max-h-[85vh] overflow-y-auto bg-black/95 border border-primary/30 shadow-xl p-0">
+                <DialogTitle className="sr-only">Trade Details</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Detailansicht eines ausgewählten Trades mit allen Parametern und Eigenschaften.
+                </DialogDescription>
+                <TradeDetail selectedTrade={selectedTrade} />
+              </DialogContent>
+            </Dialog>
+          )}
 
           {/* TradingView Chart Display */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
