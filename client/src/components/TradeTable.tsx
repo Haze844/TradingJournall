@@ -28,6 +28,7 @@ import {
   liquidationTypes,
   unmitZoneTypes,
   marketPhaseTypes,
+  slTypes,
   rrValues,
   setupTypes
 } from "@shared/schema";
@@ -48,7 +49,9 @@ import {
   DollarSign,
   Clock,
   Plus,
-  X
+  X,
+  Shield,
+  CircleDot
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -209,6 +212,29 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
     // Marktphase filter
     if (filters.marketPhases.size > 0 && trade.marketPhase && !filters.marketPhases.has(trade.marketPhase)) {
       return false;
+    }
+    
+    // SL Type filter
+    if (filters.slTypes.size > 0 && trade.slType && !filters.slTypes.has(trade.slType)) {
+      return false;
+    }
+    
+    // SL Points filter
+    if (filters.slPointsRanges.size > 0 && trade.slPoints !== undefined) {
+      const points = Number(trade.slPoints);
+      let matchesAnyRange = false;
+      
+      if (filters.slPointsRanges.has('1-10') && points >= 1 && points <= 10) {
+        matchesAnyRange = true;
+      } else if (filters.slPointsRanges.has('11-20') && points >= 11 && points <= 20) {
+        matchesAnyRange = true;
+      } else if (filters.slPointsRanges.has('21-30') && points >= 21 && points <= 30) {
+        matchesAnyRange = true;
+      }
+      
+      if (!matchesAnyRange) {
+        return false;
+      }
     }
     
     // Entry type filter
@@ -1347,7 +1373,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       SL
-                      <Shield className="h-3 w-3 ml-1" />
+                      <Filter className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">
@@ -1389,7 +1415,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect }: Tr
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
                       SL Punkte
-                      <CircleDot className="h-3 w-3 ml-1" />
+                      <Target className="h-3 w-3 ml-1" />
                     </div>
                   </PopoverTrigger>
                   <PopoverContent className="w-56" align="start">

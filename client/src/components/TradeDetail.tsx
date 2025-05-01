@@ -607,18 +607,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Ergebnis</div>
-                      <div className={`font-medium text-sm ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
-                        {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}${selectedTrade.profitLoss.toFixed(2)} $` : '-'}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">Status</div>
-                      <BadgeWinLoss isWin={selectedTrade.isWin} size="sm" />
-                    </div>
-                  </div>
+
                 </div>
               </div>
             </div>
