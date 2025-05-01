@@ -99,9 +99,24 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
     
     setIsUploading(true);
     
-    // Direkte Verwendung der URL als Bildquelle
-    setPreview(linkInput);
-    onChange(linkInput);
+    // Verarbeite den eingegebenen Link
+    let finalUrl = linkInput.trim();
+    
+    // Wenn es ein TradingView-Link ist, stelle sicher, dass er korrekt formatiert ist
+    if (finalUrl.includes('tradingview.com')) {
+      // Prüfe, ob es bereits ein direkter Screenshot-Link ist
+      if (!finalUrl.includes('/x/')) {
+        // Versuche den Link in einen Screenshot-Link umzuwandeln, wenn möglich
+        const tvLinkMatch = finalUrl.match(/\/chart\/([^\/]+)/);
+        if (tvLinkMatch && tvLinkMatch[1]) {
+          finalUrl = `https://www.tradingview.com/x/${tvLinkMatch[1]}/`;
+        }
+      }
+    }
+    
+    // Direkte Verwendung der verarbeiteten URL als Bildquelle
+    setPreview(finalUrl);
+    onChange(finalUrl);
     
     toast({
       title: "Bild hinzugefügt",
