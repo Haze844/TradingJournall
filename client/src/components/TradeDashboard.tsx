@@ -15,7 +15,8 @@ import {
   ResponsiveContainer,
   Cell,
   Pie,
-  PieChart
+  PieChart,
+  Area
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -863,12 +864,12 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
                           <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0.2}/>
                         </linearGradient>
                       </defs>
-                      <Area 
+                      <Line 
                         type="monotone" 
                         dataKey="totalPL" 
                         name="Gesamt P&L"
-                        stroke={COLORS.primary} 
-                        fill="url(#colorPL)"
+                        stroke={COLORS.primary}
+                        strokeWidth={3} 
                         dot={{ r: 2 }} 
                         activeDot={{ r: 5, strokeWidth: 1 }}
                       />
