@@ -278,11 +278,18 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-blue-300 font-medium">XP: {currentXP}/{nextLevelXP}</span>
             <Badge variant="outline" className="bg-blue-900/50 border-blue-500/30 text-blue-300">
-              Level {streak?.level}
+              Level {streakLevel}
             </Badge>
           </div>
           <div className="progress-container">
-            <Progress value={progressToNextLevel} className="h-2" />
+            <div className="relative h-2 w-full bg-blue-900/50 rounded-full overflow-hidden">
+              <div 
+                className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-blue-300 rounded-full"
+                style={{ width: `${progressToNextLevel}%`, transition: 'width 1s ease-in-out' }}
+              >
+                <span className="absolute inset-0 w-full h-full bg-white opacity-20 animate-pulse"></span>
+              </div>
+            </div>
           </div>
           <div className="mt-2 text-xs text-blue-400/70 text-center">
             {nextLevelXP - currentXP} XP bis zum nächsten Level

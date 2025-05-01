@@ -178,11 +178,11 @@ export default function SimpleHome() {
       };
     }
 
-    const wins = trades.filter(trade => trade.isWin).length;
+    const wins = trades.filter((trade: any) => trade.isWin).length;
     const losses = trades.length - wins;
     const winRate = (wins / trades.length) * 100;
-    const totalPL = trades.reduce((sum, trade) => sum + (trade.profitLoss || 0), 0);
-    const totalRR = trades.reduce((sum, trade) => sum + (trade.rrAchieved || 0), 0);
+    const totalPL = trades.reduce((sum: number, trade: any) => sum + (trade.profitLoss || 0), 0);
+    const totalRR = trades.reduce((sum: number, trade: any) => sum + (trade.rrAchieved || 0), 0);
     const avgRR = totalRR / trades.length;
 
     return {
@@ -392,9 +392,10 @@ export default function SimpleHome() {
                   <Trophy className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Performance
                 </TabsTrigger>
-                <TabsTrigger value="streaks" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
-                  <Flame className="mr-1.5 h-4 w-4 md:inline hidden" />
-                  Streak Tracker
+                <TabsTrigger value="streaks" className="custom-tabs-trigger data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2 relative overflow-hidden group">
+                  <Flame className="mr-1.5 h-4 w-4 md:inline hidden group-hover:text-blue-300 transition-colors" />
+                  <span className="group-hover:text-blue-300 transition-colors">Streak Tracker</span>
+                  <span className="absolute -bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -452,8 +453,21 @@ export default function SimpleHome() {
             
             {/* Trading Streak Tracker Tab */}
             <TabsContent value="streaks" className="mt-0">
-              <div className="rocket-card rounded-xl p-2 sm:p-4">
-                <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center"><Flame className="w-4 h-4 mr-2" /> Trading Streak Tracker</h2>
+              <div className="bg-gradient-to-r from-blue-900/10 to-blue-800/5 backdrop-blur-md rounded-xl border border-blue-500/10 shadow-xl p-2 sm:p-4">
+                <h2 className="text-lg font-bold mb-4 sm:mb-5 flex items-center">
+                  <div className="bg-blue-900/30 p-2 rounded-full mr-3">
+                    <Flame className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">
+                    Trading Streak Challenge
+                  </span>
+                </h2>
+                <div className="mb-5">
+                  <p className="text-sm text-blue-300/80 mb-3">
+                    Baue deine Trading-Streak auf, sammle Erfahrungspunkte und verdiene einzigartige Badges,
+                    während du deine Handelsleistung kontinuierlich verbesserst.
+                  </p>
+                </div>
                 <TradingStreakTracker userId={userId} />
               </div>
             </TabsContent>
