@@ -644,7 +644,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                       <div className="text-xs text-muted-foreground">SL Typ</div>
                       {editMode ? (
                         <div className="flex gap-1 flex-wrap">
-                          {slTypes.map((type) => (
+                          {["Sweep", "zerstört"].map((type) => (
                             <Button
                               key={type}
                               type="button"
