@@ -213,16 +213,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
         // Trade details
         <CardContent className="p-4" ref={cardRef} onClick={handleCardClick}>
           
-          {/* Hauptinformationen in einer Zeile */}
-          <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
-            <div />
-            <div>
-              <BadgeWinLoss isWin={selectedTrade.isWin} />
-              <span className={`ml-2 font-bold ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
-                {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
-              </span>
-            </div>
-          </div>
+          {/* Entfernt: Hauptinformationen in einer Zeile */}
           
           {/* Drei Spalten für die wichtigsten Informationen (auf Mobilgeräten 1 Spalte) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -231,6 +222,12 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
               <div className="bg-muted/30 rounded-md p-2 mb-2">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-1.5">
+                  <div className="flex justify-between items-center mb-1">
+                    <BadgeWinLoss isWin={selectedTrade.isWin} />
+                    <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                      {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
+                    </span>
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <div className="text-xs text-muted-foreground">Datum</div>
