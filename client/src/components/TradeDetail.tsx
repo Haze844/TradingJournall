@@ -60,6 +60,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const [editingRRAchieved, setEditingRRAchieved] = useState<number>(0);
   const [editingLocation, setEditingLocation] = useState("");
   const [editingRRPotential, setEditingRRPotential] = useState<number>(0);
+  const [editingSlType, setEditingSlType] = useState<string>("");
+  const [editingSlPoints, setEditingSlPoints] = useState<number | undefined>(undefined);
 
   // Mutation für das Update der Trade-Daten
   const updateTradeMutation = useMutation({
@@ -109,6 +111,8 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
     setEditingRRAchieved(selectedTrade.rrAchieved || 0);
     setEditingRRPotential(selectedTrade.rrPotential || 0);
     setEditingLocation(selectedTrade.location || '');
+    setEditingSlType(selectedTrade.slType || '');
+    setEditingSlPoints(selectedTrade.slPoints !== undefined && selectedTrade.slPoints !== null ? selectedTrade.slPoints : undefined);
     
     setEditMode(true);
   };
@@ -143,7 +147,9 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       marketPhase: editingMarketPhase,
       rrAchieved: editingRRAchieved,
       rrPotential: editingRRPotential,
-      location: editingLocation
+      location: editingLocation,
+      slType: editingSlType,
+      slPoints: editingSlPoints
     });
   };
 
@@ -607,7 +613,53 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                       )}
                     </div>
                   </div>
-
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div>
+                      <div className="text-xs text-muted-foreground">SL Typ</div>
+                      {editMode ? (
+                        <div className="flex gap-1 flex-wrap">
+                          {["Sweep", "zerstört"].map(val => (
+                            <Button
+                              key={val}
+                              type="button"
+                              variant={editingSlType === val ? "default" : "outline"}
+                              size="sm"
+                              className="p-1 h-6 text-[10px] flex-1"
+                              onClick={() => setEditingSlType(val)}
+                            >
+                              {val}
+                            </Button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.slType || '-'}</div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">SL Punkte</div>
+                      {editMode ? (
+                        <div>
+                          <Select 
+                            value={editingSlPoints?.toString() || ''}
+                            onValueChange={(value) => setEditingSlPoints(Number(value))}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Punkte wählen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 30 }, (_, i) => i + 1).map((val) => (
+                                <SelectItem key={val} value={val.toString()} className="text-xs">
+                                  {val}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : (
+                        <div className="font-medium text-sm">{selectedTrade.slPoints || '-'}</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
