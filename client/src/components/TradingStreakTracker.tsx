@@ -15,8 +15,9 @@ type TradingStreak = {
   totalLosses: number;
   experiencePoints: number;
   lastTradeDate: string | null;
-  level: number;
+  streakLevel: number; // Angepasst an den Backend-Feld-Namen
   badges: string[];
+  level?: number; // Für Abwärtskompatibilität
 };
 
 export default function TradingStreakTracker({ userId }: { userId: number }) {
@@ -103,6 +104,7 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
     let icon;
     let color;
     let label;
+    let isLegendary = false;
     
     switch (type) {
       case "winning_streak_5":
@@ -119,6 +121,7 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
         icon = <Flame className="h-5 w-5" />;
         color = "bg-purple-500";
         label = "20er Streak";
+        isLegendary = true;
         break;
       case "perfect_week":
         icon = <Star className="h-5 w-5" />;
@@ -144,6 +147,7 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
         icon = <Award className="h-5 w-5" />;
         color = "bg-emerald-500";
         label = "100 Trades";
+        isLegendary = true;
         break;
       default:
         icon = <Award className="h-5 w-5" />;
@@ -153,7 +157,7 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
     
     return (
       <div className="tooltip" data-tip={label}>
-        <div className={`${color} p-2 rounded-full text-white flex items-center justify-center mr-2 mb-2`}>
+        <div className={`achievement-badge ${color} ${isLegendary ? 'legendary' : ''} p-2 rounded-full text-white flex items-center justify-center mr-2 mb-2`}>
           {icon}
         </div>
       </div>
@@ -163,22 +167,32 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
   // Wenn keine Trading Streak vorhanden ist, zeigen wir einen Erst-Einstieg an
   if (!isLoading && !streak) {
     return (
-      <Card className="w-full bg-card/30 backdrop-blur-sm border border-muted/30">
-        <CardHeader>
+      <Card className="streak-card w-full backdrop-blur-sm">
+        <CardHeader className="pb-2">
           <CardTitle className="flex items-center">
-            <Zap className="mr-2 h-6 w-6 text-yellow-500" />
-            Trading Streak Tracker
+            <Zap className="mr-2 h-6 w-6 text-yellow-500 animate-pulse" />
+            <span className="level-title">Trading Streak Tracker</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-blue-300">
             Starte deine erste Trading Streak und sammle Auszeichnungen!
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="py-4 text-center">
-            <p>Du hast noch keine Trading Streak gestartet.</p>
-            <p className="text-sm text-muted-foreground mt-2">
+          <div className="py-6 text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="w-16 h-16 rounded-full bg-blue-800/30 flex items-center justify-center">
+                <Trophy className="h-8 w-8 text-blue-400 opacity-50" />
+              </div>
+            </div>
+            <p className="text-lg font-medium">Du hast noch keine Trading Streak gestartet.</p>
+            <p className="text-sm text-blue-300/80 mt-2">
               Füge deinen ersten Trade hinzu, um deine Streak zu beginnen!
             </p>
+            <div className="mt-6">
+              <div className="w-full h-2 bg-blue-900/30 rounded-full overflow-hidden animate-pulse">
+                <div className="h-full w-0 bg-gradient-to-r from-blue-500 to-blue-300 rounded-full"></div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -187,14 +201,20 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
   
   if (isLoading) {
     return (
-      <Card className="w-full bg-card/30 backdrop-blur-sm border border-muted/30">
+      <Card className="streak-card w-full backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Trading Streak Tracker</CardTitle>
-          <CardDescription>Lädt...</CardDescription>
+          <CardTitle className="flex items-center">
+            <Flame className="mr-2 h-6 w-6 text-yellow-500" />
+            <span className="level-title">Trading Streak Tracker</span>
+          </CardTitle>
+          <CardDescription className="text-blue-300">
+            Lädt deine Trading Daten...
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="py-8 flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-t-2 border-primary"></div>
+            <p className="mt-4 text-sm text-blue-300/80">Bitte warten, die Streak-Daten werden geladen...</p>
           </div>
         </CardContent>
       </Card>
@@ -202,57 +222,78 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
   }
 
   // Nächstes Level XP
-  const nextLevelXP = getNextLevelXP(streak?.level || 1);
+  const streakLevel = streak?.streakLevel || streak?.level || 1;
+  const nextLevelXP = getNextLevelXP(streakLevel);
   const currentXP = streak?.experiencePoints || 0;
   const progressToNextLevel = getProgress(currentXP, nextLevelXP);
 
   return (
-    <Card className="w-full bg-card/30 backdrop-blur-sm border border-muted/30">
-      <CardHeader>
+    <Card className="streak-card w-full backdrop-blur-sm">
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center">
           <Flame className="mr-2 h-6 w-6 text-yellow-500" />
-          Trading Streak Tracker
+          <span className="level-title">Trading Streak Tracker</span>
         </CardTitle>
-        <CardDescription>
-          Level {streak?.level} Trader
+        <CardDescription className="text-blue-300">
+          <span className="font-semibold">Level {streakLevel}</span> Trader
+          {streak?.badges?.length ? ` · ${streak.badges.length} Abzeichen erzielt` : ''}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="flex flex-col items-center">
-            <h3 className="text-sm font-medium">Aktuelle Streak</h3>
-            <p className="text-2xl font-bold">{streak?.currentStreak}</p>
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          <div className="streak-data-box flex flex-col items-center">
+            <h3 className="text-sm font-medium text-blue-300 mb-1">Aktuelle Streak</h3>
+            <p className="current-streak-value">{streak?.currentStreak}</p>
+            <span className="text-xs text-blue-400/70 mt-1">
+              Gewinn-Serie
+            </span>
           </div>
-          <div className="flex flex-col items-center">
-            <h3 className="text-sm font-medium">Längste Streak</h3>
-            <p className="text-2xl font-bold">{streak?.longestStreak}</p>
+          <div className="streak-data-box flex flex-col items-center">
+            <h3 className="text-sm font-medium text-blue-300 mb-1">Längste Streak</h3>
+            <p className="longest-streak-value">{streak?.longestStreak}</p>
+            <span className="text-xs text-blue-400/70 mt-1">
+              Bester Rekord
+            </span>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="flex flex-col items-center">
-            <h3 className="text-sm font-medium">Gesamt-Gewinne</h3>
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          <div className="streak-data-box flex flex-col items-center">
+            <h3 className="text-sm font-medium text-blue-300 mb-1">Gesamt-Gewinne</h3>
             <p className="text-2xl font-bold text-green-500">{streak?.totalWins}</p>
+            <span className="text-xs text-blue-400/70 mt-1">
+              Erfolgreiche Trades
+            </span>
           </div>
-          <div className="flex flex-col items-center">
-            <h3 className="text-sm font-medium">Gesamt-Verluste</h3>
+          <div className="streak-data-box flex flex-col items-center">
+            <h3 className="text-sm font-medium text-blue-300 mb-1">Gesamt-Verluste</h3>
             <p className="text-2xl font-bold text-red-500">{streak?.totalLosses}</p>
+            <span className="text-xs text-blue-400/70 mt-1">
+              Fehlgeschlagene Trades
+            </span>
           </div>
         </div>
         
-        <div className="mb-6">
+        <div className="mb-8 bg-blue-900/20 p-4 rounded-xl">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm">XP: {currentXP}/{nextLevelXP}</span>
-            <Badge variant="outline">Level {streak?.level}</Badge>
+            <span className="text-sm text-blue-300 font-medium">XP: {currentXP}/{nextLevelXP}</span>
+            <Badge variant="outline" className="bg-blue-900/50 border-blue-500/30 text-blue-300">
+              Level {streak?.level}
+            </Badge>
           </div>
-          <Progress value={progressToNextLevel} className="h-2" />
+          <div className="progress-container">
+            <Progress value={progressToNextLevel} className="h-2" />
+          </div>
+          <div className="mt-2 text-xs text-blue-400/70 text-center">
+            {nextLevelXP - currentXP} XP bis zum nächsten Level
+          </div>
         </div>
         
         {streak?.badges && streak.badges.length > 0 && (
-          <div>
-            <h3 className="text-sm font-medium mb-2">Errungenschaften</h3>
-            <div className="flex flex-wrap">
-              {streak.badges.map((badge, idx) => (
+          <div className="bg-blue-900/20 p-4 rounded-xl">
+            <h3 className="text-sm font-medium text-blue-300 mb-3">Errungenschaften</h3>
+            <div className="badge-container">
+              {streak.badges.map((badge: string, idx: number) => (
                 <BadgeIcon key={idx} type={badge} />
               ))}
             </div>
