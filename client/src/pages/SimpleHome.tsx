@@ -165,9 +165,20 @@ export default function SimpleHome() {
     setSelectedTrade(trade);
   };
 
-  // Berechne Statistiken für die angezeigten Trades
+  // State für gefilterte Trades
+  const [filteredTrades, setFilteredTrades] = useState<Trade[]>([]);
+
+  // Handler für gefilterte Trades aus der TradeTable-Komponente
+  const handleFilteredTradesChange = (newFilteredTrades: Trade[]) => {
+    setFilteredTrades(newFilteredTrades);
+  };
+
+  // Berechne Statistiken für die angezeigten Trades (basierend auf gefilterten Trades)
   const tradeStats = useMemo(() => {
-    if (!trades || trades.length === 0) {
+    // Verwende die gefilterten Trades, wenn vorhanden, ansonsten alle Trades
+    const tradesForStats = filteredTrades.length > 0 ? filteredTrades : trades;
+    
+    if (!tradesForStats || tradesForStats.length === 0) {
       return {
         count: 0,
         wins: 0,
@@ -179,15 +190,15 @@ export default function SimpleHome() {
       };
     }
 
-    const wins = trades.filter((trade: any) => trade.isWin).length;
-    const losses = trades.length - wins;
-    const winRate = (wins / trades.length) * 100;
-    const totalPL = trades.reduce((sum: number, trade: any) => sum + (trade.profitLoss || 0), 0);
-    const totalRR = trades.reduce((sum: number, trade: any) => sum + (trade.rrAchieved || 0), 0);
-    const avgRR = totalRR / trades.length;
+    const wins = tradesForStats.filter((trade: any) => trade.isWin).length;
+    const losses = tradesForStats.length - wins;
+    const winRate = (wins / tradesForStats.length) * 100;
+    const totalPL = tradesForStats.reduce((sum: number, trade: any) => sum + (trade.profitLoss || 0), 0);
+    const totalRR = tradesForStats.reduce((sum: number, trade: any) => sum + (trade.rrAchieved || 0), 0);
+    const avgRR = totalRR / tradesForStats.length;
 
     return {
-      count: trades.length,
+      count: tradesForStats.length,
       wins,
       losses,
       winRate,
@@ -195,7 +206,7 @@ export default function SimpleHome() {
       totalRR,
       avgRR
     };
-  }, [trades]);
+  }, [trades, filteredTrades]);
 
   // Handle filter changes
   const handleFilterChange = (newFilters: any) => {
@@ -363,6 +374,7 @@ export default function SimpleHome() {
                 trades={trades}
                 isLoading={tradesLoading}
                 onTradeSelect={handleTradeSelect}
+                onFilteredTradesChange={handleFilteredTradesChange}
               />
             </div>
           </div>
