@@ -167,9 +167,9 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
         )}
       </div>
       {!preview ? (
-        <div className="border-2 border-dashed border-primary/40 rounded-lg p-2 text-center hover:border-primary/60 transition-colors">
-          <div className="flex flex-col items-center justify-center space-y-1">
-            <div className="w-full space-y-1">
+        <div className="border border-dashed border-primary/40 rounded-lg p-1 text-center hover:border-primary/60 transition-colors">
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full space-y-0.5">
               <Input
                 type="url"
                 placeholder="https://www.tradingview.com/x/..."
