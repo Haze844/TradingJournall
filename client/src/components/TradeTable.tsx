@@ -309,20 +309,35 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       
       // Prüfe, ob das Datum bereits ein Date-Objekt ist oder ein String
       if (typeof trade.date === 'string') {
+        const dateString = trade.date;
         // Überprüfe, ob das Format MM/DD/YYYY ist (wie in 04/29/2025)
-        if (/^\d{2}\/\d{2}\/\d{4}/.test(trade.date)) {
+        if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
           // Das Datum ist im Format MM/DD/YYYY
-          const [month, day, year] = trade.date.split('/');
-          tradeDate = new Date(`${year}-${month}-${day}`);
+          // Zerteile es um das Datum zu extrahieren
+          const parts = dateString.split(' ');
+          const datePart = parts[0];
+          const [month, day, year] = datePart.split('/');
+          
+          // Monat ist 0-basiert in JavaScript Date (Januar = 0)
+          const monthIndex = parseInt(month, 10) - 1;
+          const dayNum = parseInt(day, 10);
+          const yearNum = parseInt(year, 10);
+          
+          tradeDate = new Date(yearNum, monthIndex, dayNum);
+          
+          // Wenn es eine Uhrzeit gibt, setze diese auch
+          if (parts.length > 1) {
+            const timePart = parts[1];
+            const [hours, minutes, seconds] = timePart.split(':').map(p => parseInt(p, 10));
+            tradeDate.setHours(hours || 0, minutes || 0, seconds || 0);
+          }
         } else {
           // Versuche normale Konvertierung
-          tradeDate = new Date(trade.date);
+          tradeDate = new Date(dateString);
         }
       } else {
         tradeDate = new Date(trade.date);
       }
-      
-      console.log("Trade Datum:", trade.date, "→", tradeDate.toISOString());
       
       // Set time to midnight for pure date comparison
       const startDate = new Date(filters.startDate);
@@ -330,13 +345,6 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       
       const endDate = new Date(filters.endDate);
       endDate.setHours(23, 59, 59, 999);
-      
-      console.log("Datum Filter: ", 
-        startDate.toISOString(), " bis ", 
-        endDate.toISOString(), 
-        " - Ist im Bereich: ", 
-        tradeDate >= startDate && tradeDate <= endDate
-      );
       
       if (tradeDate < startDate || tradeDate > endDate) {
         return false;
