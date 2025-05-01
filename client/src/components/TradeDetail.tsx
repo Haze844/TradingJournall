@@ -225,20 +225,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
           
           {/* Hauptinformationen in einer Zeile */}
           <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
-            <div className="flex items-center space-x-3">
-              <div>
-                <div className="text-xs text-muted-foreground">Datum</div>
-                <div className="font-bold text-sm">{formatDate(selectedTrade.date)}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Symbol</div>
-                <div className="font-bold text-sm">{selectedTrade.symbol}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">RR</div>
-                <div className="font-bold text-sm">{selectedTrade.rrAchieved || '-'}</div>
-              </div>
-            </div>
+            <div />
             <div>
               <BadgeWinLoss isWin={selectedTrade.isWin} />
               <span className={`ml-2 font-bold ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
@@ -254,6 +241,16 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
               <div className="bg-muted/30 rounded-md p-2 mb-2">
                 <div className="text-xs font-medium mb-1 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-1.5">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Datum</div>
+                      <div className="font-bold text-xs">{formatDate(selectedTrade.date)}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-muted-foreground">Symbol</div>
+                      <div className="font-bold text-xs">{selectedTrade.symbol}</div>
+                    </div>
+                  </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Setup</div>
                     {editMode ? (
