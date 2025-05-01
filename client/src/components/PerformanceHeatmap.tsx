@@ -164,17 +164,59 @@ const CustomPoint = (props: CustomPointProps) => {
   );
 };
 
+// Zeitraum-Optionen für Filter
+type TimeRangeOption = {
+  label: string;
+  value: string;
+  days: number;
+};
+
+const timeRangeOptions: TimeRangeOption[] = [
+  { label: "Alle Daten", value: "all", days: 0 },
+  { label: "Letzte Woche", value: "last_week", days: 7 },
+  { label: "Letzter Monat", value: "last_month", days: 30 },
+  { label: "Letztes Quartal", value: "last_quarter", days: 90 },
+  { label: "Letztes Jahr", value: "last_year", days: 365 },
+];
+
 export default function PerformanceHeatmap() {
   const [dataType, setDataType] = useState<"winRate" | "avgRR" | "pnl">("winRate");
   const [selectedCell, setSelectedCell] = useState<HeatmapDataPoint | null>(null);
   const [interactionMode, setInteractionMode] = useState<"hover" | "click">("hover");
+  const [timeRange, setTimeRange] = useState<string>("all");
   const { toast } = useToast();
   
+  // Berechne Datumsgrenzen basierend auf dem ausgewählten Zeitraum
+  const getDateRange = () => {
+    const selectedOption = timeRangeOptions.find(option => option.value === timeRange);
+    if (!selectedOption || selectedOption.value === 'all') {
+      return null; // Kein Datumsfilter, wenn "Alle Daten" ausgewählt ist
+    }
+    
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - selectedOption.days);
+    
+    return {
+      startDate: startDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
+      endDate: endDate.toISOString().split('T')[0]
+    };
+  };
+  
+  // Datumsbereich für die API-Anfrage
+  const dateRange = getDateRange();
+
   // Daten aus der API abrufen
   const { data: heatmapData, isLoading, error } = useQuery<HeatmapData>({
-    queryKey: ["/api/performance-heatmap"],
+    queryKey: ["/api/performance-heatmap", timeRange],
     queryFn: async () => {
-      const response = await fetch(`/api/performance-heatmap?userId=2`);
+      // URL mit Parametern aufbauen
+      let url = `/api/performance-heatmap?userId=2`;
+      if (dateRange) {
+        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+      }
+      
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Fehler beim Laden der Heatmap-Daten');
       }
@@ -279,19 +321,37 @@ export default function PerformanceHeatmap() {
           <CardTitle>Performance Heatmap</CardTitle>
           <CardDescription>Analyse deiner Trading-Performance nach Wochentag und Uhrzeit</CardDescription>
         </div>
-        <Select
-          value={dataType}
-          onValueChange={(value) => setDataType(value as "winRate" | "avgRR" | "pnl")}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Win-Rate" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="winRate">Win-Rate</SelectItem>
-            <SelectItem value="avgRR">Durchschn. RR</SelectItem>
-            <SelectItem value="pnl">Profit/Loss</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select
+            value={timeRange}
+            onValueChange={setTimeRange}
+          >
+            <SelectTrigger className="w-[160px] bg-black/50">
+              <SelectValue placeholder="Zeitraum" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeRangeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select
+            value={dataType}
+            onValueChange={(value) => setDataType(value as "winRate" | "avgRR" | "pnl")}
+          >
+            <SelectTrigger className="w-[160px] bg-black/50">
+              <SelectValue placeholder="Win-Rate" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="winRate">Win-Rate</SelectItem>
+              <SelectItem value="avgRR">Durchschn. RR</SelectItem>
+              <SelectItem value="pnl">Profit/Loss</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col md:flex-row gap-4">

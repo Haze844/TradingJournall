@@ -994,8 +994,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid user ID" });
       }
       
+      // Datumsfilter verarbeiten, falls vorhanden
+      const startDateParam = req.query.startDate as string;
+      const endDateParam = req.query.endDate as string;
+      
+      let startDate: Date | undefined;
+      let endDate: Date | undefined;
+      
+      if (startDateParam) {
+        startDate = new Date(startDateParam);
+        if (isNaN(startDate.getTime())) {
+          return res.status(400).json({ error: "Invalid start date format" });
+        }
+      }
+      
+      if (endDateParam) {
+        endDate = new Date(endDateParam);
+        if (isNaN(endDate.getTime())) {
+          return res.status(400).json({ error: "Invalid end date format" });
+        }
+        // Setze das Ende des Tages für den Vergleich
+        endDate.setHours(23, 59, 59, 999);
+      }
+      
       // Holen Sie alle Trades des Benutzers
-      const trades = await storage.getTrades(userId);
+      const allTrades = await storage.getTrades(userId);
+      
+      // Filtere Trades nach Datum, falls Datumsfilter angegeben wurden
+      const trades = allTrades.filter(trade => {
+        if (!trade.date) return false;
+        
+        const tradeDate = new Date(trade.date);
+        
+        if (startDate && tradeDate < startDate) return false;
+        if (endDate && tradeDate > endDate) return false;
+        
+        return true;
+      });
       
       if (!trades || trades.length === 0) {
         return res.json({ days: [], timeframe: [], data: [] });
