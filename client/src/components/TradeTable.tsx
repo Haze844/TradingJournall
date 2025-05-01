@@ -304,7 +304,25 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
     
     // Date range filter
     if (trade.date) {
-      const tradeDate = new Date(trade.date);
+      // Erstelle eine neue Date aus dem Trade-Datum
+      let tradeDate: Date;
+      
+      // Prüfe, ob das Datum bereits ein Date-Objekt ist oder ein String
+      if (typeof trade.date === 'string') {
+        // Überprüfe, ob das Format MM/DD/YYYY ist (wie in 04/29/2025)
+        if (/^\d{2}\/\d{2}\/\d{4}/.test(trade.date)) {
+          // Das Datum ist im Format MM/DD/YYYY
+          const [month, day, year] = trade.date.split('/');
+          tradeDate = new Date(`${year}-${month}-${day}`);
+        } else {
+          // Versuche normale Konvertierung
+          tradeDate = new Date(trade.date);
+        }
+      } else {
+        tradeDate = new Date(trade.date);
+      }
+      
+      console.log("Trade Datum:", trade.date, "→", tradeDate.toISOString());
       
       // Set time to midnight for pure date comparison
       const startDate = new Date(filters.startDate);
@@ -312,6 +330,13 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       
       const endDate = new Date(filters.endDate);
       endDate.setHours(23, 59, 59, 999);
+      
+      console.log("Datum Filter: ", 
+        startDate.toISOString(), " bis ", 
+        endDate.toISOString(), 
+        " - Ist im Bereich: ", 
+        tradeDate >= startDate && tradeDate <= endDate
+      );
       
       if (tradeDate < startDate || tradeDate > endDate) {
         return false;
