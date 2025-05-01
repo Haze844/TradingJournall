@@ -152,7 +152,7 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-0">
       <div className="flex items-center justify-between">
         {preview && (
           <Button 
@@ -166,7 +166,6 @@ export default function ChartImageUpload({ existingImage, onChange }: ChartImage
           </Button>
         )}
       </div>
-      
       {!preview ? (
         <div className="border-2 border-dashed border-primary/40 rounded-lg p-2 text-center hover:border-primary/60 transition-colors">
           <div className="flex flex-col items-center justify-center space-y-1">
