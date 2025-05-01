@@ -34,9 +34,10 @@ import {
 
 interface TradeDetailProps {
   selectedTrade: Trade | null;
+  onTradeSelected: (trade: Trade) => void;
 }
 
-export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
+export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDetailProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [editMode, setEditMode] = useState(false);

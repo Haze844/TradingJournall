@@ -393,7 +393,10 @@ export default function SimpleHome() {
                 <DialogDescription className="sr-only">
                   Detailansicht eines ausgewählten Trades mit allen Parametern und Eigenschaften.
                 </DialogDescription>
-                <TradeDetail selectedTrade={selectedTrade} />
+                <TradeDetail 
+                  selectedTrade={selectedTrade} 
+                  onTradeSelected={setSelectedTrade} 
+                />
               </DialogContent>
             </Dialog>
           )}
