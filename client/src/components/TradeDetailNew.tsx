@@ -220,32 +220,32 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             {/* Spalte 1: Setup und Einstieg */}
             <div className="flex flex-col h-full">
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
-                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Setup &amp; Einstieg</div>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center mb-1">
+                <div className="text-xs font-medium mb-2 border-b border-border pb-1">Setup &amp; Einstieg</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center mb-2 bg-background/50 rounded-sm p-1.5">
                     <BadgeWinLoss isWin={selectedTrade.isWin} />
                     <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
                       {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Datum</div>
-                      <div className="font-bold text-xs">{formatDate(selectedTrade.date)}</div>
+                  <div className="grid grid-cols-2 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Datum</div>
+                      <div className="font-bold text-xs mt-0.5">{formatDate(selectedTrade.date)}</div>
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">Symbol</div>
-                      <div className="font-bold text-xs">{selectedTrade.symbol}</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Symbol</div>
+                      <div className="font-bold text-xs mt-0.5">{selectedTrade.symbol}</div>
                     </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Setup</div>
+                  <div className="bg-background/50 rounded-sm p-1.5 mb-1">
+                    <div className="text-xs text-muted-foreground font-medium">Setup</div>
                     {editMode ? (
                       <Select 
                         value={editData.setup} 
                         onValueChange={val => updateField('setup', val)}
                       >
-                        <SelectTrigger className="h-7 text-xs">
+                        <SelectTrigger className="h-7 text-xs mt-0.5">
                           <SelectValue placeholder="Setup auswählen" />
                         </SelectTrigger>
                         <SelectContent>
@@ -257,17 +257,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <div className="font-medium text-sm">{selectedTrade.setup}</div>
+                      <div className="font-medium text-sm mt-0.5">{selectedTrade.setup || '-'}</div>
                     )}
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Einstieg</div>
+                  <div className="bg-background/50 rounded-sm p-1.5">
+                    <div className="text-xs text-muted-foreground font-medium">Einstieg</div>
                     {editMode ? (
                       <Select 
                         value={editData.entryLevel} 
                         onValueChange={val => updateField('entryLevel', val)}
                       >
-                        <SelectTrigger className="h-7 text-xs">
+                        <SelectTrigger className="h-7 text-xs mt-0.5">
                           <SelectValue placeholder="Level auswählen" />
                         </SelectTrigger>
                         <SelectContent>
@@ -279,7 +279,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <div className="font-medium text-sm">
+                      <div className="font-medium text-sm mt-0.5">
                         <BadgeTrend trend={selectedTrade.entryType || '-'} size="sm" />
                       </div>
                     )}
@@ -291,17 +291,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             {/* Spalte 2: Trends */}
             <div className="flex flex-col h-full">
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
-                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Trends</div>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Trend</div>
+                <div className="text-xs font-medium mb-2 border-b border-border pb-1">Trends</div>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Trend</div>
                       {editMode ? (
                         <Select 
                           value={editData.trend} 
                           onValueChange={val => updateField('trend', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Trend" />
                           </SelectTrigger>
                           <SelectContent>
@@ -313,17 +313,19 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <BadgeTrend trend={selectedTrade.trend || '-'} size="sm" />
+                        <div className="mt-0.5">
+                          <BadgeTrend trend={selectedTrade.trend || '-'} size="sm" />
+                        </div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">Int.</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Int.</div>
                       {editMode ? (
                         <Select 
                           value={editData.internalTrend} 
                           onValueChange={val => updateField('internalTrend', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Int." />
                           </SelectTrigger>
                           <SelectContent>
@@ -335,17 +337,19 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <BadgeTrend trend={selectedTrade.internalTrend || '-'} size="sm" />
+                        <div className="mt-0.5">
+                          <BadgeTrend trend={selectedTrade.internalTrend || '-'} size="sm" />
+                        </div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">Micro</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Micro</div>
                       {editMode ? (
                         <Select 
                           value={editData.microTrend} 
                           onValueChange={val => updateField('microTrend', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Micro" />
                           </SelectTrigger>
                           <SelectContent>
@@ -357,19 +361,21 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <BadgeTrend trend={selectedTrade.microTrend || '-'} size="sm" />
+                        <div className="mt-0.5">
+                          <BadgeTrend trend={selectedTrade.microTrend || '-'} size="sm" />
+                        </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex justify-between">
-                    <div>
-                      <div className="text-xs text-muted-foreground">M15</div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">M15</div>
                       {editMode ? (
                         <Select 
                           value={editData.mainTrendM15} 
                           onValueChange={val => updateField('mainTrendM15', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="M15" />
                           </SelectTrigger>
                           <SelectContent>
@@ -381,17 +387,19 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <BadgeTrend trend={selectedTrade.mainTrendM15 || '-'} size="sm" />
+                        <div className="mt-0.5">
+                          <BadgeTrend trend={selectedTrade.mainTrendM15 || '-'} size="sm" />
+                        </div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">M5</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">M5</div>
                       {editMode ? (
                         <Select 
                           value={editData.internalTrendM5} 
                           onValueChange={val => updateField('internalTrendM5', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="M5" />
                           </SelectTrigger>
                           <SelectContent>
@@ -403,7 +411,9 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <BadgeTrend trend={selectedTrade.internalTrendM5 || '-'} size="sm" />
+                        <div className="mt-0.5">
+                          <BadgeTrend trend={selectedTrade.internalTrendM5 || '-'} size="sm" />
+                        </div>
                       )}
                     </div>
                   </div>
@@ -414,17 +424,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             {/* Spalte 3: Location und Struktur */}
             <div className="flex flex-col h-full">
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
-                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Position &amp; Struktur</div>
-                <div className="space-y-1.5">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Location</div>
+                <div className="text-xs font-medium mb-2 border-b border-border pb-1">Position &amp; Struktur</div>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Location</div>
                       {editMode ? (
                         <Select 
                           value={editData.location} 
                           onValueChange={val => updateField('location', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Location" />
                           </SelectTrigger>
                           <SelectContent>
@@ -436,17 +446,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.location || '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.location || '-'}</div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">Struktur</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Struktur</div>
                       {editMode ? (
                         <Select 
                           value={editData.structure} 
                           onValueChange={val => updateField('structure', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Struktur" />
                           </SelectTrigger>
                           <SelectContent>
@@ -458,19 +468,19 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.structure || '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.structure || '-'}</div>
                       )}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Liquidation</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Liquidation</div>
                       {editMode ? (
                         <Select 
                           value={editData.liquidation} 
                           onValueChange={val => updateField('liquidation', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Liquidation" />
                           </SelectTrigger>
                           <SelectContent>
@@ -482,17 +492,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.liquidation || '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.liquidation || '-'}</div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">TF Entry</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">TF Entry</div>
                       {editMode ? (
                         <Select 
                           value={editData.timeframeEntry} 
                           onValueChange={val => updateField('timeframeEntry', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="TF Entry" />
                           </SelectTrigger>
                           <SelectContent>
@@ -504,7 +514,7 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.timeframeEntry || '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.timeframeEntry || '-'}</div>
                       )}
                     </div>
                   </div>
@@ -518,17 +528,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             {/* Linke Spalte - Marktzonen */}
             <div className="flex flex-col h-full">
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
-                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Marktzonen</div>
-                <div className="space-y-1.5">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Marktphase</div>
+                <div className="text-xs font-medium mb-2 border-b border-border pb-1">Marktzonen</div>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Marktphase</div>
                       {editMode ? (
                         <Select 
                           value={editData.marketPhase} 
                           onValueChange={val => updateField('marketPhase', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Phase" />
                           </SelectTrigger>
                           <SelectContent>
@@ -540,17 +550,17 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.marketPhase || '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.marketPhase || '-'}</div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">Unmit. Zone</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Unmit. Zone</div>
                       {editMode ? (
                         <Select 
                           value={editData.unmitZone} 
                           onValueChange={val => updateField('unmitZone', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
                             <SelectValue placeholder="Zone" />
                           </SelectTrigger>
                           <SelectContent>
@@ -562,12 +572,12 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.unmitZone || '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.unmitZone || '-'}</div>
                       )}
                     </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground">Range Punkte</div>
+                  <div className="bg-background/50 rounded-sm p-1.5">
+                    <div className="text-xs text-muted-foreground font-medium">Range Punkte</div>
                     {editMode ? (
                       <Input
                         type="number"
@@ -576,11 +586,11 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           const value = e.target.value === "" ? undefined : parseInt(e.target.value);
                           updateField('rangePoints', value);
                         }}
-                        className="h-7 text-xs"
+                        className="h-7 text-xs mt-0.5"
                         min="0"
                       />
                     ) : (
-                      <div className="font-medium text-sm">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
+                      <div className="font-medium text-sm mt-0.5">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
                     )}
                   </div>
                 </div>
@@ -590,13 +600,13 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
             {/* Rechte Spalte - Ergebnis */}
             <div className="flex flex-col h-full">
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
-                <div className="text-xs font-medium mb-1 border-b border-border pb-1">Ergebnis &amp; RR</div>
-                <div className="space-y-1.5">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">RR Achieved</div>
+                <div className="text-xs font-medium mb-2 border-b border-border pb-1">Ergebnis &amp; RR</div>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">RR Achieved</div>
                       {editMode ? (
-                        <div className="flex gap-1 flex-wrap">
+                        <div className="flex gap-1 flex-wrap mt-0.5">
                           {[-1, ...[1, 2, 3, 4, 5, 6, 7]].map(val => (
                             <Button
                               key={val}
@@ -611,13 +621,13 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           ))}
                         </div>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.rrAchieved ? `${selectedTrade.rrAchieved}R` : '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.rrAchieved ? `${selectedTrade.rrAchieved}R` : '-'}</div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">RR Potential</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">RR Potential</div>
                       {editMode ? (
-                        <div className="flex gap-1 flex-wrap">
+                        <div className="flex gap-1 flex-wrap mt-0.5">
                           {[1, 2, 3, 4, 5, 6, 7].map(val => (
                             <Button
                               key={val}
@@ -632,15 +642,15 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           ))}
                         </div>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.rrPotential ? `${selectedTrade.rrPotential}R` : '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.rrPotential ? `${selectedTrade.rrPotential}R` : '-'}</div>
                       )}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">SL Typ</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">SL Typ</div>
                       {editMode ? (
-                        <div className="flex gap-1 flex-wrap">
+                        <div className="flex gap-1 flex-wrap mt-0.5">
                           {["Sweep", "zerstört"].map((type) => (
                             <Button
                               key={type}
@@ -655,11 +665,11 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                           ))}
                         </div>
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.slType || '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.slType || '-'}</div>
                       )}
                     </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">SL Punkte</div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">SL Punkte</div>
                       {editMode ? (
                         <Input
                           type="number"
@@ -668,12 +678,12 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
                             const value = e.target.value === "" ? undefined : parseInt(e.target.value);
                             updateField('slPoints', value);
                           }}
-                          className="h-7 text-xs"
+                          className="h-7 text-xs mt-0.5"
                           min="0"
                           max="30"
                         />
                       ) : (
-                        <div className="font-medium text-sm">{selectedTrade.slPoints !== undefined ? selectedTrade.slPoints : '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.slPoints !== undefined ? selectedTrade.slPoints : '-'}</div>
                       )}
                     </div>
                   </div>
