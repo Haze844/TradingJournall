@@ -122,11 +122,21 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
       ...editData
     });
     
+    // Aktualisierte Trade-Daten
+    const updatedTradeData = {
+      ...selectedTrade,
+      ...editData
+    };
+    
+    // API-Aufruf
     updateTradeMutation.mutate({
       id: selectedTrade.id,
       ...editData,
       userId: selectedTrade.userId || 2
     });
+    
+    // Sofort die UI mit den aktuellen Daten aktualisieren
+    onTradeSelected(updatedTradeData);
   };
 
   // Chart-Upload Mutation
@@ -154,11 +164,21 @@ export default function TradeDetail({ selectedTrade }: TradeDetailProps) {
   const handleChartImageChange = (base64Image: string | null) => {
     if (!selectedTrade) return;
     
+    // Aktualisierte Trade-Daten mit neuem Chart-Bild
+    const updatedTradeData = {
+      ...selectedTrade,
+      chartImage: base64Image
+    };
+    
+    // API-Aufruf
     updateChartImageMutation.mutate({
       id: selectedTrade.id,
       chartImage: base64Image,
       userId: selectedTrade.userId || 2
     });
+    
+    // Sofort die UI mit den aktuellen Daten aktualisieren
+    onTradeSelected(updatedTradeData);
   };
 
   // Klick-Handler zum Starten oder Beenden des Edit-Modus
