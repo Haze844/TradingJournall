@@ -547,49 +547,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
-                      {editMode ? (
-                        <Input
-                          type="number"
-                          value={editData.riskSum === undefined ? "" : editData.riskSum * 4}
-                          onChange={(e) => {
-                            const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
-                            // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
-                            const value = inputValue !== undefined ? inputValue / 4 : undefined;
-                            updateField('riskSum', value);
-                          }}
-                          className="h-7 text-xs mt-0.5"
-                          min="0"
-                          placeholder="Risikopunkte eingeben"
-                        />
-                      ) : (
-                        <div className="font-medium text-sm mt-0.5">
-                          {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum * 4 : '-'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Kontotyp</div>
-                      {editMode ? (
-                        <Select 
-                          value={editData.accountType || 'PA'} 
-                          onValueChange={val => updateField('accountType', val)}
-                        >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
-                            <SelectValue placeholder="Kontotyp" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PA">PA</SelectItem>
-                            <SelectItem value="EVA">EVA</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType || 'PA'}</div>
-                      )}
-                    </div>
-                  </div>
+
                 </div>
               </div>
             </div>
@@ -648,21 +606,64 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Range Punkte</div>
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={editData.rangePoints === undefined ? "" : editData.rangePoints}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? undefined : parseInt(e.target.value);
+                            updateField('rangePoints', value);
+                          }}
+                          className="h-7 text-xs mt-0.5"
+                          min="0"
+                        />
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
+                      )}
+                    </div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={editData.riskSum === undefined ? "" : editData.riskSum * 4}
+                          onChange={(e) => {
+                            const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
+                            // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
+                            const value = inputValue !== undefined ? inputValue / 4 : undefined;
+                            updateField('riskSum', value);
+                          }}
+                          className="h-7 text-xs mt-0.5"
+                          min="0"
+                          placeholder="Risikopunkte eingeben"
+                        />
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">
+                          {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum * 4 : '-'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <div className="bg-background/50 rounded-sm p-1.5">
-                    <div className="text-xs text-muted-foreground font-medium">Range Punkte</div>
+                    <div className="text-xs text-muted-foreground font-medium">Kontotyp</div>
                     {editMode ? (
-                      <Input
-                        type="number"
-                        value={editData.rangePoints === undefined ? "" : editData.rangePoints}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? undefined : parseInt(e.target.value);
-                          updateField('rangePoints', value);
-                        }}
-                        className="h-7 text-xs mt-0.5"
-                        min="0"
-                      />
+                      <Select 
+                        value={editData.accountType || 'PA'} 
+                        onValueChange={val => updateField('accountType', val)}
+                      >
+                        <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectValue placeholder="Kontotyp" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PA">PA</SelectItem>
+                          <SelectItem value="EVA">EVA</SelectItem>
+                        </SelectContent>
+                      </Select>
                     ) : (
-                      <div className="font-medium text-sm mt-0.5">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
+                      <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType || 'PA'}</div>
                     )}
                   </div>
                 </div>
