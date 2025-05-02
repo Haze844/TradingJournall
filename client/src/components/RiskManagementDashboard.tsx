@@ -33,16 +33,58 @@ interface RiskRecommendation {
   impact: number;
 }
 
-export default function RiskManagementDashboard({ userId }: { userId: number }) {
+export default function RiskManagementDashboard({ userId, activeFilters }: { userId: number, activeFilters?: any }) {
   const [chartType, setChartType] = useState<ChartType>('line');
   const [activeTab, setActiveTab] = useState<'drawdown' | 'risk-per-trade' | 'position-size' | 'recommendations'>('drawdown');
+  
+  // Hilfsfunktion zum Erstellen der Filter-URL-Parameter
+  const buildFilterParams = () => {
+    if (!activeFilters) return '';
+    
+    let params = '';
+    
+    // Datumsfilter
+    if (activeFilters.startDate && activeFilters.endDate) {
+      const startDate = new Date(activeFilters.startDate).toISOString().split('T')[0];
+      const endDate = new Date(activeFilters.endDate).toISOString().split('T')[0];
+      params += `&startDate=${startDate}&endDate=${endDate}`;
+    }
+    
+    // Symbole
+    if (activeFilters.symbols && activeFilters.symbols.length > 0) {
+      params += `&symbols=${encodeURIComponent(JSON.stringify(activeFilters.symbols))}`;
+    }
+    
+    // Setups
+    if (activeFilters.setups && activeFilters.setups.length > 0) {
+      params += `&setups=${encodeURIComponent(JSON.stringify(activeFilters.setups))}`;
+    }
+    
+    // Win/Loss
+    if (activeFilters.isWin !== null && activeFilters.isWin !== undefined) {
+      params += `&isWin=${activeFilters.isWin}`;
+    }
+    
+    // Marktphasen
+    if (activeFilters.marketPhases && activeFilters.marketPhases.length > 0) {
+      params += `&marketPhases=${encodeURIComponent(JSON.stringify(activeFilters.marketPhases))}`;
+    }
+    
+    // Zeitzonen/Sessions
+    if (activeFilters.sessions && activeFilters.sessions.length > 0) {
+      params += `&sessions=${encodeURIComponent(JSON.stringify(activeFilters.sessions))}`;
+    }
+    
+    return params;
+  };
 
   // Fetch drawdown data
   const { data: drawdownData = [], isLoading: drawdownLoading } = useQuery({
-    queryKey: ['/api/risk/drawdown', userId],
+    queryKey: ['/api/risk/drawdown', userId, activeFilters],
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/risk/drawdown?userId=${userId}`);
+        const filterParams = buildFilterParams();
+        const response = await fetch(`/api/risk/drawdown?userId=${userId}${filterParams}`);
         if (!response.ok) {
           throw new Error('Failed to fetch drawdown data');
         }
@@ -56,10 +98,11 @@ export default function RiskManagementDashboard({ userId }: { userId: number }) 
 
   // Fetch risk per trade data
   const { data: riskPerTradeData = [], isLoading: riskPerTradeLoading } = useQuery({
-    queryKey: ['/api/risk/per-trade', userId],
+    queryKey: ['/api/risk/per-trade', userId, activeFilters],
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/risk/per-trade?userId=${userId}`);
+        const filterParams = buildFilterParams();
+        const response = await fetch(`/api/risk/per-trade?userId=${userId}${filterParams}`);
         if (!response.ok) {
           throw new Error('Failed to fetch risk per trade data');
         }
@@ -73,10 +116,11 @@ export default function RiskManagementDashboard({ userId }: { userId: number }) 
 
   // Fetch position size correlation data
   const { data: positionSizeData = [], isLoading: positionSizeLoading } = useQuery({
-    queryKey: ['/api/risk/position-size', userId],
+    queryKey: ['/api/risk/position-size', userId, activeFilters],
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/risk/position-size?userId=${userId}`);
+        const filterParams = buildFilterParams();
+        const response = await fetch(`/api/risk/position-size?userId=${userId}${filterParams}`);
         if (!response.ok) {
           throw new Error('Failed to fetch position size data');
         }
@@ -90,10 +134,11 @@ export default function RiskManagementDashboard({ userId }: { userId: number }) 
 
   // Fetch risk recommendations
   const { data: riskRecommendations = [], isLoading: recommendationsLoading } = useQuery({
-    queryKey: ['/api/risk/recommendations', userId],
+    queryKey: ['/api/risk/recommendations', userId, activeFilters],
     queryFn: async () => {
       try {
-        const response = await fetch(`/api/risk/recommendations?userId=${userId}`);
+        const filterParams = buildFilterParams();
+        const response = await fetch(`/api/risk/recommendations?userId=${userId}${filterParams}`);
         if (!response.ok) {
           throw new Error('Failed to fetch risk recommendations');
         }
