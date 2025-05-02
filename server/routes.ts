@@ -1023,8 +1023,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const directionFilter = req.query.direction as string;
       const compareWith = req.query.compareWith as string;
       
+      // Aktive Filter aus der Trades-Tabelle
+      const activeFiltersStr = req.query.activeFilters as string;
+      let activeFilters: any = {};
+      
+      if (activeFiltersStr) {
+        try {
+          activeFilters = JSON.parse(activeFiltersStr);
+        } catch (err) {
+          console.warn("Invalid activeFilters JSON string:", activeFiltersStr);
+        }
+      }
+      
       // Holen Sie alle Trades des Benutzers
-      const allTrades = await storage.getTrades(userId);
+      let allTrades = await storage.getTrades(userId);
+      
+      // Wende die aktiven Filter aus der Trades-Tabelle an, falls vorhanden
+      if (activeFilters && Object.keys(activeFilters).length > 0) {
+        console.log("Anwenden von aktiven Filtern auf Heatmap-Daten:", activeFilters);
+        
+        allTrades = allTrades.filter(trade => {
+          let passesFilter = true;
+          
+          // Datum-Filter
+          if (activeFilters.dateRange && activeFilters.dateRange.from && activeFilters.dateRange.to) {
+            const tradeDate = new Date(trade.date);
+            const fromDate = new Date(activeFilters.dateRange.from);
+            const toDate = new Date(activeFilters.dateRange.to);
+            toDate.setHours(23, 59, 59, 999); // Ende des Tages
+            
+            if (tradeDate < fromDate || tradeDate > toDate) {
+              passesFilter = false;
+            }
+          }
+          
+          // Setup-Filter
+          if (passesFilter && activeFilters.setup && activeFilters.setup !== "all") {
+            passesFilter = trade.setup === activeFilters.setup;
+          }
+          
+          // Symbol-Filter
+          if (passesFilter && activeFilters.symbol && activeFilters.symbol !== "all") {
+            passesFilter = trade.symbol === activeFilters.symbol;
+          }
+          
+          // Handelsrichtung-Filter
+          if (passesFilter && activeFilters.direction && activeFilters.direction !== "all") {
+            passesFilter = trade.entryType === activeFilters.direction;
+          }
+          
+          // Weitere Filter können hier hinzugefügt werden
+          
+          return passesFilter;
+        });
+        
+        console.log(`Nach Anwendung der aktiven Filter: ${allTrades.length} Trades übrig.`);
+      }
       
       // Vergleichsdaten für zweiten Benutzer/Zeitraum (falls angefordert)
       let comparisonTrades: any[] = [];

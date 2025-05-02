@@ -662,11 +662,13 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Setups</SelectItem>
-                    {heatmapData.filters.availableSetups && 
+                    {heatmapData.filters && heatmapData.filters.availableSetups && 
                       heatmapData.filters.availableSetups
-                        .filter(setup => setup !== null && setup !== '')
+                        .filter(setup => setup && setup !== null && setup !== '')
                         .map((setup) => (
-                          <SelectItem key={setup} value={setup}>{setup}</SelectItem>
+                          <SelectItem key={setup} value={setup || "unbekannt"}>
+                            {setup || "Unbekannt"}
+                          </SelectItem>
                         ))}
                   </SelectContent>
                 </Select>
@@ -684,11 +686,13 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Symbole</SelectItem>
-                    {heatmapData.filters.availableSymbols && 
+                    {heatmapData.filters && heatmapData.filters.availableSymbols && 
                       heatmapData.filters.availableSymbols
-                        .filter(symbol => symbol !== null && symbol !== '')
+                        .filter(symbol => symbol && symbol !== null && symbol !== '')
                         .map((symbol) => (
-                          <SelectItem key={symbol} value={symbol}>{symbol}</SelectItem>
+                          <SelectItem key={symbol} value={symbol || "unbekannt"}>
+                            {symbol || "Unbekannt"}
+                          </SelectItem>
                         ))}
                   </SelectContent>
                 </Select>
@@ -706,11 +710,13 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Richtungen</SelectItem>
-                    {heatmapData.filters.availableDirections && 
+                    {heatmapData.filters && heatmapData.filters.availableDirections && 
                       heatmapData.filters.availableDirections
-                        .filter(direction => direction !== null && direction !== '')
+                        .filter(direction => direction && direction !== null && direction !== '')
                         .map((direction) => (
-                          <SelectItem key={direction} value={direction}>{direction}</SelectItem>
+                          <SelectItem key={direction} value={direction || "unbekannt"}>
+                            {direction || "Unbekannt"}
+                          </SelectItem>
                         ))}
                   </SelectContent>
                 </Select>
@@ -720,7 +726,7 @@ export default function PerformanceHeatmap() {
         )}
         
         {/* Empfehlungen-Panel */}
-        {showRecommendations && heatmapData.recommendations && (
+        {showRecommendations && heatmapData && heatmapData.recommendations && (
           <div className="mb-4 p-3 border border-border/40 rounded-md bg-muted/20">
             <h3 className="text-sm font-medium mb-2 flex items-center">
               <Lightbulb className="h-4 w-4 mr-1 text-yellow-400" />
@@ -732,13 +738,14 @@ export default function PerformanceHeatmap() {
                 <h4 className="text-xs font-medium mb-1 text-green-400">Top Handelszeiten:</h4>
                 <div className="bg-black/40 rounded-sm p-2 text-xs">
                   <ul className="space-y-1">
-                    {heatmapData.recommendations.bestTimes.map((time, idx) => (
-                      <li key={idx} className="flex justify-between">
-                        <span>{time.day}, {time.time} Uhr</span>
-                        <span className="text-green-400">{time.winRate}% Win-Rate</span>
-                      </li>
-                    ))}
-                    {heatmapData.recommendations.bestTimes.length === 0 && (
+                    {heatmapData.recommendations && heatmapData.recommendations.bestTimes && 
+                      heatmapData.recommendations.bestTimes.map((time, idx) => (
+                        <li key={idx} className="flex justify-between">
+                          <span>{time.day}, {time.time} Uhr</span>
+                          <span className="text-green-400">{time.winRate}% Win-Rate</span>
+                        </li>
+                      ))}
+                    {(!heatmapData.recommendations || !heatmapData.recommendations.bestTimes || heatmapData.recommendations.bestTimes.length === 0) && (
                       <li className="text-muted-foreground">Keine Daten verfügbar</li>
                     )}
                   </ul>
@@ -750,13 +757,14 @@ export default function PerformanceHeatmap() {
                 <h4 className="text-xs font-medium mb-1 text-red-400">Zu vermeidende Zeiten:</h4>
                 <div className="bg-black/40 rounded-sm p-2 text-xs">
                   <ul className="space-y-1">
-                    {heatmapData.recommendations.worstTimes.map((time, idx) => (
-                      <li key={idx} className="flex justify-between">
-                        <span>{time.day}, {time.time} Uhr</span>
-                        <span className="text-red-400">{time.winRate}% Win-Rate</span>
-                      </li>
-                    ))}
-                    {heatmapData.recommendations.worstTimes.length === 0 && (
+                    {heatmapData.recommendations && heatmapData.recommendations.worstTimes && 
+                      heatmapData.recommendations.worstTimes.map((time, idx) => (
+                        <li key={idx} className="flex justify-between">
+                          <span>{time.day}, {time.time} Uhr</span>
+                          <span className="text-red-400">{time.winRate}% Win-Rate</span>
+                        </li>
+                      ))}
+                    {(!heatmapData.recommendations || !heatmapData.recommendations.worstTimes || heatmapData.recommendations.worstTimes.length === 0) && (
                       <li className="text-muted-foreground">Keine Daten verfügbar</li>
                     )}
                   </ul>
@@ -764,7 +772,7 @@ export default function PerformanceHeatmap() {
               </div>
               
               {/* Weitere Insights */}
-              {heatmapData.recommendations.trends.length > 0 && (
+              {heatmapData.recommendations && heatmapData.recommendations.trends && heatmapData.recommendations.trends.length > 0 && (
                 <div className="md:col-span-2 mt-1">
                   <h4 className="text-xs font-medium mb-1 text-blue-400">Trading Insights:</h4>
                   <div className="bg-black/40 rounded-sm p-2 text-xs">
