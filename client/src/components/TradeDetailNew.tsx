@@ -219,18 +219,16 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4 w-full max-w-[90vw] mx-auto shadow-lg">
       <CardHeader className="border-b border-border flex flex-col py-3">
-        <div className="flex flex-row items-center justify-between mb-2">
-          <CardTitle className="text-sm font-medium">Trade Details</CardTitle>
+        <div className="flex flex-col items-center justify-center mb-2">
+          <CardTitle className="text-sm font-medium mb-1">Trade Details</CardTitle>
           
           {/* Hinweis zur Bearbeitung im Edit-Modus */}
-          <div className="flex items-center gap-2">
-            {selectedTrade && editMode && (
-              <div className="text-xs text-muted-foreground flex items-center">
-                <Pencil className="h-3 w-3 mr-1" />
-                Bearbeitungsmodus aktiv - Klicke zum Speichern
-              </div>
-            )}
-          </div>
+          {selectedTrade && editMode && (
+            <div className="text-xs text-muted-foreground flex items-center">
+              <Pencil className="h-3 w-3 mr-1" />
+              Bearbeitungsmodus aktiv - Klicke zum Speichern
+            </div>
+          )}
         </div>
         
         {/* Datum, Symbol, Einstieg und Profit/Loss in der Titelleiste */}
@@ -285,30 +283,30 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
                 <div className="text-xs font-medium mb-2 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-2">
-                  {/* Diese Gruppe der Felder ist jetzt nach oben verschoben, daher entfernen wir sie hier */}
-                  <div className="bg-background/50 rounded-sm p-1.5 mb-1">
-                    <div className="text-xs text-muted-foreground font-medium">Setup</div>
-                    {editMode ? (
-                      <Select 
-                        value={editData.setup} 
-                        onValueChange={val => updateField('setup', val)}
-                      >
-                        <SelectTrigger className="h-7 text-xs mt-0.5">
-                          <SelectValue placeholder="Setup auswählen" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {setupTypes.map((setup) => (
-                            <SelectItem key={setup} value={setup}>
-                              {setup}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="font-medium text-sm mt-0.5">{selectedTrade.setup || '-'}</div>
-                    )}
-                  </div>
+                  {/* Setup und Kontotyp nebeneinander, Risiko Punkte darunter */}
                   <div className="grid grid-cols-2 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Setup</div>
+                      {editMode ? (
+                        <Select 
+                          value={editData.setup} 
+                          onValueChange={val => updateField('setup', val)}
+                        >
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                            <SelectValue placeholder="Setup auswählen" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {setupTypes.map((setup) => (
+                              <SelectItem key={setup} value={setup}>
+                                {setup}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.setup || '-'}</div>
+                      )}
+                    </div>
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Kontotyp</div>
                       {editMode ? (
@@ -328,28 +326,28 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType || 'PA'}</div>
                       )}
                     </div>
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
-                      {editMode ? (
-                        <Input
-                          type="number"
-                          value={editData.riskSum === undefined ? "" : editData.riskSum * 4}
-                          onChange={(e) => {
-                            const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
-                            // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
-                            const value = inputValue !== undefined ? inputValue / 4 : undefined;
-                            updateField('riskSum', value);
-                          }}
-                          className="h-7 text-xs mt-0.5"
-                          min="0"
-                          placeholder="Risikopunkte eingeben"
-                        />
-                      ) : (
-                        <div className="font-medium text-sm mt-0.5">
-                          {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum * 4 : '-'}
-                        </div>
-                      )}
-                    </div>
+                  </div>
+                  <div className="bg-background/50 rounded-sm p-1.5 mb-1">
+                    <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
+                    {editMode ? (
+                      <Input
+                        type="number"
+                        value={editData.riskSum === undefined ? "" : editData.riskSum * 4}
+                        onChange={(e) => {
+                          const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
+                          // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
+                          const value = inputValue !== undefined ? inputValue / 4 : undefined;
+                          updateField('riskSum', value);
+                        }}
+                        className="h-7 text-xs mt-0.5"
+                        min="0"
+                        placeholder="Risikopunkte eingeben"
+                      />
+                    ) : (
+                      <div className="font-medium text-sm mt-0.5">
+                        {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum * 4 : '-'}
+                      </div>
+                    )}
                   </div>
                   {/* Entfernt: Einstieg-Feld wird im Header angezeigt */}
                 </div>
