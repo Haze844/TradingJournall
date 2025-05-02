@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -125,6 +126,13 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
       return await response.json();
     },
     onSuccess: () => {
+      // Invalidiere alle relevanten Abfragen, damit die Daten mit dem neuen accountType neu geladen werden
+      queryClient.invalidateQueries({ queryKey: ['/api/risk/drawdown'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/risk/per-trade'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/risk/position-size'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/risk/recommendations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+      
       toast({
         title: 'Einstellungen aktualisiert',
         description: 'Deine Risikodaten wurden erfolgreich aktualisiert.',
