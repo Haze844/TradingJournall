@@ -505,7 +505,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
   
   return (
     <div className="relative w-full">
-      <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl">
+      <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl h-[70vh]">
         <CardHeader className="pb-0 pt-4">
           <div className="flex flex-wrap md:flex-nowrap justify-end gap-3 items-center">
             
@@ -536,7 +536,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
           </div>
         </CardHeader>
         
-        <div className="overflow-x-visible overflow-y-auto max-h-[98vh]">
+        <div className="overflow-x-visible overflow-y-auto max-h-[70vh]">
           <table className="w-full text-xs">
             <thead className="bg-gradient-to-r from-blue-900/20 to-black/30 border-y border-primary/20 sticky top-0 z-10">
               <tr>
