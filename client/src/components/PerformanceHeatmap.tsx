@@ -188,6 +188,8 @@ export default function PerformanceHeatmap() {
   const [selectedCell, setSelectedCell] = useState<HeatmapDataPoint | null>(null);
   const [interactionMode, setInteractionMode] = useState<"hover" | "click">("hover");
   const [timeRange, setTimeRange] = useState<string>("all");
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [showLegend, setShowLegend] = useState<boolean>(false);
   const { toast } = useToast();
   
   // Berechne Datumsgrenzen basierend auf dem ausgewählten Zeitraum
@@ -240,8 +242,12 @@ export default function PerformanceHeatmap() {
   // Daten für die Visualisierung transformieren
   const transformedData = useRef<HeatmapDataPoint[]>([]);
   
+  // Handling für Datentypänderungen - mit Animation
   useEffect(() => {
     if (heatmapData && heatmapData.data) {
+      // Interaktivitätstyp-Label aktualisieren
+      const modeText = interactionMode === 'hover' ? 'Hover-Modus aktiv' : 'Klick-Modus aktiv';
+      
       // Kartieren der Tage und Zeitrahmen zu Koordinaten
       const transformData = () => {
         return heatmapData.data.map((point) => {
@@ -249,27 +255,54 @@ export default function PerformanceHeatmap() {
           const timeIndex = heatmapData.timeframe.indexOf(point.timeframe);
           
           let value = point.winRate; // Standardwert ist Win-Rate
+          let valueLabel = '%';
           
           if (dataType === "avgRR") {
             value = parseFloat(point.avgRR) * 20; // Skalieren für bessere Visualisierung
+            valueLabel = 'R';
           } else if (dataType === "pnl") {
             const pnl = parseFloat(point.totalPnL);
             // Skalieren von PnL für die Farbgebung (einfache lineare Skalierung)
             value = pnl > 0 ? Math.min(pnl / 10, 100) : Math.max(0, 50 + pnl / 10);
+            valueLabel = '$';
           }
           
           return {
             ...point,
             x: timeIndex,
             y: dayIndex,
-            value: value
+            value: value,
+            valueLabel
           };
         });
       };
       
-      transformedData.current = transformData();
+      // Animation bei Datentypwechsel 
+      const newData = transformData();
+      
+      // Animate - leider limitiert in React/ReCharts
+      setTimeout(() => {
+        transformedData.current = newData;
+      }, 50);
     }
-  }, [heatmapData, dataType]);
+  }, [heatmapData, dataType, interactionMode]);
+  
+  // Feedback beim Ändern des Interaktionsmodus
+  useEffect(() => {
+    if (interactionMode === 'hover') {
+      toast({
+        title: "Hover-Modus aktiviert",
+        description: "Bewege den Mauszeiger über die Heatmap, um Details zu sehen.",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "Klick-Modus aktiviert", 
+        description: "Klicke auf die Heatmap, um Details zu sehen.",
+        variant: "default",
+      });
+    }
+  }, [interactionMode, toast]);
   
   if (isLoading) {
     return (
@@ -325,7 +358,7 @@ export default function PerformanceHeatmap() {
           <CardTitle>Performance Heatmap</CardTitle>
           <CardDescription>Analyse deiner Trading-Performance nach Wochentag und Uhrzeit</CardDescription>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Select
             value={timeRange}
             onValueChange={setTimeRange}
@@ -355,6 +388,104 @@ export default function PerformanceHeatmap() {
               <SelectItem value="pnl">Profit/Loss</SelectItem>
             </SelectContent>
           </Select>
+          
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 bg-black/50 border-muted"
+              onClick={() => setInteractionMode(interactionMode === 'hover' ? 'click' : 'hover')}
+              title={interactionMode === 'hover' ? 'Auf Klickmodus umschalten' : 'Auf Hovermodus umschalten'}
+            >
+              {interactionMode === 'hover' ? <MousePointer className="h-4 w-4" /> : <Hand className="h-4 w-4" />}
+            </Button>
+            
+            <Button
+              variant="outline" 
+              size="icon"
+              className="h-9 w-9 bg-black/50 border-muted"
+              onClick={() => setShowLegend(!showLegend)}
+              title={showLegend ? 'Legende ausblenden' : 'Legende einblenden'}
+            >
+              <Badge className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 bg-black/50 border-muted"
+              onClick={() => {
+                if (zoomLevel < 1.5) setZoomLevel(zoomLevel + 0.25);
+              }}
+              disabled={zoomLevel >= 1.5}
+              title="Vergrößern"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 bg-black/50 border-muted"
+              onClick={() => {
+                if (zoomLevel > 0.5) setZoomLevel(zoomLevel - 0.25);
+              }}
+              disabled={zoomLevel <= 0.5}
+              title="Verkleinern"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 bg-black/50 border-muted"
+              onClick={() => {
+                setZoomLevel(1);
+                setSelectedCell(null);
+                setShowLegend(false);
+              }}
+              title="Zurücksetzen"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 bg-black/50 border-muted"
+              onClick={() => {
+                if (!heatmapData || !heatmapData.data) return;
+                
+                // Daten für CSV-Export aufbereiten
+                let csvContent = "Tag,Uhrzeit,Trades,Win-Rate,Durchschn. RR,Profit/Loss\n";
+                
+                heatmapData.data.forEach(point => {
+                  if (point.tradeCount > 0) {
+                    csvContent += `${point.day},${point.timeframe},${point.tradeCount},${point.winRate}%,${point.avgRR},${point.totalPnL}\n`;
+                  }
+                });
+                
+                // CSV-Datei erstellen und herunterladen
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'performance-heatmap.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                toast({
+                  title: "Export erfolgreich",
+                  description: "Die Heatmap-Daten wurden als CSV-Datei exportiert.",
+                });
+              }}
+              title="Als CSV exportieren"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -383,14 +514,29 @@ export default function PerformanceHeatmap() {
                   tickFormatter={(value) => heatmapData.days[value]}
                 />
                 <RechartsTooltip content={interactionMode === 'hover' ? <CustomTooltip /> : <div className="hidden" />} />
+                {showLegend && (
+                  <Legend 
+                    payload={[
+                      { value: 'Sehr gut', color: '#059669', type: 'rect' },
+                      { value: 'Gut', color: '#10b981', type: 'rect' },
+                      { value: 'Durchschnitt', color: '#a3e635', type: 'rect' },
+                      { value: 'Passabel', color: '#facc15', type: 'rect' },
+                      { value: 'Schlecht', color: '#f97316', type: 'rect' },
+                      { value: 'Sehr schlecht', color: '#ef4444', type: 'rect' }
+                    ]}
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                  />
+                )}
                 <Scatter 
                   data={transformedData.current}
                   shape={(props: any) => (
                     <CustomPoint 
                       x={props.x}
                       y={props.y}
-                      width={props.width}
-                      height={props.height}
+                      width={props.width * zoomLevel}
+                      height={props.height * zoomLevel}
                       value={props.payload.value}
                       tradeCount={props.payload.tradeCount}
                       day={props.payload.day}
@@ -413,6 +559,15 @@ export default function PerformanceHeatmap() {
           
           {/* Detailansicht der ausgewählten Zelle */}
           <div className="md:w-4/12 bg-muted/30 rounded-md p-4">
+            <div className="flex justify-between items-center mb-3">
+              <div className={`text-xs font-medium rounded-full px-3 py-1 ${interactionMode === 'hover' ? 'bg-blue-500/20 text-blue-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                {interactionMode === 'hover' ? 'Hover-Modus' : 'Klick-Modus'}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Zoom: {Math.round(zoomLevel * 100)}%
+              </div>
+            </div>
+            
             {selectedCell ? (
               <div className="space-y-3">
                 <h3 className="font-bold text-primary">
@@ -443,7 +598,7 @@ export default function PerformanceHeatmap() {
                   </div>
                 </div>
                 
-                <div className="pt-3 text-sm text-muted-foreground">
+                <div className="pt-2 text-sm text-muted-foreground">
                   <p>Dies zeigt deine Performance für diesen Zeitraum. Klicke auf einen anderen Bereich der Heatmap, um weitere Zeitfenster zu untersuchen.</p>
                 </div>
                 
@@ -455,14 +610,30 @@ export default function PerformanceHeatmap() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex flex-col items-center justify-center h-[calc(100%-36px)]">
                 <div className="text-center text-muted-foreground">
-                  <p className="mb-2">Wähle einen Bereich in der Heatmap, um Details zu sehen</p>
-                  <div className="flex justify-center">
-                    <div className="bg-primary/20 text-primary text-xs rounded-full px-3 py-1">
-                      Klick auf eine Zelle für Details
+                  <p className="mb-3">Wähle einen Bereich in der Heatmap, um Details zu sehen</p>
+                  <div className="flex justify-center mb-4">
+                    <div className={`text-xs rounded-full px-3 py-1 ${interactionMode === 'hover' ? 'bg-primary/20 text-primary' : 'bg-amber-500/20 text-amber-500'}`}>
+                      {interactionMode === 'hover' ? 'Bewege Mauszeiger über Zellen' : 'Klick auf eine Zelle für Details'}
                     </div>
                   </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-black/30 hover:bg-black/50 text-xs"
+                    onClick={() => {
+                      toast({
+                        title: "Daten werden aktualisiert",
+                        description: "Die Heatmap-Daten werden neu geladen.",
+                      });
+                      setTimeout(() => window.location.reload(), 1000);
+                    }}
+                  >
+                    <RefreshCw className="h-3 w-3 mr-2" />
+                    Daten aktualisieren
+                  </Button>
                 </div>
               </div>
             )}
