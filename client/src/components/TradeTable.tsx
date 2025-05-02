@@ -68,7 +68,7 @@ interface TradeTableProps {
 
 export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFilteredTradesChange, onActiveFiltersChange }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const tradesPerPage = 5;
+  const tradesPerPage = 20;
   
   // Filter state
   const [filters, setFilters] = useState({
