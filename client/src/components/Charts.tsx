@@ -18,6 +18,19 @@ import { format } from "date-fns";
 import { PerformanceData, SetupWinRate } from "@shared/schema";
 import { ChartTypeSelector, type ChartType } from "@/components/ui/chart-type-selector";
 
+// Gemeinsame Stilkonfiguration für elegantere Diagramme
+const chartConfig = {
+  strokeWidth: 1.5,       // Dünnere Linien
+  barSize: 12,            // Schmalere Balken
+  dotSize: 4,             // Kleinere Punkte
+  activeDotSize: 6,       // Kleinere aktive Punkte
+  fontSize: 10,           // Kleinere Schriftgröße für Labels
+  labelOffset: 5,         // Abstand der Labels
+  cornerRadius: 2,        // Leicht abgerundete Ecken für Balken
+  animationDuration: 800, // Längere Animation für flüssigeren Eindruck
+  gridOpacity: 0.04       // Subtileres Raster
+};
+
 // Performance Chart Component
 interface PerformanceChartProps {
   data: PerformanceData[];
@@ -94,23 +107,36 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           {chartType === "line" ? (
             // Liniendiagramm
             <LineChart {...commonCartesianProps}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
-              <XAxis {...xAxisProps} />
-              <YAxis {...yAxisProps} />
+              <CartesianGrid strokeDasharray="3 3" stroke={`rgba(255, 255, 255, ${chartConfig.gridOpacity})`} />
+              <XAxis 
+                {...xAxisProps} 
+                tick={{ ...xAxisProps.tick, fontSize: chartConfig.fontSize }} 
+                height={30}
+                tickMargin={8}
+              />
+              <YAxis 
+                {...yAxisProps} 
+                tick={{ ...yAxisProps.tick, fontSize: chartConfig.fontSize }} 
+                width={35}
+                tickMargin={8}
+              />
               <Tooltip {...tooltipProps} />
               <Line
                 type="monotone"
                 dataKey="performance"
                 stroke="#4F46E5"
                 fill="rgba(79, 70, 229, 0.1)"
-                activeDot={{ r: 8 }}
+                dot={{ r: chartConfig.dotSize }}
+                activeDot={{ r: chartConfig.activeDotSize }}
                 name="Ergebnis (RR)"
-                strokeWidth={2}
+                strokeWidth={chartConfig.strokeWidth}
+                animationDuration={chartConfig.animationDuration}
                 label={{
                   position: "top",
-                  fontSize: 11,
+                  fontSize: chartConfig.fontSize,
                   fill: "#F3F4F6",
-                  formatter: (value: number) => `${value.toFixed(1)}`
+                  formatter: (value: number) => `${value.toFixed(1)}`,
+                  offset: chartConfig.labelOffset
                 }}
               />
             </LineChart>
@@ -236,9 +262,19 @@ export function SetupWinRateChart({ data }: SetupWinRateChartProps) {
           {chartType === "line" ? (
             // Balkendiagramm (Standard)
             <BarChart {...commonCartesianProps}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
-              <XAxis {...xAxisProps} />
-              <YAxis {...yAxisProps} />
+              <CartesianGrid strokeDasharray="3 3" stroke={`rgba(255, 255, 255, ${chartConfig.gridOpacity})`} />
+              <XAxis 
+                {...xAxisProps} 
+                tick={{ ...xAxisProps.tick, fontSize: chartConfig.fontSize }} 
+                height={30}
+                tickMargin={8}
+              />
+              <YAxis 
+                {...yAxisProps} 
+                tick={{ ...yAxisProps.tick, fontSize: chartConfig.fontSize }} 
+                width={35}
+                tickMargin={8}
+              />
               <Tooltip 
                 {...tooltipProps} 
                 formatter={(value: number) => [`${value}%`, "Trefferquote"]}
@@ -246,12 +282,15 @@ export function SetupWinRateChart({ data }: SetupWinRateChartProps) {
               <Bar 
                 dataKey="winRate" 
                 name="Trefferquote"
-                radius={[4, 4, 0, 0]}
+                barSize={chartConfig.barSize}
+                radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                animationDuration={chartConfig.animationDuration}
                 label={{
                   position: "top",
-                  fontSize: 11,
+                  fontSize: chartConfig.fontSize,
                   fill: "#F3F4F6",
-                  formatter: (value: number) => `${value.toFixed(1)}%`
+                  formatter: (value: number) => `${value.toFixed(1)}%`,
+                  offset: chartConfig.labelOffset
                 }}
               >
                 {chartData.map((entry, index) => (
@@ -262,9 +301,19 @@ export function SetupWinRateChart({ data }: SetupWinRateChartProps) {
           ) : (
             // Kerzendiagramm-Darstellung
             <BarChart {...commonCartesianProps}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
-              <XAxis {...xAxisProps} />
-              <YAxis {...yAxisProps} />
+              <CartesianGrid strokeDasharray="3 3" stroke={`rgba(255, 255, 255, ${chartConfig.gridOpacity})`} />
+              <XAxis 
+                {...xAxisProps} 
+                tick={{ ...xAxisProps.tick, fontSize: chartConfig.fontSize }} 
+                height={30}
+                tickMargin={8}
+              />
+              <YAxis 
+                {...yAxisProps} 
+                tick={{ ...yAxisProps.tick, fontSize: chartConfig.fontSize }} 
+                width={35}
+                tickMargin={8}
+              />
               <Tooltip 
                 {...tooltipProps} 
                 formatter={(value: number, name: string) => {
@@ -279,14 +328,28 @@ export function SetupWinRateChart({ data }: SetupWinRateChartProps) {
                 }}
               />
               {/* Low/High Linien */}
-              <Bar dataKey="low" fill="transparent" stroke="#8884d8" name="low" />
-              <Bar dataKey="high" fill="transparent" stroke="#8884d8" name="high" />
+              <Bar 
+                dataKey="low" 
+                fill="transparent" 
+                stroke="#8884d8" 
+                name="low"
+                strokeWidth={chartConfig.strokeWidth} 
+              />
+              <Bar 
+                dataKey="high" 
+                fill="transparent" 
+                stroke="#8884d8" 
+                name="high"
+                strokeWidth={chartConfig.strokeWidth}
+              />
               
               {/* Body des Kerzendiagramms */}
               <Bar
                 dataKey={(entry: any) => Math.abs(entry.open - entry.close)}
                 name="Body"
                 fill="#4F46E5"
+                barSize={chartConfig.barSize}
+                animationDuration={chartConfig.animationDuration}
               >
                 {chartData.map((entry, index) => (
                   <Cell 
