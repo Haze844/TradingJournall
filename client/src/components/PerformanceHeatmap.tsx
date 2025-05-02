@@ -126,9 +126,9 @@ function generateSampleHeatmapData(): HeatmapData {
     ]
   };
   
-  // Füge Beispiel-Filter hinzu 
+  // Füge Beispiel-Filter hinzu - KEINE leeren Werte erlauben
   const filters: HeatmapFilters = {
-    availableSetups: ["SFP", "Trendline Break", "Double Top", "Fibonacci Retracement", "ABCD Pattern"],
+    availableSetups: ["SFP", "Trendline_Break", "Double_Top", "Fibonacci_Retracement", "ABCD_Pattern"],
     availableSymbols: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "EURJPY", "DAX"],
     availableDirections: ["Long", "Short"]
   };
@@ -379,20 +379,20 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
         // Stelle sicher, dass die Filter-Daten immer definiert sind und keine leeren Werte enthalten
         if (!data.filters) {
           data.filters = {
-            availableSetups: ["SFP", "Trendline Break", "Double Top"],
+            availableSetups: ["SFP", "Trendline_Break", "Double_Top"],
             availableSymbols: ["EURUSD", "GBPUSD", "USDJPY"], 
             availableDirections: ["Long", "Short"]
           };
         } else {
           // Stelle sicher, dass keine leeren Werte in den Arrays vorhanden sind
           if (data.filters.availableSetups) {
-            data.filters.availableSetups = data.filters.availableSetups.filter(setup => setup && setup !== "" && setup !== null);
+            data.filters.availableSetups = data.filters.availableSetups.filter((setup: string | null) => setup && setup !== "" && setup !== null);
           }
           if (data.filters.availableSymbols) {
-            data.filters.availableSymbols = data.filters.availableSymbols.filter(symbol => symbol && symbol !== "" && symbol !== null);
+            data.filters.availableSymbols = data.filters.availableSymbols.filter((symbol: string | null) => symbol && symbol !== "" && symbol !== null);
           }
           if (data.filters.availableDirections) {
-            data.filters.availableDirections = data.filters.availableDirections.filter(direction => direction && direction !== "" && direction !== null);
+            data.filters.availableDirections = data.filters.availableDirections.filter((direction: string | null) => direction && direction !== "" && direction !== null);
           }
         }
         return sampleData;
