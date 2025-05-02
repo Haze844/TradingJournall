@@ -218,24 +218,46 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
 
   return (
     <Card className="bg-card overflow-hidden mb-6 sticky top-4 w-full max-w-[90vw] mx-auto shadow-lg">
-      <CardHeader className="border-b border-border flex flex-row items-center justify-between py-3">
-        <CardTitle className="text-sm font-medium">Trade Details</CardTitle>
-        
-        {/* Win/Loss Badge und Hinweis zur Bearbeitung im Edit-Modus */}
-        <div className="flex items-center gap-2">
-          {selectedTrade && (
-            <div className="flex items-center gap-1.5 mr-2">
-              <BadgeWinLoss isWin={selectedTrade.isWin} />
-            </div>
-          )}
+      <CardHeader className="border-b border-border flex flex-col py-3">
+        <div className="flex flex-row items-center justify-between mb-2">
+          <CardTitle className="text-sm font-medium">Trade Details</CardTitle>
           
-          {selectedTrade && editMode && (
-            <div className="text-xs text-muted-foreground flex items-center">
-              <Pencil className="h-3 w-3 mr-1" />
-              Bearbeitungsmodus aktiv - Klicke zum Speichern
-            </div>
-          )}
+          {/* Win/Loss Badge und Hinweis zur Bearbeitung im Edit-Modus */}
+          <div className="flex items-center gap-2">
+            {selectedTrade && (
+              <div className="flex items-center gap-1.5 mr-2">
+                <BadgeWinLoss isWin={selectedTrade.isWin} />
+              </div>
+            )}
+            
+            {selectedTrade && editMode && (
+              <div className="text-xs text-muted-foreground flex items-center">
+                <Pencil className="h-3 w-3 mr-1" />
+                Bearbeitungsmodus aktiv - Klicke zum Speichern
+              </div>
+            )}
+          </div>
         </div>
+        
+        {/* Datum, Symbol und Profit/Loss in der Titelleiste */}
+        {selectedTrade && (
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-background/50 rounded-sm p-1.5">
+              <div className="text-xs text-muted-foreground font-medium">Datum</div>
+              <div className="font-bold text-xs mt-0.5">{formatDate(selectedTrade.date)}</div>
+            </div>
+            <div className="bg-background/50 rounded-sm p-1.5">
+              <div className="text-xs text-muted-foreground font-medium">Symbol</div>
+              <div className="font-bold text-xs mt-0.5">{selectedTrade.symbol}</div>
+            </div>
+            <div className="bg-background/50 rounded-sm p-1.5">
+              <div className="text-xs text-muted-foreground font-medium">Profit/Loss</div>
+              <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
+              </span>
+            </div>
+          </div>
+        )}
       </CardHeader>
 
       {!selectedTrade ? (
@@ -260,22 +282,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
                 <div className="text-xs font-medium mb-2 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-2">
-                  <div className="grid grid-cols-3 gap-2 mb-1">
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Profit/Loss</div>
-                      <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
-                        {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
-                      </span>
-                    </div>
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Datum</div>
-                      <div className="font-bold text-xs mt-0.5">{formatDate(selectedTrade.date)}</div>
-                    </div>
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Symbol</div>
-                      <div className="font-bold text-xs mt-0.5">{selectedTrade.symbol}</div>
-                    </div>
-                  </div>
+                  {/* Diese Gruppe der Felder ist jetzt nach oben verschoben, daher entfernen wir sie hier */}
                   <div className="bg-background/50 rounded-sm p-1.5 mb-1">
                     <div className="text-xs text-muted-foreground font-medium">Setup</div>
                     {editMode ? (
