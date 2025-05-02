@@ -324,6 +324,9 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
         const ticks = riskPoints * 4;
         const riskAmount = (ticks * 0.5) * size;
         
+        // Log der Berechnung für Debugging
+        console.log(`Risiko Berechnung für Trade ${trade.id}: Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskAmount.toFixed(2)}€`);
+        
         result[type].sum += riskAmount;
         result.total.count += 1;
         result.total.sum += riskAmount;
