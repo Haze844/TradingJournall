@@ -2275,35 +2275,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get trades with filters
       const trades = await storage.getTrades(Number(userId), req.query);
       
+      console.log(`Position Size API - userId: ${userId}, gefundene Trades: ${trades.length}`);
+      
       if (trades.length === 0) {
+        console.log("Position Size API - keine Trades gefunden, sende leeres Array");
         return res.json([]);
       }
+      
+      // Debug: Detail-Informationen zu jedem Trade ausgeben
+      trades.forEach((trade, index) => {
+        console.log(`Trade ${index+1} (ID: ${trade.id}): profitLoss=${trade.profitLoss}, rrAchieved=${trade.rrAchieved}, isWin=${trade.isWin}`);
+      });
       
       // Group trades by profit/loss ranges
       const profitLossRanges = {};
       const rangeSize = 100; // Group by $100 ranges
       
       trades.forEach(trade => {
-        // Berechne positionSize aus profitLoss und rrAchieved
-        const positionSize = trade.isWin && trade.rrAchieved ?
-          Math.abs(trade.profitLoss || 0) / (trade.rrAchieved || 1) :
-          Math.abs(trade.profitLoss || 0);
-        
-        // Round down to nearest rangeSize
-        const positionSizeKey = Math.floor(positionSize / rangeSize) * rangeSize;
-        const positionSizeRange = `${positionSizeKey}-${positionSizeKey + rangeSize}`;
-        
-        if (!profitLossRanges[positionSizeRange]) {
-          profitLossRanges[positionSizeRange] = {
-            positionSize: positionSizeKey + rangeSize/2, // Midpoint for display
-            wins: 0,
-            total: 0
-          };
-        }
-        
-        profitLossRanges[positionSizeRange].total++;
-        if (trade.isWin) {
-          profitLossRanges[positionSizeRange].wins++;
+        try {
+          // Berechne positionSize aus profitLoss und rrAchieved
+          let positionSize = 0;
+          
+          if (trade.isWin && trade.rrAchieved && trade.rrAchieved > 0) {
+            positionSize = Math.abs(trade.profitLoss || 0) / trade.rrAchieved;
+            console.log(`Gewinn-Trade ${trade.id}: Position = ${Math.abs(trade.profitLoss || 0)} / ${trade.rrAchieved} = ${positionSize.toFixed(2)}`);
+          } else {
+            positionSize = Math.abs(trade.profitLoss || 0);
+            console.log(`Verlust/Anderer Trade ${trade.id}: Position = ${positionSize.toFixed(2)}`);
+          }
+          
+          // Round down to nearest rangeSize
+          const positionSizeKey = Math.floor(positionSize / rangeSize) * rangeSize;
+          const positionSizeRange = `${positionSizeKey}-${positionSizeKey + rangeSize}`;
+          
+          if (!profitLossRanges[positionSizeRange]) {
+            profitLossRanges[positionSizeRange] = {
+              positionSize: positionSizeKey + rangeSize/2, // Midpoint for display
+              wins: 0,
+              total: 0
+            };
+          }
+          
+          profitLossRanges[positionSizeRange].total++;
+          if (trade.isWin) {
+            profitLossRanges[positionSizeRange].wins++;
+          }
+        } catch (err) {
+          console.error(`Fehler bei Position Size Berechnung für Trade ${trade.id}:`, err);
         }
       });
       
