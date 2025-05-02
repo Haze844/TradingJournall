@@ -221,26 +221,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       <CardHeader className="border-b border-border flex flex-row items-center justify-between py-3">
         <CardTitle className="text-sm font-medium">Trade Details</CardTitle>
         
-        {/* Entrypoints Feld und Hinweis zur Bearbeitung im Edit-Modus */}
+        {/* Win/Loss Badge und Hinweis zur Bearbeitung im Edit-Modus */}
         <div className="flex items-center gap-2">
           {selectedTrade && (
-            <div className="flex items-center gap-1.5 mr-2 bg-background/60 rounded-md p-1.5">
-              <div className="text-xs text-muted-foreground font-medium">Entrypoints:</div>
-              {editMode ? (
-                <Input
-                  type="number"
-                  value={editData.entryPoints === undefined ? "" : editData.entryPoints}
-                  onChange={(e) => {
-                    const value = e.target.value === "" ? undefined : parseInt(e.target.value);
-                    updateField('entryPoints', value);
-                  }}
-                  className="h-6 w-14 text-xs ml-1"
-                  min="0"
-                  placeholder="EP"
-                />
-              ) : (
-                <div className="font-medium text-xs">{selectedTrade.entryPoints || '-'}</div>
-              )}
+            <div className="flex items-center gap-1.5 mr-2">
+              <BadgeWinLoss isWin={selectedTrade.isWin} />
             </div>
           )}
           
@@ -276,7 +261,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                 <div className="text-xs font-medium mb-2 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center mb-2 bg-background/50 rounded-sm p-1.5">
-                    <BadgeWinLoss isWin={selectedTrade.isWin} />
+                    <div className="text-xs text-muted-foreground font-medium">Profit/Loss</div>
                     <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
                       {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
                     </span>
