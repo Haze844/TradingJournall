@@ -2036,10 +2036,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const date = new Date(trade.date);
         const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         
-        // Calculate profit/loss
-        const pnl = trade.isWin 
-          ? trade.positionSize * trade.rrAchieved 
-          : -trade.positionSize;
+        // Use the profitLoss field directly 
+        // Wenn trade.profitLoss vorhanden, nutze diesen Wert direkt
+        const pnl = trade.profitLoss || 0;
         
         balance += pnl;
         
@@ -2109,10 +2108,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const date = new Date(trade.date);
         const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         
+        // Für nicht gewonnene Trades wird der profitLoss als Risiko verwendet
+        // Für gewonnene Trades berechnen wir das Risiko anders: ~profitLoss / rrAchieved
+        const riskDollar = trade.isWin && trade.rrAchieved ? 
+          Math.abs(trade.profitLoss || 0) / (trade.rrAchieved || 1) : 
+          Math.abs(trade.profitLoss || 0);
+        
         // Calculate risk percentage (assuming account value of 10000 if not specified)
-        const accountValue = trade.accountValue || 10000;
-        const riskPercent = (trade.positionSize / accountValue) * 100;
-        const riskDollar = trade.positionSize;
+        const accountValue = 10000; // Default Kontostand
+        const riskPercent = (riskDollar / accountValue) * 100;
         
         // Add or update monthly data
         if (!monthlyData[monthYear]) {
@@ -2167,31 +2171,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      // Group trades by position size ranges
-      const positionSizeRanges = {};
+      // Group trades by profit/loss ranges
+      const profitLossRanges = {};
       const rangeSize = 100; // Group by $100 ranges
       
       trades.forEach(trade => {
+        // Berechne positionSize aus profitLoss und rrAchieved
+        const positionSize = trade.isWin && trade.rrAchieved ?
+          Math.abs(trade.profitLoss || 0) / (trade.rrAchieved || 1) :
+          Math.abs(trade.profitLoss || 0);
+        
         // Round down to nearest rangeSize
-        const positionSizeKey = Math.floor(trade.positionSize / rangeSize) * rangeSize;
+        const positionSizeKey = Math.floor(positionSize / rangeSize) * rangeSize;
         const positionSizeRange = `${positionSizeKey}-${positionSizeKey + rangeSize}`;
         
-        if (!positionSizeRanges[positionSizeRange]) {
-          positionSizeRanges[positionSizeRange] = {
+        if (!profitLossRanges[positionSizeRange]) {
+          profitLossRanges[positionSizeRange] = {
             positionSize: positionSizeKey + rangeSize/2, // Midpoint for display
             wins: 0,
             total: 0
           };
         }
         
-        positionSizeRanges[positionSizeRange].total++;
+        profitLossRanges[positionSizeRange].total++;
         if (trade.isWin) {
-          positionSizeRanges[positionSizeRange].wins++;
+          profitLossRanges[positionSizeRange].wins++;
         }
       });
       
       // Calculate win rates and convert to array
-      const positionSizeData = Object.entries(positionSizeRanges)
+      const positionSizeData = Object.entries(profitLossRanges)
         .map(([range, data]) => ({
           positionSize: data.positionSize,
           winRate: parseFloat(((data.wins / data.total) * 100).toFixed(2)),
@@ -2229,8 +2238,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const winningTrades = trades.filter(t => t.isWin).length;
       const winRate = (winningTrades / totalTrades) * 100;
       
-      // Calculate average position size
-      const avgPositionSize = trades.reduce((sum, trade) => sum + trade.positionSize, 0) / totalTrades;
+      // Calculate risk values from profitLoss field
+      const riskValues = trades.map(trade => {
+        return trade.isWin && trade.rrAchieved ?
+          Math.abs(trade.profitLoss || 0) / (trade.rrAchieved || 1) :
+          Math.abs(trade.profitLoss || 0);
+      });
+      
+      const avgRisk = riskValues.reduce((sum, val) => sum + val, 0) / totalTrades;
       
       // Find maximum drawdown
       let balance = 10000;
@@ -2239,9 +2254,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       [...trades].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
         .forEach(trade => {
-          const pnl = trade.isWin 
-            ? trade.positionSize * trade.rrAchieved 
-            : -trade.positionSize;
+          // Verwende direkt den profitLoss Wert
+          const pnl = trade.profitLoss || 0;
           
           balance += pnl;
           
@@ -2277,11 +2291,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // 3. Check position size consistency
-      const positionSizes = trades.map(t => t.positionSize);
-      const positionSizeStdDev = calculateStandardDeviation(positionSizes);
-      const positionSizeVariation = (positionSizeStdDev / avgPositionSize) * 100;
+      const riskStdDev = calculateStandardDeviation(riskValues);
+      const riskVariation = (riskStdDev / avgRisk) * 100;
       
-      if (positionSizeVariation > 50) {
+      if (riskVariation > 50) {
         recommendations.push({
           id: "inconsistent-position",
           recommendation: "Standardisiere deine Positionsgrößen",
@@ -2291,45 +2304,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // 4. Check optimal position size from position size data
-      const positionSizeRanges = {};
+      const riskRanges = {};
       const rangeSize = 100;
       
-      trades.forEach(trade => {
-        const positionSizeKey = Math.floor(trade.positionSize / rangeSize) * rangeSize;
-        const positionSizeRange = `${positionSizeKey}-${positionSizeKey + rangeSize}`;
+      riskValues.forEach((risk, index) => {
+        const riskKey = Math.floor(risk / rangeSize) * rangeSize;
+        const riskRange = `${riskKey}-${riskKey + rangeSize}`;
         
-        if (!positionSizeRanges[positionSizeRange]) {
-          positionSizeRanges[positionSizeRange] = {
-            positionSize: positionSizeKey + rangeSize/2,
+        if (!riskRanges[riskRange]) {
+          riskRanges[riskRange] = {
+            risk: riskKey + rangeSize/2,
             wins: 0,
             total: 0
           };
         }
         
-        positionSizeRanges[positionSizeRange].total++;
-        if (trade.isWin) {
-          positionSizeRanges[positionSizeRange].wins++;
+        riskRanges[riskRange].total++;
+        if (trades[index].isWin) {
+          riskRanges[riskRange].wins++;
         }
       });
       
-      // Find optimal position size range with at least 5 trades
-      let optimalPositionSize = null;
+      // Find optimal risk range with at least 5 trades
+      let optimalRisk = null;
       let bestWinRate = 0;
       
-      Object.values(positionSizeRanges).forEach(range => {
+      Object.values(riskRanges).forEach(range => {
         const rangeWinRate = range.total >= 5 ? (range.wins / range.total) : 0;
         if (rangeWinRate > bestWinRate) {
           bestWinRate = rangeWinRate;
-          optimalPositionSize = range.positionSize;
+          optimalRisk = range.risk;
         }
       });
       
-      if (optimalPositionSize && Math.abs(avgPositionSize - optimalPositionSize) > rangeSize) {
-        const direction = avgPositionSize < optimalPositionSize ? "erhöhen" : "verringern";
+      if (optimalRisk && Math.abs(avgRisk - optimalRisk) > rangeSize) {
+        const direction = avgRisk < optimalRisk ? "erhöhen" : "verringern";
         recommendations.push({
           id: "optimal-position",
-          recommendation: `Positionsgröße auf ca. ${optimalPositionSize}$ ${direction}`,
-          explanation: `Deine Performance ist besser bei einer Positionsgröße von etwa ${optimalPositionSize}$. Erwäge, deine durchschnittliche Positionsgröße anzupassen.`,
+          recommendation: `Risiko pro Trade auf ca. ${optimalRisk.toFixed(0)}$ ${direction}`,
+          explanation: `Deine Performance ist besser bei einem Risiko von etwa ${optimalRisk.toFixed(0)}$ pro Trade. Erwäge, deine durchschnittliche Positionsgröße anzupassen.`,
           impact: 0.6
         });
       }
