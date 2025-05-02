@@ -426,7 +426,7 @@ export default function SimpleHome() {
             <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center">
               <AlertCircle className="w-4 h-4 mr-2" /> Risikomanagement
             </h2>
-            <RiskManagementDashboard userId={userId} />
+            <RiskManagementDashboard userId={userId} activeFilters={activeFilters} />
           </div>
         </TabsContent>
             
