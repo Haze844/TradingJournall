@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, ResponsiveContainer, LineChart, Line, BarChart, Bar, CartesianGrid, XAxis, YAxis, Cell } from 'recharts';
 import { ChartTypeSelector, type ChartType } from '@/components/ui/chart-type-selector';
 import { format } from 'date-fns';
-import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart } from 'lucide-react';
+import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart, RefreshCcw, Wallet } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { accountTypeValues } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
 // Gemeinsame Stilkonfiguration für elegantere Diagramme
 const chartConfig = {
@@ -49,6 +55,67 @@ interface RiskRecommendation {
 export default function RiskManagementDashboard({ userId, activeFilters }: { userId: number, activeFilters?: any }) {
   const [chartType, setChartType] = useState<ChartType>('line');
   const [activeTab, setActiveTab] = useState<'drawdown' | 'risk-per-trade' | 'position-size' | 'recommendations'>('drawdown');
+  const [accountBalance, setAccountBalance] = useState<number>(2500); // Standard-Kontostand: 2500€
+  const [accountType, setAccountType] = useState<string>('all'); // Standard: alle Konten
+  const { toast } = useToast();
+  
+  // Abruf der Benutzereinstellungen
+  const { data: userSettings } = useQuery({
+    queryKey: ['/api/settings', userId],
+    queryFn: async () => {
+      try {
+        const response = await fetch(`/api/settings?userId=${userId}`);
+        if (!response.ok) {
+          return { accountBalance: 2500, accountType: 'all' };
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Fehler beim Abrufen der Benutzereinstellungen:', error);
+        return { accountBalance: 2500, accountType: 'all' };
+      }
+    },
+  });
+  
+  // Einstellungen aktualisieren, wenn sie geladen werden
+  useEffect(() => {
+    if (userSettings?.accountBalance) {
+      setAccountBalance(userSettings.accountBalance);
+    }
+    if (userSettings?.accountType) {
+      setAccountType(userSettings.accountType);
+    }
+  }, [userSettings]);
+  
+  // Mutation zum Aktualisieren der Benutzereinstellungen
+  const updateSettingsMutation = useMutation({
+    mutationFn: async ({ accountBalance, accountType }: { accountBalance: number; accountType: string }) => {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, accountBalance, accountType }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Fehler beim Speichern der Einstellungen');
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Einstellungen aktualisiert',
+        description: 'Deine Risikodaten wurden erfolgreich aktualisiert.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Fehler',
+        description: 'Die Einstellungen konnten nicht gespeichert werden.',
+        variant: 'destructive',
+      });
+    },
+  });
   
   // Hilfsfunktion zum Erstellen der Filter-URL-Parameter
   const buildFilterParams = () => {
@@ -208,6 +275,58 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Konto-Einstellungen für Risikomanagement */}
+        <div className="mb-6 p-4 bg-muted rounded-lg">
+          <div className="flex flex-col sm:flex-row gap-4 items-end">
+            <div className="w-full sm:w-1/3">
+              <Label htmlFor="accountBalance" className="text-sm font-medium mb-1.5 block">Kontostand (€)</Label>
+              <div className="flex items-center">
+                <Input 
+                  id="accountBalance"
+                  type="number" 
+                  value={accountBalance} 
+                  onChange={(e) => setAccountBalance(parseFloat(e.target.value) || 0)}
+                  className="flex-grow"
+                />
+              </div>
+            </div>
+            
+            <div className="w-full sm:w-1/3">
+              <Label htmlFor="accountType" className="text-sm font-medium mb-1.5 block">Kontotyp filtern</Label>
+              <Select 
+                value={accountType} 
+                onValueChange={setAccountType}
+              >
+                <SelectTrigger id="accountType">
+                  <SelectValue placeholder="Kontotyp wählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle Konten</SelectItem>
+                  {accountTypeValues.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="w-full sm:w-1/3">
+              <Button 
+                onClick={() => {
+                  // Speichere die Einstellungen
+                  updateSettingsMutation.mutate({ 
+                    accountBalance, 
+                    accountType 
+                  });
+                }}
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <RefreshCcw className="h-4 w-4" />
+                Risikodaten aktualisieren
+              </Button>
+            </div>
+          </div>
+        </div>
+        
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-4 mb-6">
             <TabsTrigger value="drawdown" className="text-xs md:text-sm flex items-center gap-1">
