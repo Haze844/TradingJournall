@@ -63,9 +63,10 @@ interface TradeTableProps {
   isLoading: boolean;
   onTradeSelect: (trade: Trade) => void;
   onFilteredTradesChange?: (filteredTrades: Trade[]) => void;
+  onActiveFiltersChange?: (activeFilters: any) => void; // Hinzugefügt für Heatmap-Kommunikation
 }
 
-export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFilteredTradesChange }: TradeTableProps) {
+export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFilteredTradesChange, onActiveFiltersChange }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 5;
   
