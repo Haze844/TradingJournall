@@ -42,21 +42,51 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { format, subDays, subMonths, parseISO, isValid } from 'date-fns';
+import { de } from 'date-fns/locale';
+import { Input } from "@/components/ui/input";
 
-// Zeitraum-Optionen für Filter
+// Konstanten für Zeitraumfilterung
 type TimeRangeOption = {
   label: string;
   value: string;
   days: number;
 };
 
-const timeRangeOptions: TimeRangeOption[] = [
-  { label: "Alle Daten", value: "all", days: 0 },
-  { label: "Letzte Woche", value: "last_week", days: 7 },
-  { label: "Letzter Monat", value: "last_month", days: 30 },
-  { label: "Letztes Quartal", value: "last_quarter", days: 90 },
-  { label: "Letztes Jahr", value: "last_year", days: 365 }
-];
+// Hilfsfunktion zur Formatierung von Datum im deutschen Format
+const formatDateDE = (date: Date): string => {
+  return format(date, 'dd.MM.yyyy', { locale: de });
+};
+
+// Parst ein Datum aus deutschem Format (TT.MM.YYYY) oder ISO-Format
+const parseDateInput = (dateString: string): Date | null => {
+  if (!dateString) return null;
+  
+  // Versuche zuerst als deutsches Datumsformat zu parsen (DD.MM.YYYY)
+  const parts = dateString.split('.');
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Monate in JS sind 0-basiert
+    const year = parseInt(parts[2], 10);
+    
+    const date = new Date(year, month, day);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+  }
+  
+  // Alternativ versuche als ISO-Format zu parsen
+  try {
+    const date = parseISO(dateString);
+    if (isValid(date)) {
+      return date;
+    }
+  } catch (e) {
+    // Ignoriere Fehler beim Parsen
+  }
+  
+  return null;
+};
 
 interface TradeDashboardProps {
   trades: Trade[];
@@ -72,7 +102,12 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
   const [tradeTypeData, setTradeTypeData] = useState<any[]>([]);
   const [setupPerformance, setSetupPerformance] = useState<any[]>([]);
   const [selectedSetup, setSelectedSetup] = useState<string>("all");
-  const [selectedTimeRange, setSelectedTimeRange] = useState<string>("all");
+  
+  // Für benutzerdefinierte Datumsfilterung
+  const [startDateInput, setStartDateInput] = useState<string>("");
+  const [endDateInput, setEndDateInput] = useState<string>("");
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   
   // Verfügbare Setups aus den Trades extrahieren
   const availableSetups = useMemo(() => {
@@ -85,32 +120,58 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     return Array.from(setups);
   }, [trades]);
   
-  // Filtere Trades nach Zeitraum
-  const timeFilteredTrades = useMemo(() => {
-    if (selectedTimeRange === "all") {
+  // Verarbeite Datumsfilter, wenn Start- und/oder Enddatum eingegeben wurde
+  useEffect(() => {
+    if (startDateInput) {
+      const parsedDate = parseDateInput(startDateInput);
+      if (parsedDate) {
+        // Setze Startzeit auf 00:00:00
+        parsedDate.setHours(0, 0, 0, 0);
+        setStartDate(parsedDate);
+      }
+    } else {
+      setStartDate(null);
+    }
+  }, [startDateInput]);
+
+  useEffect(() => {
+    if (endDateInput) {
+      const parsedDate = parseDateInput(endDateInput);
+      if (parsedDate) {
+        // Setze Endzeit auf 23:59:59
+        parsedDate.setHours(23, 59, 59, 999);
+        setEndDate(parsedDate);
+      }
+    } else {
+      setEndDate(null);
+    }
+  }, [endDateInput]);
+
+  // Filtere Trades nach Datumsbereich
+  const dateFilteredTrades = useMemo(() => {
+    if (!startDate && !endDate) {
       return trades;
     }
     
-    const option = timeRangeOptions.find(opt => opt.value === selectedTimeRange);
-    if (!option) return trades;
-    
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - option.days);
-    
     return trades.filter(trade => {
       if (!trade.date) return false;
+      
       const tradeDate = new Date(trade.date);
-      return tradeDate >= cutoffDate;
+      
+      if (startDate && tradeDate < startDate) return false;
+      if (endDate && tradeDate > endDate) return false;
+      
+      return true;
     });
-  }, [trades, selectedTimeRange]);
+  }, [trades, startDate, endDate]);
   
-  // Gefilterte Trades basierend auf ausgewähltem Setup und Zeitraum
+  // Gefilterte Trades basierend auf ausgewähltem Setup und Datumsbereich
   const filteredTrades = useMemo(() => {
     if (selectedSetup === "all") {
-      return timeFilteredTrades;
+      return dateFilteredTrades;
     }
-    return timeFilteredTrades.filter(trade => trade.setup === selectedSetup);
-  }, [timeFilteredTrades, selectedSetup]);
+    return dateFilteredTrades.filter(trade => trade.setup === selectedSetup);
+  }, [dateFilteredTrades, selectedSetup]);
   
   // Statistik-Werte basierend auf gefilterten Trades
   const totalTrades = filteredTrades.length;
@@ -503,22 +564,25 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
             </SelectContent>
           </Select>
           
-          {/* Zeitraum Filter */}
-          <Select
-            value={selectedTimeRange}
-            onValueChange={setSelectedTimeRange}
-          >
-            <SelectTrigger className="w-[180px] bg-black/50">
-              <SelectValue placeholder="Zeitraum" />
-            </SelectTrigger>
-            <SelectContent>
-              {timeRangeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Datumsbereich */}
+          <div className="flex gap-2 items-center">
+            <div className="relative">
+              <CalendarRange className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-8 w-[140px] bg-black/50 border-border"
+                placeholder="TT.MM.JJJJ"
+                value={startDateInput}
+                onChange={(e) => setStartDateInput(e.target.value)}
+              />
+            </div>
+            <span className="text-muted-foreground">-</span>
+            <Input
+              className="w-[140px] bg-black/50 border-border"
+              placeholder="TT.MM.JJJJ"
+              value={endDateInput}
+              onChange={(e) => setEndDateInput(e.target.value)}
+            />
+          </div>
           
           {/* Filter Badges */}
           <div className="flex flex-wrap gap-2">
@@ -528,10 +592,17 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
               </Badge>
             )}
             
-            {selectedTimeRange !== "all" && (
+            {startDate && (
               <Badge className="px-2 py-1 bg-primary/20 text-primary" variant="outline">
                 <CalendarRange className="h-3 w-3 mr-1 inline" />
-                {timeRangeOptions.find(opt => opt.value === selectedTimeRange)?.label || "Gefiltert"}
+                Von: {formatDateDE(startDate)}
+              </Badge>
+            )}
+            
+            {endDate && (
+              <Badge className="px-2 py-1 bg-primary/20 text-primary" variant="outline">
+                <CalendarRange className="h-3 w-3 mr-1 inline" />
+                Bis: {formatDateDE(endDate)}
               </Badge>
             )}
           </div>
