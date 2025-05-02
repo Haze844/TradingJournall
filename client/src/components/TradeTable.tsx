@@ -369,6 +369,41 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       onFilteredTradesChange(filteredTrades);
     }
   }, [filteredTrades, onFilteredTradesChange]);
+  
+  // Benachrichtige übergeordnete Komponente über Änderungen an den Filtern
+  useEffect(() => {
+    // Nur benachrichtigen, wenn der Handler existiert
+    if (onActiveFiltersChange) {
+      // Set-Objekte in Arrays umwandeln, damit sie über HTTP übertragen werden können
+      const serializableFilters = {
+        ...filters,
+        symbols: Array.from(filters.symbols),
+        setups: Array.from(filters.setups),
+        mainTrends: Array.from(filters.mainTrends),
+        internalTrends: Array.from(filters.internalTrends),
+        entryTypes: Array.from(filters.entryTypes),
+        accountTypes: Array.from(filters.accountTypes),
+        sessions: Array.from(filters.sessions),
+        rrRanges: Array.from(filters.rrRanges),
+        plRanges: Array.from(filters.plRanges),
+        trends: Array.from(filters.trends),
+        internalTrendsNew: Array.from(filters.internalTrendsNew),
+        microTrends: Array.from(filters.microTrends),
+        structures: Array.from(filters.structures),
+        timeframeEntries: Array.from(filters.timeframeEntries),
+        liquidations: Array.from(filters.liquidations),
+        locations: Array.from(filters.locations),
+        unmitZones: Array.from(filters.unmitZones),
+        marketPhases: Array.from(filters.marketPhases),
+        slTypes: Array.from(filters.slTypes),
+        slPointsRanges: Array.from(filters.slPointsRanges),
+        startDate: filters.startDate.toISOString(),
+        endDate: filters.endDate.toISOString(),
+        isWin: filters.isWin
+      };
+      onActiveFiltersChange(serializableFilters);
+    }
+  }, [filters, onActiveFiltersChange]);
 
   // Calculate pagination for filtered trades
   const indexOfLastTrade = currentPage * tradesPerPage;

@@ -173,10 +173,18 @@ export default function SimpleHome() {
 
   // State für gefilterte Trades
   const [filteredTrades, setFilteredTrades] = useState<Trade[]>([]);
+  
+  // State für aktive Filter aus der TradeTable
+  const [activeFilters, setActiveFilters] = useState<any>(null);
 
   // Handler für gefilterte Trades aus der TradeTable-Komponente
   const handleFilteredTradesChange = useCallback((newFilteredTrades: Trade[]) => {
     setFilteredTrades(newFilteredTrades);
+  }, []);
+  
+  // Handler für aktive Filter aus der TradeTable-Komponente
+  const handleActiveFiltersChange = useCallback((newActiveFilters: any) => {
+    setActiveFilters(newActiveFilters);
   }, []);
 
   // Berechne Statistiken für die angezeigten Trades (basierend auf gefilterten Trades)
@@ -384,6 +392,7 @@ export default function SimpleHome() {
                 isLoading={tradesLoading}
                 onTradeSelect={handleTradeSelect}
                 onFilteredTradesChange={handleFilteredTradesChange}
+                onActiveFiltersChange={handleActiveFiltersChange}
               />
             </div>
           </div>
@@ -542,7 +551,7 @@ export default function SimpleHome() {
                 
                 {/* Performance Heatmap */}
                 <div>
-                  <PerformanceHeatmap />
+                  <PerformanceHeatmap activeFilters={activeFilters} />
                 </div>
               </div>
             </TabsContent>
