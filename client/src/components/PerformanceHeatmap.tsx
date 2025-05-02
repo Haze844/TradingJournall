@@ -243,7 +243,11 @@ const timeRangeOptions: TimeRangeOption[] = [
   { label: "Letztes Jahr", value: "last_year", days: 365 },
 ];
 
-export default function PerformanceHeatmap() {
+interface PerformanceHeatmapProps {
+  activeFilters?: any;
+}
+
+export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmapProps) {
   const [dataType, setDataType] = useState<"winRate" | "avgRR" | "pnl">("winRate");
   const [selectedCell, setSelectedCell] = useState<HeatmapDataPoint | null>(null);
   const [interactionMode, setInteractionMode] = useState<"hover" | "click">("hover");
@@ -280,29 +284,81 @@ export default function PerformanceHeatmap() {
 
   // Daten aus der API abrufen
   const { data: heatmapData, isLoading, error } = useQuery<HeatmapData>({
-    queryKey: ["/api/performance-heatmap", timeRange, setupFilter, symbolFilter, directionFilter, compareMode],
+    queryKey: ["/api/performance-heatmap", timeRange, setupFilter, symbolFilter, directionFilter, compareMode, activeFilters],
     queryFn: async () => {
       // URL mit Parametern aufbauen
       let url = `/api/performance-heatmap?userId=2`;
       
-      // Zeitraum-Filter hinzufügen
-      if (dateRange) {
-        url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
-      }
-      
-      // Setup-Filter hinzufügen
-      if (setupFilter && setupFilter !== "all") {
-        url += `&setup=${setupFilter}`;
-      }
-      
-      // Symbol-Filter hinzufügen
-      if (symbolFilter && symbolFilter !== "all") {
-        url += `&symbol=${symbolFilter}`;
-      }
-      
-      // Richtungs-Filter hinzufügen
-      if (directionFilter && directionFilter !== "all") {
-        url += `&direction=${directionFilter}`;
+      // Die activeFilters von der TradeTable übertragen, wenn sie existieren
+      if (activeFilters) {
+        // Nutze die Daten aus der TradeTable für eine präzisere Heatmap-Darstellung
+        
+        // Datumsfilter aus TradeTable
+        if (activeFilters.startDate && activeFilters.endDate) {
+          // Datums-Strings extrahieren
+          const startDate = new Date(activeFilters.startDate).toISOString().split('T')[0];
+          const endDate = new Date(activeFilters.endDate).toISOString().split('T')[0];
+          url += `&startDate=${startDate}&endDate=${endDate}`;
+        } 
+        // Ansonsten den Datumsfilter aus der Heatmap verwenden
+        else if (dateRange) {
+          url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+        }
+        
+        // Symbole aus TradeTable-Filter
+        if (activeFilters.symbols && activeFilters.symbols.length > 0) {
+          url += `&symbols=${encodeURIComponent(JSON.stringify(activeFilters.symbols))}`;
+        } 
+        // Ansonsten den Symbol-Filter aus der Heatmap verwenden
+        else if (symbolFilter && symbolFilter !== "all") {
+          url += `&symbol=${symbolFilter}`;
+        }
+        
+        // Setups aus TradeTable-Filter
+        if (activeFilters.setups && activeFilters.setups.length > 0) {
+          url += `&setups=${encodeURIComponent(JSON.stringify(activeFilters.setups))}`;
+        }
+        // Ansonsten den Setup-Filter aus der Heatmap verwenden
+        else if (setupFilter && setupFilter !== "all") {
+          url += `&setup=${setupFilter}`;
+        }
+        
+        // Füge weitere Filter hinzu (Win/Loss, Trends, Strukturen usw.)
+        if (activeFilters.isWin !== null) {
+          url += `&isWin=${activeFilters.isWin}`;
+        }
+        
+        // Marktphasen
+        if (activeFilters.marketPhases && activeFilters.marketPhases.length > 0) {
+          url += `&marketPhases=${encodeURIComponent(JSON.stringify(activeFilters.marketPhases))}`;
+        }
+        
+        // Zeitzonen/Sessions
+        if (activeFilters.sessions && activeFilters.sessions.length > 0) {
+          url += `&sessions=${encodeURIComponent(JSON.stringify(activeFilters.sessions))}`;
+        }
+      } 
+      // Wenn keine activeFilters vorhanden sind, verwende die Filter der Heatmap
+      else {
+        // Zeitraum-Filter hinzufügen
+        if (dateRange) {
+          url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+        }
+        
+        // Setup-Filter hinzufügen
+        if (setupFilter && setupFilter !== "all") {
+          url += `&setup=${setupFilter}`;
+        }
+        
+        // Symbol-Filter hinzufügen
+        if (symbolFilter && symbolFilter !== "all") {
+          url += `&symbol=${symbolFilter}`;
+        }
+        
+        // Richtungs-Filter hinzufügen
+        if (directionFilter && directionFilter !== "all") {
+          url += `&direction=${directionFilter}`;
+        }
       }
       
       // Vergleichsmodus-Parameter hinzufügen
