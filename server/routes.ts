@@ -2013,7 +2013,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Drawdown API called with filters:", req.query);
       
       // Get trades with filters
-      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      const trades = await storage.getTrades(Number(userId), req.query);
       
       if (trades.length === 0) {
         return res.json([]);
@@ -2091,7 +2091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Risk per trade API called with filters:", req.query);
       
       // Get trades with filters
-      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      const trades = await storage.getTrades(Number(userId), req.query);
       
       if (trades.length === 0) {
         return res.json([]);
@@ -2161,7 +2161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Position size API called with filters:", req.query);
       
       // Get trades with filters
-      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      const trades = await storage.getTrades(Number(userId), req.query);
       
       if (trades.length === 0) {
         return res.json([]);
@@ -2218,7 +2218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Risk recommendations API called with filters:", req.query);
       
       // Get trades with filters
-      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      const trades = await storage.getTrades(Number(userId), req.query);
       
       if (trades.length === 0) {
         return res.json([]);
