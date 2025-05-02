@@ -108,7 +108,38 @@ function generateSampleHeatmapData(): HeatmapData {
     });
   });
   
-  return { days, timeframe, data };
+  // Generiere Beispieldaten für Empfehlungen
+  const recommendations: HeatmapRecommendations = {
+    bestTimes: [
+      { day: "Dienstag", time: "10-12", winRate: 78, avgRR: "2.5" },
+      { day: "Mittwoch", time: "14-16", winRate: 72, avgRR: "2.3" },
+      { day: "Donnerstag", time: "16-18", winRate: 65, avgRR: "1.9" }
+    ],
+    worstTimes: [
+      { day: "Montag", time: "08-10", winRate: 32, avgRR: "0.7" },
+      { day: "Freitag", time: "18-22", winRate: 28, avgRR: "0.6" }
+    ],
+    trends: [
+      { type: "pattern", message: "Die beste Performance ist zwischen 10-12 Uhr an Dienstagen zu beobachten." },
+      { type: "improvement", message: "Deine Nachmittags-Performance hat sich in den letzten 30 Tagen um 12% verbessert." },
+      { type: "suggestion", message: "Vermeide den Handel in den ersten 30 Minuten nach Marktöffnung für bessere Ergebnisse." }
+    ]
+  };
+  
+  // Füge Beispiel-Filter hinzu 
+  const filters: HeatmapFilters = {
+    availableSetups: ["SFP", "Trendline Break", "Double Top", "Fibonacci Retracement", "ABCD Pattern"],
+    availableSymbols: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "EURJPY", "DAX"],
+    availableDirections: ["Long", "Short"]
+  };
+  
+  return {
+    days,
+    timeframe,
+    data,
+    recommendations,
+    filters
+  };
 }
 
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
@@ -288,7 +319,16 @@ export default function PerformanceHeatmap() {
       // Wenn keine Daten vorhanden sind, generiere Beispieldaten für die Visualisierung
       if (!data.data || data.data.length === 0) {
         console.log("Keine Daten vom Server - generiere Beispieldaten für die Heatmap-Visualisierung");
-        return generateSampleHeatmapData();
+        const sampleData = generateSampleHeatmapData();
+        // Stelle sicher, dass die Filter-Daten immer definiert sind
+        if (!data.filters) {
+          data.filters = {
+            availableSetups: ["SFP", "Trendline Break", "Double Top"],
+            availableSymbols: ["EURUSD", "GBPUSD", "USDJPY"], 
+            availableDirections: ["Long", "Short"]
+          };
+        }
+        return sampleData;
       }
       
       return data;
