@@ -2239,10 +2239,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const monthYear = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
         console.log(`Processing trade for risk: date=${trade.date}, parsed as=${dateObj.toISOString()}, monthYear=${monthYear}`);
         
-        // Konstantes Risiko von 200€ pro Trade
-        // Bei -1 RR entspricht das genau 200€ Verlust
-        const fixedRiskPerTrade = 200;
-        let riskDollar = fixedRiskPerTrade;
+        // Neue Berechnung: Risiko Punkte * 4 = Ticks, (Ticks * 0,5) * Size = Risikosumme
+        // Wenn riskSum nicht vorhanden ist, fallen wir auf einen Default-Wert zurück
+        const riskPoints = trade.riskSum || 0;
+        const size = trade.size || 1; // Default Size ist 1, falls nicht angegeben
+        
+        // Berechnung der Ticks und der Risikosumme
+        const ticks = riskPoints * 4;
+        const riskDollar = (ticks * 0.5) * size;
+        
+        console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskDollar}€`);
         
         // Für Logging-Zwecke behalten wir die bisherige Logik bei
         let calculatedRisk = 0;
@@ -2252,7 +2258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           calculatedRisk = Math.abs(trade.profitLoss || 0);
         }
         
-        console.log(`Trade mit fixem Risiko: ${fixedRiskPerTrade}€ (berechnetes Risiko wäre: ${calculatedRisk.toFixed(2)}€)`);
+        console.log(`Trade mit Risikosumme: ${riskDollar.toFixed(2)}€ (berechnetes Risiko wäre: ${calculatedRisk.toFixed(2)}€)`);
         
         
         // Calculate risk percentage (using account value of 2500€ as specified by user)
