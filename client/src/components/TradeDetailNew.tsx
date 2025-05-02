@@ -260,13 +260,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
                 <div className="text-xs font-medium mb-2 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center mb-2 bg-background/50 rounded-sm p-1.5">
-                    <div className="text-xs text-muted-foreground font-medium">Profit/Loss</div>
-                    <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
-                      {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mb-1">
+                  <div className="grid grid-cols-3 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Profit/Loss</div>
+                      <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                        {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
+                      </span>
+                    </div>
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Datum</div>
                       <div className="font-bold text-xs mt-0.5">{formatDate(selectedTrade.date)}</div>
