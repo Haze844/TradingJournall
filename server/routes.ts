@@ -2248,7 +2248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const ticks = riskPoints * 4;
         const riskDollar = (ticks * 0.5) * size;
         
-        console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskDollar}€`);
+        console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskDollar}$`);
         
         // Für Logging-Zwecke behalten wir die bisherige Logik bei
         let calculatedRisk = 0;
@@ -2258,7 +2258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           calculatedRisk = Math.abs(trade.profitLoss || 0);
         }
         
-        console.log(`Trade mit Risikosumme: ${riskDollar.toFixed(2)}€ (berechnetes Risiko wäre: ${calculatedRisk.toFixed(2)}€)`);
+        console.log(`Trade mit Risikosumme: ${riskDollar.toFixed(2)}$ (berechnetes Risiko wäre: ${calculatedRisk.toFixed(2)}$)`);
         
         
         // Calculate risk percentage (using account value of 2500€ as specified by user)
@@ -2343,16 +2343,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const ticks = riskPoints * 4;
           const positionSize = (ticks * 0.5) * size;
           
-          console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${positionSize.toFixed(2)}€`);
+          console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${positionSize.toFixed(2)}$`);
           
           // Für Logging auch die alte Berechnung anzeigen
           let calculatedPosition = 0;
           if (trade.isWin && trade.rrAchieved && trade.rrAchieved > 0) {
             calculatedPosition = Math.abs(trade.profitLoss || 0) / trade.rrAchieved;
-            console.log(`Gewinn-Trade ${trade.id}: Neue Risikosumme = ${positionSize.toFixed(2)}€ (berechnet wäre: ${calculatedPosition.toFixed(2)}€)`);
+            console.log(`Gewinn-Trade ${trade.id}: Neue Risikosumme = ${positionSize.toFixed(2)}$ (berechnet wäre: ${calculatedPosition.toFixed(2)}$)`);
           } else {
             calculatedPosition = Math.abs(trade.profitLoss || 0);
-            console.log(`Verlust-Trade ${trade.id}: Neue Risikosumme = ${positionSize.toFixed(2)}€ (berechnet wäre: ${calculatedPosition.toFixed(2)}€)`);
+            console.log(`Verlust-Trade ${trade.id}: Neue Risikosumme = ${positionSize.toFixed(2)}$ (berechnet wäre: ${calculatedPosition.toFixed(2)}$)`);
           }
           
           // Round down to nearest rangeSize
@@ -2428,7 +2428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           Math.abs(trade.profitLoss || 0) / (trade.rrAchieved || 1) :
           Math.abs(trade.profitLoss || 0);
         
-        console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskDollar.toFixed(2)}€ (berechnet wäre: ${calculatedRisk.toFixed(2)}€)`);
+        console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskDollar.toFixed(2)}$ (berechnet wäre: ${calculatedRisk.toFixed(2)}$)`);
         
         return riskDollar;
       });
