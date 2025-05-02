@@ -247,6 +247,50 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
       }
     },
   });
+  
+  // Fetch all trades für die Risikosummenberechnung
+  const { data: allTrades = [], isLoading: tradesLoading } = useQuery({
+    queryKey: ['/api/trades', userId, activeFilters],
+    queryFn: async () => {
+      try {
+        const filterParams = buildFilterParams();
+        const response = await fetch(`/api/trades?userId=${userId}${filterParams}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch trades');
+        }
+        const data = await response.json();
+        console.log('Trades for risk sum calculation received:', data.length, 'items');
+        return data;
+      } catch (error) {
+        console.error('Error fetching trades:', error);
+        return [];
+      }
+    },
+  });
+  
+  // Berechne Risikosumme nach Kontotyp
+  const riskSumByAccountType = React.useMemo(() => {
+    const result = {
+      PA: { count: 0, sum: 0 },
+      EVA: { count: 0, sum: 0 },
+      total: { count: 0, sum: 0 }
+    };
+    
+    if (!allTrades || allTrades.length === 0) return result;
+    
+    allTrades.forEach(trade => {
+      if (trade.riskSum) {
+        const type = trade.accountType || 'PA'; // Default to PA if not specified
+        result[type] = result[type] || { count: 0, sum: 0 }; // Ensure the type exists
+        result[type].count += 1;
+        result[type].sum += Number(trade.riskSum);
+        result.total.count += 1;
+        result.total.sum += Number(trade.riskSum);
+      }
+    });
+    
+    return result;
+  }, [allTrades]);
 
   // Calculate optimal position size
   const optimalPositionSize = positionSizeData.reduce((optimal, current) => {
