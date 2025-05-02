@@ -17,7 +17,7 @@ import {
 } from "@shared/schema";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateTime } from "@/lib/utils";
 import ChartImageUpload from "./ChartImageUpload";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -222,14 +222,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         <div className="flex flex-row items-center justify-between mb-2">
           <CardTitle className="text-sm font-medium">Trade Details</CardTitle>
           
-          {/* Win/Loss Badge und Hinweis zur Bearbeitung im Edit-Modus */}
+          {/* Hinweis zur Bearbeitung im Edit-Modus */}
           <div className="flex items-center gap-2">
-            {selectedTrade && (
-              <div className="flex items-center gap-1.5 mr-2">
-                <BadgeWinLoss isWin={selectedTrade.isWin} />
-              </div>
-            )}
-            
             {selectedTrade && editMode && (
               <div className="text-xs text-muted-foreground flex items-center">
                 <Pencil className="h-3 w-3 mr-1" />
@@ -244,14 +238,17 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-background/50 rounded-sm p-1.5">
               <div className="text-xs text-muted-foreground font-medium">Datum</div>
-              <div className="font-bold text-xs mt-0.5">{formatDate(selectedTrade.date)}</div>
+              <div className="font-bold text-xs mt-0.5">{formatDateTime(selectedTrade.date)}</div>
             </div>
             <div className="bg-background/50 rounded-sm p-1.5">
               <div className="text-xs text-muted-foreground font-medium">Symbol</div>
               <div className="font-bold text-xs mt-0.5">{selectedTrade.symbol}</div>
             </div>
             <div className="bg-background/50 rounded-sm p-1.5">
-              <div className="text-xs text-muted-foreground font-medium">Profit/Loss</div>
+              <div className="flex justify-between items-center">
+                <div className="text-xs text-muted-foreground font-medium">Profit/Loss</div>
+                {selectedTrade && <BadgeWinLoss isWin={selectedTrade.isWin} />}
+              </div>
               <span className={`font-bold text-xs ${selectedTrade.profitLoss && selectedTrade.profitLoss > 0 ? 'text-green-500' : selectedTrade.profitLoss && selectedTrade.profitLoss < 0 ? 'text-red-500' : ''}`}>
                 {selectedTrade.profitLoss ? `${selectedTrade.profitLoss > 0 ? '+' : ''}$${selectedTrade.profitLoss.toFixed(2)}` : '-'}
               </span>
