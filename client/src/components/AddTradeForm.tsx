@@ -89,7 +89,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
       unmitZone: "",
       rangePoints: 0,
       marketPhase: "",
-      riskSum: 200
+      riskSum: 200,
+      size: 0
     }
   });
 
@@ -143,7 +144,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
         unmitZone: "",
         rangePoints: 0,
         marketPhase: "",
-        riskSum: 200
+        riskSum: 200,
+        size: 0
       });
       
       // Cache invalidieren
@@ -597,7 +599,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* R:R Informationen */}
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-5 gap-2">
             <div>
               <Label htmlFor="rrAchieved">R:R Erreicht</Label>
               <Select
@@ -641,14 +643,32 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
               )}
             </div>
             <div>
-              <Label htmlFor="riskSum">Risiko Summe ($)</Label>
+              <Label htmlFor="size">Size</Label>
+              <Input
+                id="size"
+                type="number"
+                defaultValue={0}
+                {...register("size", { valueAsNumber: true })}
+                className={errors.size ? "border-red-500" : ""}
+                placeholder="0"
+              />
+              {errors.size && (
+                <p className="text-xs text-red-500 mt-1">{errors.size.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="riskSum">Risiko Punkte</Label>
               <Input
                 id="riskSum"
                 type="number"
                 defaultValue={200}
-                {...register("riskSum", { valueAsNumber: true })}
+                onBlur={(e) => {
+                  const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                  // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
+                  setValue("riskSum", value / 4);
+                }}
                 className={errors.riskSum ? "border-red-500" : ""}
-                placeholder="200"
+                placeholder="800"
               />
               {errors.riskSum && (
                 <p className="text-xs text-red-500 mt-1">{errors.riskSum.message}</p>

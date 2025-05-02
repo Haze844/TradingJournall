@@ -327,27 +327,49 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
-                  <div className="bg-background/50 rounded-sm p-1.5 mb-1">
-                    <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
-                    {editMode ? (
-                      <Input
-                        type="number"
-                        value={editData.riskSum === undefined ? "" : editData.riskSum * 4}
-                        onChange={(e) => {
-                          const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
-                          // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
-                          const value = inputValue !== undefined ? inputValue / 4 : undefined;
-                          updateField('riskSum', value);
-                        }}
-                        className="h-7 text-xs mt-0.5"
-                        min="0"
-                        placeholder="Risikopunkte eingeben"
-                      />
-                    ) : (
-                      <div className="font-medium text-sm mt-0.5">
-                        {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum * 4 : '-'}
-                      </div>
-                    )}
+                  <div className="grid grid-cols-2 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Size</div>
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={editData.size === undefined ? "" : editData.size}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? undefined : parseInt(e.target.value);
+                            updateField('size', value);
+                          }}
+                          className="h-7 text-xs mt-0.5"
+                          min="0"
+                          placeholder="Position Size"
+                        />
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">
+                          {selectedTrade.size !== undefined ? selectedTrade.size : '-'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={editData.riskSum === undefined ? "" : editData.riskSum * 4}
+                          onChange={(e) => {
+                            const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
+                            // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
+                            const value = inputValue !== undefined ? inputValue / 4 : undefined;
+                            updateField('riskSum', value);
+                          }}
+                          className="h-7 text-xs mt-0.5"
+                          min="0"
+                          placeholder="Risikopunkte eingeben"
+                        />
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">
+                          {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum * 4 : '-'}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {/* Entfernt: Einstieg-Feld wird im Header angezeigt */}
                 </div>
