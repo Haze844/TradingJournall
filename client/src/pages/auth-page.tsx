@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Rocket, TrendingUp, BarChart3, BrainCircuit, Lock, User, Loader2 } from "lucide-react";
+import { NxtLvlLogo } from "@/components/Header";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -34,17 +35,12 @@ export default function AuthPage() {
         {/* Form Side */}
         <div className="rocket-card rounded-xl p-6 backdrop-blur-md">
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-white text-black font-bold p-2 rounded-xl text-lg meme-logo">
-                NXT<br />LVL
-              </div>
-              <div>
-                <h1 className="text-2xl font-extrabold moon-text">NXT LVL Tradingtagebuch</h1>
-                <p className="text-xs text-gray-400">Trading-Performance optimieren</p>
-              </div>
+            <div className="mb-4">
+              <NxtLvlLogo className="group" />
+              <p className="text-xs text-blue-300 mt-2">Trading-Performance optimieren</p>
             </div>
             <p className="text-muted-foreground">
-              Sign in to track your trades and prepare for liftoff! 🚀
+              Melde dich an, um deine Trades zu verfolgen! 🚀
             </p>
           </div>
           
