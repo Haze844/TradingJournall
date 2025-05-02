@@ -2036,8 +2036,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const date = new Date(trade.date);
         const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         
-        // Use the profitLoss field directly 
-        // Wenn trade.profitLoss vorhanden, nutze diesen Wert direkt
+        // Verwende den profitLoss Wert direkt
         const pnl = trade.profitLoss || 0;
         
         balance += pnl;
