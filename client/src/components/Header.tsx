@@ -85,16 +85,16 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
         
         <div className="container mx-auto py-3 pt-5 relative z-10">
           {/* Top-Bereich mit Logo und Benutzerbereich */}
-          <div className="flex justify-between items-center mb-4">
-            {/* Kreatives, modernes Logo */}
-            <div className="flex-1">
+          <div className="flex flex-col items-center mb-4">
+            {/* Kreatives, modernes Logo - zentriert */}
+            <div className="flex justify-center w-full mb-2">
               <Link href="/" className="group">
                 <NxtLvlLogo />
               </Link>
             </div>
             
-            {/* Desktop Konto-Bereich auf der rechten Seite */}
-            <div className="hidden md:flex items-center gap-3 whitespace-nowrap z-20">
+            {/* Desktop Konto-Bereich - absolut positioniert, rechte Seite */}
+            <div className="hidden md:flex items-center gap-3 whitespace-nowrap z-20 absolute top-4 right-4">
               {user ? (
                 <div className="flex items-center bg-gradient-to-r from-blue-800/40 via-blue-700/40 to-blue-800/30 
                                rounded-full overflow-hidden border border-blue-400/20 shadow-lg backdrop-blur-md">
@@ -136,8 +136,8 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
               )}
             </div>
             
-            {/* Mobile Kontobereich - auf kleinen Bildschirmen */}
-            <div className="md:hidden flex items-center gap-3 whitespace-nowrap z-20">
+            {/* Mobile Kontobereich - absolut positioniert, rechte Seite */}
+            <div className="md:hidden flex items-center gap-3 whitespace-nowrap z-20 absolute top-4 right-4">
               {user ? (
                 <div className="flex items-center bg-gradient-to-r from-blue-800/40 via-blue-700/40 to-blue-800/30 
                                 rounded-full overflow-hidden border border-blue-400/20 shadow-lg backdrop-blur-md">
