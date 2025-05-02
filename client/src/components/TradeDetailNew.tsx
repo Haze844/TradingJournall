@@ -233,9 +233,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
           </div>
         </div>
         
-        {/* Datum, Symbol und Profit/Loss in der Titelleiste */}
+        {/* Datum, Symbol, Einstieg und Profit/Loss in der Titelleiste */}
         {selectedTrade && (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <div className="bg-background/50 rounded-sm p-1.5">
               <div className="text-xs text-muted-foreground font-medium">Datum</div>
               <div className="font-bold text-xs mt-0.5">{formatDateTime(selectedTrade.date)}</div>
@@ -243,6 +243,12 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
             <div className="bg-background/50 rounded-sm p-1.5">
               <div className="text-xs text-muted-foreground font-medium">Symbol</div>
               <div className="font-bold text-xs mt-0.5">{selectedTrade.symbol}</div>
+            </div>
+            <div className="bg-background/50 rounded-sm p-1.5">
+              <div className="text-xs text-muted-foreground font-medium">Einstieg</div>
+              <div className="font-bold text-xs mt-0.5">
+                <BadgeTrend trend={selectedTrade.entryType || '-'} size="sm" />
+              </div>
             </div>
             <div className="bg-background/50 rounded-sm p-1.5">
               <div className="flex justify-between items-center">
@@ -345,30 +351,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
-                  <div className="bg-background/50 rounded-sm p-1.5">
-                    <div className="text-xs text-muted-foreground font-medium">Einstieg</div>
-                    {editMode ? (
-                      <Select 
-                        value={editData.entryLevel} 
-                        onValueChange={val => updateField('entryLevel', val)}
-                      >
-                        <SelectTrigger className="h-7 text-xs mt-0.5">
-                          <SelectValue placeholder="Level auswählen" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {entryLevelTypes.map((level) => (
-                            <SelectItem key={level} value={level}>
-                              {level}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="font-medium text-sm mt-0.5">
-                        <BadgeTrend trend={selectedTrade.entryType || '-'} size="sm" />
-                      </div>
-                    )}
-                  </div>
+                  {/* Entfernt: Einstieg-Feld wird im Header angezeigt */}
                 </div>
               </div>
             </div>
