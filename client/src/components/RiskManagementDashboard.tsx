@@ -55,7 +55,7 @@ interface RiskRecommendation {
 export default function RiskManagementDashboard({ userId, activeFilters }: { userId: number, activeFilters?: any }) {
   const [chartType, setChartType] = useState<ChartType>('line');
   const [activeTab, setActiveTab] = useState<'drawdown' | 'risk-per-trade' | 'position-size' | 'recommendations'>('drawdown');
-  const [accountBalance, setAccountBalance] = useState<number>(2500); // Standard-Kontostand: 2500€
+  const [accountBalance, setAccountBalance] = useState<number>(2500); // Standard-Kontostand: 2500$
   const [accountType, setAccountType] = useState<string>('all'); // Standard: alle Konten
   const { toast } = useToast();
   
@@ -388,7 +388,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           tick={{ fill: '#9CA3AF' }}
                           tickFormatter={(value) => `${value}%`}
                         />
-                        <Tooltip {...tooltipProps} />
+                        <RechartsTooltip content={CustomTooltip} />
                         <Line
                           type="monotone"
                           dataKey="drawdown"
@@ -402,27 +402,18 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                             position: "top",
                             fontSize: chartConfig.fontSize,
                             fill: "#EF4444",
-                            formatter: (value: number) => `${value}%`,
-                            offset: chartConfig.labelOffset
+                            formatter: (value: number) => `${value}%`
                           }}
                         />
                         <Line
                           type="monotone"
                           dataKey="maxDrawdown"
-                          stroke="#F59E0B"
+                          stroke="#3B82F6"
                           name="Max Drawdown"
                           strokeWidth={chartConfig.strokeWidth}
-                          strokeDasharray="5 5"
                           dot={{ r: chartConfig.dotSize }}
                           activeDot={{ r: chartConfig.activeDotSize }}
                           animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "insideBottom",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#F59E0B",
-                            formatter: (value: number) => `${value}%`,
-                            offset: chartConfig.labelOffset
-                          }}
                         />
                       </LineChart>
                     ) : (
@@ -441,36 +432,22 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           tick={{ fill: '#9CA3AF' }}
                           tickFormatter={(value) => `${value}%`}
                         />
-                        <Tooltip {...tooltipProps} />
+                        <RechartsTooltip content={CustomTooltip} />
                         <Bar
                           dataKey="drawdown"
-                          fill="#EF4444"
                           name="Drawdown"
-                          barSize={chartConfig.barSize}
+                          fill="#EF4444"
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          barSize={chartConfig.barSize}
                           animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "top",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#EF4444",
-                            formatter: (value: number) => `${value}%`,
-                            offset: chartConfig.labelOffset
-                          }}
                         />
                         <Bar
                           dataKey="maxDrawdown"
-                          fill="#F59E0B"
                           name="Max Drawdown"
-                          barSize={chartConfig.barSize}
+                          fill="#3B82F6"
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          barSize={chartConfig.barSize}
                           animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "insideBottom",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#F59E0B",
-                            formatter: (value: number) => `${value}%`,
-                            offset: chartConfig.labelOffset
-                          }}
                         />
                       </BarChart>
                     )}
@@ -478,32 +455,81 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Aktueller Drawdown</div>
-                  <div className="font-bold text-lg">
-                    {drawdownLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      `${drawdownData[drawdownData.length - 1]?.drawdown || 0}%`
-                    )}
-                  </div>
-                </div>
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Maximaler Drawdown</div>
-                  <div className="font-bold text-lg">
-                    {drawdownLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      `${Math.max(...drawdownData.map(d => d.maxDrawdown), 0)}%`
-                    )}
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-muted/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Erkenntnisse</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <TrendingDown className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                        <span>
+                          Maximaler Drawdown: 
+                          <span className="font-semibold ml-1">
+                            {Math.max(...drawdownData.map(d => d.maxDrawdown), 0)}%
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            ${(accountBalance * Math.max(...drawdownData.map(d => d.maxDrawdown), 0) / 100).toFixed(2)}
+                          </span>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <TrendingDown className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                        <span>
+                          Durchschnittlicher Drawdown: 
+                          <span className="font-semibold ml-1">
+                            {drawdownData.length > 0 ? (drawdownData.reduce((acc, item) => acc + item.drawdown, 0) / drawdownData.length).toFixed(2) : 0}%
+                          </span>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Wallet className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                        <span>
+                          Absoluter Verlust im schlimmsten Szenario: 
+                          <span className="font-semibold ml-1">
+                            ${(accountBalance * Math.max(...drawdownData.map(d => d.maxDrawdown), 0) / 100).toFixed(2)}
+                          </span>
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-muted/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Empfehlungen</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                        <span>
+                          Maximales Risiko pro Trade sollte 
+                          <span className="font-semibold mx-1">
+                            {Math.round(100 / (Math.max(...drawdownData.map(d => d.maxDrawdown), 10) / 2))}%
+                          </span>
+                          deines Drawdowns nicht überschreiten.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <RefreshCcw className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                        <span>
+                          Nach einem Drawdown von 
+                          <span className="font-semibold mx-1">
+                            {Math.round(Math.max(...drawdownData.map(d => d.maxDrawdown), 0) / 2)}%
+                          </span>
+                          solltest du die Positionsgröße reduzieren oder eine Pause einlegen.
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </TabsContent>
 
-          {/* Risk Per Trade Tab */}
+          {/* Risk per Trade Tab */}
           <TabsContent value="risk-per-trade">
             <div className="flex flex-col gap-6">
               <div className="flex justify-between items-center">
@@ -528,54 +554,40 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           tick={{ fill: '#9CA3AF' }}
                         />
                         <YAxis
-                          yAxisId="left"
                           stroke="#9CA3AF"
                           tick={{ fill: '#9CA3AF' }}
                           tickFormatter={(value) => `${value}%`}
+                          yAxisId="left"
                         />
                         <YAxis
-                          yAxisId="right"
                           orientation="right"
                           stroke="#9CA3AF"
                           tick={{ fill: '#9CA3AF' }}
                           tickFormatter={(value) => `$${value}`}
+                          yAxisId="right"
                         />
-                        <Tooltip {...tooltipProps} />
+                        <RechartsTooltip content={CustomTooltip} />
                         <Line
-                          yAxisId="left"
                           type="monotone"
                           dataKey="riskPercent"
-                          stroke="#10B981"
-                          name="Risiko (%)"
+                          yAxisId="left"
+                          stroke="#3B82F6"
+                          name="Risiko %"
                           strokeWidth={chartConfig.strokeWidth}
                           dot={{ r: chartConfig.dotSize }}
                           activeDot={{ r: chartConfig.activeDotSize }}
                           animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "top",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#10B981",
-                            formatter: (value: number) => `${value}%`,
-                            offset: chartConfig.labelOffset
-                          }}
                         />
                         <Line
-                          yAxisId="right"
                           type="monotone"
                           dataKey="riskDollar"
-                          stroke="#8B5CF6"
-                          name="Risiko ($)"
+                          yAxisId="right"
+                          stroke="#10B981"
+                          name="Risiko $"
                           strokeWidth={chartConfig.strokeWidth}
                           dot={{ r: chartConfig.dotSize }}
                           activeDot={{ r: chartConfig.activeDotSize }}
                           animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "insideBottom",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#8B5CF6",
-                            formatter: (value: number) => `$${value}`,
-                            offset: chartConfig.labelOffset
-                          }}
                         />
                       </LineChart>
                     ) : (
@@ -590,50 +602,36 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           tick={{ fill: '#9CA3AF' }}
                         />
                         <YAxis
-                          yAxisId="left"
                           stroke="#9CA3AF"
                           tick={{ fill: '#9CA3AF' }}
                           tickFormatter={(value) => `${value}%`}
+                          yAxisId="left"
                         />
                         <YAxis
-                          yAxisId="right"
                           orientation="right"
                           stroke="#9CA3AF"
                           tick={{ fill: '#9CA3AF' }}
                           tickFormatter={(value) => `$${value}`}
-                        />
-                        <Tooltip {...tooltipProps} />
-                        <Bar
-                          yAxisId="left"
-                          dataKey="riskPercent"
-                          fill="#10B981"
-                          name="Risiko (%)"
-                          barSize={chartConfig.barSize}
-                          radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
-                          animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "top",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#10B981",
-                            formatter: (value: number) => `${value}%`,
-                            offset: chartConfig.labelOffset
-                          }}
-                        />
-                        <Bar
                           yAxisId="right"
-                          dataKey="riskDollar"
-                          fill="#8B5CF6"
-                          name="Risiko ($)"
-                          barSize={chartConfig.barSize}
+                        />
+                        <RechartsTooltip content={CustomTooltip} />
+                        <Bar
+                          dataKey="riskPercent"
+                          name="Risiko %"
+                          yAxisId="left"
+                          fill="#3B82F6"
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          barSize={chartConfig.barSize}
                           animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "inside",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#F3F4F6",
-                            formatter: (value: number) => `$${value}`,
-                            offset: chartConfig.labelOffset
-                          }}
+                        />
+                        <Bar
+                          dataKey="riskDollar"
+                          name="Risiko $"
+                          yAxisId="right"
+                          fill="#10B981"
+                          radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          barSize={chartConfig.barSize}
+                          animationDuration={chartConfig.animationDuration}
                         />
                       </BarChart>
                     )}
@@ -641,37 +639,78 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Durchschnittliches Risiko</div>
-                  <div className="font-bold text-lg">
-                    {riskPerTradeLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      `${(riskPerTradeData.reduce((acc, item) => acc + item.riskPercent, 0) / riskPerTradeData.length || 0).toFixed(1)}%`
-                    )}
-                  </div>
-                </div>
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Max. Risiko</div>
-                  <div className="font-bold text-lg">
-                    {riskPerTradeLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      `${Math.max(...riskPerTradeData.map(d => d.riskPercent), 0).toFixed(1)}%`
-                    )}
-                  </div>
-                </div>
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Durchschn. Risiko in $</div>
-                  <div className="font-bold text-lg">
-                    {riskPerTradeLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      `$${(riskPerTradeData.reduce((acc, item) => acc + item.riskDollar, 0) / riskPerTradeData.length || 0).toFixed(0)}`
-                    )}
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-muted/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Analysezusammenfassung</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <DollarSign className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                        <span>
+                          Durchschnittliches Risiko pro Trade: 
+                          <span className="font-semibold ml-1">
+                            {riskPerTradeData.length > 0 ? (riskPerTradeData.reduce((acc, item) => acc + item.riskPercent, 0) / riskPerTradeData.length).toFixed(2) : 0}%
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            ${riskPerTradeData.length > 0 ? (riskPerTradeData.reduce((acc, item) => acc + item.riskDollar, 0) / riskPerTradeData.length).toFixed(2) : 0}
+                          </span>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <DollarSign className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                        <span>
+                          Maximales Risiko in einem Trade: 
+                          <span className="font-semibold ml-1">
+                            {Math.max(...riskPerTradeData.map(d => d.riskPercent), 0).toFixed(2)}%
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            ${Math.max(...riskPerTradeData.map(d => d.riskDollar), 0).toFixed(2)}
+                          </span>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <DollarSign className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                        <span>
+                          Empfohlenes maximal Risiko (2%): 
+                          <span className="font-semibold ml-1">
+                            ${(accountBalance * 0.02).toFixed(2)}
+                          </span>
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-muted/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Empfehlungen</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                        <span>
+                          Begrenze dein Risiko auf
+                          <span className="font-semibold mx-1">
+                            ${(accountBalance * 0.02).toFixed(0)}
+                          </span>
+                          pro Trade (2% des Kapitals)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                        <span>
+                          Bei aufeinanderfolgenden Verlusten:
+                          <span className="block text-xs mt-1">
+                            Senke das Risiko auf 1% (${(accountBalance * 0.01).toFixed(0)}) bis du wieder profitabel bist
+                          </span>
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </TabsContent>
@@ -680,7 +719,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
           <TabsContent value="position-size">
             <div className="flex flex-col gap-6">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Positionsgröße & Erfolgsquote</h3>
+                <h3 className="text-lg font-medium">Positionsgrößen-Analyse</h3>
               </div>
 
               {positionSizeLoading ? (
@@ -690,47 +729,45 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={positionSizeData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
                       <XAxis
                         dataKey="positionSize"
                         stroke="#9CA3AF"
                         tick={{ fill: '#9CA3AF' }}
-                        tickFormatter={(value) => `${value}%`}
+                        label={{ 
+                          value: 'Positionsgröße ($)', 
+                          position: 'insideBottom', 
+                          fill: '#9CA3AF', 
+                          offset: 0 
+                        }}
                       />
                       <YAxis
                         stroke="#9CA3AF"
                         tick={{ fill: '#9CA3AF' }}
                         tickFormatter={(value) => `${value}%`}
-                      />
-                      <Tooltip 
-                        {...tooltipProps} 
-                        formatter={(value, name, props) => {
-                          if (name === 'winRate') return [`${value}%`, 'Erfolgsquote'];
-                          if (name === 'count') return [value, 'Anzahl Trades'];
-                          return [value, name];
+                        label={{ 
+                          value: 'Win-Rate (%)', 
+                          angle: -90, 
+                          position: 'insideLeft', 
+                          fill: '#9CA3AF',
+                          offset: 10 
                         }}
                       />
+                      <RechartsTooltip content={CustomTooltip} />
                       <Bar 
                         dataKey="winRate" 
-                        name="Erfolgsquote"
-                        fill="#4F46E5"
-                        barSize={chartConfig.barSize}
+                        name="Win-Rate"
+                        fill="#3B82F6"
                         radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                        barSize={chartConfig.barSize}
                         animationDuration={chartConfig.animationDuration}
-                        label={{
-                          position: "top",
-                          fontSize: chartConfig.fontSize,
-                          fill: "#F3F4F6",
-                          formatter: (value: number) => `${value}%`,
-                          offset: chartConfig.labelOffset
-                        }}
                       >
                         {positionSizeData.map((entry, index) => (
                           <Cell 
                             key={`cell-${index}`} 
-                            fill={entry.positionSize === optimalPositionSize.positionSize ? '#10B981' : '#4F46E5'} 
+                            fill={entry.positionSize === optimalPositionSize.positionSize ? '#10B981' : '#3B82F6'} 
                           />
                         ))}
                       </Bar>
@@ -739,71 +776,120 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Optimale Positionsgröße</div>
-                  <div className="font-bold text-lg">
-                    {positionSizeLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      `${optimalPositionSize.positionSize || 0}%`
-                    )}
-                  </div>
-                </div>
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Beste Erfolgsquote</div>
-                  <div className="font-bold text-lg">
-                    {positionSizeLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      `${optimalPositionSize.winRate || 0}%`
-                    )}
-                  </div>
-                </div>
-                <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Anzahl Trades</div>
-                  <div className="font-bold text-lg">
-                    {positionSizeLoading ? (
-                      <Skeleton className="h-7 w-20" />
-                    ) : (
-                      optimalPositionSize.count || 0
-                    )}
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-muted/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Positionsgrößen-Erkenntnisse</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <PieChart className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                        <span>
+                          Optimale Positionsgröße: 
+                          <span className="font-semibold ml-1">
+                            ${optimalPositionSize.positionSize}
+                          </span>
+                          <span className="block text-xs text-muted-foreground">
+                            Win-Rate: {optimalPositionSize.winRate}% ({optimalPositionSize.count} Trades)
+                          </span>
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <PieChart className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                        <span>
+                          Durchschnittliche Win-Rate: 
+                          <span className="font-semibold ml-1">
+                            {positionSizeData.length > 0 ? 
+                              (positionSizeData.reduce((acc, item) => acc + (item.winRate * item.count), 0) / 
+                               positionSizeData.reduce((acc, item) => acc + item.count, 0)).toFixed(2) : 0}%
+                          </span>
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-muted/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Empfehlungen</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                        <span>
+                          Verwende bevorzugt eine Positionsgröße von 
+                          <span className="font-semibold mx-1">
+                            ${optimalPositionSize.positionSize}
+                          </span>
+                          für die beste Performance.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                        <span>
+                          Meide Positionen 
+                          {positionSizeData
+                            .filter(d => d.winRate < (optimalPositionSize.winRate * 0.8))
+                            .slice(0, 2)
+                            .map(d => (
+                              <span className="font-semibold mx-1 whitespace-nowrap" key={d.positionSize}>
+                                ${d.positionSize}
+                              </span>
+                            ))
+                          }
+                          mit niedrigen Win-Raten.
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </TabsContent>
 
           {/* Recommendations Tab */}
           <TabsContent value="recommendations">
-            <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-medium">Empfehlungen zur Risikominimierung</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Risikomanagement-Empfehlungen</h3>
+              </div>
 
               {recommendationsLoading ? (
-                <>
-                  <Skeleton className="h-24 w-full mb-2" />
-                  <Skeleton className="h-24 w-full mb-2" />
+                <div className="space-y-3">
                   <Skeleton className="h-24 w-full" />
-                </>
-              ) : riskRecommendations.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertCircle className="mx-auto h-12 w-12 mb-4 text-muted-foreground/50" />
-                  <p>Keine Empfehlungen verfügbar. Füge mehr Trades hinzu für eine detaillierte Analyse.</p>
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-3">
                   {riskRecommendations.map((rec) => {
-                    const impact = getImpactColor(rec.impact);
+                    const impactColor = getImpactColor(rec.impact);
                     return (
                       <div 
                         key={rec.id} 
-                        className={`border border-border rounded-md p-4 ${impact.bg} ${impact.border}`}
+                        className={`p-4 rounded-lg border ${impactColor.border} ${impactColor.bg}`}
                       >
-                        <h4 className={`font-medium mb-1 ${impact.text}`}>{rec.recommendation}</h4>
-                        <p className="text-sm text-muted-foreground">{rec.explanation}</p>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-start justify-between">
+                            <h4 className={`font-medium ${impactColor.text}`}>{rec.recommendation}</h4>
+                            <div className="rounded-full px-2 py-0.5 text-xs border bg-background/50 backdrop-blur-sm">
+                              Priorität: {rec.impact > 0.7 ? 'Hoch' : rec.impact > 0.4 ? 'Mittel' : 'Niedrig'}
+                            </div>
+                          </div>
+                          <p className="text-sm">{rec.explanation}</p>
+                        </div>
                       </div>
                     );
                   })}
+
+                  {riskRecommendations.length === 0 && (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <AlertCircle className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                      <p>Keine Risiko-Empfehlungen verfügbar. Füge mehr Trades hinzu, um aussagekräftige Empfehlungen zu erhalten.</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
