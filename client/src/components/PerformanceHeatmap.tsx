@@ -298,6 +298,7 @@ export default function PerformanceHeatmap() {
 
   // Daten für die Visualisierung transformieren
   const transformedData = useRef<HeatmapDataPoint[]>([]);
+  const transformedComparisonData = useRef<HeatmapDataPoint[]>([]);
   
   // Handling für Datentypänderungen - mit Animation
   useEffect(() => {
@@ -305,9 +306,9 @@ export default function PerformanceHeatmap() {
       // Interaktivitätstyp-Label aktualisieren
       const modeText = interactionMode === 'hover' ? 'Hover-Modus aktiv' : 'Klick-Modus aktiv';
       
-      // Kartieren der Tage und Zeitrahmen zu Koordinaten
-      const transformData = () => {
-        return heatmapData.data.map((point) => {
+      // Funktion zum Transformieren von Daten für die Visualisierung
+      const transformData = (data: HeatmapDataPoint[], isComparison = false) => {
+        return data.map((point) => {
           const dayIndex = heatmapData.days.indexOf(point.day);
           const timeIndex = heatmapData.timeframe.indexOf(point.timeframe);
           
@@ -329,20 +330,29 @@ export default function PerformanceHeatmap() {
             x: timeIndex,
             y: dayIndex,
             value: value,
-            valueLabel
+            valueLabel,
+            isComparison
           };
         });
       };
       
-      // Animation bei Datentypwechsel 
-      const newData = transformData();
+      // Hauptdaten transformieren
+      const newData = transformData(heatmapData.data);
       
-      // Animate - leider limitiert in React/ReCharts
+      // Vergleichsdaten transformieren, falls vorhanden
+      if (heatmapData.comparison) {
+        const comparisonData = transformData(heatmapData.comparison, true);
+        setTimeout(() => {
+          transformedComparisonData.current = comparisonData;
+        }, 50);
+      }
+      
+      // Animation bei Datentypwechsel 
       setTimeout(() => {
         transformedData.current = newData;
       }, 50);
     }
-  }, [heatmapData, dataType, interactionMode]);
+  }, [heatmapData, dataType, interactionMode, compareMode]);
   
   // Feedback beim Ändern des Interaktionsmodus
   useEffect(() => {
@@ -612,9 +622,11 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Setups</SelectItem>
-                    {heatmapData.filters.availableSetups.map((setup) => (
-                      <SelectItem key={setup} value={setup}>{setup}</SelectItem>
-                    ))}
+                    {heatmapData.filters.availableSetups
+                      .filter(setup => setup !== null && setup !== '')
+                      .map((setup) => (
+                        <SelectItem key={setup} value={setup}>{setup || 'Unbekannt'}</SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -631,9 +643,11 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Symbole</SelectItem>
-                    {heatmapData.filters.availableSymbols.map((symbol) => (
-                      <SelectItem key={symbol} value={symbol}>{symbol}</SelectItem>
-                    ))}
+                    {heatmapData.filters.availableSymbols
+                      .filter(symbol => symbol !== null && symbol !== '')
+                      .map((symbol) => (
+                        <SelectItem key={symbol} value={symbol}>{symbol || 'Unbekannt'}</SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -650,9 +664,11 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Richtungen</SelectItem>
-                    {heatmapData.filters.availableDirections.map((direction) => (
-                      <SelectItem key={direction} value={direction}>{direction}</SelectItem>
-                    ))}
+                    {heatmapData.filters.availableDirections
+                      .filter(direction => direction !== null && direction !== '')
+                      .map((direction) => (
+                        <SelectItem key={direction} value={direction}>{direction || 'Unbekannt'}</SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -788,6 +804,29 @@ export default function PerformanceHeatmap() {
                     <Cell key={`cell-${index}`} />
                   ))}
                 </Scatter>
+                
+                {/* Vergleichsdaten anzeigen, falls vorhanden */}
+                {compareMode && heatmapData.comparison && transformedComparisonData.current.length > 0 && (
+                  <Scatter 
+                    name="Vergleichsdaten"
+                    data={transformedComparisonData.current.map(point => ({
+                      ...point,
+                      x: point.x + 0.4, // Leicht versetzt zum Vergleich
+                    }))}
+                    shape={(props: any) => (
+                      <Rectangle
+                        x={props.x - 0.2}
+                        y={props.y - 0.2}
+                        width={0.4}
+                        height={0.4}
+                        fill={props.payload.tradeCount > 0 ? "#60a5fa" : "#374151"}
+                        opacity={props.payload.tradeCount > 0 ? 0.8 : 0.2}
+                        stroke="none"
+                        style={{ cursor: 'pointer' }}
+                      />
+                    )}
+                  />
+                )}
               </ScatterChart>
             </ResponsiveContainer>
           </div>
@@ -875,22 +914,37 @@ export default function PerformanceHeatmap() {
           </div>
         </div>
         
-        <div className="mt-6 grid grid-cols-7 gap-1">
-          <div className="text-xs text-center text-muted-foreground">Sehr schlecht</div>
-          <div className="text-xs text-center text-muted-foreground">Schlecht</div>
-          <div className="text-xs text-center text-muted-foreground">Mäßig</div>
-          <div className="text-xs text-center text-muted-foreground">Durchschnitt</div>
-          <div className="text-xs text-center text-muted-foreground">Gut</div>
-          <div className="text-xs text-center text-muted-foreground">Sehr gut</div>
-          <div className="text-xs text-center text-muted-foreground">Keine Daten</div>
+        <div className="mt-6">
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            <div className="text-xs text-center text-muted-foreground">Sehr schlecht</div>
+            <div className="text-xs text-center text-muted-foreground">Schlecht</div>
+            <div className="text-xs text-center text-muted-foreground">Mäßig</div>
+            <div className="text-xs text-center text-muted-foreground">Durchschnitt</div>
+            <div className="text-xs text-center text-muted-foreground">Gut</div>
+            <div className="text-xs text-center text-muted-foreground">Sehr gut</div>
+            <div className="text-xs text-center text-muted-foreground">Keine Daten</div>
+            
+            <div className="h-2 bg-[#ef4444] rounded"></div>
+            <div className="h-2 bg-[#f97316] rounded"></div>
+            <div className="h-2 bg-[#facc15] rounded"></div>
+            <div className="h-2 bg-[#a3e635] rounded"></div>
+            <div className="h-2 bg-[#10b981] rounded"></div>
+            <div className="h-2 bg-[#059669] rounded"></div>
+            <div className="h-2 bg-[#374151] rounded"></div>
+          </div>
           
-          <div className="h-2 bg-[#ef4444] rounded"></div>
-          <div className="h-2 bg-[#f97316] rounded"></div>
-          <div className="h-2 bg-[#facc15] rounded"></div>
-          <div className="h-2 bg-[#a3e635] rounded"></div>
-          <div className="h-2 bg-[#10b981] rounded"></div>
-          <div className="h-2 bg-[#059669] rounded"></div>
-          <div className="h-2 bg-[#374151] rounded"></div>
+          {compareMode && (
+            <div className="flex items-center justify-center space-x-4 mt-2 pt-2 border-t border-border/30">
+              <div className="flex items-center">
+                <div className="w-3 h-3 mr-1.5 bg-primary rounded-sm"></div>
+                <span className="text-xs text-muted-foreground">Deine Daten</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-3 h-3 mr-1.5 bg-[#60a5fa] rounded-sm"></div>
+                <span className="text-xs text-muted-foreground">Vergleichsdaten</span>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
