@@ -1023,7 +1023,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const directionFilter = req.query.direction as string;
       const compareWith = req.query.compareWith as string;
       
-      // Aktive Filter aus der Trades-Tabelle
+      // Erweiterte Filter-Arrays für die Filterung
+      let setupsArray: string[] = [];
+      let symbolsArray: string[] = [];
+      let marketPhasesArray: string[] = [];
+      let sessionsArray: string[] = [];
+      let isWin: boolean | null = null;
+      
+      // Array-Parameter aus JSON-Strings parsen (von der TradeTable übertragen)
+      if (req.query.setups) {
+        try {
+          setupsArray = JSON.parse(req.query.setups as string);
+          console.log("Setups Filter erhalten:", setupsArray);
+        } catch (error) {
+          console.warn("Fehler beim Parsen der Setups-Filter:", error);
+        }
+      }
+      
+      if (req.query.symbols) {
+        try {
+          symbolsArray = JSON.parse(req.query.symbols as string);
+          console.log("Symbols Filter erhalten:", symbolsArray);
+        } catch (error) {
+          console.warn("Fehler beim Parsen der Symbols-Filter:", error);
+        }
+      }
+      
+      if (req.query.marketPhases) {
+        try {
+          marketPhasesArray = JSON.parse(req.query.marketPhases as string);
+          console.log("Marktphasen Filter erhalten:", marketPhasesArray);
+        } catch (error) {
+          console.warn("Fehler beim Parsen der Marktphasen-Filter:", error);
+        }
+      }
+      
+      if (req.query.sessions) {
+        try {
+          sessionsArray = JSON.parse(req.query.sessions as string);
+          console.log("Sessions Filter erhalten:", sessionsArray);
+        } catch (error) {
+          console.warn("Fehler beim Parsen der Sessions-Filter:", error);
+        }
+      }
+      
+      // Win/Loss-Filter
+      if (req.query.isWin === 'true') {
+        isWin = true;
+      } else if (req.query.isWin === 'false') {
+        isWin = false;
+      }
+      
+      // Aktive Filter aus der Trades-Tabelle (Legacy-Support)
       const activeFiltersStr = req.query.activeFilters as string;
       let activeFilters: any = {};
       
@@ -1125,17 +1176,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const tradeDate = new Date(trade.date);
         
+        // Datumsfilter anwenden
         if (startDate && tradeDate < startDate) return false;
         if (endDate && tradeDate > endDate) return false;
         
-        // Setup-Filter anwenden
-        if (setupFilter && setupFilter !== "all" && trade.setup !== setupFilter) return false;
+        // Einfache Filter anwenden, wenn keine Array-Filter aktiviert sind
         
-        // Symbol-Filter anwenden
-        if (symbolFilter && symbolFilter !== "all" && trade.symbol !== symbolFilter) return false;
+        // Setup-Filter: Einzelner Wert oder Array
+        if (setupsArray.length > 0) {
+          // Array-Filter (von TradeTable)
+          if (!trade.setup || !setupsArray.includes(trade.setup)) return false;
+        } else if (setupFilter && setupFilter !== "all" && trade.setup !== setupFilter) {
+          // Einzelner Wert (von Heatmap-Dropdown)
+          return false;
+        }
+        
+        // Symbol-Filter: Einzelner Wert oder Array
+        if (symbolsArray.length > 0) {
+          // Array-Filter (von TradeTable)
+          if (!trade.symbol || !symbolsArray.includes(trade.symbol)) return false;
+        } else if (symbolFilter && symbolFilter !== "all" && trade.symbol !== symbolFilter) {
+          // Einzelner Wert (von Heatmap-Dropdown)
+          return false;
+        }
         
         // Richtungs-Filter anwenden
         if (directionFilter && directionFilter !== "all" && trade.entryType !== directionFilter) return false;
+        
+        // Win/Loss-Status filtern
+        if (isWin !== null && trade.isWin !== isWin) return false;
+        
+        // Marktphasen filtern
+        if (marketPhasesArray.length > 0 && (!trade.marketPhase || !marketPhasesArray.includes(trade.marketPhase))) {
+          return false;
+        }
+        
+        // Sessions filtern
+        if (sessionsArray.length > 0 && (!trade.session || !sessionsArray.includes(trade.session))) {
+          return false;
+        }
         
         return true;
       });
