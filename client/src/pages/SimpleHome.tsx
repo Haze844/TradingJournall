@@ -244,6 +244,9 @@ export default function SimpleHome() {
             <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
               <Activity className="w-4 h-4 mr-1.5" /> Analyse
             </TabsTrigger>
+            <TabsTrigger value="risk" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
+              <AlertCircle className="w-4 h-4 mr-1.5" /> Risiko
+            </TabsTrigger>
           </TabsList>
         </div>
         
@@ -408,6 +411,16 @@ export default function SimpleHome() {
         </TabsContent>
         
         {/* AI Analysis Tab - Mit Sub-Navigation */}
+        {/* Risiko Tab in der Hauptnavigation */}
+        <TabsContent value="risk" className="mt-0">
+          <div className="rocket-card rounded-xl p-2 sm:p-4">
+            <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center">
+              <AlertCircle className="w-4 h-4 mr-2" /> Risikomanagement
+            </h2>
+            <RiskManagementDashboard userId={userId} />
+          </div>
+        </TabsContent>
+            
         <TabsContent value="ai-analysis" className="mt-0">
           {/* Unternavigation für Analyse mit Tabs */}
           <Tabs defaultValue="patterns" className="w-full">
@@ -473,10 +486,6 @@ export default function SimpleHome() {
                   <Activity className="mr-1.5 h-4 w-4 md:inline hidden" />
                   KI-Analyse
                 </TabsTrigger>
-                <TabsTrigger value="risk" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
-                  <AlertCircle className="mr-1.5 h-4 w-4 md:inline hidden" />
-                  Risiko
-                </TabsTrigger>
                 <TabsTrigger value="market-phases" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
                   <BarChart2 className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Marktphasen
@@ -509,13 +518,7 @@ export default function SimpleHome() {
               </div>
             </TabsContent>
             
-            {/* Risikomanagement Tab */}
-            <TabsContent value="risk" className="mt-0">
-              <div className="rocket-card rounded-xl p-2 sm:p-4">
-                <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center"><AlertCircle className="w-4 h-4 mr-2" /> Risikomanagement</h2>
-                <RiskManagementDashboard userId={userId} />
-              </div>
-            </TabsContent>
+
             
             {/* Marktphasen Tab */}
             <TabsContent value="market-phases" className="mt-0">
