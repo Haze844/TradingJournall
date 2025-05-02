@@ -182,9 +182,9 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
           
           {/* Navigations-Tabs am unteren Rand des Headers */}
           <div className="flex justify-center items-center pb-1">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="flex justify-center w-full">
               <TabsList className="main-tabs-list bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10 
-                                max-w-fit mx-auto overflow-hidden backdrop-blur-sm">
+                                overflow-hidden backdrop-blur-sm mx-auto">
                 <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-4 py-1.5 transition-all duration-200 rounded-lg">
                   <BarChart2 className="w-4 h-4 mr-1.5" /> Dashboard
                 </TabsTrigger>
