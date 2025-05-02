@@ -504,7 +504,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
   };
   
   return (
-    <div className="relative max-w-6xl mx-auto">
+    <div className="relative w-full">
       <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl">
         <CardHeader className="pb-0 pt-4">
           <div className="flex flex-wrap md:flex-nowrap justify-between gap-3 items-center">

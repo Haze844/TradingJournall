@@ -272,9 +272,9 @@ export default function SimpleHome() {
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4" ref={tradesSectionRef}>
             
-            {/* Statistik Panel */}
-            <div className="mb-6 bg-gradient-to-r from-black/40 to-black/20 rounded-xl p-5 border border-primary/20 backdrop-blur-sm shadow-lg">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* Statistik Panel - kleiner gestaltet */}
+            <div className="mb-4 bg-gradient-to-r from-black/40 to-black/20 rounded-xl p-3 border border-primary/20 backdrop-blur-sm shadow-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="bg-black/25 p-4 rounded-lg border border-primary/10 hover:border-primary/30 hover:shadow-md transition-all duration-200 flex flex-col">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center">
                     <BarChart2 className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
@@ -378,7 +378,7 @@ export default function SimpleHome() {
               </div>
             </div>
             
-            <div className="relative">
+            <div className="relative w-full">
               {/* Filter */}
               <FilterBar
                 userId={userId}
@@ -386,14 +386,16 @@ export default function SimpleHome() {
                 onFilterChange={handleFilterChange}
               />
               
-              {/* Trade Tabelle */}
-              <TradeTable
-                trades={trades}
-                isLoading={tradesLoading}
-                onTradeSelect={handleTradeSelect}
-                onFilteredTradesChange={handleFilteredTradesChange}
-                onActiveFiltersChange={handleActiveFiltersChange}
-              />
+              {/* Trade Tabelle - verbreitert */}
+              <div className="w-full">
+                <TradeTable
+                  trades={trades}
+                  isLoading={tradesLoading}
+                  onTradeSelect={handleTradeSelect}
+                  onFilteredTradesChange={handleFilteredTradesChange}
+                  onActiveFiltersChange={handleActiveFiltersChange}
+                />
+              </div>
             </div>
           </div>
           
