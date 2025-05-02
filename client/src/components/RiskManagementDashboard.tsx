@@ -84,11 +84,14 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     queryFn: async () => {
       try {
         const filterParams = buildFilterParams();
+        console.log('Drawdown request with filters:', filterParams);
         const response = await fetch(`/api/risk/drawdown?userId=${userId}${filterParams}`);
         if (!response.ok) {
           throw new Error('Failed to fetch drawdown data');
         }
-        return response.json();
+        const data = await response.json();
+        console.log('Drawdown data received:', data.length, 'items');
+        return data;
       } catch (error) {
         console.error('Error fetching drawdown data:', error);
         return [];
@@ -102,11 +105,14 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     queryFn: async () => {
       try {
         const filterParams = buildFilterParams();
+        console.log('Risk per trade request with filters:', filterParams);
         const response = await fetch(`/api/risk/per-trade?userId=${userId}${filterParams}`);
         if (!response.ok) {
           throw new Error('Failed to fetch risk per trade data');
         }
-        return response.json();
+        const data = await response.json();
+        console.log('Risk per trade data received:', data.length, 'items');
+        return data;
       } catch (error) {
         console.error('Error fetching risk per trade data:', error);
         return [];

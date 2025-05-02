@@ -1998,6 +1998,374 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Risk Management API Routes
+  // -------------------------
+
+  // 1. Drawdown Data API
+  app.get("/api/risk/drawdown", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId || (req.user && req.user.id);
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      console.log("Drawdown API called with filters:", req.query);
+      
+      // Get trades with filters
+      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      
+      if (trades.length === 0) {
+        return res.json([]);
+      }
+      
+      // Sort trades by date
+      const sortedTrades = [...trades].sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+      
+      // Calculate running balance and drawdowns
+      let balance = 10000; // Starting balance
+      let peak = balance;
+      let drawdownData = [];
+      
+      // Group by month for visualization
+      const monthlyData = {};
+      
+      sortedTrades.forEach(trade => {
+        const date = new Date(trade.date);
+        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        // Calculate profit/loss
+        const pnl = trade.isWin 
+          ? trade.positionSize * trade.rrAchieved 
+          : -trade.positionSize;
+        
+        balance += pnl;
+        
+        // Update peak if necessary
+        if (balance > peak) {
+          peak = balance;
+        }
+        
+        // Calculate drawdown percentage
+        const drawdownPercent = peak > 0 ? ((peak - balance) / peak) * 100 : 0;
+        
+        // Add or update monthly data
+        if (!monthlyData[monthYear]) {
+          monthlyData[monthYear] = {
+            date: monthYear,
+            drawdown: drawdownPercent,
+            maxDrawdown: drawdownPercent
+          };
+        } else {
+          monthlyData[monthYear].drawdown = drawdownPercent;
+          monthlyData[monthYear].maxDrawdown = Math.max(
+            monthlyData[monthYear].maxDrawdown,
+            drawdownPercent
+          );
+        }
+      });
+      
+      // Convert to array and sort by date
+      drawdownData = Object.values(monthlyData).sort((a, b) => 
+        a.date.localeCompare(b.date)
+      );
+      
+      res.json(drawdownData);
+    } catch (error) {
+      console.error("Error calculating drawdown data:", error);
+      res.status(500).json({ error: errorMessage(error) });
+    }
+  });
+
+  // 2. Risk Per Trade Data API
+  app.get("/api/risk/per-trade", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId || (req.user && req.user.id);
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      console.log("Risk per trade API called with filters:", req.query);
+      
+      // Get trades with filters
+      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      
+      if (trades.length === 0) {
+        return res.json([]);
+      }
+      
+      // Sort trades by date
+      const sortedTrades = [...trades].sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+      
+      // Group by month for visualization
+      const monthlyData = {};
+      
+      sortedTrades.forEach(trade => {
+        const date = new Date(trade.date);
+        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        
+        // Calculate risk percentage (assuming account value of 10000 if not specified)
+        const accountValue = trade.accountValue || 10000;
+        const riskPercent = (trade.positionSize / accountValue) * 100;
+        const riskDollar = trade.positionSize;
+        
+        // Add or update monthly data
+        if (!monthlyData[monthYear]) {
+          monthlyData[monthYear] = {
+            date: monthYear,
+            riskPercent: riskPercent,
+            riskDollar: riskDollar,
+            count: 1
+          };
+        } else {
+          // Average the values if multiple trades in same month
+          const count = monthlyData[monthYear].count + 1;
+          monthlyData[monthYear].riskPercent = 
+            (monthlyData[monthYear].riskPercent * monthlyData[monthYear].count + riskPercent) / count;
+          monthlyData[monthYear].riskDollar = 
+            (monthlyData[monthYear].riskDollar * monthlyData[monthYear].count + riskDollar) / count;
+          monthlyData[monthYear].count = count;
+        }
+      });
+      
+      // Convert to array, remove count property, and sort by date
+      const riskData = Object.values(monthlyData)
+        .map(({ date, riskPercent, riskDollar }) => ({
+          date,
+          riskPercent: parseFloat(riskPercent.toFixed(2)),
+          riskDollar: parseFloat(riskDollar.toFixed(2))
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+      
+      res.json(riskData);
+    } catch (error) {
+      console.error("Error calculating risk per trade data:", error);
+      res.status(500).json({ error: errorMessage(error) });
+    }
+  });
+
+  // 3. Position Size Correlation Data API
+  app.get("/api/risk/position-size", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId || (req.user && req.user.id);
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      console.log("Position size API called with filters:", req.query);
+      
+      // Get trades with filters
+      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      
+      if (trades.length === 0) {
+        return res.json([]);
+      }
+      
+      // Group trades by position size ranges
+      const positionSizeRanges = {};
+      const rangeSize = 100; // Group by $100 ranges
+      
+      trades.forEach(trade => {
+        // Round down to nearest rangeSize
+        const positionSizeKey = Math.floor(trade.positionSize / rangeSize) * rangeSize;
+        const positionSizeRange = `${positionSizeKey}-${positionSizeKey + rangeSize}`;
+        
+        if (!positionSizeRanges[positionSizeRange]) {
+          positionSizeRanges[positionSizeRange] = {
+            positionSize: positionSizeKey + rangeSize/2, // Midpoint for display
+            wins: 0,
+            total: 0
+          };
+        }
+        
+        positionSizeRanges[positionSizeRange].total++;
+        if (trade.isWin) {
+          positionSizeRanges[positionSizeRange].wins++;
+        }
+      });
+      
+      // Calculate win rates and convert to array
+      const positionSizeData = Object.entries(positionSizeRanges)
+        .map(([range, data]) => ({
+          positionSize: data.positionSize,
+          winRate: parseFloat(((data.wins / data.total) * 100).toFixed(2)),
+          count: data.total
+        }))
+        .sort((a, b) => a.positionSize - b.positionSize);
+      
+      res.json(positionSizeData);
+    } catch (error) {
+      console.error("Error calculating position size correlation:", error);
+      res.status(500).json({ error: errorMessage(error) });
+    }
+  });
+
+  // 4. Risk Recommendations API
+  app.get("/api/risk/recommendations", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId || (req.user && req.user.id);
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      console.log("Risk recommendations API called with filters:", req.query);
+      
+      // Get trades with filters
+      const trades = await storage.getTradesByUserId(Number(userId), req.query);
+      
+      if (trades.length === 0) {
+        return res.json([]);
+      }
+      
+      // Calculate overall statistics
+      const totalTrades = trades.length;
+      const winningTrades = trades.filter(t => t.isWin).length;
+      const winRate = (winningTrades / totalTrades) * 100;
+      
+      // Calculate average position size
+      const avgPositionSize = trades.reduce((sum, trade) => sum + trade.positionSize, 0) / totalTrades;
+      
+      // Find maximum drawdown
+      let balance = 10000;
+      let peak = balance;
+      let maxDrawdown = 0;
+      
+      [...trades].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .forEach(trade => {
+          const pnl = trade.isWin 
+            ? trade.positionSize * trade.rrAchieved 
+            : -trade.positionSize;
+          
+          balance += pnl;
+          
+          if (balance > peak) {
+            peak = balance;
+          }
+          
+          const drawdown = peak > 0 ? ((peak - balance) / peak) * 100 : 0;
+          maxDrawdown = Math.max(maxDrawdown, drawdown);
+        });
+      
+      // Generate recommendations based on analysis
+      const recommendations = [];
+      
+      // 1. Check win rate and suggest position sizing
+      if (winRate < 40) {
+        recommendations.push({
+          id: "low-win-rate",
+          recommendation: "Reduziere deine Positionsgröße",
+          explanation: "Deine Gewinnrate liegt unter 40%. Verkleinere deine Positionen, bis du eine höhere Konsistenz erreichst.",
+          impact: 0.9
+        });
+      }
+      
+      // 2. Check drawdown
+      if (maxDrawdown > 20) {
+        recommendations.push({
+          id: "high-drawdown",
+          recommendation: "Drawdown-Management verbessern",
+          explanation: `Dein maximaler Drawdown von ${maxDrawdown.toFixed(1)}% ist zu hoch. Implementiere striktere Stop-Loss-Regeln und Positionsgrößenmanagement.`,
+          impact: 0.8
+        });
+      }
+      
+      // 3. Check position size consistency
+      const positionSizes = trades.map(t => t.positionSize);
+      const positionSizeStdDev = calculateStandardDeviation(positionSizes);
+      const positionSizeVariation = (positionSizeStdDev / avgPositionSize) * 100;
+      
+      if (positionSizeVariation > 50) {
+        recommendations.push({
+          id: "inconsistent-position",
+          recommendation: "Standardisiere deine Positionsgrößen",
+          explanation: "Deine Positionsgrößen variieren zu stark. Etabliere eine konsistente Risikomanagement-Strategie.",
+          impact: 0.7
+        });
+      }
+      
+      // 4. Check optimal position size from position size data
+      const positionSizeRanges = {};
+      const rangeSize = 100;
+      
+      trades.forEach(trade => {
+        const positionSizeKey = Math.floor(trade.positionSize / rangeSize) * rangeSize;
+        const positionSizeRange = `${positionSizeKey}-${positionSizeKey + rangeSize}`;
+        
+        if (!positionSizeRanges[positionSizeRange]) {
+          positionSizeRanges[positionSizeRange] = {
+            positionSize: positionSizeKey + rangeSize/2,
+            wins: 0,
+            total: 0
+          };
+        }
+        
+        positionSizeRanges[positionSizeRange].total++;
+        if (trade.isWin) {
+          positionSizeRanges[positionSizeRange].wins++;
+        }
+      });
+      
+      // Find optimal position size range with at least 5 trades
+      let optimalPositionSize = null;
+      let bestWinRate = 0;
+      
+      Object.values(positionSizeRanges).forEach(range => {
+        const rangeWinRate = range.total >= 5 ? (range.wins / range.total) : 0;
+        if (rangeWinRate > bestWinRate) {
+          bestWinRate = rangeWinRate;
+          optimalPositionSize = range.positionSize;
+        }
+      });
+      
+      if (optimalPositionSize && Math.abs(avgPositionSize - optimalPositionSize) > rangeSize) {
+        const direction = avgPositionSize < optimalPositionSize ? "erhöhen" : "verringern";
+        recommendations.push({
+          id: "optimal-position",
+          recommendation: `Positionsgröße auf ca. ${optimalPositionSize}$ ${direction}`,
+          explanation: `Deine Performance ist besser bei einer Positionsgröße von etwa ${optimalPositionSize}$. Erwäge, deine durchschnittliche Positionsgröße anzupassen.`,
+          impact: 0.6
+        });
+      }
+      
+      // 5. Consistency check across recent trades
+      const recentTrades = [...trades].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      ).slice(0, Math.min(20, trades.length));
+      
+      const recentWinRate = (recentTrades.filter(t => t.isWin).length / recentTrades.length) * 100;
+      const winRateChange = recentWinRate - winRate;
+      
+      if (winRateChange < -15) {
+        recommendations.push({
+          id: "declining-performance",
+          recommendation: "Überprüfe deine jüngsten Trades",
+          explanation: "Deine jüngste Performance hat abgenommen. Mache eine Pause oder verkleinere deine Positionen, während du deine Strategie überarbeitest.",
+          impact: 0.85
+        });
+      }
+      
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error generating risk recommendations:", error);
+      res.status(500).json({ error: errorMessage(error) });
+    }
+  });
+  
+  // Helper function to calculate standard deviation
+  function calculateStandardDeviation(values) {
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const squareDiffs = values.map(value => Math.pow(value - mean, 2));
+    const variance = squareDiffs.reduce((sum, value) => sum + value, 0) / values.length;
+    return Math.sqrt(variance);
+  }
+
   const httpServer = createServer(app);
   return httpServer;
 }
