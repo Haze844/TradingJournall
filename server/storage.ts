@@ -812,10 +812,27 @@ export class MemStorage implements IStorage {
       (trade) => trade.userId === userId
     );
     
+    console.log("MemStorage getTrades - Initial trade count for userId", userId, ":", userTrades.length, "trades:", JSON.stringify(userTrades));
+    
     if (filters) {
+      console.log("MemStorage getTrades - Filters applied:", JSON.stringify(filters));
+      
+      // Spezieller Umgang mit Datums-Filtern
+      if (filters.startDate || filters.endDate) {
+        const startDate = filters.startDate ? new Date(filters.startDate as any) : null;
+        const endDate = filters.endDate ? new Date(filters.endDate as any) : null;
+        
+        console.log("Date filters:", { startDate, endDate });
+        
+        // Standardfilter fürs Datum (nicht anwenden, speziell behandeln)
+        delete filters.startDate;
+        delete filters.endDate;
+      }
+      
+      // Standard-Filter-Ansatz
       userTrades = userTrades.filter(trade => {
         for (const [key, value] of Object.entries(filters)) {
-          if (value !== undefined && trade[key as keyof Trade] !== value) {
+          if (value !== undefined && value !== null && value !== '' && trade[key as keyof Trade] !== value) {
             return false;
           }
         }
@@ -823,7 +840,22 @@ export class MemStorage implements IStorage {
       });
     }
     
-    return userTrades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const sortedTrades = userTrades.sort((a, b) => {
+      // Safer date parsing
+      let dateA, dateB;
+      try {
+        dateA = new Date(b.date);
+        dateB = new Date(a.date);
+      } catch (e) {
+        console.error("Date parsing error:", e);
+        return 0;
+      }
+      return dateA.getTime() - dateB.getTime();
+    });
+    
+    console.log("MemStorage getTrades - Final filtered trade count:", sortedTrades.length);
+    
+    return sortedTrades;
   }
 
   async getTradeById(id: number): Promise<Trade | undefined> {
