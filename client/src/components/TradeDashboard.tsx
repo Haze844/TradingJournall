@@ -120,6 +120,18 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     return Array.from(setups);
   }, [trades]);
   
+  // Generiere Beispielzeitraum-Optionen für die vordefinierten Filter
+  const timeRangeOptions: TimeRangeOption[] = [
+    { label: "Alle Daten", value: "all", days: 0 },
+    { label: "Letzte Woche", value: "last_week", days: 7 },
+    { label: "Letzter Monat", value: "last_month", days: 30 },
+    { label: "Letztes Quartal", value: "last_quarter", days: 90 },
+    { label: "Letztes Jahr", value: "last_year", days: 365 }
+  ];
+  
+  // State für vordefinierte Zeiträume
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string>("all");
+  
   // Verarbeite Datumsfilter, wenn Start- und/oder Enddatum eingegeben wurde
   useEffect(() => {
     if (startDateInput) {
@@ -128,6 +140,8 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
         // Setze Startzeit auf 00:00:00
         parsedDate.setHours(0, 0, 0, 0);
         setStartDate(parsedDate);
+        // Wenn ein benutzerdefiniertes Datum ausgewählt wird, den vordefinierten Filter zurücksetzen
+        setSelectedTimeRange("all");
       }
     } else {
       setStartDate(null);
@@ -141,37 +155,67 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
         // Setze Endzeit auf 23:59:59
         parsedDate.setHours(23, 59, 59, 999);
         setEndDate(parsedDate);
+        // Wenn ein benutzerdefiniertes Datum ausgewählt wird, den vordefinierten Filter zurücksetzen
+        setSelectedTimeRange("all");
       }
     } else {
       setEndDate(null);
     }
   }, [endDateInput]);
+  
+  // Effekt für vordefinierten Zeitraumfilter
+  useEffect(() => {
+    if (selectedTimeRange !== "all") {
+      // Wenn ein vordefinierter Zeitraum ausgewählt wird, die benutzerdefinierten Datumseingaben zurücksetzen
+      setStartDateInput("");
+      setEndDateInput("");
+      setStartDate(null);
+      setEndDate(null);
+    }
+  }, [selectedTimeRange]);
 
-  // Filtere Trades nach Datumsbereich
-  const dateFilteredTrades = useMemo(() => {
-    if (!startDate && !endDate) {
-      return trades;
+  // Filtere Trades nach Zeitraum (vordefiniert oder benutzerdefiniert)
+  const timeFilteredTrades = useMemo(() => {
+    // Wenn ein vordefinierter Zeitraum ausgewählt ist
+    if (selectedTimeRange !== "all") {
+      const option = timeRangeOptions.find(opt => opt.value === selectedTimeRange);
+      if (!option) return trades;
+      
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - option.days);
+      
+      return trades.filter(trade => {
+        if (!trade.date) return false;
+        const tradeDate = new Date(trade.date);
+        return tradeDate >= cutoffDate;
+      });
     }
     
-    return trades.filter(trade => {
-      if (!trade.date) return false;
-      
-      const tradeDate = new Date(trade.date);
-      
-      if (startDate && tradeDate < startDate) return false;
-      if (endDate && tradeDate > endDate) return false;
-      
-      return true;
-    });
-  }, [trades, startDate, endDate]);
+    // Wenn ein benutzerdefinierter Zeitraum ausgewählt ist
+    if (startDate || endDate) {
+      return trades.filter(trade => {
+        if (!trade.date) return false;
+        
+        const tradeDate = new Date(trade.date);
+        
+        if (startDate && tradeDate < startDate) return false;
+        if (endDate && tradeDate > endDate) return false;
+        
+        return true;
+      });
+    }
+    
+    // Wenn kein Filter aktiv ist
+    return trades;
+  }, [trades, startDate, endDate, selectedTimeRange, timeRangeOptions]);
   
-  // Gefilterte Trades basierend auf ausgewähltem Setup und Datumsbereich
+  // Gefilterte Trades basierend auf ausgewähltem Setup und Zeitraum
   const filteredTrades = useMemo(() => {
     if (selectedSetup === "all") {
-      return dateFilteredTrades;
+      return timeFilteredTrades;
     }
-    return dateFilteredTrades.filter(trade => trade.setup === selectedSetup);
-  }, [dateFilteredTrades, selectedSetup]);
+    return timeFilteredTrades.filter(trade => trade.setup === selectedSetup);
+  }, [timeFilteredTrades, selectedSetup]);
   
   // Statistik-Werte basierend auf gefilterten Trades
   const totalTrades = filteredTrades.length;
@@ -564,7 +608,24 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
             </SelectContent>
           </Select>
           
-          {/* Datumsbereich */}
+          {/* Zeitraumfilter (vordefinierte Optionen) */}
+          <Select
+            value={selectedTimeRange}
+            onValueChange={setSelectedTimeRange}
+          >
+            <SelectTrigger className="w-[180px] bg-black/50">
+              <SelectValue placeholder="Zeitraum" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeRangeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          {/* Benutzerdefinierter Datumsbereich */}
           <div className="flex gap-2 items-center">
             <div className="relative">
               <CalendarRange className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -592,14 +653,21 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
               </Badge>
             )}
             
-            {startDate && (
+            {selectedTimeRange !== "all" && (
+              <Badge className="px-2 py-1 bg-primary/20 text-primary" variant="outline">
+                <CalendarRange className="h-3 w-3 mr-1 inline" />
+                {timeRangeOptions.find(opt => opt.value === selectedTimeRange)?.label || "Gefiltert"}
+              </Badge>
+            )}
+            
+            {startDate && selectedTimeRange === "all" && (
               <Badge className="px-2 py-1 bg-primary/20 text-primary" variant="outline">
                 <CalendarRange className="h-3 w-3 mr-1 inline" />
                 Von: {formatDateDE(startDate)}
               </Badge>
             )}
             
-            {endDate && (
+            {endDate && selectedTimeRange === "all" && (
               <Badge className="px-2 py-1 bg-primary/20 text-primary" variant="outline">
                 <CalendarRange className="h-3 w-3 mr-1 inline" />
                 Bis: {formatDateDE(endDate)}
