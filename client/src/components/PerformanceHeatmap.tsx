@@ -731,9 +731,9 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                     <SelectItem value="all">Alle Setups</SelectItem>
                     {heatmapData.filters && heatmapData.filters.availableSetups && 
                       heatmapData.filters.availableSetups
-                        .filter(setup => setup && setup !== null && setup !== '')
-                        .map((setup) => (
-                          <SelectItem key={setup} value={setup}>
+                        .filter((setup: string | null) => setup && setup !== null && setup !== '')
+                        .map((setup: string) => (
+                          <SelectItem key={setup} value={setup || "default_setup"}>
                             {setup}
                           </SelectItem>
                         ))}
@@ -755,9 +755,9 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                     <SelectItem value="all">Alle Symbole</SelectItem>
                     {heatmapData.filters && heatmapData.filters.availableSymbols && 
                       heatmapData.filters.availableSymbols
-                        .filter(symbol => symbol && symbol !== null && symbol !== '')
-                        .map((symbol) => (
-                          <SelectItem key={symbol} value={symbol}>
+                        .filter((symbol: string | null) => symbol && symbol !== null && symbol !== '')
+                        .map((symbol: string) => (
+                          <SelectItem key={symbol} value={symbol || "default_symbol"}>
                             {symbol}
                           </SelectItem>
                         ))}
@@ -779,9 +779,9 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                     <SelectItem value="all">Alle Richtungen</SelectItem>
                     {heatmapData.filters && heatmapData.filters.availableDirections && 
                       heatmapData.filters.availableDirections
-                        .filter(direction => direction && direction !== null && direction !== '')
-                        .map((direction) => (
-                          <SelectItem key={direction} value={direction}>
+                        .filter((direction: string | null) => direction && direction !== null && direction !== '')
+                        .map((direction: string) => (
+                          <SelectItem key={direction} value={direction || "default_direction"}>
                             {direction}
                           </SelectItem>
                         ))}
