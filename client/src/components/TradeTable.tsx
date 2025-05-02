@@ -312,7 +312,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       if (typeof trade.date === 'string') {
         const dateString = trade.date;
         // Überprüfe, ob das Format MM/DD/YYYY ist (wie in 04/29/2025)
-        if (/^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
+        if (dateString && /^\d{2}\/\d{2}\/\d{4}/.test(dateString)) {
           // Das Datum ist im Format MM/DD/YYYY
           // Zerteile es um das Datum zu extrahieren
           const parts = dateString.split(' ');
@@ -329,7 +329,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
           // Wenn es eine Uhrzeit gibt, setze diese auch
           if (parts.length > 1) {
             const timePart = parts[1];
-            const [hours, minutes, seconds] = timePart.split(':').map(p => parseInt(p, 10));
+            const [hours, minutes, seconds] = (timePart || '').split(':').map(p => parseInt(p || '0', 10));
             tradeDate.setHours(hours || 0, minutes || 0, seconds || 0);
           }
         } else {
