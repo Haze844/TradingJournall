@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Tooltip, ResponsiveContainer, XAxis, YAxis, Tooltip as RechartsTooltip, Rectangle, ScatterChart, Scatter, Cell, Legend } from "recharts";
 import { Loader2, MousePointer, Hand, Download, ZoomIn, ZoomOut, RefreshCw, SlidersHorizontal, Lightbulb, TrendingUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
+import { SafeSelectItem } from "@/components/ui/safe-select-item";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
