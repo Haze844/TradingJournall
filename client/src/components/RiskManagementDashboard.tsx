@@ -8,6 +8,19 @@ import { ChartTypeSelector, type ChartType } from '@/components/ui/chart-type-se
 import { format } from 'date-fns';
 import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart } from 'lucide-react';
 
+// Gemeinsame Stilkonfiguration für elegantere Diagramme
+const chartConfig = {
+  strokeWidth: 1.5,       // Dünnere Linien
+  barSize: 12,            // Schmalere Balken
+  dotSize: 4,             // Kleinere Punkte
+  activeDotSize: 6,       // Kleinere aktive Punkte
+  fontSize: 10,           // Kleinere Schriftgröße für Labels
+  labelOffset: 5,         // Abstand der Labels
+  cornerRadius: 2,        // Leicht abgerundete Ecken für Balken
+  animationDuration: 800, // Längere Animation für flüssigeren Eindruck
+  gridOpacity: 0.04       // Subtileres Raster
+};
+
 interface DrawdownData {
   date: string;
   drawdown: number;
@@ -250,12 +263,16 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="drawdown"
                           stroke="#EF4444"
                           name="Drawdown"
-                          strokeWidth={2}
+                          strokeWidth={chartConfig.strokeWidth}
+                          dot={{ r: chartConfig.dotSize }}
+                          activeDot={{ r: chartConfig.activeDotSize }}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
-                            ...labelProps,
                             position: "top",
+                            fontSize: chartConfig.fontSize,
                             fill: "#EF4444",
-                            formatter: (value: number) => `${value}%`
+                            formatter: (value: number) => `${value}%`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                         <Line
@@ -263,13 +280,17 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="maxDrawdown"
                           stroke="#F59E0B"
                           name="Max Drawdown"
-                          strokeWidth={2}
+                          strokeWidth={chartConfig.strokeWidth}
                           strokeDasharray="5 5"
+                          dot={{ r: chartConfig.dotSize }}
+                          activeDot={{ r: chartConfig.activeDotSize }}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
-                            ...labelProps,
                             position: "insideBottom",
+                            fontSize: chartConfig.fontSize,
                             fill: "#F59E0B",
-                            formatter: (value: number) => `${value}%`
+                            formatter: (value: number) => `${value}%`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                       </LineChart>
@@ -294,20 +315,30 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="drawdown"
                           fill="#EF4444"
                           name="Drawdown"
+                          barSize={chartConfig.barSize}
+                          radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
-                            ...labelProps,
                             position: "top",
-                            fill: "#EF4444"
+                            fontSize: chartConfig.fontSize,
+                            fill: "#EF4444",
+                            formatter: (value: number) => `${value}%`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                         <Bar
                           dataKey="maxDrawdown"
                           fill="#F59E0B"
                           name="Max Drawdown"
+                          barSize={chartConfig.barSize}
+                          radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
-                            ...labelProps,
                             position: "insideBottom",
-                            fill: "#F59E0B"
+                            fontSize: chartConfig.fontSize,
+                            fill: "#F59E0B",
+                            formatter: (value: number) => `${value}%`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                       </BarChart>
@@ -385,12 +416,16 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="riskPercent"
                           stroke="#10B981"
                           name="Risiko (%)"
-                          strokeWidth={2}
+                          strokeWidth={chartConfig.strokeWidth}
+                          dot={{ r: chartConfig.dotSize }}
+                          activeDot={{ r: chartConfig.activeDotSize }}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
-                            ...labelProps,
                             position: "top",
+                            fontSize: chartConfig.fontSize,
                             fill: "#10B981",
-                            formatter: (value: number) => `${value}%`
+                            formatter: (value: number) => `${value}%`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                         <Line
@@ -398,13 +433,17 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           type="monotone"
                           dataKey="riskDollar"
                           stroke="#8B5CF6"
-                          name="Risiko ($)"
-                          strokeWidth={2}
+                          name="Risiko (€)"
+                          strokeWidth={chartConfig.strokeWidth}
+                          dot={{ r: chartConfig.dotSize }}
+                          activeDot={{ r: chartConfig.activeDotSize }}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
                             position: "insideBottom",
-                            fontSize: 11,
+                            fontSize: chartConfig.fontSize,
                             fill: "#8B5CF6",
-                            formatter: (value: number) => `€${value}`
+                            formatter: (value: number) => `€${value}`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                       </LineChart>
@@ -438,23 +477,31 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="riskPercent"
                           fill="#10B981"
                           name="Risiko (%)"
+                          barSize={chartConfig.barSize}
+                          radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
-                            ...labelProps,
                             position: "top",
+                            fontSize: chartConfig.fontSize,
                             fill: "#10B981",
-                            formatter: (value: number) => `${value}%`
+                            formatter: (value: number) => `${value}%`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                         <Bar
                           yAxisId="right"
                           dataKey="riskDollar"
                           fill="#8B5CF6"
-                          name="Risiko ($)"
+                          name="Risiko (€)"
+                          barSize={chartConfig.barSize}
+                          radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                          animationDuration={chartConfig.animationDuration}
                           label={{
                             position: "inside",
-                            fontSize: 11,
+                            fontSize: chartConfig.fontSize,
                             fill: "#F3F4F6",
-                            formatter: (value: number) => `€${value}`
+                            formatter: (value: number) => `€${value}`,
+                            offset: chartConfig.labelOffset
                           }}
                         />
                       </BarChart>
@@ -538,11 +585,15 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                         dataKey="winRate" 
                         name="Erfolgsquote"
                         fill="#4F46E5"
+                        barSize={chartConfig.barSize}
+                        radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
+                        animationDuration={chartConfig.animationDuration}
                         label={{
                           position: "top",
-                          fontSize: 11,
+                          fontSize: chartConfig.fontSize,
                           fill: "#F3F4F6",
-                          formatter: (value: number) => `${value}%`
+                          formatter: (value: number) => `${value}%`,
+                          offset: chartConfig.labelOffset
                         }}
                       >
                         {positionSizeData.map((entry, index) => (
