@@ -197,7 +197,7 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
   const [setupFilter, setSetupFilter] = useState<string>("all");
   const [symbolFilter, setSymbolFilter] = useState<string>("all");
   const [directionFilter, setDirectionFilter] = useState<string>("all");
-  const [compareMode, setCompareMode] = useState<string>("");
+  const [compareMode, setCompareMode] = useState<string>("none");
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
   const { toast } = useToast();
@@ -302,7 +302,7 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
       }
       
       // Vergleichsmodus-Parameter hinzufügen
-      if (compareMode) {
+      if (compareMode && compareMode !== "none") {
         url += `&compareWith=${compareMode}`;
       }
       
@@ -661,7 +661,7 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                 <SelectValue placeholder="Vergleich deaktiviert" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Kein Vergleich</SelectItem>
+                <SelectItem value="none">Kein Vergleich</SelectItem>
                 <SelectGroup>
                   <SelectLabel>Zeitraum-Vergleich</SelectLabel>
                   <SelectItem value="period:last30days">Mit letzten 30 Tagen</SelectItem>
