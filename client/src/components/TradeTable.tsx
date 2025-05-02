@@ -42,9 +42,7 @@ import {
   Wallet, 
   BarChart4, 
   LineChart, 
-  TrendingUp,
-  ChevronLeft,
-  ChevronRight, 
+  TrendingUp, 
   ArrowUpDown, 
   Award,
   Target,
@@ -544,8 +542,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
           </div>
         </CardHeader>
         
-        <div className="overflow-hidden overflow-y-auto max-h-[70vh]">
-          <table className="w-full text-xs table-auto">
+        <div className="overflow-x-visible overflow-y-auto max-h-[70vh]">
+          <table className="w-full text-xs">
             <thead className="bg-gradient-to-r from-blue-900/20 to-black/30 border-y border-primary/20 sticky top-0 z-10">
               <tr>
                 <th className="p-3 text-left whitespace-nowrap">
@@ -1682,7 +1680,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <ChevronLeft className="h-3 w-3" />
+            <i className="fas fa-chevron-left"></i>
           </Button>
           
           {Array.from({ length: Math.min(totalPages, 3) }).map((_, index) => (
@@ -1701,7 +1699,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === totalPages || totalPages === 0}
           >
-            <ChevronRight className="h-3 w-3" />
+            <i className="fas fa-chevron-right"></i>
           </Button>
         </div>
       </div>
