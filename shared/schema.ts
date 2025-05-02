@@ -79,7 +79,8 @@ export const trades = pgTable("trades", {
   rangePoints: integer("range_points"), // Wert zwischen 0 und 300
   marketPhase: text("market_phase").default(''), // Long, stark Long, Short, stark Short, Range
   slType: text("sl_type").default(''), // Sweep oder zerstört
-  slPoints: integer("sl_points") // Wert zwischen 1 und 30
+  slPoints: integer("sl_points"), // Wert zwischen 1 und 30
+  riskSum: real("risk_sum").default(200) // Risiko Summe in $, Standard 200$
 });
 
 export const insertTradeSchema = createInsertSchema(trades).omit({
