@@ -312,39 +312,54 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
       }
       const data = await response.json();
       
-      // Wenn keine Daten vorhanden sind, generiere Beispieldaten für die Visualisierung
+      // Stelle sicher, dass alle Daten valide sind, bereinige leere Werte
+      // Reinige die Daten und entferne leere Werte aus den Filtern
+      if (!data.filters) {
+        data.filters = {
+          availableSetups: [],
+          availableSymbols: [],
+          availableDirections: []
+        };
+      }
+      
+      // Bereite einen festen Satz an Fallback-Daten vor
+      const hardcodedData = {
+        days: ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"],
+        timeframe: ["04-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-22"],
+        data: [],
+        recommendations: {
+          bestTimes: [],
+          worstTimes: [],
+          trends: []
+        },
+        filters: {
+          availableSetups: [],
+          availableSymbols: [],
+          availableDirections: []
+        }
+      };
+      
+      // Reinige die Filter-Arrays von leeren Werten
+      if (data.filters) {
+        data.filters.availableSetups = (data.filters.availableSetups || [])
+          .filter(setup => setup && setup !== "" && setup !== null)
+          .map(setup => String(setup).trim());
+            
+        data.filters.availableSymbols = (data.filters.availableSymbols || [])
+          .filter(symbol => symbol && symbol !== "" && symbol !== null)
+          .map(symbol => String(symbol).trim());
+            
+        data.filters.availableDirections = (data.filters.availableDirections || [])
+          .filter(direction => direction && direction !== "" && direction !== null)
+          .map(direction => String(direction).trim());
+      }
+      
+      // Wenn keine Daten vorhanden sind, zeige leere Daten
       if (!data.data || data.data.length === 0) {
-        console.log("Keine Daten vom Server - generiere Beispieldaten für die Heatmap-Visualisierung");
-        
-        // Direkt ein vollständig neues Beispiel-Datenobjekt zurückgeben, anstatt zu versuchen, serverdaten zu patchen
+        console.log("Keine Daten vom Server - zeige leere Heatmap");
         return {
-          days: ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"],
-          timeframe: ["04-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-22"],
-          data: [
-            { day: "Montag", timeframe: "08-10", value: 45, tradeCount: 5, winRate: 45, avgRR: "1.2", totalPnL: "-120.00" },
-            { day: "Dienstag", timeframe: "10-12", value: 75, tradeCount: 8, winRate: 75, avgRR: "2.5", totalPnL: "450.00" },
-            { day: "Mittwoch", timeframe: "14-16", value: 60, tradeCount: 6, winRate: 60, avgRR: "1.8", totalPnL: "280.00" },
-            { day: "Donnerstag", timeframe: "16-18", value: 50, tradeCount: 4, winRate: 50, avgRR: "1.5", totalPnL: "120.00" },
-            { day: "Freitag", timeframe: "12-14", value: 30, tradeCount: 3, winRate: 30, avgRR: "0.8", totalPnL: "-180.00" }
-          ],
-          recommendations: {
-            bestTimes: [
-              { day: "Dienstag", time: "10-12", winRate: 75, avgRR: "2.5" },
-              { day: "Mittwoch", time: "14-16", winRate: 60, avgRR: "1.8" }
-            ],
-            worstTimes: [
-              { day: "Freitag", time: "12-14", winRate: 30, avgRR: "0.8" }
-            ],
-            trends: [
-              { type: "pattern", message: "Die beste Performance ist zwischen 10-12 Uhr an Dienstagen zu beobachten." },
-              { type: "improvement", message: "Deine Nachmittags-Performance hat sich in den letzten 30 Tagen verbessert." }
-            ]
-          },
-          filters: {
-            availableSetups: ["SFP", "Trendline_Break", "Double_Top"],
-            availableSymbols: ["EURUSD", "GBPUSD", "USDJPY"],
-            availableDirections: ["Long", "Short"]
-          }
+          ...hardcodedData,
+          filters: data.filters // Behalte bereinigte Filter bei
         };
       }
       
@@ -683,9 +698,9 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       heatmapData.filters.availableSetups
                         .filter((setup: string | null) => setup && setup !== null && setup !== '')
                         .map((setup: string) => (
-                          <SelectItem key={setup} value={setup || "default_setup"}>
+                          <SafeSelectItem key={setup} value={setup} fallbackValue="default_setup">
                             {setup}
-                          </SelectItem>
+                          </SafeSelectItem>
                         ))}
                   </SelectContent>
                 </Select>
@@ -707,9 +722,9 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       heatmapData.filters.availableSymbols
                         .filter((symbol: string | null) => symbol && symbol !== null && symbol !== '')
                         .map((symbol: string) => (
-                          <SelectItem key={symbol} value={symbol || "default_symbol"}>
+                          <SafeSelectItem key={symbol} value={symbol} fallbackValue="default_symbol">
                             {symbol}
-                          </SelectItem>
+                          </SafeSelectItem>
                         ))}
                   </SelectContent>
                 </Select>
@@ -731,9 +746,9 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       heatmapData.filters.availableDirections
                         .filter((direction: string | null) => direction && direction !== null && direction !== '')
                         .map((direction: string) => (
-                          <SelectItem key={direction} value={direction || "default_direction"}>
+                          <SafeSelectItem key={direction} value={direction} fallbackValue="default_direction">
                             {direction}
-                          </SelectItem>
+                          </SafeSelectItem>
                         ))}
                   </SelectContent>
                 </Select>
