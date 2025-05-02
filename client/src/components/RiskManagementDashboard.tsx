@@ -311,16 +311,22 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     console.log(`Trades gefiltert nach Kontotyp ${accountType}:`, 
       `Total: ${allTrades.length}, Gefiltert: ${filteredTrades.length}`);
     
-    // Berechnung der Risikopunkte (riskSum * 4)
+    // Berechnung der Risikosumme: Risiko Punkte * 4 = Ticks, (Ticks * 0,5) * Size = Risikosumme
     filteredTrades.forEach(trade => {
       if (trade.riskSum) {
         const type = trade.accountType || 'PA'; // Default to PA if not specified
         result[type] = result[type] || { count: 0, sum: 0 }; // Ensure the type exists
         result[type].count += 1;
-        // Risikopunkte = Risikosumme * 4
-        result[type].sum += Number(trade.riskSum) * 4;
+        
+        // Neue Berechnung: Risiko Punkte * 4 = Ticks, (Ticks * 0,5) * Size = Risikosumme
+        const riskPoints = Number(trade.riskSum) || 0;
+        const size = Number(trade.size) || 1; // Default Size ist 1, falls nicht angegeben
+        const ticks = riskPoints * 4;
+        const riskAmount = (ticks * 0.5) * size;
+        
+        result[type].sum += riskAmount;
         result.total.count += 1;
-        result.total.sum += Number(trade.riskSum) * 4;
+        result.total.sum += riskAmount;
       }
     });
     
@@ -472,7 +478,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">PA Risiko Punkte</p>
+                          <p className="text-sm text-muted-foreground mb-1">PA Risikosumme (€)</p>
                           <h3 className="text-2xl font-bold">{riskSumByAccountType.PA.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.PA.count} Trades</p>
                         </div>
@@ -488,7 +494,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">EVA Risiko Punkte</p>
+                          <p className="text-sm text-muted-foreground mb-1">EVA Risikosumme (€)</p>
                           <h3 className="text-2xl font-bold">{riskSumByAccountType.EVA.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.EVA.count} Trades</p>
                         </div>
@@ -504,7 +510,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Gesamt Risiko Punkte</p>
+                          <p className="text-sm text-muted-foreground mb-1">Gesamt Risikosumme (€)</p>
                           <h3 className="text-2xl font-bold">{riskSumByAccountType.total.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.total.count} Trades</p>
                         </div>

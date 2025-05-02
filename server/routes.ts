@@ -2335,18 +2335,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       trades.forEach(trade => {
         try {
-          // Festes Risiko von 200€ pro Trade verwenden
-          const fixedRiskPerTrade = 200;
-          let positionSize = fixedRiskPerTrade;
+          // Neue Berechnung: Risiko Punkte * 4 = Ticks, (Ticks * 0,5) * Size = Risikosumme
+          const riskPoints = trade.riskSum || 0;
+          const size = trade.size || 1; // Default Size ist 1, falls nicht angegeben
+          
+          // Berechnung der Ticks und der Risikosumme
+          const ticks = riskPoints * 4;
+          const positionSize = (ticks * 0.5) * size;
+          
+          console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${positionSize.toFixed(2)}€`);
           
           // Für Logging auch die alte Berechnung anzeigen
           let calculatedPosition = 0;
           if (trade.isWin && trade.rrAchieved && trade.rrAchieved > 0) {
             calculatedPosition = Math.abs(trade.profitLoss || 0) / trade.rrAchieved;
-            console.log(`Gewinn-Trade ${trade.id}: Festes Risiko = ${fixedRiskPerTrade}€ (berechnet wäre: ${calculatedPosition.toFixed(2)}€)`);
+            console.log(`Gewinn-Trade ${trade.id}: Neue Risikosumme = ${positionSize.toFixed(2)}€ (berechnet wäre: ${calculatedPosition.toFixed(2)}€)`);
           } else {
             calculatedPosition = Math.abs(trade.profitLoss || 0);
-            console.log(`Verlust-Trade ${trade.id}: Festes Risiko = ${fixedRiskPerTrade}€ (berechnet wäre: ${calculatedPosition.toFixed(2)}€)`);
+            console.log(`Verlust-Trade ${trade.id}: Neue Risikosumme = ${positionSize.toFixed(2)}€ (berechnet wäre: ${calculatedPosition.toFixed(2)}€)`);
           }
           
           // Round down to nearest rangeSize
@@ -2409,18 +2415,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const winningTrades = trades.filter(t => t.isWin).length;
       const winRate = (winningTrades / totalTrades) * 100;
       
-      // Konstantes Risiko von 200€ pro Trade 
-      // -1RR entspricht 200€ Verlust
-      const fixedRiskPerTrade = 200;
+      // Neue Berechnung: Risiko Punkte * 4 = Ticks, (Ticks * 0,5) * Size = Risikosumme
       const riskValues = trades.map(trade => {
-        // Berechnen für Logging-Zwecke auch das alte Risiko
+        // Berechnung der Ticks und der Risikosumme
+        const riskPoints = trade.riskSum || 0;
+        const size = trade.size || 1; // Default Size ist 1, falls nicht angegeben
+        const ticks = riskPoints * 4;
+        const riskDollar = (ticks * 0.5) * size;
+        
+        // Für Logging auch die alte Berechnung anzeigen
         const calculatedRisk = trade.isWin && trade.rrAchieved ?
           Math.abs(trade.profitLoss || 0) / (trade.rrAchieved || 1) :
           Math.abs(trade.profitLoss || 0);
         
-        console.log(`Trade ${trade.id}: Festes Risiko = ${fixedRiskPerTrade}€ (berechnet wäre: ${calculatedRisk.toFixed(2)}€)`);
+        console.log(`Trade ${trade.id} (${trade.accountType}): Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskDollar.toFixed(2)}€ (berechnet wäre: ${calculatedRisk.toFixed(2)}€)`);
         
-        return fixedRiskPerTrade;
+        return riskDollar;
       });
       
       const avgRisk = riskValues.reduce((sum, val) => sum + val, 0) / totalTrades;
