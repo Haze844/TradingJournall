@@ -102,13 +102,23 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
   // Mutation zum Aktualisieren der Benutzereinstellungen
   const updateSettingsMutation = useMutation({
     mutationFn: async ({ accountBalance, accountType }: { accountBalance: number; accountType: string }) => {
+      // Da req.user in isAuthenticated nicht gesetzt ist, muss userId explizit übergeben werden
+      // userId kommt aus den Props der Komponente
+      console.log('Speichere Einstellungen:', { userId, accountBalance, accountType });
+      
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, accountBalance, accountType }),
+        body: JSON.stringify({ 
+          userId: userId, 
+          accountBalance: accountBalance, 
+          accountType: accountType 
+        }),
       });
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Fehler:', errorText);
         throw new Error('Fehler beim Speichern der Einstellungen');
       }
       
@@ -131,9 +141,15 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
   
   // Hilfsfunktion zum Erstellen der Filter-URL-Parameter
   const buildFilterParams = () => {
-    if (!activeFilters) return '';
-    
     let params = '';
+    
+    // Kontotyp-Filter hinzufügen, außer wenn "all" ausgewählt ist
+    if (accountType !== 'all') {
+      params += `&accountType=${accountType}`;
+    }
+    
+    // Weitere Filter aus activeFilters hinzufügen
+    if (!activeFilters) return params;
     
     // Datumsfilter
     if (activeFilters.startDate && activeFilters.endDate) {
@@ -172,7 +188,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
 
   // Fetch drawdown data
   const { data: drawdownData = [], isLoading: drawdownLoading } = useQuery({
-    queryKey: ['/api/risk/drawdown', userId, activeFilters],
+    queryKey: ['/api/risk/drawdown', userId, activeFilters, accountType],
     queryFn: async () => {
       try {
         const filterParams = buildFilterParams();
@@ -193,7 +209,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
 
   // Fetch risk per trade data
   const { data: riskPerTradeData = [], isLoading: riskPerTradeLoading } = useQuery({
-    queryKey: ['/api/risk/per-trade', userId, activeFilters],
+    queryKey: ['/api/risk/per-trade', userId, activeFilters, accountType],
     queryFn: async () => {
       try {
         const filterParams = buildFilterParams();
@@ -214,7 +230,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
 
   // Fetch position size correlation data
   const { data: positionSizeData = [], isLoading: positionSizeLoading } = useQuery({
-    queryKey: ['/api/risk/position-size', userId, activeFilters],
+    queryKey: ['/api/risk/position-size', userId, activeFilters, accountType],
     queryFn: async () => {
       try {
         const filterParams = buildFilterParams();
@@ -232,7 +248,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
 
   // Fetch risk recommendations
   const { data: riskRecommendations = [], isLoading: recommendationsLoading } = useQuery({
-    queryKey: ['/api/risk/recommendations', userId, activeFilters],
+    queryKey: ['/api/risk/recommendations', userId, activeFilters, accountType],
     queryFn: async () => {
       try {
         const filterParams = buildFilterParams();
@@ -250,7 +266,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
   
   // Fetch all trades für die Risikosummenberechnung
   const { data: allTrades = [], isLoading: tradesLoading } = useQuery({
-    queryKey: ['/api/trades', userId, activeFilters],
+    queryKey: ['/api/trades', userId, activeFilters, accountType],
     queryFn: async () => {
       try {
         const filterParams = buildFilterParams();
@@ -268,7 +284,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     },
   });
   
-  // Berechne Risikosumme nach Kontotyp
+  // Berechne Risikosumme nach Kontotyp und filtere nach ausgewähltem Kontotyp
   const riskSumByAccountType = React.useMemo(() => {
     const result = {
       PA: { count: 0, sum: 0 },
@@ -278,7 +294,17 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     
     if (!allTrades || allTrades.length === 0) return result;
     
-    allTrades.forEach(trade => {
+    // Filtere Trades nach ausgewähltem Kontotyp (wenn nicht "all")
+    const filteredTrades = accountType === 'all' 
+      ? allTrades 
+      : allTrades.filter(trade => (trade.accountType || 'PA') === accountType);
+    
+    // Log für Debugging
+    console.log(`Trades gefiltert nach Kontotyp ${accountType}:`, 
+      `Total: ${allTrades.length}, Gefiltert: ${filteredTrades.length}`);
+    
+    // Berechnung der Risikosummen
+    filteredTrades.forEach(trade => {
       if (trade.riskSum) {
         const type = trade.accountType || 'PA'; // Default to PA if not specified
         result[type] = result[type] || { count: 0, sum: 0 }; // Ensure the type exists
@@ -290,7 +316,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     });
     
     return result;
-  }, [allTrades]);
+  }, [allTrades, accountType]);
 
   // Calculate optimal position size
   const optimalPositionSize = positionSizeData.reduce((optimal, current) => {
