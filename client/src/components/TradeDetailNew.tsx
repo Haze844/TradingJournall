@@ -547,7 +547,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Risiko Summe ($)</div>
                       {editMode ? (
@@ -565,6 +565,14 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       ) : (
                         <div className="font-medium text-sm mt-0.5">${selectedTrade.riskSum !== undefined ? selectedTrade.riskSum : '-'}</div>
                       )}
+                    </div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
+                      <div className="font-medium text-sm mt-0.5">
+                        {editMode ? 
+                          (editData.riskSum !== undefined ? (editData.riskSum * 4) : '-') : 
+                          (selectedTrade.riskSum !== undefined ? (selectedTrade.riskSum * 4) : '-')}
+                      </div>
                     </div>
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Kontotyp</div>
