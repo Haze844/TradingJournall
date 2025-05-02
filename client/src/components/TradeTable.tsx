@@ -504,62 +504,66 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
   };
   
   return (
-    <Card className="bg-card/50 backdrop-blur border-primary/10 shadow-md">
-      <CardHeader className="pb-0">
-        <div className="flex flex-wrap md:flex-nowrap justify-between gap-2 items-start">
-          <div>
-            <CardTitle className="text-lg font-bold">Trades</CardTitle>
+    <div className="relative max-w-6xl mx-auto">
+      <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl">
+        <CardHeader className="pb-0 pt-4">
+          <div className="flex flex-wrap md:flex-nowrap justify-between gap-3 items-center">
+            <div>
+              <CardTitle className="text-lg font-bold bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent flex items-center">
+                <BarChart4 className="h-5 w-5 mr-2 text-primary" />
+                Trades
+              </CardTitle>
+            </div>
+            
+            <div className="flex gap-2 md:ml-auto flex-nowrap">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
+                onClick={resetFilters}
+              >
+                <X className="h-3 w-3 mr-1" />
+                Filter zurücksetzen
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
+                onClick={() => {
+                  // Ein neues Event erstellen und dispatchen
+                  const event = new CustomEvent('add-trade-clicked');
+                  window.dispatchEvent(event);
+                }}
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Hinzufügen
+              </Button>
+            </div>
           </div>
-          
-          <div className="flex gap-2 md:ml-auto flex-nowrap">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="text-xs h-8"
-              onClick={resetFilters}
-            >
-              <X className="h-3 w-3 mr-1" />
-              Filter zurücksetzen
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="text-xs h-8"
-              onClick={() => {
-                // Ein neues Event erstellen und dispatchen
-                const event = new CustomEvent('add-trade-clicked');
-                window.dispatchEvent(event);
-              }}
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Hinzufügen
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50 sticky top-0 z-10">
-            <tr>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Datum
-                      <CalendarDays className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-4" align="start">
+        </CardHeader>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="bg-gradient-to-r from-blue-900/20 to-black/30 border-y border-primary/20 sticky top-0 z-10">
+              <tr>
+                <th className="p-3 text-left whitespace-nowrap">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                        Datum
+                        <CalendarDays className="h-3 w-3 ml-1" />
+                      </div>
+                    </PopoverTrigger>
+                  <PopoverContent className="w-auto p-4 bg-black/95 border-primary/20 backdrop-blur-md" align="start">
                     <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Zeitraum filtern</h4>
+                      <h4 className="font-medium text-sm text-primary">Zeitraum filtern</h4>
                       <div className="grid gap-2">
                         <div className="grid gap-1">
                           <Label htmlFor="date-from" className="text-xs">Von</Label>
                           <Input
                             id="date-from"
                             type="date"
-                            className="h-8"
+                            className="h-8 bg-black/50 border-primary/10"
                             value={filters.startDate.toISOString().split('T')[0]}
                             onChange={(e) => {
                               const newDate = e.target.value ? new Date(e.target.value) : new Date();
@@ -573,7 +577,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                           <Input
                             id="date-to"
                             type="date"
-                            className="h-8"
+                            className="h-8 bg-black/50 border-primary/10"
                             value={filters.endDate.toISOString().split('T')[0]}
                             onChange={(e) => {
                               const newDate = e.target.value ? new Date(e.target.value) : new Date();
@@ -587,7 +591,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs"
+                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
                           onClick={() => {
                             const {startDate, endDate} = getLastMonthDates();
                             setFilters({...filters, startDate, endDate});
@@ -599,7 +603,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs"
+                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
                           onClick={() => {
                             const {weekStart, weekEnd} = getWeekDates();
                             setFilters({...filters, startDate: weekStart, endDate: weekEnd});
@@ -611,7 +615,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs"
+                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
                           onClick={() => {
                             const {startDate, endDate} = getTodayDates();
                             setFilters({...filters, startDate, endDate});
@@ -623,7 +627,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs"
+                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
                           onClick={() => {
                             setFilters({
                               ...filters, 
@@ -1700,5 +1704,6 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
         </div>
       </div>
     </Card>
+  </div>
   );
 }
