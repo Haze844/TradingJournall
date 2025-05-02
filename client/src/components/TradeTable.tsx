@@ -507,13 +507,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
     <div className="relative w-full">
       <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl">
         <CardHeader className="pb-0 pt-4">
-          <div className="flex flex-wrap md:flex-nowrap justify-center gap-3 items-center">
-            <div className="w-full text-center">
-              <CardTitle className="text-xl font-bold bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent flex items-center justify-center">
-                <BarChart4 className="h-6 w-6 mr-2 text-primary" />
-                Trades
-              </CardTitle>
-            </div>
+          <div className="flex flex-wrap md:flex-nowrap justify-end gap-3 items-center">
             
             <div className="flex gap-2 md:ml-auto flex-nowrap">
               <Button 
