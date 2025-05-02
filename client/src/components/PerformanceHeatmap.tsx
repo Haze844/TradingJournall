@@ -722,8 +722,8 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       heatmapData.filters.availableSetups
                         .filter(setup => setup && setup !== null && setup !== '')
                         .map((setup) => (
-                          <SelectItem key={setup} value={setup || "unbekannt"}>
-                            {setup || "Unbekannt"}
+                          <SelectItem key={setup} value={setup}>
+                            {setup}
                           </SelectItem>
                         ))}
                   </SelectContent>
@@ -746,8 +746,8 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       heatmapData.filters.availableSymbols
                         .filter(symbol => symbol && symbol !== null && symbol !== '')
                         .map((symbol) => (
-                          <SelectItem key={symbol} value={symbol || "unbekannt"}>
-                            {symbol || "Unbekannt"}
+                          <SelectItem key={symbol} value={symbol}>
+                            {symbol}
                           </SelectItem>
                         ))}
                   </SelectContent>
@@ -770,8 +770,8 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       heatmapData.filters.availableDirections
                         .filter(direction => direction && direction !== null && direction !== '')
                         .map((direction) => (
-                          <SelectItem key={direction} value={direction || "unbekannt"}>
-                            {direction || "Unbekannt"}
+                          <SelectItem key={direction} value={direction}>
+                            {direction}
                           </SelectItem>
                         ))}
                   </SelectContent>
