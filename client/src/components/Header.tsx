@@ -29,154 +29,44 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full main-header mb-6">
-      <div className="container mx-auto px-4 py-4">
-        {/* Hauptzeile mit Logo, Hauptmenü und Nutzerinfo */}
-        <div className="flex flex-col md:flex-row justify-between items-center">
+    <header className="w-full main-header mb-6 bg-gradient-to-r from-blue-900/20 to-purple-900/15 backdrop-blur-md shadow-md">
+      <div className="container mx-auto py-3">
+        <div className="flex justify-between items-center">
           
-          {/* Logo und Titel - Verlinkt zur Hauptseite */}
-          <Link href="/" className="flex items-center gap-3 mb-4 md:mb-0 hover:opacity-80 transition-opacity whitespace-nowrap">
-            <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-extrabold text-sm meme-logo shadow-lg">
-              NXT<br />LVL
+          {/* Moderneres Logo über die gesamte Breite - Verlinkt zur Hauptseite */}
+          <Link href="/" className="flex-1 flex items-center hover:opacity-90 transition-all">
+            <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 
+                           rounded-xl flex items-center justify-center text-white shadow-lg
+                           py-2 px-3 mr-4">
+              <div className="text-xl font-extrabold tracking-tighter leading-none">
+                NXT<span className="ml-1 text-blue-200">LVL</span>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold moon-text">NXT LVL Trading</h1>
-              <p className="text-xs text-muted-foreground">Trading-Performance optimieren</p>
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white to-blue-300 bg-clip-text text-transparent">
+                Trading Journal
+              </h1>
+              <p className="text-xs text-blue-300/80">Performance optimieren. Gewinne maximieren.</p>
             </div>
           </Link>
           
-          {/* Hauptnavigation */}
-          <nav className="flex flex-nowrap justify-center gap-3 mb-2 md:mb-0 whitespace-nowrap overflow-x-auto">
-            {/* Dashboard Button - zum Dashboard navigieren */}
-            <Button variant="ghost" size="sm" asChild>
-              <a href="#" onClick={(e) => {
-                e.preventDefault();
-                // Setze den aktiven Tab auf "dashboard"
-                const dashboardTab = document.querySelector('[value="dashboard"]') as HTMLElement;
-                if (dashboardTab) dashboardTab.click();
-              }}>
-                <BarChart2 className="w-4 h-4 mr-2" />
-                Dashboard
-              </a>
-            </Button>
-            
-            {/* Trading Dropdown - Kern der Anwendung */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center">
-                  <BarChart2 className="w-4 h-4 mr-2" />
-                  Trading
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-56 bg-black/90 backdrop-blur-md border-primary/20">
-                <DropdownMenuLabel className="text-primary">Trading Funktionen</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  {/* Chronologisch nach Workflow geordnet */}
-                  <DropdownMenuItem asChild>
-                    <a href="#" onClick={(e) => {
-                      e.preventDefault();
-                      const dashboardTab = document.querySelector('[value="dashboard"]') as HTMLElement;
-                      if (dashboardTab) dashboardTab.click();
-                    }}>
-                      <BarChart2 className="w-4 h-4 mr-2" />
-                      <span>Dashboard</span>
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <a href="#" onClick={(e) => {
-                      e.preventDefault();
-                      const tradesTab = document.querySelector('[value="trades"]') as HTMLElement;
-                      if (tradesTab) tradesTab.click();
-                    }}>
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      <span>Trades Liste</span>
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/#import">
-                      <FileUp className="w-4 h-4 mr-2" />
-                      <span>CSV Import</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/#risk-management">
-                      <AlertCircle className="w-4 h-4 mr-2" />
-                      <span>Risikomanagement</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/#market-phase">
-                      <Activity className="w-4 h-4 mr-2" />
-                      <span>Marktphasen</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {/* Analyse Dropdown - Erweiterte Features */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center">
-                  <Brain className="w-4 h-4 mr-2" />
-                  Analyse
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-56 bg-black/90 backdrop-blur-md border-primary/20">
-                <DropdownMenuLabel className="text-primary">Analyse Werkzeuge</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  {/* Nach Komplexität sortiert */}
-                  <DropdownMenuItem asChild>
-                    <Link href="/#ai-analysis">
-                      <Brain className="w-4 h-4 mr-2" />
-                      <span>KI-Analyse</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/coach">
-                      <Trophy className="w-4 h-4 mr-2" />
-                      <span>Trading Coach</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/calendar">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      <span>Makro-Kalender</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            {/* Community - Social Trading */}
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/social">
-                <Users className="w-4 h-4 mr-2" />
-                Community
-              </Link>
-            </Button>
-          </nav>
-          
-          {/* User-Menü rechts */}
-          <div className="flex items-center gap-2 whitespace-nowrap">
+          {/* Nur Konto und Einstellungen - vereinfachte Navigation */}
+          <div className="flex items-center gap-3 whitespace-nowrap">
             {user ? (
               <>
-                <span className="text-sm text-muted-foreground mr-1">
-                  {user.username}
-                </span>
+                <div className="bg-black/20 rounded-full px-4 py-1.5 border border-primary/20 flex items-center">
+                  <span className="text-sm font-medium text-white mr-1.5">
+                    {user.username}
+                  </span>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="flex items-center">
+                    <Button variant="ghost" size="sm" className="flex items-center bg-black/30 hover:bg-black/50 transition-colors">
                       <Settings className="w-4 h-4" />
-                      <ChevronDown className="w-3 h-3 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40 bg-black/90 backdrop-blur-md border-primary/20">
-                    <DropdownMenuLabel className="text-primary">Benutzer</DropdownMenuLabel>
+                  <DropdownMenuContent align="end" className="w-44 bg-black/90 backdrop-blur-md border-primary/20">
+                    <DropdownMenuLabel className="text-primary">Kontoeinstellungen</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                       <Settings className="w-4 h-4 mr-2" />
@@ -191,7 +81,7 @@ export default function Header() {
                 </DropdownMenu>
               </>
             ) : (
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="bg-primary/20 hover:bg-primary/30">
                 <Link href="/auth">Anmelden</Link>
               </Button>
             )}
