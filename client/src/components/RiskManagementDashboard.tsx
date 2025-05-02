@@ -292,7 +292,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     },
   });
   
-  // Berechne Risikosumme nach Kontotyp und filtere nach ausgewähltem Kontotyp
+  // Berechne Risikopunkte nach Kontotyp und filtere nach ausgewähltem Kontotyp
   const riskSumByAccountType = React.useMemo(() => {
     const result = {
       PA: { count: 0, sum: 0 },
@@ -311,15 +311,16 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     console.log(`Trades gefiltert nach Kontotyp ${accountType}:`, 
       `Total: ${allTrades.length}, Gefiltert: ${filteredTrades.length}`);
     
-    // Berechnung der Risikosummen
+    // Berechnung der Risikopunkte (riskSum * 4)
     filteredTrades.forEach(trade => {
       if (trade.riskSum) {
         const type = trade.accountType || 'PA'; // Default to PA if not specified
         result[type] = result[type] || { count: 0, sum: 0 }; // Ensure the type exists
         result[type].count += 1;
-        result[type].sum += Number(trade.riskSum);
+        // Risikopunkte = Risikosumme * 4
+        result[type].sum += Number(trade.riskSum) * 4;
         result.total.count += 1;
-        result.total.sum += Number(trade.riskSum);
+        result.total.sum += Number(trade.riskSum) * 4;
       }
     });
     
@@ -471,8 +472,8 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">PA Risikosumme</p>
-                          <h3 className="text-2xl font-bold">${riskSumByAccountType.PA.sum.toFixed(2)}</h3>
+                          <p className="text-sm text-muted-foreground mb-1">PA Risiko Punkte</p>
+                          <h3 className="text-2xl font-bold">{riskSumByAccountType.PA.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.PA.count} Trades</p>
                         </div>
                         <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
@@ -487,8 +488,8 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">EVA Risikosumme</p>
-                          <h3 className="text-2xl font-bold">${riskSumByAccountType.EVA.sum.toFixed(2)}</h3>
+                          <p className="text-sm text-muted-foreground mb-1">EVA Risiko Punkte</p>
+                          <h3 className="text-2xl font-bold">{riskSumByAccountType.EVA.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.EVA.count} Trades</p>
                         </div>
                         <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
@@ -503,8 +504,8 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Gesamt Risikosumme</p>
-                          <h3 className="text-2xl font-bold">${riskSumByAccountType.total.sum.toFixed(2)}</h3>
+                          <p className="text-sm text-muted-foreground mb-1">Gesamt Risiko Punkte</p>
+                          <h3 className="text-2xl font-bold">{riskSumByAccountType.total.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.total.count} Trades</p>
                         </div>
                         <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
