@@ -144,7 +144,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
         unmitZone: "",
         rangePoints: 0,
         marketPhase: "",
-        riskSum: 200,
+        riskSum: 200, // Eigentlicher Wert, der auf der Datenbank-Seite gespeichert wird
         size: 0
       });
       
@@ -661,14 +661,14 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
               <Input
                 id="riskSum"
                 type="number"
-                defaultValue={200}
+                defaultValue={800}
                 onBlur={(e) => {
                   const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
                   // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
                   setValue("riskSum", value / 4);
                 }}
                 className={errors.riskSum ? "border-red-500" : ""}
-                placeholder="800"
+                placeholder="0"
               />
               {errors.riskSum && (
                 <p className="text-xs text-red-500 mt-1">{errors.riskSum.message}</p>

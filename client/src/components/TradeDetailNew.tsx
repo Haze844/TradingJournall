@@ -362,7 +362,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           }}
                           className="h-7 text-xs mt-0.5"
                           min="0"
-                          placeholder="Risikopunkte eingeben"
+                          placeholder="0"
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">
