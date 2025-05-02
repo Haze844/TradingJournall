@@ -171,6 +171,14 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     },
     labelStyle: { color: '#F3F4F6' },
   };
+  
+  // Label-Eigenschaften für die direkte Anzeige von Werten ohne Hover
+  const labelProps = {
+    position: "top",
+    fontSize: 11,
+    fill: "#F3F4F6",
+    formatter: (value: number) => `${value}%`
+  };
 
   const getImpactColor = (impact: number) => {
     if (impact > 0.7) return { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20' };
@@ -243,6 +251,12 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           stroke="#EF4444"
                           name="Drawdown"
                           strokeWidth={2}
+                          label={{
+                            ...labelProps,
+                            position: "top",
+                            fill: "#EF4444",
+                            formatter: (value: number) => `${value}%`
+                          }}
                         />
                         <Line
                           type="monotone"
@@ -251,6 +265,12 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           name="Max Drawdown"
                           strokeWidth={2}
                           strokeDasharray="5 5"
+                          label={{
+                            ...labelProps,
+                            position: "insideBottom",
+                            fill: "#F59E0B",
+                            formatter: (value: number) => `${value}%`
+                          }}
                         />
                       </LineChart>
                     ) : (
@@ -274,11 +294,21 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="drawdown"
                           fill="#EF4444"
                           name="Drawdown"
+                          label={{
+                            ...labelProps,
+                            position: "top",
+                            fill: "#EF4444"
+                          }}
                         />
                         <Bar
                           dataKey="maxDrawdown"
                           fill="#F59E0B"
                           name="Max Drawdown"
+                          label={{
+                            ...labelProps,
+                            position: "insideBottom",
+                            fill: "#F59E0B"
+                          }}
                         />
                       </BarChart>
                     )}
@@ -356,6 +386,12 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           stroke="#10B981"
                           name="Risiko (%)"
                           strokeWidth={2}
+                          label={{
+                            ...labelProps,
+                            position: "top",
+                            fill: "#10B981",
+                            formatter: (value: number) => `${value}%`
+                          }}
                         />
                         <Line
                           yAxisId="right"
@@ -364,6 +400,12 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           stroke="#8B5CF6"
                           name="Risiko ($)"
                           strokeWidth={2}
+                          label={{
+                            position: "insideBottom",
+                            fontSize: 11,
+                            fill: "#8B5CF6",
+                            formatter: (value: number) => `€${value}`
+                          }}
                         />
                       </LineChart>
                     ) : (
@@ -396,12 +438,24 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="riskPercent"
                           fill="#10B981"
                           name="Risiko (%)"
+                          label={{
+                            ...labelProps,
+                            position: "top",
+                            fill: "#10B981",
+                            formatter: (value: number) => `${value}%`
+                          }}
                         />
                         <Bar
                           yAxisId="right"
                           dataKey="riskDollar"
                           fill="#8B5CF6"
                           name="Risiko ($)"
+                          label={{
+                            position: "inside",
+                            fontSize: 11,
+                            fill: "#F3F4F6",
+                            formatter: (value: number) => `€${value}`
+                          }}
                         />
                       </BarChart>
                     )}
@@ -484,6 +538,12 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                         dataKey="winRate" 
                         name="Erfolgsquote"
                         fill="#4F46E5"
+                        label={{
+                          position: "top",
+                          fontSize: 11,
+                          fill: "#F3F4F6",
+                          formatter: (value: number) => `${value}%`
+                        }}
                       >
                         {positionSizeData.map((entry, index) => (
                           <Cell 
