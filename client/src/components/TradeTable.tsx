@@ -1575,6 +1575,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                  <td className="p-3"><Skeleton className="h-5 w-14" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-8" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-16" /></td>
@@ -1652,7 +1653,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
             ) : (
               // Empty state
               <tr>
-                <td colSpan={19} className="p-6 text-center text-muted-foreground">
+                <td colSpan={20} className="p-6 text-center text-muted-foreground">
                   Keine Trades gefunden
                 </td>
               </tr>
