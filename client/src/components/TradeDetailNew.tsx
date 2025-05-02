@@ -499,7 +499,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 mb-1">
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Liquidation</div>
                       {editMode ? (
@@ -542,6 +542,44 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         </Select>
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.timeframeEntry || '-'}</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Risiko Summe ($)</div>
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={editData.riskSum === undefined ? "200" : editData.riskSum}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? 200 : parseFloat(e.target.value);
+                            updateField('riskSum', value);
+                          }}
+                          className="h-7 text-xs mt-0.5"
+                          min="0"
+                        />
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">${selectedTrade.riskSum !== undefined ? selectedTrade.riskSum : 200}</div>
+                      )}
+                    </div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Kontotyp</div>
+                      {editMode ? (
+                        <Select 
+                          value={editData.accountType || 'PA'} 
+                          onValueChange={val => updateField('accountType', val)}
+                        >
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                            <SelectValue placeholder="Kontotyp" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PA">PA</SelectItem>
+                            <SelectItem value="EVA">EVA</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType || 'PA'}</div>
                       )}
                     </div>
                   </div>
@@ -711,23 +749,6 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.slPoints !== undefined ? selectedTrade.slPoints : '-'}</div>
-                      )}
-                    </div>
-                    <div className="bg-background/50 rounded-sm p-1.5 mt-2">
-                      <div className="text-xs text-muted-foreground font-medium">Risiko Summe ($)</div>
-                      {editMode ? (
-                        <Input
-                          type="number"
-                          value={editData.riskSum === undefined ? "200" : editData.riskSum}
-                          onChange={(e) => {
-                            const value = e.target.value === "" ? 200 : parseFloat(e.target.value);
-                            updateField('riskSum', value);
-                          }}
-                          className="h-7 text-xs mt-0.5"
-                          min="0"
-                        />
-                      ) : (
-                        <div className="font-medium text-sm mt-0.5">${selectedTrade.riskSum !== undefined ? selectedTrade.riskSum : 200}</div>
                       )}
                     </div>
                   </div>
