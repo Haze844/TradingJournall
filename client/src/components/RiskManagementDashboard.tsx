@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, CartesianGrid, XAxis, YAxis, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { ChartTypeSelector, type ChartType } from '@/components/ui/chart-type-selector';
 import { format } from 'date-fns';
-import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart, RefreshCcw, Wallet } from 'lucide-react';
+import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart, RefreshCcw, Wallet, PiggyBank } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -422,7 +422,66 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                 <h3 className="text-lg font-medium">Drawdown-Analyse</h3>
                 <ChartTypeSelector value={chartType} onChange={setChartType} />
               </div>
-
+              
+              {/* Risikosummen nach Kontotyp */}
+              {tradesLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  {/* PA Konto */}
+                  <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">PA Risikosumme</p>
+                          <h3 className="text-2xl font-bold">${riskSumByAccountType.PA.sum.toFixed(2)}</h3>
+                          <p className="text-xs text-muted-foreground">{riskSumByAccountType.PA.count} Trades</p>
+                        </div>
+                        <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                          <Wallet className="h-5 w-5 text-blue-500" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* EVA Konto */}
+                  <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">EVA Risikosumme</p>
+                          <h3 className="text-2xl font-bold">${riskSumByAccountType.EVA.sum.toFixed(2)}</h3>
+                          <p className="text-xs text-muted-foreground">{riskSumByAccountType.EVA.count} Trades</p>
+                        </div>
+                        <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                          <Wallet className="h-5 w-5 text-purple-500" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Gesamt */}
+                  <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Gesamt Risikosumme</p>
+                          <h3 className="text-2xl font-bold">${riskSumByAccountType.total.sum.toFixed(2)}</h3>
+                          <p className="text-xs text-muted-foreground">{riskSumByAccountType.total.count} Trades</p>
+                        </div>
+                        <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                          <PiggyBank className="h-5 w-5 text-green-500" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+              
               {drawdownLoading ? (
                 <Skeleton className="h-64 w-full" />
               ) : (
