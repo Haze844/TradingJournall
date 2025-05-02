@@ -14,17 +14,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { accountTypeValues } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 
-// Gemeinsame Stilkonfiguration für elegantere Diagramme
+// Gemeinsame Stilkonfiguration für professionellere Diagramme
 const chartConfig = {
-  strokeWidth: 1.5,       // Dünnere Linien
-  barSize: 12,            // Schmalere Balken
-  dotSize: 4,             // Kleinere Punkte
-  activeDotSize: 6,       // Kleinere aktive Punkte
-  fontSize: 10,           // Kleinere Schriftgröße für Labels
-  labelOffset: 5,         // Abstand der Labels
-  cornerRadius: 2,        // Leicht abgerundete Ecken für Balken
-  animationDuration: 800, // Längere Animation für flüssigeren Eindruck
-  gridOpacity: 0.04       // Subtileres Raster
+  strokeWidth: 2,          // Deutlichere Linien
+  barSize: 20,             // Ausgewogenere Balkenbreite
+  dotSize: 0,              // Keine Punkte auf Linien für glatteres Aussehen
+  activeDotSize: 7,        // Größere aktive Punkte beim Hover
+  fontSize: 11,            // Bessere Lesbarkeit für Labels
+  labelOffset: 5,          // Abstand der Labels
+  cornerRadius: 4,         // Stärker abgerundete Ecken für Balken
+  animationDuration: 1000, // Längere Animation für flüssigeren Eindruck
+  gridOpacity: 0.07,       // Subtileres aber sichtbareres Raster
+  areaOpacity: 0.15,       // Transparenz für Area-Charts
+  curveBasis: true,        // Glattere Kurven statt eckiger Linien
+  // Premium-Farben für Business-Anmutung
+  colors: {
+    primary: '#3b82f6',    // Blau
+    secondary: '#10b981',  // Grün
+    accent: '#8b5cf6',     // Lila
+    danger: '#ef4444',     // Rot
+    warning: '#f59e0b',    // Orange
+    success: '#10b981',    // Grün
+    info: '#0ea5e9'        // Hellblau
+  }
 };
 
 interface DrawdownData {
@@ -375,68 +387,116 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     {chartType === 'line' ? (
                       <LineChart
                         data={drawdownData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+                        className="mt-2"
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <defs>
+                          <linearGradient id="drawdownFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={chartConfig.colors.danger} stopOpacity={0.2} />
+                            <stop offset="95%" stopColor={chartConfig.colors.danger} stopOpacity={0.01} />
+                          </linearGradient>
+                          <linearGradient id="maxDrawdownFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={chartConfig.colors.primary} stopOpacity={0.2} />
+                            <stop offset="95%" stopColor={chartConfig.colors.primary} stopOpacity={0.01} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid 
+                          strokeDasharray="3 6" 
+                          vertical={false} 
+                          stroke="rgba(255, 255, 255, 0.07)" 
+                        />
                         <XAxis
                           dataKey="date"
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dy={10}
                         />
                         <YAxis
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
                           tickFormatter={(value) => `${value}%`}
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dx={-10}
                         />
-                        <RechartsTooltip content={CustomTooltip} />
+                        <RechartsTooltip 
+                          content={CustomTooltip} 
+                          cursor={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
+                        />
                         <Line
-                          type="monotone"
+                          type={chartConfig.curveBasis ? "basis" : "monotone"}
                           dataKey="drawdown"
-                          stroke="#EF4444"
-                          name="Drawdown"
+                          stroke={chartConfig.colors.danger}
                           strokeWidth={chartConfig.strokeWidth}
-                          dot={{ r: chartConfig.dotSize }}
-                          activeDot={{ r: chartConfig.activeDotSize }}
+                          name="Drawdown"
+                          dot={false}
+                          activeDot={{ r: chartConfig.activeDotSize, stroke: chartConfig.colors.danger, strokeWidth: 1 }}
                           animationDuration={chartConfig.animationDuration}
-                          label={{
-                            position: "top",
-                            fontSize: chartConfig.fontSize,
-                            fill: "#EF4444",
-                            formatter: (value: number) => `${value}%`
-                          }}
+                          fill="url(#drawdownFill)"
                         />
                         <Line
-                          type="monotone"
+                          type={chartConfig.curveBasis ? "basis" : "monotone"}
                           dataKey="maxDrawdown"
-                          stroke="#3B82F6"
+                          stroke={chartConfig.colors.primary}
                           name="Max Drawdown"
                           strokeWidth={chartConfig.strokeWidth}
-                          dot={{ r: chartConfig.dotSize }}
-                          activeDot={{ r: chartConfig.activeDotSize }}
+                          dot={false}
+                          activeDot={{ r: chartConfig.activeDotSize, stroke: chartConfig.colors.primary, strokeWidth: 1 }}
                           animationDuration={chartConfig.animationDuration}
+                          fill="url(#maxDrawdownFill)"
                         />
                       </LineChart>
                     ) : (
                       <BarChart
                         data={drawdownData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+                        className="mt-2"
+                        barGap={3}
+                        barCategoryGap={20}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <defs>
+                          <linearGradient id="drawdownBarFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={chartConfig.colors.danger} stopOpacity={0.9} />
+                            <stop offset="100%" stopColor={chartConfig.colors.danger} stopOpacity={0.6} />
+                          </linearGradient>
+                          <linearGradient id="maxDrawdownBarFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={chartConfig.colors.primary} stopOpacity={0.9} />
+                            <stop offset="100%" stopColor={chartConfig.colors.primary} stopOpacity={0.6} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid
+                          strokeDasharray="3 6"
+                          vertical={false}
+                          stroke="rgba(255, 255, 255, 0.07)"
+                        />
                         <XAxis
                           dataKey="date"
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dy={10}
                         />
                         <YAxis
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
                           tickFormatter={(value) => `${value}%`}
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dx={-10}
                         />
-                        <RechartsTooltip content={CustomTooltip} />
+                        <RechartsTooltip
+                          content={CustomTooltip}
+                          cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                        />
                         <Bar
                           dataKey="drawdown"
                           name="Drawdown"
-                          fill="#EF4444"
+                          fill="url(#drawdownBarFill)"
+                          stroke={chartConfig.colors.danger}
+                          strokeWidth={1}
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
                           barSize={chartConfig.barSize}
                           animationDuration={chartConfig.animationDuration}
@@ -444,7 +504,9 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                         <Bar
                           dataKey="maxDrawdown"
                           name="Max Drawdown"
-                          fill="#3B82F6"
+                          fill="url(#maxDrawdownBarFill)"
+                          stroke={chartConfig.colors.primary}
+                          strokeWidth={1}
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
                           barSize={chartConfig.barSize}
                           animationDuration={chartConfig.animationDuration}
@@ -545,81 +607,141 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     {chartType === 'line' ? (
                       <LineChart
                         data={riskPerTradeData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+                        className="mt-2"
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <defs>
+                          <linearGradient id="riskPercentFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={chartConfig.colors.primary} stopOpacity={0.2} />
+                            <stop offset="95%" stopColor={chartConfig.colors.primary} stopOpacity={0.01} />
+                          </linearGradient>
+                          <linearGradient id="riskDollarFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={chartConfig.colors.success} stopOpacity={0.2} />
+                            <stop offset="95%" stopColor={chartConfig.colors.success} stopOpacity={0.01} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid 
+                          strokeDasharray="3 6" 
+                          vertical={false} 
+                          stroke="rgba(255, 255, 255, 0.07)" 
+                        />
                         <XAxis
                           dataKey="date"
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dy={10}
                         />
                         <YAxis
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
                           tickFormatter={(value) => `${value}%`}
                           yAxisId="left"
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dx={-10}
                         />
                         <YAxis
                           orientation="right"
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
                           tickFormatter={(value) => `$${value}`}
                           yAxisId="right"
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dx={10}
                         />
-                        <RechartsTooltip content={CustomTooltip} />
+                        <RechartsTooltip 
+                          content={CustomTooltip} 
+                          cursor={{ stroke: 'rgba(255, 255, 255, 0.2)' }}
+                        />
                         <Line
-                          type="monotone"
+                          type={chartConfig.curveBasis ? "basis" : "monotone"}
                           dataKey="riskPercent"
                           yAxisId="left"
-                          stroke="#3B82F6"
+                          stroke={chartConfig.colors.primary}
                           name="Risiko %"
                           strokeWidth={chartConfig.strokeWidth}
-                          dot={{ r: chartConfig.dotSize }}
-                          activeDot={{ r: chartConfig.activeDotSize }}
+                          dot={false}
+                          activeDot={{ r: chartConfig.activeDotSize, stroke: chartConfig.colors.primary, strokeWidth: 1 }}
                           animationDuration={chartConfig.animationDuration}
+                          fill="url(#riskPercentFill)"
                         />
                         <Line
-                          type="monotone"
+                          type={chartConfig.curveBasis ? "basis" : "monotone"}
                           dataKey="riskDollar"
                           yAxisId="right"
-                          stroke="#10B981"
+                          stroke={chartConfig.colors.success}
                           name="Risiko $"
                           strokeWidth={chartConfig.strokeWidth}
-                          dot={{ r: chartConfig.dotSize }}
-                          activeDot={{ r: chartConfig.activeDotSize }}
+                          dot={false}
+                          activeDot={{ r: chartConfig.activeDotSize, stroke: chartConfig.colors.success, strokeWidth: 1 }}
                           animationDuration={chartConfig.animationDuration}
+                          fill="url(#riskDollarFill)"
                         />
                       </LineChart>
                     ) : (
                       <BarChart
                         data={riskPerTradeData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+                        className="mt-2"
+                        barGap={3}
+                        barCategoryGap={20}
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                        <defs>
+                          <linearGradient id="riskPercentBarFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={chartConfig.colors.primary} stopOpacity={0.9} />
+                            <stop offset="100%" stopColor={chartConfig.colors.primary} stopOpacity={0.6} />
+                          </linearGradient>
+                          <linearGradient id="riskDollarBarFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={chartConfig.colors.success} stopOpacity={0.9} />
+                            <stop offset="100%" stopColor={chartConfig.colors.success} stopOpacity={0.6} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid
+                          strokeDasharray="3 6"
+                          vertical={false}
+                          stroke="rgba(255, 255, 255, 0.07)"
+                        />
                         <XAxis
                           dataKey="date"
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dy={10}
                         />
                         <YAxis
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
                           tickFormatter={(value) => `${value}%`}
                           yAxisId="left"
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dx={-10}
                         />
                         <YAxis
                           orientation="right"
                           stroke="#9CA3AF"
-                          tick={{ fill: '#9CA3AF' }}
+                          tick={{ fill: '#9CA3AF', fontSize: 10 }}
                           tickFormatter={(value) => `$${value}`}
                           yAxisId="right"
+                          axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                          dx={10}
                         />
-                        <RechartsTooltip content={CustomTooltip} />
+                        <RechartsTooltip
+                          content={CustomTooltip}
+                          cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                        />
                         <Bar
                           dataKey="riskPercent"
                           name="Risiko %"
                           yAxisId="left"
-                          fill="#3B82F6"
+                          fill="url(#riskPercentBarFill)"
+                          stroke={chartConfig.colors.primary}
+                          strokeWidth={1}
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
                           barSize={chartConfig.barSize}
                           animationDuration={chartConfig.animationDuration}
@@ -628,7 +750,9 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           dataKey="riskDollar"
                           name="Risiko $"
                           yAxisId="right"
-                          fill="#10B981"
+                          fill="url(#riskDollarBarFill)"
+                          stroke={chartConfig.colors.success}
+                          strokeWidth={1}
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
                           barSize={chartConfig.barSize}
                           animationDuration={chartConfig.animationDuration}
@@ -729,47 +853,86 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={positionSizeData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+                      className="mt-2"
+                      barGap={3}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
+                      <defs>
+                        <linearGradient id="positionSizeBarFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={chartConfig.colors.primary} stopOpacity={0.9} />
+                          <stop offset="100%" stopColor={chartConfig.colors.primary} stopOpacity={0.6} />
+                        </linearGradient>
+                        <linearGradient id="optimalPositionBarFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={chartConfig.colors.success} stopOpacity={0.9} />
+                          <stop offset="100%" stopColor={chartConfig.colors.success} stopOpacity={0.6} />
+                        </linearGradient>
+                        <filter id="glow" height="300%" width="300%" x="-100%" y="-100%">
+                          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                          <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      <CartesianGrid
+                        strokeDasharray="3 6"
+                        vertical={false}
+                        stroke="rgba(255, 255, 255, 0.07)"
+                      />
                       <XAxis
                         dataKey="positionSize"
                         stroke="#9CA3AF"
-                        tick={{ fill: '#9CA3AF' }}
+                        tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                        tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                        dy={10}
                         label={{ 
                           value: 'Positionsgröße ($)', 
                           position: 'insideBottom', 
                           fill: '#9CA3AF', 
-                          offset: 0 
+                          offset: 0,
+                          style: { fontSize: 11 }
                         }}
                       />
                       <YAxis
                         stroke="#9CA3AF"
-                        tick={{ fill: '#9CA3AF' }}
+                        tick={{ fill: '#9CA3AF', fontSize: 10 }}
                         tickFormatter={(value) => `${value}%`}
+                        axisLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                        tickLine={{ stroke: 'rgba(255, 255, 255, 0.1)' }}
+                        dx={-10}
                         label={{ 
                           value: 'Win-Rate (%)', 
                           angle: -90, 
                           position: 'insideLeft', 
                           fill: '#9CA3AF',
-                          offset: 10 
+                          offset: 10,
+                          style: { fontSize: 11 }
                         }}
                       />
-                      <RechartsTooltip content={CustomTooltip} />
+                      <RechartsTooltip 
+                        content={CustomTooltip} 
+                        cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                      />
                       <Bar 
                         dataKey="winRate" 
                         name="Win-Rate"
-                        fill="#3B82F6"
-                        radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
                         barSize={chartConfig.barSize}
                         animationDuration={chartConfig.animationDuration}
+                        radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
                       >
-                        {positionSizeData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.positionSize === optimalPositionSize.positionSize ? '#10B981' : '#3B82F6'} 
-                          />
-                        ))}
+                        {positionSizeData.map((entry, index) => {
+                          const isOptimal = entry.positionSize === optimalPositionSize.positionSize;
+                          return (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={isOptimal ? 'url(#optimalPositionBarFill)' : 'url(#positionSizeBarFill)'}
+                              stroke={isOptimal ? chartConfig.colors.success : chartConfig.colors.primary}
+                              strokeWidth={1}
+                              style={{ filter: isOptimal ? 'url(#glow)' : 'none' }}
+                            />
+                          );
+                        })}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
