@@ -622,11 +622,12 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Setups</SelectItem>
-                    {heatmapData.filters.availableSetups
-                      .filter(setup => setup !== null && setup !== '')
-                      .map((setup) => (
-                        <SelectItem key={setup} value={setup}>{setup || 'Unbekannt'}</SelectItem>
-                      ))}
+                    {heatmapData.filters.availableSetups && 
+                      heatmapData.filters.availableSetups
+                        .filter(setup => setup !== null && setup !== '')
+                        .map((setup) => (
+                          <SelectItem key={setup} value={setup}>{setup}</SelectItem>
+                        ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -643,11 +644,12 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Symbole</SelectItem>
-                    {heatmapData.filters.availableSymbols
-                      .filter(symbol => symbol !== null && symbol !== '')
-                      .map((symbol) => (
-                        <SelectItem key={symbol} value={symbol}>{symbol || 'Unbekannt'}</SelectItem>
-                      ))}
+                    {heatmapData.filters.availableSymbols && 
+                      heatmapData.filters.availableSymbols
+                        .filter(symbol => symbol !== null && symbol !== '')
+                        .map((symbol) => (
+                          <SelectItem key={symbol} value={symbol}>{symbol}</SelectItem>
+                        ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -664,11 +666,12 @@ export default function PerformanceHeatmap() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Richtungen</SelectItem>
-                    {heatmapData.filters.availableDirections
-                      .filter(direction => direction !== null && direction !== '')
-                      .map((direction) => (
-                        <SelectItem key={direction} value={direction}>{direction || 'Unbekannt'}</SelectItem>
-                      ))}
+                    {heatmapData.filters.availableDirections && 
+                      heatmapData.filters.availableDirections
+                        .filter(direction => direction !== null && direction !== '')
+                        .map((direction) => (
+                          <SelectItem key={direction} value={direction}>{direction}</SelectItem>
+                        ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -806,12 +809,14 @@ export default function PerformanceHeatmap() {
                 </Scatter>
                 
                 {/* Vergleichsdaten anzeigen, falls vorhanden */}
-                {compareMode && heatmapData.comparison && transformedComparisonData.current.length > 0 && (
+                {compareMode && heatmapData.comparison && transformedComparisonData.current && transformedComparisonData.current.length > 0 && (
                   <Scatter 
                     name="Vergleichsdaten"
                     data={transformedComparisonData.current.map(point => ({
                       ...point,
-                      x: point.x + 0.4, // Leicht versetzt zum Vergleich
+                      // Sicherstellen, dass x und y definiert sind
+                      x: typeof point.x === 'number' ? point.x + 0.4 : 0, // Leicht versetzt zum Vergleich
+                      y: typeof point.y === 'number' ? point.y : 0
                     }))}
                     shape={(props: any) => (
                       <Rectangle

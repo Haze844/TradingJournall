@@ -1263,9 +1263,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: primaryData,
         recommendations,
         filters: {
-          availableSetups: [...new Set(allTrades.map(t => t.setup).filter(Boolean))],
-          availableSymbols: [...new Set(allTrades.map(t => t.symbol).filter(Boolean))],
-          availableDirections: [...new Set(allTrades.map(t => t.entryType).filter(Boolean))],
+          availableSetups: [...new Set(allTrades.map(t => t.setup).filter(setup => setup && setup !== ''))],
+          availableSymbols: [...new Set(allTrades.map(t => t.symbol).filter(symbol => symbol && symbol !== ''))],
+          availableDirections: [...new Set(allTrades.map(t => t.entryType).filter(type => type && type !== ''))],
         }
       };
       
