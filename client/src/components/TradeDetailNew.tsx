@@ -353,12 +353,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       {editMode ? (
                         <Input
                           type="number"
-                          value={editData.riskSum === undefined ? "" : editData.riskSum * 4}
+                          value={editData.riskSum === undefined ? "" : editData.riskSum}
                           onChange={(e) => {
                             const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
-                            // Teile durch 4, um den eigentlichen Risiko-Wert zu speichern
-                            const value = inputValue !== undefined ? inputValue / 4 : undefined;
-                            updateField('riskSum', value);
+                            // Direkt den eingegebenen Wert als Risiko-Punkte speichern
+                            updateField('riskSum', inputValue);
                           }}
                           className="h-7 text-xs mt-0.5"
                           min="0"
@@ -366,7 +365,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">
-                          {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum * 4 : '-'}
+                          {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum : '-'}
                         </div>
                       )}
                     </div>
