@@ -3,7 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tooltip, ResponsiveContainer, LineChart, Line, BarChart, Bar, CartesianGrid, XAxis, YAxis, Cell } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, BarChart, Bar, CartesianGrid, XAxis, YAxis, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { ChartTypeSelector, type ChartType } from '@/components/ui/chart-type-selector';
 import { format } from 'date-fns';
 import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart, RefreshCcw, Wallet } from 'lucide-react';
@@ -241,15 +241,27 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     return current.winRate > optimal.winRate ? current : optimal;
   }, { positionSize: 0, winRate: 0, count: 0 });
 
-  // Tooltips and common props for charts
-  const tooltipProps = {
-    contentStyle: {
-      backgroundColor: '#262626',
-      border: 'none',
-      borderRadius: '4px',
-      color: '#F3F4F6',
-    },
-    labelStyle: { color: '#F3F4F6' },
+  // Benutzerdefinierter, moderner Tooltip ohne weiße Flächen beim Hover
+  const CustomTooltip = ({ active, payload, label, ...props }: any) => {
+    if (!active || !payload || !payload.length) return null;
+    
+    return (
+      <div className="rounded-md bg-background/95 backdrop-blur-sm border border-border shadow-lg p-2 text-xs">
+        <p className="text-muted-foreground mb-1">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center gap-1.5 my-0.5">
+            <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
+            <span className="text-xs font-medium">
+              {entry.name}: {typeof entry.value === 'number' 
+                ? entry.dataKey.includes('Dollar')
+                  ? `$${entry.value}`
+                  : `${entry.value}%`
+                : entry.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   };
   
   // Label-Eigenschaften für die direkte Anzeige von Werten ohne Hover
