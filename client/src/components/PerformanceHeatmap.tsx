@@ -65,80 +65,19 @@ interface CustomTooltipProps {
 
 // Benutzerdefinierter Tooltip für die Heatmap
 // Funktion zur Generierung von Beispieldaten für die Heatmap
+// Die Beispieldaten-Funktion wird nicht mehr benötigt, da wir die Daten direkt zurückgeben
+// Für die Typisierung behalten wir die Funktion, aber sie wird nicht mehr verwendet
 function generateSampleHeatmapData(): HeatmapData {
-  // Definiere die Tage der Woche und Zeitrahmen
-  const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
-  const timeframe = ["04-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-22"];
-  
-  // Generiere Daten für jeden Tag und Zeitrahmen
-  const data: HeatmapDataPoint[] = [];
-  
-  days.forEach(day => {
-    timeframe.forEach(time => {
-      // Erstelle zufällige Daten
-      const tradeCount = Math.floor(Math.random() * 10);  // 0-9 Trades
-      
-      if (tradeCount > 0) {
-        // Realistischere Werte für Tage/Zeiten mit Aktivität
-        const winRate = Math.floor(Math.random() * 100);  // 0-100%
-        const avgRR = (Math.random() * 4).toFixed(2);     // 0-4 R
-        const totalPnL = ((Math.random() * 2000) - 800).toFixed(2);  // -800 bis +1200$
-        
-        data.push({
-          day,
-          timeframe: time,
-          value: winRate,
-          tradeCount,
-          winRate,
-          avgRR,
-          totalPnL
-        });
-      } else {
-        // Leere Slots für Zeiten ohne Trades
-        data.push({
-          day,
-          timeframe: time,
-          value: 0,
-          tradeCount: 0,
-          winRate: 0,
-          avgRR: "0.00",
-          totalPnL: "0.00"
-        });
-      }
-    });
-  });
-  
-  // Generiere Beispieldaten für Empfehlungen
-  const recommendations: HeatmapRecommendations = {
-    bestTimes: [
-      { day: "Dienstag", time: "10-12", winRate: 78, avgRR: "2.5" },
-      { day: "Mittwoch", time: "14-16", winRate: 72, avgRR: "2.3" },
-      { day: "Donnerstag", time: "16-18", winRate: 65, avgRR: "1.9" }
-    ],
-    worstTimes: [
-      { day: "Montag", time: "08-10", winRate: 32, avgRR: "0.7" },
-      { day: "Freitag", time: "18-22", winRate: 28, avgRR: "0.6" }
-    ],
-    trends: [
-      { type: "pattern", message: "Die beste Performance ist zwischen 10-12 Uhr an Dienstagen zu beobachten." },
-      { type: "improvement", message: "Deine Nachmittags-Performance hat sich in den letzten 30 Tagen um 12% verbessert." },
-      { type: "suggestion", message: "Vermeide den Handel in den ersten 30 Minuten nach Marktöffnung für bessere Ergebnisse." }
-    ]
-  };
-  
-  // Füge Beispiel-Filter hinzu - KEINE leeren Werte erlauben
-  const filters: HeatmapFilters = {
-    availableSetups: ["SFP", "Trendline_Break", "Double_Top", "Fibonacci_Retracement", "ABCD_Pattern"],
-    availableSymbols: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "EURJPY", "DAX"],
-    availableDirections: ["Long", "Short"]
-  };
-  
+  // Dummy-Return, wird nicht verwendet
   return {
-    days,
-    timeframe,
-    data,
-    recommendations,
-    filters
+    days: [],
+    timeframe: [],
+    data: [],
+    filters: {
+      availableSetups: [],
+      availableSymbols: [],
+      availableDirections: []
+    }
   };
 }
 
@@ -375,27 +314,37 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
       // Wenn keine Daten vorhanden sind, generiere Beispieldaten für die Visualisierung
       if (!data.data || data.data.length === 0) {
         console.log("Keine Daten vom Server - generiere Beispieldaten für die Heatmap-Visualisierung");
-        const sampleData = generateSampleHeatmapData();
-        // Stelle sicher, dass die Filter-Daten immer definiert sind und keine leeren Werte enthalten
-        if (!data.filters) {
-          data.filters = {
+        
+        // Direkt ein vollständig neues Beispiel-Datenobjekt zurückgeben, anstatt zu versuchen, serverdaten zu patchen
+        return {
+          days: ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"],
+          timeframe: ["04-08", "08-10", "10-12", "12-14", "14-16", "16-18", "18-22"],
+          data: [
+            { day: "Montag", timeframe: "08-10", value: 45, tradeCount: 5, winRate: 45, avgRR: "1.2", totalPnL: "-120.00" },
+            { day: "Dienstag", timeframe: "10-12", value: 75, tradeCount: 8, winRate: 75, avgRR: "2.5", totalPnL: "450.00" },
+            { day: "Mittwoch", timeframe: "14-16", value: 60, tradeCount: 6, winRate: 60, avgRR: "1.8", totalPnL: "280.00" },
+            { day: "Donnerstag", timeframe: "16-18", value: 50, tradeCount: 4, winRate: 50, avgRR: "1.5", totalPnL: "120.00" },
+            { day: "Freitag", timeframe: "12-14", value: 30, tradeCount: 3, winRate: 30, avgRR: "0.8", totalPnL: "-180.00" }
+          ],
+          recommendations: {
+            bestTimes: [
+              { day: "Dienstag", time: "10-12", winRate: 75, avgRR: "2.5" },
+              { day: "Mittwoch", time: "14-16", winRate: 60, avgRR: "1.8" }
+            ],
+            worstTimes: [
+              { day: "Freitag", time: "12-14", winRate: 30, avgRR: "0.8" }
+            ],
+            trends: [
+              { type: "pattern", message: "Die beste Performance ist zwischen 10-12 Uhr an Dienstagen zu beobachten." },
+              { type: "improvement", message: "Deine Nachmittags-Performance hat sich in den letzten 30 Tagen verbessert." }
+            ]
+          },
+          filters: {
             availableSetups: ["SFP", "Trendline_Break", "Double_Top"],
-            availableSymbols: ["EURUSD", "GBPUSD", "USDJPY"], 
+            availableSymbols: ["EURUSD", "GBPUSD", "USDJPY"],
             availableDirections: ["Long", "Short"]
-          };
-        } else {
-          // Stelle sicher, dass keine leeren Werte in den Arrays vorhanden sind
-          if (data.filters.availableSetups) {
-            data.filters.availableSetups = data.filters.availableSetups.filter((setup: string | null) => setup && setup !== "" && setup !== null);
           }
-          if (data.filters.availableSymbols) {
-            data.filters.availableSymbols = data.filters.availableSymbols.filter((symbol: string | null) => symbol && symbol !== "" && symbol !== null);
-          }
-          if (data.filters.availableDirections) {
-            data.filters.availableDirections = data.filters.availableDirections.filter((direction: string | null) => direction && direction !== "" && direction !== null);
-          }
-        }
-        return sampleData;
+        };
       }
       
       return data;
