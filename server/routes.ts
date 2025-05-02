@@ -2014,53 +2014,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get trades with filters
       const trades = await storage.getTrades(Number(userId), req.query);
-      console.log('Drawdown API - trades found:', trades.length, trades);
+      console.log("Drawdown API - trades found:", trades.length);
       
       if (trades.length === 0) {
+        console.log("Drawdown API - no trades found, returning empty array");
         return res.json([]);
       }
       
+      // Log a few sample trades for debugging
+      console.log("Drawdown API - sample trades:");
+      trades.slice(0, 3).forEach((trade, i) => {
+        console.log(`Trade ${i+1}: id=${trade.id}, date=${trade.date}, profitLoss=${trade.profitLoss}`);
+      });
+      
       // Sort trades by date
-      const sortedTrades = [...trades].sort((a, b) => 
-        new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-      
-      // Calculate running balance and drawdowns
-      let balance = 10000; // Starting balance
-      let peak = balance;
-      let drawdownData = [];
-      
-      // Group by month for visualization
-      const monthlyData = {};
-      
-      sortedTrades.forEach(trade => {
-        // Problem mit Datumsformat beheben - konvertiere alle in yyyy-mm-dd Format
-        // In der Datenbank haben wir 'MM/DD/YYYY HH:MM:SS' Format
-        let dateObj: Date;
+      const sortedTrades = [...trades].sort((a, b) => {
+        let dateA = new Date();
+        let dateB = new Date();
         
         try {
-          if (typeof trade.date === 'string' && trade.date.includes('/')) {
-            // Format MM/DD/YYYY HH:MM:SS
-            const parts = trade.date.split(' ')[0].split('/');
-            const month = parseInt(parts[0], 10) - 1; // JS months are 0-indexed
-            const day = parseInt(parts[1], 10);
-            const year = parseInt(parts[2], 10);
-            dateObj = new Date(year, month, day);
-          } else {
-            dateObj = new Date(trade.date);
+          if (typeof a.date === 'string') {
+            if (a.date.includes('/')) {
+              // MM/DD/YYYY format
+              const parts = a.date.split(' ')[0].split('/');
+              const month = parseInt(parts[0], 10) - 1;
+              const day = parseInt(parts[1], 10);
+              const year = parseInt(parts[2], 10);
+              dateA = new Date(year, month, day);
+            } else {
+              dateA = new Date(a.date);
+            }
+          } else if (a.date instanceof Date) {
+            dateA = a.date;
+          }
+          
+          if (typeof b.date === 'string') {
+            if (b.date.includes('/')) {
+              // MM/DD/YYYY format
+              const parts = b.date.split(' ')[0].split('/');
+              const month = parseInt(parts[0], 10) - 1;
+              const day = parseInt(parts[1], 10);
+              const year = parseInt(parts[2], 10);
+              dateB = new Date(year, month, day);
+            } else {
+              dateB = new Date(b.date);
+            }
+          } else if (b.date instanceof Date) {
+            dateB = b.date;
+          }
+        } catch (e) {
+          console.error('Date sorting error:', e);
+        }
+        
+        return dateA.getTime() - dateB.getTime();
+      });
+      
+      // Calculate running balance and drawdown
+      let balance = 10000; // Starting balance
+      let peak = balance;
+      
+      // Group by month
+      const monthlyData: Record<string, any> = {};
+      
+      sortedTrades.forEach(trade => {
+        // Handle date parsing with fallback
+        let dateObj = new Date();
+        try {
+          if (typeof trade.date === 'string') {
+            if (trade.date.includes('/')) {
+              // MM/DD/YYYY format
+              const parts = trade.date.split(' ')[0].split('/');
+              const month = parseInt(parts[0], 10) - 1;
+              const day = parseInt(parts[1], 10);
+              const year = parseInt(parts[2], 10);
+              dateObj = new Date(year, month, day);
+            } else {
+              dateObj = new Date(trade.date);
+            }
+          } else if (trade.date instanceof Date) {
+            dateObj = trade.date;
           }
         } catch (e) {
           console.error('Date parsing error:', e, 'for trade date:', trade.date);
-          dateObj = new Date(); // Fallback zu heute
         }
         
         const monthYear = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
-        console.log('Processing trade with date:', trade.date, 'parsed as:', dateObj, 'monthYear:', monthYear);
         
-        // Verwende den profitLoss Wert direkt
-        const pnl = trade.profitLoss || 0;
-        console.log('Trade PNL:', pnl);
+        // Verwende den profitLoss Wert direkt (mit Default 0 falls undefined/null)
+        const pnl = typeof trade.profitLoss === 'number' ? trade.profitLoss : 0;
         
+        // Update balance
         balance += pnl;
         
         // Update peak if necessary
@@ -2071,28 +2114,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Calculate drawdown percentage
         const drawdownPercent = peak > 0 ? ((peak - balance) / peak) * 100 : 0;
         
+        console.log(`Trade processed: date=${monthYear}, pnl=${pnl}, balance=${balance.toFixed(2)}, peak=${peak.toFixed(2)}, drawdown=${drawdownPercent.toFixed(2)}%`);
+        
         // Add or update monthly data
         if (!monthlyData[monthYear]) {
           monthlyData[monthYear] = {
             date: monthYear,
-            drawdown: drawdownPercent,
-            maxDrawdown: drawdownPercent
+            drawdown: parseFloat(drawdownPercent.toFixed(2)),
+            maxDrawdown: parseFloat(drawdownPercent.toFixed(2)),
+            balance: parseFloat(balance.toFixed(2))
           };
         } else {
-          monthlyData[monthYear].drawdown = drawdownPercent;
-          monthlyData[monthYear].maxDrawdown = Math.max(
-            monthlyData[monthYear].maxDrawdown,
-            drawdownPercent
+          monthlyData[monthYear].drawdown = parseFloat(drawdownPercent.toFixed(2));
+          monthlyData[monthYear].balance = parseFloat(balance.toFixed(2));
+          monthlyData[monthYear].maxDrawdown = parseFloat(
+            Math.max(
+              monthlyData[monthYear].maxDrawdown,
+              drawdownPercent
+            ).toFixed(2)
           );
         }
       });
       
       // Convert to array and sort by date
-      drawdownData = Object.values(monthlyData).sort((a: any, b: any) => 
-        String(a.date).localeCompare(String(b.date))
-      );
+      const drawdownData = Object.values(monthlyData)
+        .sort((a, b) => String(a.date).localeCompare(String(b.date)));
       
-      console.log('Final drawdown data being returned:', drawdownData);
+      console.log(`Drawdown API - final data: ${drawdownData.length} months processed`);
       
       res.json(drawdownData);
     } catch (error) {
@@ -2114,32 +2162,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get trades with filters
       const trades = await storage.getTrades(Number(userId), req.query);
+      console.log("Risk per trade - Found trades:", trades.length);
       
       if (trades.length === 0) {
         return res.json([]);
       }
       
+      // Debug-Ausgabe der Trades
+      trades.forEach((trade, index) => {
+        console.log(`Trade ${index+1}: id=${trade.id}, date=${trade.date}, profitLoss=${trade.profitLoss}, isWin=${trade.isWin}, rrAchieved=${trade.rrAchieved}`);
+      });
+      
       // Sort trades by date
-      const sortedTrades = [...trades].sort((a, b) => 
-        new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
+      const sortedTrades = [...trades].sort((a, b) => {
+        let dateA = new Date(a.date);
+        let dateB = new Date(b.date);
+        return dateA.getTime() - dateB.getTime();
+      });
       
       // Group by month for visualization
-      const monthlyData = {};
+      const monthlyData: Record<string, any> = {};
       
       sortedTrades.forEach(trade => {
-        const date = new Date(trade.date);
-        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        let dateObj = new Date();
+        try {
+          if (typeof trade.date === 'string') {
+            if (trade.date.includes('/')) {
+              // MM/DD/YYYY format
+              const parts = trade.date.split(' ')[0].split('/');
+              const month = parseInt(parts[0], 10) - 1;
+              const day = parseInt(parts[1], 10);
+              const year = parseInt(parts[2], 10);
+              dateObj = new Date(year, month, day);
+            } else {
+              dateObj = new Date(trade.date);
+            }
+          } else if (trade.date instanceof Date) {
+            dateObj = trade.date;
+          }
+        } catch (e) {
+          console.error('Date parsing error:', e, 'for trade date:', trade.date);
+        }
         
-        // Für nicht gewonnene Trades wird der profitLoss als Risiko verwendet
-        // Für gewonnene Trades berechnen wir das Risiko anders: ~profitLoss / rrAchieved
-        const riskDollar = trade.isWin && trade.rrAchieved ? 
-          Math.abs(trade.profitLoss || 0) / (trade.rrAchieved || 1) : 
-          Math.abs(trade.profitLoss || 0);
+        const monthYear = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+        console.log(`Processing trade for risk: date=${trade.date}, parsed as=${dateObj.toISOString()}, monthYear=${monthYear}`);
+        
+        // Für nicht gewonnene Trades wird der profitLoss als Risiko verwendet (absoluter Wert)
+        // Für gewonnene Trades berechnen wir das Risiko anhand des rrAchieved
+        let riskDollar = 0;
+        
+        if (trade.isWin && trade.rrAchieved && trade.rrAchieved > 0) {
+          // Bei gewonnenen Trades: Risiko = Gewinn / RR
+          riskDollar = Math.abs(trade.profitLoss || 0) / trade.rrAchieved;
+        } else {
+          // Bei verlorenen Trades: Risiko = absoluter Verlust
+          riskDollar = Math.abs(trade.profitLoss || 0);
+        }
         
         // Calculate risk percentage (assuming account value of 10000 if not specified)
         const accountValue = 10000; // Default Kontostand
         const riskPercent = (riskDollar / accountValue) * 100;
+        
+        console.log(`Trade risk calculated: profitLoss=${trade.profitLoss}, isWin=${trade.isWin}, rrAchieved=${trade.rrAchieved}, riskDollar=${riskDollar}, riskPercent=${riskPercent}`);
         
         // Add or update monthly data
         if (!monthlyData[monthYear]) {
@@ -2167,8 +2251,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           riskPercent: parseFloat(riskPercent.toFixed(2)),
           riskDollar: parseFloat(riskDollar.toFixed(2))
         }))
-        .sort((a, b) => a.date.localeCompare(b.date));
+        .sort((a, b) => String(a.date).localeCompare(String(b.date)));
       
+      console.log("Final risk data:", riskData);
       res.json(riskData);
     } catch (error) {
       console.error("Error calculating risk per trade data:", error);

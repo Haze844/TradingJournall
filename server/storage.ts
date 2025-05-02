@@ -812,7 +812,7 @@ export class MemStorage implements IStorage {
       (trade) => trade.userId === userId
     );
     
-    console.log("MemStorage getTrades - Initial trade count for userId", userId, ":", userTrades.length, "trades:", JSON.stringify(userTrades));
+    console.log("MemStorage getTrades - Initial trade count for userId", userId, ":", userTrades.length);
     
     if (filters) {
       console.log("MemStorage getTrades - Filters applied:", JSON.stringify(filters));
