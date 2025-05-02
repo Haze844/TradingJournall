@@ -88,7 +88,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
       timeframeEntry: "",
       unmitZone: "",
       rangePoints: 0,
-      marketPhase: ""
+      marketPhase: "",
+      riskSum: 200
     }
   });
 
@@ -141,7 +142,8 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
         timeframeEntry: "",
         unmitZone: "",
         rangePoints: 0,
-        marketPhase: ""
+        marketPhase: "",
+        riskSum: 200
       });
       
       // Cache invalidieren
@@ -595,7 +597,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
           </div>
 
           {/* R:R Informationen */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <div>
               <Label htmlFor="rrAchieved">R:R Erreicht</Label>
               <Select
@@ -636,6 +638,20 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
               </Select>
               {errors.rrPotential && (
                 <p className="text-xs text-red-500 mt-1">{errors.rrPotential.message}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="riskSum">Risiko Summe ($)</Label>
+              <Input
+                id="riskSum"
+                type="number"
+                defaultValue={200}
+                {...register("riskSum", { valueAsNumber: true })}
+                className={errors.riskSum ? "border-red-500" : ""}
+                placeholder="200"
+              />
+              {errors.riskSum && (
+                <p className="text-xs text-red-500 mt-1">{errors.riskSum.message}</p>
               )}
             </div>
             <div>
