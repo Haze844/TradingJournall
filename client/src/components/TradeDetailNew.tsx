@@ -92,7 +92,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         rrPotential: selectedTrade.rrPotential ?? 0,
         location: selectedTrade.location || '',
         slType: selectedTrade.slType || '',
-        slPoints: selectedTrade.slPoints
+        slPoints: selectedTrade.slPoints,
+        accountType: selectedTrade.accountType || 'PA', 
+        riskSum: selectedTrade.riskSum ?? 200
       });
     }
   }, [selectedTrade, editMode]);
