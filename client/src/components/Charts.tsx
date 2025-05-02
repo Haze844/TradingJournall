@@ -106,6 +106,12 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
                 activeDot={{ r: 8 }}
                 name="Ergebnis (RR)"
                 strokeWidth={2}
+                label={{
+                  position: "top",
+                  fontSize: 11,
+                  fill: "#F3F4F6",
+                  formatter: (value: number) => `${value.toFixed(1)}`
+                }}
               />
             </LineChart>
           ) : (
@@ -241,6 +247,12 @@ export function SetupWinRateChart({ data }: SetupWinRateChartProps) {
                 dataKey="winRate" 
                 name="Trefferquote"
                 radius={[4, 4, 0, 0]}
+                label={{
+                  position: "top",
+                  fontSize: 11,
+                  fill: "#F3F4F6",
+                  formatter: (value: number) => `${value.toFixed(1)}%`
+                }}
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={getBarColor(index)} />
