@@ -2014,6 +2014,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get trades with filters
       const trades = await storage.getTrades(Number(userId), req.query);
+      console.log('Drawdown API - trades found:', trades.length, trades);
       
       if (trades.length === 0) {
         return res.json([]);
@@ -2033,11 +2034,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const monthlyData = {};
       
       sortedTrades.forEach(trade => {
-        const date = new Date(trade.date);
-        const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        // Problem mit Datumsformat beheben - konvertiere alle in yyyy-mm-dd Format
+        // In der Datenbank haben wir 'MM/DD/YYYY HH:MM:SS' Format
+        let dateObj: Date;
+        
+        try {
+          if (typeof trade.date === 'string' && trade.date.includes('/')) {
+            // Format MM/DD/YYYY HH:MM:SS
+            const parts = trade.date.split(' ')[0].split('/');
+            const month = parseInt(parts[0], 10) - 1; // JS months are 0-indexed
+            const day = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+            dateObj = new Date(year, month, day);
+          } else {
+            dateObj = new Date(trade.date);
+          }
+        } catch (e) {
+          console.error('Date parsing error:', e, 'for trade date:', trade.date);
+          dateObj = new Date(); // Fallback zu heute
+        }
+        
+        const monthYear = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+        console.log('Processing trade with date:', trade.date, 'parsed as:', dateObj, 'monthYear:', monthYear);
         
         // Verwende den profitLoss Wert direkt
         const pnl = trade.profitLoss || 0;
+        console.log('Trade PNL:', pnl);
         
         balance += pnl;
         
@@ -2066,9 +2088,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Convert to array and sort by date
-      drawdownData = Object.values(monthlyData).sort((a, b) => 
-        a.date.localeCompare(b.date)
+      drawdownData = Object.values(monthlyData).sort((a: any, b: any) => 
+        String(a.date).localeCompare(String(b.date))
       );
+      
+      console.log('Final drawdown data being returned:', drawdownData);
       
       res.json(drawdownData);
     } catch (error) {
