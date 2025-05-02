@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, ResponsiveContainer, XAxis, YAxis, Tooltip as RechartsTooltip, Rectangle, ScatterChart, Scatter, Cell, Legend } from "recharts";
-import { Loader2, MousePointer, Hand, Download, ZoomIn, ZoomOut, RefreshCw } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, MousePointer, Hand, Download, ZoomIn, ZoomOut, RefreshCw, SlidersHorizontal, Lightbulb, TrendingUp } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -219,6 +219,12 @@ export default function PerformanceHeatmap() {
   const [timeRange, setTimeRange] = useState<string>("all");
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showLegend, setShowLegend] = useState<boolean>(false);
+  const [setupFilter, setSetupFilter] = useState<string>("all");
+  const [symbolFilter, setSymbolFilter] = useState<string>("all");
+  const [directionFilter, setDirectionFilter] = useState<string>("all");
+  const [compareMode, setCompareMode] = useState<string>("");
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
   const { toast } = useToast();
   
   // Berechne Datumsgrenzen basierend auf dem ausgewählten Zeitraum
@@ -243,12 +249,34 @@ export default function PerformanceHeatmap() {
 
   // Daten aus der API abrufen
   const { data: heatmapData, isLoading, error } = useQuery<HeatmapData>({
-    queryKey: ["/api/performance-heatmap", timeRange],
+    queryKey: ["/api/performance-heatmap", timeRange, setupFilter, symbolFilter, directionFilter, compareMode],
     queryFn: async () => {
       // URL mit Parametern aufbauen
       let url = `/api/performance-heatmap?userId=2`;
+      
+      // Zeitraum-Filter hinzufügen
       if (dateRange) {
         url += `&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+      }
+      
+      // Setup-Filter hinzufügen
+      if (setupFilter && setupFilter !== "all") {
+        url += `&setup=${setupFilter}`;
+      }
+      
+      // Symbol-Filter hinzufügen
+      if (symbolFilter && symbolFilter !== "all") {
+        url += `&symbol=${symbolFilter}`;
+      }
+      
+      // Richtungs-Filter hinzufügen
+      if (directionFilter && directionFilter !== "all") {
+        url += `&direction=${directionFilter}`;
+      }
+      
+      // Vergleichsmodus-Parameter hinzufügen
+      if (compareMode) {
+        url += `&compareWith=${compareMode}`;
       }
       
       const response = await fetch(url);
@@ -518,6 +546,184 @@ export default function PerformanceHeatmap() {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Filter und Einstellungen */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-8 bg-black/50 border-muted"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5 mr-1" />
+              Filter {showFilters ? 'ausblenden' : 'anzeigen'}
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-8 bg-black/50 border-muted"
+              onClick={() => setShowRecommendations(!showRecommendations)}
+            >
+              <Lightbulb className="h-3.5 w-3.5 mr-1" />
+              Empfehlungen {showRecommendations ? 'ausblenden' : 'anzeigen'}
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Select
+              value={compareMode}
+              onValueChange={setCompareMode}
+            >
+              <SelectTrigger className="w-[180px] h-8 text-xs bg-black/50 border-muted">
+                <SelectValue placeholder="Vergleich deaktiviert" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Kein Vergleich</SelectItem>
+                <SelectGroup>
+                  <SelectLabel>Zeitraum-Vergleich</SelectLabel>
+                  <SelectItem value="period:last30days">Mit letzten 30 Tagen</SelectItem>
+                  <SelectItem value="period:last90days">Mit letzten 90 Tagen</SelectItem>
+                  <SelectItem value="period:lastyear">Mit letztem Jahr</SelectItem>
+                </SelectGroup>
+                <SelectGroup>
+                  <SelectLabel>Benutzer-Vergleich</SelectLabel>
+                  <SelectItem value="user:1">Mit Mo vergleichen</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {/* Erweiterte Filter */}
+        {showFilters && heatmapData.filters && (
+          <div className="mb-4 p-3 border border-border/40 rounded-md bg-muted/20">
+            <h3 className="text-sm font-medium mb-2">Erweiterte Filter</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Setup-Filter */}
+              <div>
+                <Label htmlFor="setup-filter" className="text-xs mb-1">Setup</Label>
+                <Select 
+                  value={setupFilter}
+                  onValueChange={setSetupFilter}
+                >
+                  <SelectTrigger id="setup-filter" className="h-8 text-xs bg-black/50">
+                    <SelectValue placeholder="Alle Setups" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Setups</SelectItem>
+                    {heatmapData.filters.availableSetups.map((setup) => (
+                      <SelectItem key={setup} value={setup}>{setup}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Symbol-Filter */}
+              <div>
+                <Label htmlFor="symbol-filter" className="text-xs mb-1">Symbol</Label>
+                <Select 
+                  value={symbolFilter}
+                  onValueChange={setSymbolFilter}
+                >
+                  <SelectTrigger id="symbol-filter" className="h-8 text-xs bg-black/50">
+                    <SelectValue placeholder="Alle Symbole" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Symbole</SelectItem>
+                    {heatmapData.filters.availableSymbols.map((symbol) => (
+                      <SelectItem key={symbol} value={symbol}>{symbol}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Richtungs-Filter */}
+              <div>
+                <Label htmlFor="direction-filter" className="text-xs mb-1">Richtung</Label>
+                <Select 
+                  value={directionFilter}
+                  onValueChange={setDirectionFilter}
+                >
+                  <SelectTrigger id="direction-filter" className="h-8 text-xs bg-black/50">
+                    <SelectValue placeholder="Alle Richtungen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Richtungen</SelectItem>
+                    {heatmapData.filters.availableDirections.map((direction) => (
+                      <SelectItem key={direction} value={direction}>{direction}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Empfehlungen-Panel */}
+        {showRecommendations && heatmapData.recommendations && (
+          <div className="mb-4 p-3 border border-border/40 rounded-md bg-muted/20">
+            <h3 className="text-sm font-medium mb-2 flex items-center">
+              <Lightbulb className="h-4 w-4 mr-1 text-yellow-400" />
+              Trading Empfehlungen
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Beste Handelszeiten */}
+              <div>
+                <h4 className="text-xs font-medium mb-1 text-green-400">Top Handelszeiten:</h4>
+                <div className="bg-black/40 rounded-sm p-2 text-xs">
+                  <ul className="space-y-1">
+                    {heatmapData.recommendations.bestTimes.map((time, idx) => (
+                      <li key={idx} className="flex justify-between">
+                        <span>{time.day}, {time.time} Uhr</span>
+                        <span className="text-green-400">{time.winRate}% Win-Rate</span>
+                      </li>
+                    ))}
+                    {heatmapData.recommendations.bestTimes.length === 0 && (
+                      <li className="text-muted-foreground">Keine Daten verfügbar</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Zu vermeidende Handelszeiten */}
+              <div>
+                <h4 className="text-xs font-medium mb-1 text-red-400">Zu vermeidende Zeiten:</h4>
+                <div className="bg-black/40 rounded-sm p-2 text-xs">
+                  <ul className="space-y-1">
+                    {heatmapData.recommendations.worstTimes.map((time, idx) => (
+                      <li key={idx} className="flex justify-between">
+                        <span>{time.day}, {time.time} Uhr</span>
+                        <span className="text-red-400">{time.winRate}% Win-Rate</span>
+                      </li>
+                    ))}
+                    {heatmapData.recommendations.worstTimes.length === 0 && (
+                      <li className="text-muted-foreground">Keine Daten verfügbar</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Weitere Insights */}
+              {heatmapData.recommendations.trends.length > 0 && (
+                <div className="md:col-span-2 mt-1">
+                  <h4 className="text-xs font-medium mb-1 text-blue-400">Trading Insights:</h4>
+                  <div className="bg-black/40 rounded-sm p-2 text-xs">
+                    <ul className="space-y-1">
+                      {heatmapData.recommendations.trends.map((trend, idx) => (
+                        <li key={idx} className="flex items-start gap-1">
+                          <TrendingUp className="h-3.5 w-3.5 mt-0.5 text-blue-400 flex-shrink-0" />
+                          <span>{trend.message}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative h-[350px] w-full md:w-8/12">
             <ResponsiveContainer width="100%" height="100%">
