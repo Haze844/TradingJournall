@@ -38,6 +38,8 @@ export default function SimpleHome() {
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   // State für die Sichtbarkeit des Add-Formulars
   const [isAddTradeVisible, setIsAddTradeVisible] = useState(false);
+  // State für aktiven Tab
+  const [activeTab, setActiveTab] = useState("dashboard");
   
   // Globales Modal - außerhalb der Tabelle
   const TradeFormModal = () => {
@@ -236,27 +238,11 @@ export default function SimpleHome() {
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
       <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
       
-      {/* Header */}
-      <Header />
+      {/* Header mit integrierten Tabs */}
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Main Content */}
-      <Tabs defaultValue="dashboard" className="w-full" id="main-tabs">
-        <div className="flex justify-center mb-4">
-          <TabsList className="main-tabs-list bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10">
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
-              <BarChart2 className="w-4 h-4 mr-1.5" /> Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
-              <DollarSign className="w-4 h-4 mr-1.5" /> Trades
-            </TabsTrigger>
-            <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
-              <Activity className="w-4 h-4 mr-1.5" /> Analyse
-            </TabsTrigger>
-            <TabsTrigger value="risk" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-5 py-1.5 transition-all duration-200 rounded-lg">
-              <AlertCircle className="w-4 h-4 mr-1.5" /> Risiko
-            </TabsTrigger>
-          </TabsList>
-        </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" id="main-tabs">
         
         {/* Dashboard Tab - Umfassende Statistiken und Analysen */}
         <TabsContent value="dashboard">

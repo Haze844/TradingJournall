@@ -1,10 +1,10 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
   Users, TrendingDown, DollarSign, AlertCircle, LogOut, LineChart, User,
-  ChevronDown, ChevronRight, Menu
+  ChevronDown, ChevronRight, Menu, Flame
 } from "lucide-react";
 
 import {
@@ -20,6 +20,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuPortal
 } from "@/components/ui/dropdown-menu";
+
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Logo-Komponente für einheitliches Design
 export const NxtLvlLogo = ({ className = "" }) => (
@@ -50,17 +52,30 @@ export const NxtLvlLogo = ({ className = "" }) => (
   </div>
 );
 
-export default function Header() {
+type HeaderProps = {
+  activeTab?: string;
+  onTabChange?: (value: string) => void;
+}
+
+export default function Header({ activeTab = "dashboard", onTabChange }: HeaderProps) {
   const { user, logoutMutation } = useAuth();
+  const [location, navigate] = useLocation();
 
   const handleLogout = () => {
     logoutMutation.mutate();
   };
+  
+  const handleTabChange = (value: string) => {
+    if (onTabChange) {
+      onTabChange(value);
+    }
+  };
 
   return (
     <header className="w-full main-header mb-6 backdrop-blur-xl">
-      {/* Kreatives Header-Design mit übergreifendem Logo */}
-      <div className="bg-gradient-to-r from-blue-950 via-blue-800 to-blue-900 shadow-2xl relative overflow-hidden border-b border-blue-400/30">
+      {/* Kreatives Header-Design mit übergreifendem Logo und weicheren Übergängen */}
+      <div className="bg-gradient-to-r from-blue-950 via-blue-800 to-blue-900 shadow-xl relative overflow-hidden 
+                      border-b border-blue-400/20 rounded-b-xl">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-400/10 via-transparent to-transparent"></div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-600/10 via-transparent to-transparent"></div>
         
@@ -68,15 +83,18 @@ export default function Header() {
         <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl"></div>
         
-        <div className="container mx-auto py-6 relative z-10">
-          <div className="flex justify-between items-center">
+        <div className="container mx-auto py-3 pt-5 relative z-10">
+          {/* Top-Bereich mit Logo und Benutzerbereich */}
+          <div className="flex justify-between items-center mb-4">
             {/* Kreatives, modernes Logo */}
-            <Link href="/" className="flex-1 group">
-              <NxtLvlLogo />
-            </Link>
+            <div className="flex-1">
+              <Link href="/" className="group">
+                <NxtLvlLogo />
+              </Link>
+            </div>
             
-            {/* Integrierter Kontobereich mit transparentem Glaseffekt */}
-            <div className="flex items-center gap-3 whitespace-nowrap z-20">
+            {/* Desktop Konto-Bereich auf der rechten Seite */}
+            <div className="hidden md:flex items-center gap-3 whitespace-nowrap z-20">
               {user ? (
                 <div className="flex items-center bg-gradient-to-r from-blue-800/40 via-blue-700/40 to-blue-800/30 
                                rounded-full overflow-hidden border border-blue-400/20 shadow-lg backdrop-blur-md">
@@ -117,6 +135,70 @@ export default function Header() {
                 </Button>
               )}
             </div>
+            
+            {/* Mobile Kontobereich - auf kleinen Bildschirmen */}
+            <div className="md:hidden flex items-center gap-3 whitespace-nowrap z-20">
+              {user ? (
+                <div className="flex items-center bg-gradient-to-r from-blue-800/40 via-blue-700/40 to-blue-800/30 
+                                rounded-full overflow-hidden border border-blue-400/20 shadow-lg backdrop-blur-md">
+                  <div className="flex items-center px-3 py-1.5 relative">
+                    <div className="absolute inset-0 bg-blue-400/5 rounded-full blur"></div>
+                    <User className="w-4 h-4 mr-2 text-blue-200" />
+                    <span className="font-medium text-blue-100 relative z-10 text-sm">
+                      {user.username}
+                    </span>
+                  </div>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-full rounded-none border-l border-blue-400/20 
+                                                                      bg-blue-700/30 hover:bg-blue-600/40 transition-colors px-2">
+                        <Settings className="w-3.5 h-3.5 text-blue-200" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-blue-900/90 backdrop-blur-xl border-blue-400/30 shadow-xl">
+                      <DropdownMenuLabel className="text-blue-200">Kontoeinstellungen</DropdownMenuLabel>
+                      <DropdownMenuSeparator className="bg-blue-500/20" />
+                      <DropdownMenuItem className="hover:bg-blue-800/60 text-blue-100">
+                        <Settings className="w-4 h-4 mr-2 text-blue-300" />
+                        <span>Einstellungen</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-blue-500/20" />
+                      <DropdownMenuItem onClick={handleLogout} className="hover:bg-red-900/30 text-red-200">
+                        <LogOut className="w-4 h-4 mr-2" />
+                        <span>Abmelden</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <Button variant="ghost" size="sm" asChild 
+                        className="bg-blue-600/30 hover:bg-blue-500/40 text-blue-100 border border-blue-400/20 px-3 py-1">
+                  <Link href="/auth">Anmelden</Link>
+                </Button>
+              )}
+            </div>
+          </div>
+          
+          {/* Navigations-Tabs am unteren Rand des Headers */}
+          <div className="flex justify-center items-center pb-1">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+              <TabsList className="main-tabs-list bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10 
+                                max-w-fit mx-auto overflow-hidden backdrop-blur-sm">
+                <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-4 py-1.5 transition-all duration-200 rounded-lg">
+                  <BarChart2 className="w-4 h-4 mr-1.5" /> Dashboard
+                </TabsTrigger>
+                <TabsTrigger value="trades" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-4 py-1.5 transition-all duration-200 rounded-lg">
+                  <DollarSign className="w-4 h-4 mr-1.5" /> Trades
+                </TabsTrigger>
+                <TabsTrigger value="ai-analysis" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-4 py-1.5 transition-all duration-200 rounded-lg">
+                  <Activity className="w-4 h-4 mr-1.5" /> Analyse
+                </TabsTrigger>
+                <TabsTrigger value="risk" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-4 py-1.5 transition-all duration-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 mr-1.5" /> Risiko
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
       </div>
