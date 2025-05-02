@@ -829,11 +829,27 @@ export class MemStorage implements IStorage {
         delete filters.endDate;
       }
       
+      // userId aus Filter entfernen, da wir bereits nach userId gefiltert haben
+      const { userId: filterUserId, ...otherFilters } = filters;
+      
+      // Debug für userId Filter-Problem
+      if (filterUserId) {
+        console.log(`Filter enthält userId=${filterUserId}, entferne diesen Filter, da bereits nach userId=${userId} gefiltert wurde`);
+      }
+      
       // Standard-Filter-Ansatz
       userTrades = userTrades.filter(trade => {
-        for (const [key, value] of Object.entries(filters)) {
+        for (const [key, value] of Object.entries(otherFilters)) {
+          // Wenn Wert nicht leer ist und nicht mit dem Trade-Wert übereinstimmt
           if (value !== undefined && value !== null && value !== '' && trade[key as keyof Trade] !== value) {
-            return false;
+            // Spezielle Typbehandlung für numerische Werte
+            if (typeof trade[key as keyof Trade] === 'number' && !isNaN(Number(value))) {
+              if (Number(trade[key as keyof Trade]) !== Number(value)) {
+                return false;
+              }
+            } else {
+              return false;
+            }
           }
         }
         return true;
