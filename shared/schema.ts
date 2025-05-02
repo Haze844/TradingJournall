@@ -46,6 +46,7 @@ export const marketPhaseTypes = ["Long", "stark Long", "Short", "stark Short", "
 export const rrValues = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 export const slTypes = ["Sweep", "zerstört"] as const;
 export const slPointsValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30] as const;
+export const accountTypeValues = ["PA", "EVA"] as const;;
 
 // Trades schema
 export const trades = pgTable("trades", {
