@@ -1314,6 +1314,12 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                 </Popover>
               </th>
               <th className="p-3 text-left whitespace-nowrap">
+                <div className="flex items-center gap-1">
+                  Risiko Summe ($)
+                  <Wallet className="h-3 w-3 ml-1" />
+                </div>
+              </th>
+              <th className="p-3 text-left whitespace-nowrap">
                 <Popover>
                   <PopoverTrigger asChild>
                     <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
@@ -1626,6 +1632,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                     {trade.entryType ? <BadgeTrend trend={trade.entryType} size="xs" /> : '-'}
                   </td>
                   <td className="p-3 text-xs">{trade.rrAchieved}</td>
+                  <td className="p-3 text-xs">{trade.riskSum ? `${trade.riskSum}$` : '-'}</td>
                   <td className="p-3 text-xs">
                     <span className={`${trade.profitLoss && trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss && trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
                       {trade.profitLoss ? `${trade.profitLoss > 0 ? '+' : ''}${trade.profitLoss.toFixed(2)}` : '-'}
