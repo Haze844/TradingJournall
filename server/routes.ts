@@ -2070,7 +2070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Calculate running balance and drawdown
-      let balance = 10000; // Starting balance
+      let balance = 2500; // Startkapital 2500€ (vom Benutzer angegeben)
       let peak = balance;
       
       // Group by month
@@ -2219,8 +2219,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           riskDollar = Math.abs(trade.profitLoss || 0);
         }
         
-        // Calculate risk percentage (assuming account value of 10000 if not specified)
-        const accountValue = 10000; // Default Kontostand
+        // Calculate risk percentage (using account value of 2500€ as specified by user)
+        const accountValue = 2500; // Kontostand 2500€ vom Benutzer angegeben
         const riskPercent = (riskDollar / accountValue) * 100;
         
         console.log(`Trade risk calculated: profitLoss=${trade.profitLoss}, isWin=${trade.isWin}, rrAchieved=${trade.rrAchieved}, riskDollar=${riskDollar}, riskPercent=${riskPercent}`);
@@ -2374,7 +2374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const avgRisk = riskValues.reduce((sum, val) => sum + val, 0) / totalTrades;
       
       // Find maximum drawdown
-      let balance = 10000;
+      let balance = 2500; // Startkapital 2500€ (vom Benutzer angegeben)
       let peak = balance;
       let maxDrawdown = 0;
       
