@@ -376,13 +376,24 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
       if (!data.data || data.data.length === 0) {
         console.log("Keine Daten vom Server - generiere Beispieldaten für die Heatmap-Visualisierung");
         const sampleData = generateSampleHeatmapData();
-        // Stelle sicher, dass die Filter-Daten immer definiert sind
+        // Stelle sicher, dass die Filter-Daten immer definiert sind und keine leeren Werte enthalten
         if (!data.filters) {
           data.filters = {
             availableSetups: ["SFP", "Trendline Break", "Double Top"],
             availableSymbols: ["EURUSD", "GBPUSD", "USDJPY"], 
             availableDirections: ["Long", "Short"]
           };
+        } else {
+          // Stelle sicher, dass keine leeren Werte in den Arrays vorhanden sind
+          if (data.filters.availableSetups) {
+            data.filters.availableSetups = data.filters.availableSetups.filter(setup => setup && setup !== "" && setup !== null);
+          }
+          if (data.filters.availableSymbols) {
+            data.filters.availableSymbols = data.filters.availableSymbols.filter(symbol => symbol && symbol !== "" && symbol !== null);
+          }
+          if (data.filters.availableDirections) {
+            data.filters.availableDirections = data.filters.availableDirections.filter(direction => direction && direction !== "" && direction !== null);
+          }
         }
         return sampleData;
       }
