@@ -553,16 +553,17 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       {editMode ? (
                         <Input
                           type="number"
-                          value={editData.riskSum === undefined ? "200" : editData.riskSum}
+                          value={editData.riskSum === undefined ? "" : editData.riskSum}
                           onChange={(e) => {
-                            const value = e.target.value === "" ? 200 : parseFloat(e.target.value);
+                            const value = e.target.value === "" ? undefined : parseFloat(e.target.value);
                             updateField('riskSum', value);
                           }}
                           className="h-7 text-xs mt-0.5"
                           min="0"
+                          placeholder="Risikosumme eingeben"
                         />
                       ) : (
-                        <div className="font-medium text-sm mt-0.5">${selectedTrade.riskSum !== undefined ? selectedTrade.riskSum : 200}</div>
+                        <div className="font-medium text-sm mt-0.5">${selectedTrade.riskSum !== undefined ? selectedTrade.riskSum : '-'}</div>
                       )}
                     </div>
                     <div className="bg-background/50 rounded-sm p-1.5">
