@@ -20,12 +20,41 @@ type HeatmapDataPoint = {
   totalPnL: string;
   x?: number;
   y?: number;
+  isComparison?: boolean;
+  valueLabel?: string;
+};
+
+type HeatmapRecommendation = {
+  day: string;
+  time: string;
+  winRate: number;
+  avgRR: string;
+};
+
+type HeatmapTrend = {
+  type: string;
+  message: string;
+};
+
+type HeatmapRecommendations = {
+  bestTimes: HeatmapRecommendation[];
+  worstTimes: HeatmapRecommendation[];
+  trends: HeatmapTrend[];
+};
+
+type HeatmapFilters = {
+  availableSetups: string[];
+  availableSymbols: string[];
+  availableDirections: string[];
 };
 
 type HeatmapData = {
   days: string[];
   timeframe: string[];
   data: HeatmapDataPoint[];
+  comparison?: HeatmapDataPoint[];
+  recommendations?: HeatmapRecommendations;
+  filters?: HeatmapFilters;
 };
 
 interface CustomTooltipProps {

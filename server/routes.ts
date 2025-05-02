@@ -1017,10 +1017,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         endDate.setHours(23, 59, 59, 999);
       }
       
+      // Zusätzliche Filter für Setup, Symbol, Handelsrichtung
+      const setupFilter = req.query.setup as string;
+      const symbolFilter = req.query.symbol as string;
+      const directionFilter = req.query.direction as string;
+      const compareWith = req.query.compareWith as string;
+      
       // Holen Sie alle Trades des Benutzers
       const allTrades = await storage.getTrades(userId);
       
-      // Filtere Trades nach Datum, falls Datumsfilter angegeben wurden
+      // Vergleichsdaten für zweiten Benutzer/Zeitraum (falls angefordert)
+      let comparisonTrades: any[] = [];
+      
+      if (compareWith && compareWith.startsWith("user:")) {
+        // Vergleich mit anderem Benutzer (Format: user:1)
+        const compareUserId = parseInt(compareWith.split(":")[1]);
+        if (!isNaN(compareUserId)) {
+          comparisonTrades = await storage.getTrades(compareUserId);
+        }
+      } else if (compareWith && compareWith.startsWith("period:")) {
+        // Vergleich mit anderem Zeitraum (Format: period:last30days)
+        const compareTimePeriod = compareWith.split(":")[1];
+        
+        let compareStartDate: Date | undefined;
+        let compareEndDate: Date | undefined;
+        
+        if (compareTimePeriod === "last30days") {
+          compareEndDate = new Date();
+          compareStartDate = new Date();
+          compareStartDate.setDate(compareEndDate.getDate() - 30);
+        } else if (compareTimePeriod === "last90days") {
+          compareEndDate = new Date();
+          compareStartDate = new Date();
+          compareStartDate.setDate(compareEndDate.getDate() - 90);
+        } else if (compareTimePeriod === "lastyear") {
+          compareEndDate = new Date();
+          compareStartDate = new Date();
+          compareStartDate.setFullYear(compareEndDate.getFullYear() - 1);
+        }
+        
+        if (compareStartDate && compareEndDate) {
+          comparisonTrades = allTrades.filter(trade => {
+            if (!trade.date) return false;
+            const tradeDate = new Date(trade.date);
+            return tradeDate >= compareStartDate! && tradeDate <= compareEndDate!;
+          });
+        }
+      }
+      
+      // Filtere Trades nach Datum und zusätzlichen Filtern
       const trades = allTrades.filter(trade => {
         if (!trade.date) return false;
         
@@ -1028,6 +1073,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (startDate && tradeDate < startDate) return false;
         if (endDate && tradeDate > endDate) return false;
+        
+        // Setup-Filter anwenden
+        if (setupFilter && setupFilter !== "all" && trade.setup !== setupFilter) return false;
+        
+        // Symbol-Filter anwenden
+        if (symbolFilter && symbolFilter !== "all" && trade.symbol !== symbolFilter) return false;
+        
+        // Richtungs-Filter anwenden
+        if (directionFilter && directionFilter !== "all" && trade.entryType !== directionFilter) return false;
         
         return true;
       });
@@ -1057,88 +1111,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return "other";
       };
       
-      // Gruppieren der Trades nach Wochentag und Zeitraum
-      const groupedTrades: Record<string, Record<string, any[]>> = {};
-      
-      // Initialisiere die Gruppenstruktur
-      days.forEach(day => {
-        groupedTrades[day] = {};
-        timeframe.forEach(time => {
-          groupedTrades[day][time] = [];
+      // Generiere Heatmap-Daten
+      const processTradesForHeatmap = (tradesData: any[], isComparison = false) => {
+        // Gruppieren der Trades nach Wochentag und Zeitraum
+        const groupedTrades: Record<string, Record<string, any[]>> = {};
+        
+        // Initialisiere die Gruppenstruktur
+        days.forEach(day => {
+          groupedTrades[day] = {};
+          timeframe.forEach(time => {
+            groupedTrades[day][time] = [];
+          });
         });
+        
+        // Füge Trades zu den entsprechenden Gruppen hinzu
+        for (const trade of tradesData) {
+          if (!trade.date) continue;
+          
+          const tradeDate = new Date(trade.date);
+          const dayOfWeek = tradeDate.getDay(); // 0 (Sonntag) bis 6 (Samstag)
+          
+          // Wir ignorieren Wochenende (0 = Sonntag, 6 = Samstag)
+          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+          
+          // Konvertierung von 0-basiertem Tag zu unserem Format
+          const dayIndex = dayOfWeek - 1; // 0 = Montag, ..., 4 = Freitag
+          const day = days[dayIndex];
+          
+          const hour = tradeDate.getHours();
+          const timeframeSlot = getTimeframeForHour(hour);
+          
+          // Ignoriere Zeitslots außerhalb unserer definierten Zeitrahmen
+          if (timeframeSlot === "other") continue;
+          
+          if (groupedTrades[day] && groupedTrades[day][timeframeSlot]) {
+            groupedTrades[day][timeframeSlot].push(trade);
+          }
+        }
+        
+        // Erstelle die Heatmap-Daten mit Performance-Metriken
+        const resultData = [];
+        
+        days.forEach(day => {
+          timeframe.forEach(time => {
+            const tradesInSlot = groupedTrades[day][time];
+            
+            if (tradesInSlot.length > 0) {
+              // Berechne Win-Rate für diesen Slot
+              const wins = tradesInSlot.filter(t => t.isWin).length;
+              const winRate = tradesInSlot.length > 0 ? (wins / tradesInSlot.length) * 100 : 0;
+              
+              // Berechne durchschnittliches RR für diesen Slot
+              const totalRR = tradesInSlot.reduce((sum, t) => sum + (t.rrAchieved || 0), 0);
+              const avgRR = tradesInSlot.length > 0 ? totalRR / tradesInSlot.length : 0;
+              
+              // Berechne Gesamt-PnL für diesen Slot
+              const totalPnL = tradesInSlot.reduce((sum, t) => sum + (t.profitLoss || 0), 0);
+              
+              resultData.push({
+                day,
+                timeframe: time,
+                value: winRate, // Primärwert für die Heatmap-Farbe
+                tradeCount: tradesInSlot.length,
+                winRate: Math.round(winRate),
+                avgRR: avgRR.toFixed(2),
+                totalPnL: totalPnL.toFixed(2),
+                isComparison,
+              });
+            } else {
+              // Leere Slots auch hinzufügen mit Nullwerten
+              resultData.push({
+                day,
+                timeframe: time,
+                value: 0,
+                tradeCount: 0,
+                winRate: 0,
+                avgRR: "0.00",
+                totalPnL: "0.00",
+                isComparison,
+              });
+            }
+          });
+        });
+        
+        return resultData;
+      };
+      
+      // Verarbeite primäre Daten
+      const primaryData = processTradesForHeatmap(trades);
+      
+      // Analysiere die Daten für Empfehlungen
+      const bestPerformingSlots = primaryData
+        .filter(slot => slot.tradeCount > 0)
+        .sort((a, b) => b.winRate - a.winRate)
+        .slice(0, 3);
+      
+      const worstPerformingSlots = primaryData
+        .filter(slot => slot.tradeCount > 0)
+        .sort((a, b) => a.winRate - b.winRate)
+        .slice(0, 3);
+      
+      // Erstelle Empfehlungen basierend auf den Daten
+      const recommendations = {
+        bestTimes: bestPerformingSlots.map(slot => ({
+          day: slot.day,
+          time: slot.timeframe,
+          winRate: slot.winRate,
+          avgRR: slot.avgRR
+        })),
+        worstTimes: worstPerformingSlots.map(slot => ({
+          day: slot.day,
+          time: slot.timeframe,
+          winRate: slot.winRate,
+          avgRR: slot.avgRR
+        })),
+        trends: []
+      };
+      
+      // Ermittle tagesbezogene Trends
+      const dayPerformance: Record<string, { totalWinRate: number, count: number }> = {};
+      days.forEach(day => {
+        dayPerformance[day] = { totalWinRate: 0, count: 0 };
       });
       
-      // Füge Trades zu den entsprechenden Gruppen hinzu
-      for (const trade of trades) {
-        if (!trade.date) continue;
-        
-        const tradeDate = new Date(trade.date);
-        const dayOfWeek = tradeDate.getDay(); // 0 (Sonntag) bis 6 (Samstag)
-        
-        // Wir ignorieren Wochenende (0 = Sonntag, 6 = Samstag)
-        if (dayOfWeek === 0 || dayOfWeek === 6) continue;
-        
-        // Konvertierung von 0-basiertem Tag zu unserem Format
-        const dayIndex = dayOfWeek - 1; // 0 = Montag, ..., 4 = Freitag
-        const day = days[dayIndex];
-        
-        const hour = tradeDate.getHours();
-        const timeframeSlot = getTimeframeForHour(hour);
-        
-        // Ignoriere Zeitslots außerhalb unserer definierten Zeitrahmen
-        if (timeframeSlot === "other") continue;
-        
-        if (groupedTrades[day] && groupedTrades[day][timeframeSlot]) {
-          groupedTrades[day][timeframeSlot].push(trade);
+      primaryData.forEach(slot => {
+        if (slot.tradeCount > 0) {
+          dayPerformance[slot.day].totalWinRate += slot.winRate;
+          dayPerformance[slot.day].count += 1;
         }
+      });
+      
+      const dayTrends = Object.entries(dayPerformance)
+        .map(([day, data]) => ({
+          day,
+          avgWinRate: data.count > 0 ? Math.round(data.totalWinRate / data.count) : 0
+        }))
+        .filter(item => item.avgWinRate > 0)
+        .sort((a, b) => b.avgWinRate - a.avgWinRate);
+      
+      if (dayTrends.length > 0) {
+        recommendations.trends.push({
+          type: 'day',
+          message: `Dein bester Handelstag ist ${dayTrends[0].day} mit einer durchschnittlichen Win-Rate von ${dayTrends[0].avgWinRate}%.`
+        });
       }
       
-      // Erstelle die Heatmap-Daten mit Performance-Metriken
-      days.forEach(day => {
-        timeframe.forEach(time => {
-          const tradesInSlot = groupedTrades[day][time];
-          
-          if (tradesInSlot.length > 0) {
-            // Berechne Win-Rate für diesen Slot
-            const wins = tradesInSlot.filter(t => t.isWin).length;
-            const winRate = tradesInSlot.length > 0 ? (wins / tradesInSlot.length) * 100 : 0;
-            
-            // Berechne durchschnittliches RR für diesen Slot
-            const totalRR = tradesInSlot.reduce((sum, t) => sum + (t.rrAchieved || 0), 0);
-            const avgRR = tradesInSlot.length > 0 ? totalRR / tradesInSlot.length : 0;
-            
-            // Berechne Gesamt-PnL für diesen Slot
-            const totalPnL = tradesInSlot.reduce((sum, t) => sum + (t.profitLoss || 0), 0);
-            
-            heatmapData.push({
-              day,
-              timeframe: time,
-              value: winRate, // Primärwert für die Heatmap-Farbe
-              tradeCount: tradesInSlot.length,
-              winRate: Math.round(winRate),
-              avgRR: avgRR.toFixed(2),
-              totalPnL: totalPnL.toFixed(2),
-            });
-          } else {
-            // Leere Slots auch hinzufügen mit Nullwerten
-            heatmapData.push({
-              day,
-              timeframe: time,
-              value: 0,
-              tradeCount: 0,
-              winRate: 0,
-              avgRR: "0.00",
-              totalPnL: "0.00",
-            });
-          }
-        });
-      });
-      
-      res.json({
+      // Kombiniere alle Daten für die Antwort
+      const responseData = {
         days,
         timeframe,
-        data: heatmapData
-      });
+        data: primaryData,
+        recommendations,
+        filters: {
+          availableSetups: [...new Set(allTrades.map(t => t.setup).filter(Boolean))],
+          availableSymbols: [...new Set(allTrades.map(t => t.symbol).filter(Boolean))],
+          availableDirections: [...new Set(allTrades.map(t => t.entryType).filter(Boolean))],
+        }
+      };
+      
+      // Füge Vergleichsdaten hinzu, falls vorhanden
+      if (comparisonTrades.length > 0) {
+        responseData.comparison = processTradesForHeatmap(comparisonTrades, true);
+      }
+      
+      res.json(responseData);
     } catch (error) {
       console.error("Error generating performance heatmap data:", error);
       res.status(500).json({ error: "Failed to generate performance heatmap data" });
