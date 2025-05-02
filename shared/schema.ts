@@ -302,6 +302,9 @@ export const appSettings = pgTable("app_settings", {
   deviceId: text("device_id"),
   deviceName: text("device_name"),
   deviceType: text("device_type"),
+  // Risikomanagement-Einstellungen
+  accountBalance: real("account_balance").default(2500), // Standard-Kontostand 2500€
+  accountType: text("account_type").default("all"), // Standard: "all" für alle Kontotypen
 })
 
 export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({

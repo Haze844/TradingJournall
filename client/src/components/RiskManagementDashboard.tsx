@@ -279,7 +279,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
         <div className="mb-6 p-4 bg-muted rounded-lg">
           <div className="flex flex-col sm:flex-row gap-4 items-end">
             <div className="w-full sm:w-1/3">
-              <Label htmlFor="accountBalance" className="text-sm font-medium mb-1.5 block">Kontostand (€)</Label>
+              <Label htmlFor="accountBalance" className="text-sm font-medium mb-1.5 block">Kontostand ($)</Label>
               <div className="flex items-center">
                 <Input 
                   id="accountBalance"
@@ -552,7 +552,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           type="monotone"
                           dataKey="riskDollar"
                           stroke="#8B5CF6"
-                          name="Risiko (€)"
+                          name="Risiko ($)"
                           strokeWidth={chartConfig.strokeWidth}
                           dot={{ r: chartConfig.dotSize }}
                           activeDot={{ r: chartConfig.activeDotSize }}
@@ -561,7 +561,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                             position: "insideBottom",
                             fontSize: chartConfig.fontSize,
                             fill: "#8B5CF6",
-                            formatter: (value: number) => `€${value}`,
+                            formatter: (value: number) => `$${value}`,
                             offset: chartConfig.labelOffset
                           }}
                         />
@@ -611,7 +611,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                           yAxisId="right"
                           dataKey="riskDollar"
                           fill="#8B5CF6"
-                          name="Risiko (€)"
+                          name="Risiko ($)"
                           barSize={chartConfig.barSize}
                           radius={[chartConfig.cornerRadius, chartConfig.cornerRadius, 0, 0]}
                           animationDuration={chartConfig.animationDuration}
@@ -619,7 +619,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                             position: "inside",
                             fontSize: chartConfig.fontSize,
                             fill: "#F3F4F6",
-                            formatter: (value: number) => `€${value}`,
+                            formatter: (value: number) => `$${value}`,
                             offset: chartConfig.labelOffset
                           }}
                         />
@@ -651,7 +651,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                   </div>
                 </div>
                 <div className="bg-muted p-3 rounded-lg">
-                  <div className="text-sm text-muted-foreground mb-1">Durchschn. Risiko ($)</div>
+                  <div className="text-sm text-muted-foreground mb-1">Durchschn. Risiko in $</div>
                   <div className="font-bold text-lg">
                     {riskPerTradeLoading ? (
                       <Skeleton className="h-7 w-20" />

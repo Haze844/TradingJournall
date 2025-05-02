@@ -1781,7 +1781,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deviceId = req.query.deviceId as string;
 
       const settings = await storage.getAppSettings(userId, deviceId);
-      res.json(settings || {});
+      
+      // Standard-Einstellungen, falls keine gefunden wurden
+      if (!settings) {
+        return res.json({
+          accountBalance: 2500, 
+          accountType: 'all',
+          theme: 'dark',
+          notifications: true,
+          syncEnabled: true,
+          offlineModeEnabled: false
+        });
+      }
+      
+      res.json(settings);
     } catch (error) {
       console.error("Error fetching settings:", error);
       res.status(500).json({ error: "Failed to fetch settings" });
@@ -1791,6 +1804,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/settings", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = req.user!.id;
+      
+      // Prüfe, ob bereits Einstellungen für diesen Benutzer existieren
+      const existingSettings = await storage.getAppSettings(userId);
+      
+      if (existingSettings) {
+        // Aktualisiere vorhandene Einstellungen
+        const updatedSettings = await storage.updateAppSettings(existingSettings.id, {
+          ...req.body,
+          userId
+        });
+        
+        if (!updatedSettings) {
+          throw new Error("Fehler beim Aktualisieren der Einstellungen");
+        }
+        
+        return res.json(updatedSettings);
+      }
+      
+      // Erstelle neue Einstellungen, falls keine existieren
       const settings = {
         ...req.body,
         userId
@@ -1799,8 +1831,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newSettings = await storage.createAppSettings(settings);
       res.status(201).json(newSettings);
     } catch (error) {
-      console.error("Error creating settings:", error);
-      res.status(500).json({ error: "Failed to create settings" });
+      console.error("Error creating/updating settings:", error);
+      res.status(500).json({ error: "Failed to create/update settings" });
     }
   });
 
