@@ -94,7 +94,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         slType: selectedTrade.slType || '',
         slPoints: selectedTrade.slPoints,
         accountType: selectedTrade.accountType || 'PA', 
-        riskSum: selectedTrade.riskSum ?? 200
+        riskSum: selectedTrade.riskSum ?? 200,
+        entryPoints: selectedTrade.entryPoints
       });
     }
   }, [selectedTrade, editMode]);
