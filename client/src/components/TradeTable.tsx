@@ -542,7 +542,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
           </div>
         </CardHeader>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-visible overflow-y-auto max-h-[70vh]">
           <table className="w-full text-xs">
             <thead className="bg-gradient-to-r from-blue-900/20 to-black/30 border-y border-primary/20 sticky top-0 z-10">
               <tr>
