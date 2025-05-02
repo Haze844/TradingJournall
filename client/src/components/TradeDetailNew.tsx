@@ -283,8 +283,27 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
               <div className="bg-muted/30 rounded-md p-3 mb-2 h-full">
                 <div className="text-xs font-medium mb-2 border-b border-border pb-1">Setup &amp; Einstieg</div>
                 <div className="space-y-2">
-                  {/* Setup und Kontotyp nebeneinander, Risiko Punkte darunter */}
+                  {/* Kontotyp und Setup nebeneinander, Risiko Punkte darunter */}
                   <div className="grid grid-cols-2 gap-2 mb-1">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Kontotyp</div>
+                      {editMode ? (
+                        <Select 
+                          value={editData.accountType || 'PA'} 
+                          onValueChange={val => updateField('accountType', val)}
+                        >
+                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                            <SelectValue placeholder="Kontotyp" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PA">PA</SelectItem>
+                            <SelectItem value="EVA">EVA</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType || 'PA'}</div>
+                      )}
+                    </div>
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Setup</div>
                       {editMode ? (
@@ -305,25 +324,6 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         </Select>
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.setup || '-'}</div>
-                      )}
-                    </div>
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Kontotyp</div>
-                      {editMode ? (
-                        <Select 
-                          value={editData.accountType || 'PA'} 
-                          onValueChange={val => updateField('accountType', val)}
-                        >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
-                            <SelectValue placeholder="Kontotyp" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PA">PA</SelectItem>
-                            <SelectItem value="EVA">EVA</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType || 'PA'}</div>
                       )}
                     </div>
                   </div>
