@@ -219,7 +219,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
             currentBlockType = 'trends';
           } else if (title.includes("marktzonen")) {
             currentBlockType = "marktzonen";
-          } else if (title.includes("ergebnis")) {
+          } else if (title.includes("ergebnis") || title.includes("rr")) {
             currentBlockType = "ergebnis";
           } else if (title.includes('position') || title.includes('struktur')) {
             currentBlockType = 'position';
@@ -298,7 +298,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
           const title = titleEl.textContent?.toLowerCase() || '';
           } else if (title.includes("marktzonen")) {
             currentBlockType = "marktzonen";
-          } else if (title.includes("ergebnis")) {
+          } else if (title.includes("ergebnis") || title.includes("rr")) {
             currentBlockType = "ergebnis";
           if (title.includes('setup') || title.includes('einstieg')) {
             currentBlockType = 'setup';
@@ -462,7 +462,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                   blockRefs.current.marktzonen = block as HTMLElement;
                   blockRefs.current.elements.marktzonen.push(element);
                 } 
-                else if (title.includes('ergebnis')) {
+                else if (title.includes('ergebnis') || title.includes('rr')) {
                   blockRefs.current.ergebnis = block as HTMLElement;
                   blockRefs.current.elements.ergebnis.push(element);
                 }
