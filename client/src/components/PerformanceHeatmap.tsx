@@ -945,43 +945,62 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                 )}
                 <Scatter 
                   data={transformedData.current}
-                  shape={(props: any) => (
-                    <CustomPoint 
-                      x={props.x}
-                      y={props.y}
-                      width={props.width * zoomLevel}
-                      height={props.height * zoomLevel}
-                      value={props.payload.value}
-                      tradeCount={props.payload.tradeCount}
-                      day={props.payload.day}
-                      timeframe={props.payload.timeframe}
-                      isSelected={selectedCell ? 
-                        selectedCell.day === props.payload.day && 
-                        selectedCell.timeframe === props.payload.timeframe 
-                        : false}
-                      onClick={(data) => {
-                        console.log("Cell clicked - data:", data);
-                        console.log("Cell trades data:", data.trades);
-                        console.log("Trade count:", data.tradeCount);
-                        
-                        setSelectedCell(data);
-                        
-                        if (interactionMode === "click" && data.tradeCount > 0) {
-                          if (data.trades && data.trades.length > 0) {
-                            console.log("Trade details available, showing details");
-                            setShowTradeDetails(true);
-                          } else {
-                            console.warn("Trade count > 0 but no trades array available:", data);
-                            toast({
-                              title: "Hinweis",
-                              description: "Für diese Zelle sind keine detaillierten Trade-Daten verfügbar.",
-                              variant: "destructive",
-                            });
+                  shape={(props: any) => {
+                    // Log the payload for debugging
+                    if (props.payload.tradeCount > 0) {
+                      console.log("Rendering cell with trades:", props.payload);
+                    }
+                    
+                    return (
+                      <CustomPoint 
+                        x={props.x}
+                        y={props.y}
+                        width={props.width * zoomLevel}
+                        height={props.height * zoomLevel}
+                        value={props.payload.value}
+                        tradeCount={props.payload.tradeCount}
+                        day={props.payload.day}
+                        timeframe={props.payload.timeframe}
+                        trades={props.payload.trades}
+                        winRate={props.payload.winRate}
+                        avgRR={props.payload.avgRR}
+                        totalPnL={props.payload.totalPnL}
+                        isSelected={selectedCell ? 
+                          selectedCell.day === props.payload.day && 
+                          selectedCell.timeframe === props.payload.timeframe 
+                          : false}
+                        onClick={(data) => {
+                          // Create a complete cell data object with all necessary properties
+                          const cellData = {
+                            ...data,
+                            // Make sure to include trades from the original payload
+                            trades: props.payload.trades || []
+                          };
+                          
+                          console.log("Cell clicked - data:", cellData);
+                          console.log("Original payload trades:", props.payload.trades);
+                          console.log("Trade count:", cellData.tradeCount);
+                          
+                          // Set the cell with complete trades data
+                          setSelectedCell(cellData);
+                          
+                          if (interactionMode === "click" && cellData.tradeCount > 0) {
+                            if (cellData.trades && cellData.trades.length > 0) {
+                              console.log("Trade details available, showing details");
+                              setShowTradeDetails(true);
+                            } else {
+                              console.warn("Trade count > 0 but no trades array available:", cellData);
+                              toast({
+                                title: "Hinweis",
+                                description: "Für diese Zelle sind keine detaillierten Trade-Daten verfügbar.",
+                                variant: "destructive",
+                              });
+                            }
                           }
-                        }
-                      }}
-                    />
-                  )}
+                        }}
+                      />
+                    );
+                  }}
                 >
                   {transformedData.current.map((entry, index) => (
                     <Cell key={`cell-${index}`} />
