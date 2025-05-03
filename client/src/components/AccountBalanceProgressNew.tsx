@@ -262,32 +262,32 @@ export default function AccountBalanceProgressNew({
     : 0;
 
   return (
-    <div className={`space-y-1 border border-primary/20 px-2 py-1 rounded-lg bg-black/20 shadow-md backdrop-blur-sm ${className}`}>
+    <div className={`space-y-1 border border-primary/10 px-1 py-0.5 rounded-lg bg-black/10 shadow-sm backdrop-blur-sm ${className}`}>
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <h3 className="text-xs font-bold flex items-center">
-              <Wallet className="mr-0.5 h-3.5 w-3.5 text-primary" />
+            <h3 className="text-[11px] font-bold flex items-center">
+              <Wallet className="mr-0.5 h-3 w-3 text-primary" />
               Kontoentwicklung
               {paBalanceProgress >= 100 && 
-                <div className="ml-1 text-[10px] bg-primary/10 text-primary px-1 py-0.5 rounded-full font-medium flex items-center">
-                  <TrendingUp className="mr-0.5 h-2.5 w-2.5" />
+                <div className="ml-1 text-[9px] bg-primary/10 text-primary px-1 py-0.5 rounded-full font-medium flex items-center">
+                  <TrendingUp className="mr-0.5 h-2 w-2" />
                   Ziel
                 </div>
               }
             </h3>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <p className="text-[10px] text-muted-foreground flex items-center">
+          <div className="flex items-center space-x-1">
+            <p className="text-[9px] text-muted-foreground flex items-center">
               {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
             </p>
             
             <Popover>
               <PopoverTrigger asChild>
-                <button className="flex items-center justify-center gap-0.5 bg-primary/10 hover:bg-primary/20 transition-colors p-1 px-1.5 rounded-md">
-                  <Settings className="h-3 w-3 text-primary" />
-                  <span className="text-[10px] text-primary font-medium">Einst.</span>
+                <button className="flex items-center justify-center gap-0.5 bg-primary/5 hover:bg-primary/15 transition-colors p-0.5 px-1 rounded-md">
+                  <Settings className="h-2.5 w-2.5 text-primary" />
+                  <span className="text-[9px] text-primary font-medium">Einst.</span>
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4 bg-black/95 border-primary/20 backdrop-blur-md">
@@ -563,153 +563,117 @@ export default function AccountBalanceProgressNew({
           </div>
         </div>
         
-        <div className="mt-2">
+        <div className="mt-1">
           <Tabs 
             defaultValue="pa" 
             value={activeTab} 
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="w-full h-7 bg-black/20 border border-primary/10 p-0.5 flex justify-center gap-3">
-              <TabsTrigger 
-                value="pa" 
-                className="text-xs w-16 rounded-md flex-grow-0 data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
-              >
-                <PiggyBank className="h-3 w-3 mr-1" />
-                PA
-              </TabsTrigger>
-              <TabsTrigger 
-                value="eva" 
-                className="text-xs w-16 rounded-md flex-grow-0 data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
-              >
-                <PiggyBank className="h-3 w-3 mr-1" />
-                EVA
-              </TabsTrigger>
-              <TabsTrigger 
-                value="ek" 
-                className="text-xs w-16 rounded-md flex-grow-0 data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
-              >
-                <PiggyBank className="h-3 w-3 mr-1" />
-                EK
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex flex-col md:flex-row gap-1 md:gap-3">
+              <div className="w-full md:w-auto">
+                <TabsList className="w-full h-6 bg-black/20 border border-primary/5 p-0.5 flex justify-center gap-2">
+                  <TabsTrigger 
+                    value="pa" 
+                    className="text-[10px] h-5 rounded-md flex-grow data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+                  >
+                    <PiggyBank className="h-2.5 w-2.5 mr-1" />
+                    PA
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="eva" 
+                    className="text-[10px] h-5 rounded-md flex-grow data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+                  >
+                    <PiggyBank className="h-2.5 w-2.5 mr-1" />
+                    EVA
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="ek" 
+                    className="text-[10px] h-5 rounded-md flex-grow data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+                  >
+                    <PiggyBank className="h-2.5 w-2.5 mr-1" />
+                    EK
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             
-          <TabsContent value="pa" className="mt-0 space-y-2">
-            {isLoading ? (
-              <Skeleton className="h-24 w-full" />
-            ) : (
-              <div className="space-y-2">
-                {/* PA Kontostand Einstellungen */}
-                <div className="flex justify-between px-1 py-2">
-                  <div className="flex items-center">
-                    <div className="mr-3">
-                      <span className="text-[12px] text-primary/80 block mb-1">Aktueller Wert:</span>
-                      <span className="font-medium text-[16px] text-primary">${paBalance.toLocaleString()}</span>
+              <div className="flex-grow">
+                <TabsContent value="pa" className="m-0 p-0">
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-full" />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-grow">
+                        <div className="flex justify-between items-center mb-0.5">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-primary/80">PA Konto: </span>
+                            <span className="font-medium text-[11px] text-primary">${paBalance.toLocaleString()}</span>
+                          </div>
+                          <span className="text-[10px] text-primary/80">{paBalanceProgress}%</span>
+                        </div>
+                        
+                        <div className="w-full bg-black/30 rounded-full h-1 border border-primary/10">
+                          <div 
+                            className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                            style={{ width: `${paBalanceProgress}%` }}
+                          ></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                
-                {/* Fortschrittsbalken */}
-                <div className="mt-2 mb-1 relative">
-                  <div className="w-full bg-black/50 rounded-full h-5 border border-primary/20">
-                    <div 
-                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out flex items-center justify-end pr-2"
-                      style={{ width: `${paBalanceProgress}%` }}
-                    >
-                      {paBalanceProgress > 15 && (
-                        <span className="text-[12px] text-white font-medium">
-                          {paBalanceProgress}%
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {paBalanceProgress <= 15 && (
-                    <span className="absolute right-1 top-1 text-[12px] text-white font-medium">
-                      {paBalanceProgress}%
-                    </span>
                   )}
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="eva" className="mt-0 space-y-2">
-            {isLoading ? (
-              <Skeleton className="h-24 w-full" />
-            ) : (
-              <div className="space-y-2">
-                {/* EVA Kontostand Einstellungen */}
-                <div className="flex justify-between px-1 py-2">
-                  <div className="flex items-center">
-                    <div className="mr-3">
-                      <span className="text-[12px] text-primary/80 block mb-1">Aktueller Wert:</span>
-                      <span className="font-medium text-[16px] text-primary">${evaBalance.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
+                </TabsContent>
                 
-                {/* Fortschrittsbalken */}
-                <div className="mt-2 mb-1 relative">
-                  <div className="w-full bg-black/50 rounded-full h-5 border border-primary/20">
-                    <div 
-                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out flex items-center justify-end pr-2"
-                      style={{ width: `${evaBalanceProgress}%` }}
-                    >
-                      {evaBalanceProgress > 15 && (
-                        <span className="text-[12px] text-white font-medium">
-                          {evaBalanceProgress}%
-                        </span>
-                      )}
+                <TabsContent value="eva" className="m-0 p-0">
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-full" />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-grow">
+                        <div className="flex justify-between items-center mb-0.5">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-primary/80">EVA Konto: </span>
+                            <span className="font-medium text-[11px] text-primary">${evaBalance.toLocaleString()}</span>
+                          </div>
+                          <span className="text-[10px] text-primary/80">{evaBalanceProgress}%</span>
+                        </div>
+                        
+                        <div className="w-full bg-black/30 rounded-full h-1 border border-primary/10">
+                          <div 
+                            className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                            style={{ width: `${evaBalanceProgress}%` }}
+                          ></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  {evaBalanceProgress <= 15 && (
-                    <span className="absolute right-1 top-1 text-[12px] text-white font-medium">
-                      {evaBalanceProgress}%
-                    </span>
                   )}
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="ek" className="mt-0 space-y-2">
-            {isLoading ? (
-              <Skeleton className="h-24 w-full" />
-            ) : (
-              <div className="space-y-2">
-                {/* EK Kontostand Einstellungen */}
-                <div className="flex justify-between px-1 py-2">
-                  <div className="flex items-center">
-                    <div className="mr-3">
-                      <span className="text-[12px] text-primary/80 block mb-1">Aktueller Wert:</span>
-                      <span className="font-medium text-[16px] text-primary">${ekBalance.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
+                </TabsContent>
                 
-                {/* Fortschrittsbalken */}
-                <div className="mt-2 mb-1 relative">
-                  <div className="w-full bg-black/50 rounded-full h-5 border border-primary/20">
-                    <div 
-                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out flex items-center justify-end pr-2"
-                      style={{ width: `${ekBalanceProgress}%` }}
-                    >
-                      {ekBalanceProgress > 15 && (
-                        <span className="text-[12px] text-white font-medium">
-                          {ekBalanceProgress}%
-                        </span>
-                      )}
+                <TabsContent value="ek" className="m-0 p-0">
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-full" />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-grow">
+                        <div className="flex justify-between items-center mb-0.5">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-primary/80">EK Konto: </span>
+                            <span className="font-medium text-[11px] text-primary">${ekBalance.toLocaleString()}</span>
+                          </div>
+                          <span className="text-[10px] text-primary/80">{ekBalanceProgress}%</span>
+                        </div>
+                        
+                        <div className="w-full bg-black/30 rounded-full h-1 border border-primary/10">
+                          <div 
+                            className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                            style={{ width: `${ekBalanceProgress}%` }}
+                          ></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  {ekBalanceProgress <= 15 && (
-                    <span className="absolute right-1 top-1 text-[12px] text-white font-medium">
-                      {ekBalanceProgress}%
-                    </span>
                   )}
-                </div>
+                </TabsContent>
               </div>
-            )}
-          </TabsContent>
+            </div>
           </Tabs>
         </div>
       </div>
