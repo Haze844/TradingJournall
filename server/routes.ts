@@ -348,6 +348,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID is required" });
       }
       
+      // Preserve the provided date exactly as submitted or use server time as fallback
+      const date = req.body.date ? new Date(req.body.date) : new Date();
+      console.log("Trade date from request:", req.body.date);
+      console.log("Parsed date for trade:", date);
+      
       // Generate GPT feedback
       const gptFeedback = await generateTradeFeedback({
         ...tradeData,
@@ -357,6 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newTrade = await storage.createTrade({
         ...tradeData,
         userId,
+        date,
         gptFeedback,
       });
       
