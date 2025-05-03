@@ -28,16 +28,21 @@ export default function AccountBalanceProgressNew({
   const [isEditingPAGoal, setIsEditingPAGoal] = useState(false);
   const [isEditingEVA, setIsEditingEVA] = useState(false);
   const [isEditingEVAGoal, setIsEditingEVAGoal] = useState(false);
+  const [isEditingEK, setIsEditingEK] = useState(false);
+  const [isEditingEKGoal, setIsEditingEKGoal] = useState(false);
   
   // Refs für Input-Felder
   const paBalanceInputRef = useRef<HTMLInputElement>(null);
   const paGoalInputRef = useRef<HTMLInputElement>(null);
   const evaBalanceInputRef = useRef<HTMLInputElement>(null);
   const evaGoalInputRef = useRef<HTMLInputElement>(null);
+  const ekBalanceInputRef = useRef<HTMLInputElement>(null);
+  const ekGoalInputRef = useRef<HTMLInputElement>(null);
   
   // State für berechnete Kontostände aus gefilterten Trades
   const [calculatedPaBalance, setCalculatedPaBalance] = useState<number | null>(null);
   const [calculatedEvaBalance, setCalculatedEvaBalance] = useState<number | null>(null);
+  const [calculatedEkBalance, setCalculatedEkBalance] = useState<number | null>(null);
 
   // Benutzereinstellungen abrufen
   const { data: settings, isLoading } = useQuery({
@@ -85,19 +90,28 @@ export default function AccountBalanceProgressNew({
           return sum + (Number(trade.profitLoss) || 0);
         }, 0);
       
+      // EK Konto Berechnung
+      const ekProfit = filteredTrades
+        .filter(trade => trade.accountType === "EK")
+        .reduce((sum, trade) => {
+          return sum + (Number(trade.profitLoss) || 0);
+        }, 0);
+      
       // Aktualisiere die berechneten Kontostände
       setCalculatedPaBalance(Number(settings.accountBalance) + paProfit);
       setCalculatedEvaBalance(Number(settings.evaAccountBalance) + evaProfit);
+      setCalculatedEkBalance(Number(settings.ekAccountBalance || 0) + ekProfit);
     } else {
       // Wenn keine gefilterten Trades, setze auf null zurück
       setCalculatedPaBalance(null);
       setCalculatedEvaBalance(null);
+      setCalculatedEkBalance(null);
     }
   }, [filteredTrades, settings]);
 
   // Mutation zum Aktualisieren des Kontostands
   const updateBalanceMutation = useMutation({
-    mutationFn: async (data: { accountType: 'PA' | 'EVA', balance: number }) => {
+    mutationFn: async (data: { accountType: 'PA' | 'EVA' | 'EK', balance: number }) => {
       if (!user) throw new Error('Benutzer nicht eingeloggt');
       return apiRequest('PUT', '/api/account-balance', { 
         userId: user.id, 
@@ -123,7 +137,7 @@ export default function AccountBalanceProgressNew({
 
   // Mutation zum Aktualisieren des Zielwerts
   const updateGoalMutation = useMutation({
-    mutationFn: async (data: { accountType: 'PA' | 'EVA', goalBalance: number }) => {
+    mutationFn: async (data: { accountType: 'PA' | 'EVA' | 'EK', goalBalance: number }) => {
       if (!user) throw new Error('Benutzer nicht eingeloggt');
       
       return apiRequest('PUT', '/api/goal-balance', { 
@@ -192,12 +206,15 @@ export default function AccountBalanceProgressNew({
   // Extrahiere Basiswerte aus den Settings
   const basePaBalance = settings ? settings.accountBalance : 0;
   const baseEvaBalance = settings ? settings.evaAccountBalance : 0;
+  const baseEkBalance = settings ? settings.ekAccountBalance || 0 : 0;
   const paGoal = settings ? settings.goalBalance : 0;
   const evaGoal = settings ? settings.evaGoalBalance : 0;
+  const ekGoal = settings ? settings.ekGoalBalance || 0 : 0;
 
   // Verwende entweder die berechneten Werte oder die Basiswerte
   const paBalance = calculatedPaBalance !== null ? calculatedPaBalance : basePaBalance;
   const evaBalance = calculatedEvaBalance !== null ? calculatedEvaBalance : baseEvaBalance;
+  const ekBalance = calculatedEkBalance !== null ? calculatedEkBalance : baseEkBalance;
 
   // Berechne Fortschritt in Prozent
   const paBalanceProgress = paGoal > 0 && paBalance > basePaBalance 
@@ -205,6 +222,9 @@ export default function AccountBalanceProgressNew({
     : 0;
   const evaBalanceProgress = evaGoal > 0 && evaBalance > baseEvaBalance 
     ? Math.min(100, Math.round(((evaBalance - baseEvaBalance) / (evaGoal - baseEvaBalance)) * 100)) 
+    : 0;
+  const ekBalanceProgress = ekGoal > 0 && ekBalance > baseEkBalance 
+    ? Math.min(100, Math.round(((ekBalance - baseEkBalance) / (ekGoal - baseEkBalance)) * 100)) 
     : 0;
 
   return (
@@ -329,7 +349,7 @@ export default function AccountBalanceProgressNew({
                   </div>
                   
                   {/* EVA Konto Einstellungen */}
-                  <div className="space-y-2 pb-1">
+                  <div className="space-y-2 border-b border-primary/10 pb-3">
                     <h5 className="text-xs font-medium text-primary/90 flex items-center">
                       <PiggyBank className="h-3.5 w-3.5 mr-1" />
                       EVA Konto
@@ -415,6 +435,94 @@ export default function AccountBalanceProgressNew({
                       )}
                     </div>
                   </div>
+                  
+                  {/* EK Konto Einstellungen */}
+                  <div className="space-y-2 pb-1">
+                    <h5 className="text-xs font-medium text-primary/90 flex items-center">
+                      <PiggyBank className="h-3.5 w-3.5 mr-1" />
+                      EK Konto
+                    </h5>
+                    
+                    {/* Basis Kontostand */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-muted-foreground">Basis-Kontostand:</span>
+                      {isEditingEK ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            ref={ekBalanceInputRef}
+                            defaultValue={baseEkBalance}
+                            className="h-7 w-24 text-[13px] px-2"
+                            type="number"
+                            min="0"
+                          />
+                          <button 
+                            className="p-1 hover:bg-primary/20 rounded-md"
+                            onClick={handleEKBalanceSubmit}
+                          >
+                            <Check className="h-3.5 w-3.5 text-primary" />
+                          </button>
+                          <button 
+                            className="p-1 hover:bg-destructive/20 rounded-md"
+                            onClick={() => setIsEditingEK(false)}
+                          >
+                            <X className="h-3.5 w-3.5 text-destructive" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                            ${baseEkBalance.toLocaleString()}
+                          </span>
+                          <button
+                            className="p-1 hover:bg-primary/10 rounded-md ml-1"
+                            onClick={() => setIsEditingEK(true)}
+                          >
+                            <Edit className="h-3.5 w-3.5 text-primary/70" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Ziel Kontostand */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-muted-foreground">Ziel-Kontostand:</span>
+                      {isEditingEKGoal ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            ref={ekGoalInputRef}
+                            defaultValue={ekGoal}
+                            className="h-7 w-24 text-[13px] px-2"
+                            type="number"
+                            min="1"
+                          />
+                          <button 
+                            className="p-1 hover:bg-primary/20 rounded-md"
+                            onClick={handleEKGoalSubmit}
+                          >
+                            <Check className="h-3.5 w-3.5 text-primary" />
+                          </button>
+                          <button 
+                            className="p-1 hover:bg-destructive/20 rounded-md"
+                            onClick={() => setIsEditingEKGoal(false)}
+                          >
+                            <X className="h-3.5 w-3.5 text-destructive" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                            ${ekGoal.toLocaleString()}
+                          </span>
+                          <button
+                            className="p-1 hover:bg-primary/10 rounded-md ml-1"
+                            onClick={() => setIsEditingEKGoal(true)}
+                          >
+                            <Edit className="h-3.5 w-3.5 text-primary/70" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </PopoverContent>
             </Popover>
@@ -442,6 +550,13 @@ export default function AccountBalanceProgressNew({
               >
                 <PiggyBank className="h-3 w-3 mr-1" />
                 EVA
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ek" 
+                className="text-xs w-16 rounded-md flex-grow-0 data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+              >
+                <PiggyBank className="h-3 w-3 mr-1" />
+                EK
               </TabsTrigger>
             </TabsList>
             
@@ -516,6 +631,45 @@ export default function AccountBalanceProgressNew({
                   {evaBalanceProgress <= 15 && (
                     <span className="absolute right-1 top-1 text-[12px] text-white font-medium">
                       {evaBalanceProgress}%
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="ek" className="mt-0 space-y-2">
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : (
+              <div className="space-y-2">
+                {/* EK Kontostand Einstellungen */}
+                <div className="flex justify-between px-1 py-2">
+                  <div className="flex items-center">
+                    <div className="mr-3">
+                      <span className="text-[12px] text-primary/80 block mb-1">Aktueller Wert:</span>
+                      <span className="font-medium text-[16px] text-primary">${ekBalance.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Fortschrittsbalken */}
+                <div className="mt-2 mb-1 relative">
+                  <div className="w-full bg-black/50 rounded-full h-5 border border-primary/20">
+                    <div 
+                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out flex items-center justify-end pr-2"
+                      style={{ width: `${ekBalanceProgress}%` }}
+                    >
+                      {ekBalanceProgress > 15 && (
+                        <span className="text-[12px] text-white font-medium">
+                          {ekBalanceProgress}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {ekBalanceProgress <= 15 && (
+                    <span className="absolute right-1 top-1 text-[12px] text-white font-medium">
+                      {ekBalanceProgress}%
                     </span>
                   )}
                 </div>
