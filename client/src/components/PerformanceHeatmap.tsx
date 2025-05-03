@@ -23,6 +23,7 @@ type HeatmapDataPoint = {
   y?: number;
   isComparison?: boolean;
   valueLabel?: string;
+  trades?: any[]; // Liste der Trades für diese Zelle
 };
 
 type HeatmapRecommendation = {
@@ -110,6 +111,10 @@ interface CustomPointProps {
   day: string;
   timeframe: string;
   isSelected: boolean;
+  winRate?: number;
+  avgRR?: string;
+  totalPnL?: string;
+  trades?: any[];
   onClick: (data: HeatmapDataPoint) => void;
 }
 
@@ -139,16 +144,18 @@ const CustomPoint = (props: CustomPointProps) => {
   };
 
   const handleClick = () => {
+    // Alle Eigenschaften der Zelle an den Handler übergeben
     onClick({
       day: props.day,
       timeframe: props.timeframe,
       value: props.value,
       tradeCount: props.tradeCount,
-      winRate: props.value, // In diesem Fall ist es gleich, aber könnte unterschiedlich sein
-      avgRR: "0", // Wird später überschrieben mit tatsächlichen Daten
-      totalPnL: "0", // Wird später überschrieben mit tatsächlichen Daten
+      winRate: props.winRate || props.value, // Korrekte Win-Rate verwenden
+      avgRR: props.avgRR || "0", // Durchschnittliches RR verwenden
+      totalPnL: props.totalPnL || "0", // Korrekten P/L-Wert verwenden
       x: props.x,
-      y: props.y
+      y: props.y,
+      trades: props.trades || [] // Liste der dazugehörigen Trades weitergeben
     });
   };
 

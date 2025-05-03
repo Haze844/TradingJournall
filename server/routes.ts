@@ -1311,6 +1311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 avgRR: avgRR.toFixed(2),
                 totalPnL: totalPnL.toFixed(2),
                 isComparison,
+                trades: tradesInSlot, // Vollständige Liste der Trades für diese Zelle hinzufügen
               });
             } else {
               // Leere Slots auch hinzufügen mit Nullwerten
@@ -1323,6 +1324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 avgRR: "0.00",
                 totalPnL: "0.00",
                 isComparison,
+                trades: [], // Leere Trade-Liste für Zellen ohne Daten
               });
             }
           });
