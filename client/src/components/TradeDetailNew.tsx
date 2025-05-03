@@ -32,6 +32,74 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Komponente für Button-Gruppen mit Tastaturnavigation
+const ButtonGroupWrapper = ({ 
+  children, 
+  className, 
+  tabIndex, 
+  onKeyDown, 
+  inputRef 
+}: { 
+  children: React.ReactNode, 
+  className?: string, 
+  tabIndex?: number, 
+  onKeyDown?: (e: React.KeyboardEvent) => void,
+  inputRef?: (el: HTMLDivElement | null) => void
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (onKeyDown) {
+      onKeyDown(e);
+    }
+    
+    // Nur innerhalb der Button-Gruppe navigieren
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      
+      const buttons = containerRef.current?.querySelectorAll('button');
+      if (!buttons || buttons.length === 0) return;
+      
+      // Aktuellen Button finden
+      const activeElement = document.activeElement;
+      let currentIndex = -1;
+      
+      buttons.forEach((button, index) => {
+        if (button === activeElement) {
+          currentIndex = index;
+        }
+      });
+      
+      // Nächsten/vorherigen Button bestimmen
+      let newIndex = currentIndex;
+      if (e.key === 'ArrowRight') {
+        newIndex = currentIndex < buttons.length - 1 ? currentIndex + 1 : 0;
+      } else if (e.key === 'ArrowLeft') {
+        newIndex = currentIndex > 0 ? currentIndex - 1 : buttons.length - 1;
+      }
+      
+      // Fokus setzen
+      if (newIndex >= 0 && newIndex < buttons.length) {
+        (buttons[newIndex] as HTMLButtonElement).focus();
+      }
+    }
+  };
+  
+  return (
+    <div 
+      className={className}
+      ref={(el) => {
+        containerRef.current = el;
+        if (inputRef) inputRef(el);
+      }}
+      tabIndex={tabIndex || 0}
+      onKeyDown={handleKeyDown}
+    >
+      {children}
+    </div>
+  );
+};
+
 interface TradeDetailProps {
   selectedTrade: Trade | null;
   onTradeSelected: (trade: Trade) => void;
@@ -1189,13 +1257,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Session</div>
                       {editMode ? (
-                        <div 
+                        <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          ref={(el) => { inputRefs.current[19] = el; }}
+                          inputRef={(el) => { inputRefs.current[19] = el; }}
                           onKeyDown={(e) => handleKeyDown(e, 19)}
                         >
-                          {["London", "London Neverland", "NY AM", "NY AM Neverland", "NY PM"].map((session, idx) => (
+                          {["London", "London Neverland", "NY AM", "NY AM Neverland", "NY PM"].map((session) => (
                             <Button
                               key={session}
                               type="button"
@@ -1203,14 +1271,12 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className="p-1 h-6 text-[10px]"
                               onClick={() => updateField('session', session)}
-                              // Nur den ersten Button erhält einen Ref
-                              ref={idx === 0 ? (el) => { inputRefs.current[20] = el; } : undefined}
-                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 20) : undefined}
+                              tabIndex={-1} // Buttons in der Gruppe sind über die Gruppe fokussierbar
                             >
                               {session}
                             </Button>
                           ))}
-                        </div>
+                        </ButtonGroupWrapper>
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.session || '-'}</div>
                       )}
@@ -1229,13 +1295,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">RR Achieved</div>
                       {editMode ? (
-                        <div 
+                        <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          ref={(el) => { inputRefs.current[21] = el; }}
+                          inputRef={(el) => { inputRefs.current[21] = el; }}
                           onKeyDown={(e) => handleKeyDown(e, 21)}
                         >
-                          {[-1, ...[1, 2, 3, 4, 5, 6, 7]].map((val, idx) => (
+                          {[-1, ...[1, 2, 3, 4, 5, 6, 7]].map((val) => (
                             <Button
                               key={val}
                               type="button"
@@ -1243,14 +1309,12 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className={`p-1 h-6 text-[10px] flex-1 ${val === -1 ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : ''}`}
                               onClick={() => updateField('rrAchieved', val)}
-                              // Nur der erste Button erhält einen Ref
-                              ref={idx === 0 ? (el) => { inputRefs.current[22] = el; } : undefined}
-                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 22) : undefined}
+                              tabIndex={-1}
                             >
                               {val}R
                             </Button>
                           ))}
-                        </div>
+                        </ButtonGroupWrapper>
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.rrAchieved ? `${selectedTrade.rrAchieved}R` : '-'}</div>
                       )}
@@ -1258,13 +1322,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">RR Potential</div>
                       {editMode ? (
-                        <div 
+                        <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          ref={(el) => { inputRefs.current[23] = el; }}
+                          inputRef={(el) => { inputRefs.current[23] = el; }}
                           onKeyDown={(e) => handleKeyDown(e, 23)}
                         >
-                          {[1, 2, 3, 4, 5, 6, 7].map((val, idx) => (
+                          {[1, 2, 3, 4, 5, 6, 7].map((val) => (
                             <Button
                               key={val}
                               type="button"
@@ -1272,14 +1336,12 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className="p-1 h-6 text-[10px] flex-1"
                               onClick={() => updateField('rrPotential', val)}
-                              // Nur der erste Button erhält einen Ref
-                              ref={idx === 0 ? (el) => { inputRefs.current[24] = el; } : undefined}
-                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 24) : undefined}
+                              tabIndex={-1}
                             >
                               {val}R
                             </Button>
                           ))}
-                        </div>
+                        </ButtonGroupWrapper>
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.rrPotential ? `${selectedTrade.rrPotential}R` : '-'}</div>
                       )}
@@ -1289,13 +1351,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">SL Typ</div>
                       {editMode ? (
-                        <div 
+                        <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          ref={(el) => { inputRefs.current[25] = el; }}
+                          inputRef={(el) => { inputRefs.current[25] = el; }}
                           onKeyDown={(e) => handleKeyDown(e, 25)}
                         >
-                          {["Sweep", "zerstört"].map((type, idx) => (
+                          {["Sweep", "zerstört"].map((type) => (
                             <Button
                               key={type}
                               type="button"
@@ -1303,14 +1365,12 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className="p-1 h-6 text-[10px] flex-1"
                               onClick={() => updateField('slType', type)}
-                              // Nur der erste Button erhält einen Ref
-                              ref={idx === 0 ? (el) => { inputRefs.current[26] = el; } : undefined}
-                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 26) : undefined}
+                              tabIndex={-1}
                             >
                               {type}
                             </Button>
                           ))}
-                        </div>
+                        </ButtonGroupWrapper>
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.slType || '-'}</div>
                       )}
