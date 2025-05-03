@@ -509,8 +509,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl h-[70vh]">
         <CardHeader className="pb-0 pt-4">
           <div className="flex flex-wrap items-start justify-between gap-2 w-full">
-            {/* Account Balance Progress */}
-            <AccountBalanceProgress className="w-auto min-w-[300px] flex-none" />
+            {/* Account Balance Progress mit gefilterten Trades */}
+            <AccountBalanceProgress 
+              className="w-auto min-w-[300px] flex-none" 
+              filteredTrades={filteredTrades} 
+            />
             
             {/* Filter Buttons */}
             <div className="flex gap-2 items-start">

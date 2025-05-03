@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -13,9 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AccountBalanceProgressProps {
   className?: string;
+  filteredTrades?: any[];
 }
 
-export default function AccountBalanceProgress({ className }: AccountBalanceProgressProps) {
+export default function AccountBalanceProgress({ className, filteredTrades = [] }: AccountBalanceProgressProps) {
   const [activeTab, setActiveTab] = useState<string>("pa");
   const { user } = useAuth();
   const { toast } = useToast();
@@ -32,6 +33,10 @@ export default function AccountBalanceProgress({ className }: AccountBalanceProg
   const paGoalInputRef = useRef<HTMLInputElement>(null);
   const evaBalanceInputRef = useRef<HTMLInputElement>(null);
   const evaGoalInputRef = useRef<HTMLInputElement>(null);
+  
+  // State für berechnete Kontostände aus gefilterten Trades
+  const [calculatedPaBalance, setCalculatedPaBalance] = useState<number | null>(null);
+  const [calculatedEvaBalance, setCalculatedEvaBalance] = useState<number | null>(null);
 
   // Benutzereinstellungen abrufen
   const { data: settings, isLoading } = useQuery({
@@ -64,6 +69,47 @@ export default function AccountBalanceProgress({ className }: AccountBalanceProg
     },
     enabled: !!user,
   });
+  
+  // Berechne Kontostände basierend auf gefilterten Trades
+  useEffect(() => {
+    if (settings && filteredTrades.length > 0) {
+      // PA Konto Berechnung
+      const paProfit = filteredTrades
+        .filter(trade => trade.accountType === "PA")
+        .reduce((sum, trade) => {
+          // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
+          if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
+            return sum + trade.profitLoss;
+          } else if (trade.riskPoints !== null && trade.riskPoints !== undefined && 
+                     trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
+            return sum + (trade.riskPoints * trade.rrAchieved);
+          }
+          return sum;
+        }, 0);
+      
+      // EVA Konto Berechnung
+      const evaProfit = filteredTrades
+        .filter(trade => trade.accountType === "EVA")
+        .reduce((sum, trade) => {
+          // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
+          if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
+            return sum + trade.profitLoss;
+          } else if (trade.riskPoints !== null && trade.riskPoints !== undefined && 
+                     trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
+            return sum + (trade.riskPoints * trade.rrAchieved);
+          }
+          return sum;
+        }, 0);
+        
+      // Aktualisiere die berechneten Balancen
+      setCalculatedPaBalance(settings.accountBalance + paProfit);
+      setCalculatedEvaBalance(settings.evaAccountBalance + evaProfit);
+    } else {
+      // Wenn keine gefilterten Trades, setze auf null zurück
+      setCalculatedPaBalance(null);
+      setCalculatedEvaBalance(null);
+    }
+  }, [filteredTrades, settings]);
 
   // Mutation zum Aktualisieren des Kontostands
   const updateBalanceMutation = useMutation({
@@ -120,11 +166,13 @@ export default function AccountBalanceProgress({ className }: AccountBalanceProg
   });
 
   // Berechne Werte
-  const paBalance = settings?.accountBalance || 2500;
+  const basePaBalance = settings?.accountBalance || 2500;
+  const paBalance = calculatedPaBalance !== null ? calculatedPaBalance : basePaBalance;
   const paGoal = settings?.goalBalance || 7500;
   const paBalanceProgress = Math.min(Math.round((paBalance / paGoal) * 100), 100);
   
-  const evaBalance = settings?.evaAccountBalance || 1500;
+  const baseEvaBalance = settings?.evaAccountBalance || 1500;
+  const evaBalance = calculatedEvaBalance !== null ? calculatedEvaBalance : baseEvaBalance;
   const evaGoal = settings?.evaGoalBalance || 7500;
   const evaBalanceProgress = Math.min(Math.round((evaBalance / evaGoal) * 100), 100);
 
