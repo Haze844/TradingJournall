@@ -6,7 +6,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import AccountBalanceProgress from "@/components/AccountBalanceProgress";
+import AccountBalanceProgressNew from "@/components/AccountBalanceProgressNew";
 import { 
   Popover,
   PopoverContent,
@@ -509,9 +509,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl h-[70vh]">
         <CardHeader className="pb-0 pt-4">
           <div className="flex flex-wrap items-start justify-between gap-2 w-full">
-            {/* Account Balance Progress mit gefilterten Trades - Hälfte der Größe des Statistikpanels */}
+            {/* Account Balance Progress mit gefilterten Trades */}
             <AccountBalanceProgress 
-              className="w-auto min-w-[280px] max-w-[450px] flex-none border border-primary/20 p-2 rounded-lg bg-black/30" 
+              className="w-auto min-w-[280px] max-w-[450px] flex-none" 
               filteredTrades={filteredTrades} 
             />
             
