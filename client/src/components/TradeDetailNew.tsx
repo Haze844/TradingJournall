@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, createRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
@@ -43,6 +43,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
   const [editMode, setEditMode] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   
+  // Refs für alle Eingabefelder, um Navigation per Enter zu ermöglichen
+  const inputRefs = useRef<Array<HTMLElement | null>>([]);
+  
   // Nur ein einziger State für alle Bearbeitungen
   const [editData, setEditData] = useState<Partial<Trade>>({});
   
@@ -69,6 +72,38 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     }
   });
 
+  // Funktion zum Navigieren zum nächsten Eingabefeld
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>, index: number) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      
+      // Suche nach dem nächsten verfügbaren Eingabefeld
+      let nextIndex = index + 1;
+      while (nextIndex < inputRefs.current.length && !inputRefs.current[nextIndex]) {
+        nextIndex++;
+      }
+      
+      // Wenn ein nächstes Feld existiert, fokussiere es
+      if (nextIndex < inputRefs.current.length && inputRefs.current[nextIndex]) {
+        const nextElement = inputRefs.current[nextIndex];
+        
+        if (nextElement instanceof HTMLButtonElement || 
+            nextElement instanceof HTMLInputElement || 
+            nextElement instanceof HTMLSelectElement) {
+          nextElement.focus();
+          
+          // Für SelectTrigger muss ein Klick simuliert werden
+          if (nextElement.classList.contains('SelectTrigger')) {
+            nextElement.click();
+          }
+        }
+      } else {
+        // Kein weiteres Feld gefunden, beende den Bearbeitungsmodus
+        saveChanges();
+      }
+    }
+  };
+  
   // Initialisierung der Edit-Daten, wenn der Edit-Modus gestartet wird
   useEffect(() => {
     if (selectedTrade && editMode) {
@@ -95,8 +130,23 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         slPoints: selectedTrade.slPoints,
         accountType: selectedTrade.accountType || 'PA', 
         riskSum: selectedTrade.riskSum ?? 200,
-        entryPoints: selectedTrade.entryPoints
+        entryPoints: selectedTrade.entryPoints,
+        session: selectedTrade.session || ''
       });
+      
+      // Initialisiere die inputRefs-Array mit leeren Elementen
+      // Diese werden im JSX durch die ref-Attribute gefüllt
+      inputRefs.current = Array(20).fill(null);
+      
+      // Fokussiere auf das erste Eingabefeld, wenn der Edit-Modus gestartet wird
+      setTimeout(() => {
+        if (inputRefs.current[0]) {
+          const firstElement = inputRefs.current[0];
+          if (firstElement instanceof HTMLElement) {
+            firstElement.focus();
+          }
+        }
+      }, 100);
     }
   }, [selectedTrade, editMode]);
 
@@ -292,7 +342,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.accountType || 'PA'} 
                           onValueChange={val => updateField('accountType', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[0] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 0)}
+                          >
                             <SelectValue placeholder="Kontotyp" />
                           </SelectTrigger>
                           <SelectContent>
@@ -312,7 +366,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.setup} 
                           onValueChange={val => updateField('setup', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[1] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 1)}
+                          >
                             <SelectValue placeholder="Setup auswählen" />
                           </SelectTrigger>
                           <SelectContent>
@@ -342,6 +400,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           className="h-7 text-xs mt-0.5"
                           min="0"
                           placeholder="Position Size"
+                          ref={(el) => { inputRefs.current[2] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 2)}
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">
@@ -363,6 +423,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           className="h-7 text-xs mt-0.5"
                           min="0"
                           placeholder="0"
+                          ref={(el) => { inputRefs.current[3] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 3)}
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">
@@ -389,7 +451,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.trend} 
                           onValueChange={val => updateField('trend', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[4] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 4)}
+                          >
                             <SelectValue placeholder="Trend" />
                           </SelectTrigger>
                           <SelectContent>
