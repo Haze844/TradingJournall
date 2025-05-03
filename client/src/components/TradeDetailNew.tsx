@@ -192,6 +192,116 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
 
   // Funktion zum Navigieren zum nächsten oder vorherigen Eingabefeld
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>, index: number) => {
+    // Navigation mit Pfeiltasten (oben/unten) für bessere vertikale Navigation
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      
+      // 1. Element im aktuellen Block finden
+      const currentElement = inputRefs.current[index];
+      if (!currentElement) return;
+      
+      // Finden des nächsten Elements in einer anderen Zeile (üblicherweise unterhalb)
+      // Schrittweite variiert je nach Layout, versuchen wir es mit 2-4 Elementen
+      const navigationSteps = [2, 3, 4]; // Typische Schrittweiten basierend auf Grid-Layout
+      
+      for (const step of navigationSteps) {
+        const nextIndex = index + step;
+        if (nextIndex < inputRefs.current.length && inputRefs.current[nextIndex]) {
+          const nextElement = inputRefs.current[nextIndex];
+          if (nextElement instanceof HTMLButtonElement || 
+              nextElement instanceof HTMLInputElement || 
+              nextElement instanceof HTMLSelectElement) {
+            nextElement.focus();
+            return;
+          }
+        }
+      }
+      
+      // Wenn keine passende Zeile gefunden wurde, versuche zum nächsten Block zu springen
+      const block = currentElement.closest('.bg-muted\\/30');
+      if (block) {
+        const titleEl = block.querySelector('.text-xs.font-medium');
+        if (titleEl) {
+          const titleText = titleEl.textContent?.toLowerCase() || '';
+          const currentBlockType = getBlockTypeFromTitle(titleText);
+          
+          // Zum nächsten Block springen
+          let nextBlockType = '';
+          if (currentBlockType === 'setup') nextBlockType = 'trends';
+          else if (currentBlockType === 'trends') nextBlockType = 'position';
+          else if (currentBlockType === 'position') nextBlockType = 'marktzonen';
+          else if (currentBlockType === 'marktzonen') nextBlockType = 'ergebnis';
+          
+          console.log(`Springe zum nächsten Block von unten: ${nextBlockType}`);
+          
+          if (nextBlockType && blockRefs.current.elements[nextBlockType]?.length > 0) {
+            const firstElementInNextBlock = blockRefs.current.elements[nextBlockType][0];
+            if (firstElementInNextBlock instanceof HTMLButtonElement || 
+                firstElementInNextBlock instanceof HTMLInputElement || 
+                firstElementInNextBlock instanceof HTMLSelectElement) {
+              firstElementInNextBlock.focus();
+              return;
+            }
+          }
+        }
+      }
+    }
+    
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      
+      // 1. Element im aktuellen Block finden
+      const currentElement = inputRefs.current[index];
+      if (!currentElement) return;
+      
+      // Finden des vorherigen Elements in einer Zeile (üblicherweise oberhalb)
+      // Schrittweite variiert je nach Layout, versuchen wir es mit 2-4 Elementen
+      const navigationSteps = [2, 3, 4]; // Typische Schrittweiten basierend auf Grid-Layout
+      
+      for (const step of navigationSteps) {
+        const prevIndex = index - step;
+        if (prevIndex >= 0 && inputRefs.current[prevIndex]) {
+          const prevElement = inputRefs.current[prevIndex];
+          if (prevElement instanceof HTMLButtonElement || 
+              prevElement instanceof HTMLInputElement || 
+              prevElement instanceof HTMLSelectElement) {
+            prevElement.focus();
+            return;
+          }
+        }
+      }
+      
+      // Wenn keine passende Zeile gefunden wurde, versuche zum vorherigen Block zu springen
+      const block = currentElement.closest('.bg-muted\\/30');
+      if (block) {
+        const titleEl = block.querySelector('.text-xs.font-medium');
+        if (titleEl) {
+          const titleText = titleEl.textContent?.toLowerCase() || '';
+          const currentBlockType = getBlockTypeFromTitle(titleText);
+          
+          // Zum vorherigen Block springen
+          let prevBlockType = '';
+          if (currentBlockType === 'trends') prevBlockType = 'setup';
+          else if (currentBlockType === 'position') prevBlockType = 'trends';
+          else if (currentBlockType === 'marktzonen') prevBlockType = 'position';
+          else if (currentBlockType === 'ergebnis') prevBlockType = 'marktzonen';
+          
+          console.log(`Springe zum vorherigen Block von oben: ${prevBlockType}`);
+          
+          if (prevBlockType && blockRefs.current.elements[prevBlockType]?.length > 0) {
+            const lastIndex = blockRefs.current.elements[prevBlockType].length - 1;
+            const lastElementInPrevBlock = blockRefs.current.elements[prevBlockType][lastIndex];
+            if (lastElementInPrevBlock instanceof HTMLButtonElement || 
+                lastElementInPrevBlock instanceof HTMLInputElement || 
+                lastElementInPrevBlock instanceof HTMLSelectElement) {
+              lastElementInPrevBlock.focus();
+              return;
+            }
+          }
+        }
+      }
+    }
+    
     // Navigation mit Enter-Taste zum nächsten Feld - barrierefrei durch alle Blöcke
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -246,48 +356,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       }
     }
     
-    // Navigation mit Pfeiltasten (hoch/runter)
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      
-      // Suche nach dem vorherigen verfügbaren Eingabefeld
-      let prevIndex = index - 1;
-      while (prevIndex >= 0 && !inputRefs.current[prevIndex]) {
-        prevIndex--;
-      }
-      
-      // Wenn ein vorheriges Feld existiert, fokussiere es
-      if (prevIndex >= 0 && inputRefs.current[prevIndex]) {
-        const prevElement = inputRefs.current[prevIndex];
-        
-        if (prevElement instanceof HTMLButtonElement || 
-            prevElement instanceof HTMLInputElement || 
-            prevElement instanceof HTMLSelectElement) {
-          prevElement.focus();
-        }
-      }
-    }
-    
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      
-      // Suche nach dem nächsten verfügbaren Eingabefeld
-      let nextIndex = index + 1;
-      while (nextIndex < inputRefs.current.length && !inputRefs.current[nextIndex]) {
-        nextIndex++;
-      }
-      
-      // Wenn ein nächstes Feld existiert, fokussiere es
-      if (nextIndex < inputRefs.current.length && inputRefs.current[nextIndex]) {
-        const nextElement = inputRefs.current[nextIndex];
-        
-        if (nextElement instanceof HTMLButtonElement || 
-            nextElement instanceof HTMLInputElement || 
-            nextElement instanceof HTMLSelectElement) {
-          nextElement.focus();
-        }
-      }
-    }
+    // Die verbesserten Navigation mit Pfeiltasten (hoch/runter) am Anfang der Funktion ersetzt diesen Block
     
     // Navigation mit Pfeiltasten (links/rechts) für alle Felder
     // Verbesserte Implementierung, die die Block-Struktur berücksichtigt
