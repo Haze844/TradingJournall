@@ -85,6 +85,18 @@ export default function AccountBalanceProgress({
     enabled: !!user,
   });
   
+  // Detaillierte Debug-Funktion
+  const logTradeDetails = (trade: any) => {
+    console.log(`
+      Trade ID: ${trade.id} 
+      Symbol: ${trade.symbol}
+      Konto: ${trade.accountType} 
+      Profit/Loss: ${trade.profitLoss} 
+      Risk: ${trade.riskSum} 
+      RR: ${trade.rrAchieved}
+    `);
+  };
+
   // Berechne Kontostände basierend auf gefilterten Trades
   useEffect(() => {
     if (settings && Array.isArray(filteredTrades)) {
@@ -92,43 +104,33 @@ export default function AccountBalanceProgress({
       console.log("Berechne Kontostände aus", filteredTrades.length, "gefilterten Trades");
       console.log("Basis PA:", settings.accountBalance, "EVA:", settings.evaAccountBalance);
       
-      // PA Konto Berechnung
+      // Detaillierter Log für Debugging
+      console.log("DETAILLIERTE TRADE ANALYSE:");
+      filteredTrades.forEach(trade => logTradeDetails(trade));
+      
+      // PA Konto Berechnung - nur mit profitLoss
       const paProfit = filteredTrades
         .filter(trade => trade.accountType === "PA")
         .reduce((sum, trade) => {
-          // Berechne den Gewinn/Verlust
-          let profit = 0;
-          
-          // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
-          if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
-            profit = Number(trade.profitLoss);
-            console.log("PA Trade:", trade.id, "P/L:", profit);
-          } else if (trade.riskSum !== null && trade.riskSum !== undefined && 
-                     trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
-            profit = Number(trade.riskSum) * Number(trade.rrAchieved);
-            console.log("PA Trade (berechnet):", trade.id, "Risiko:", trade.riskSum, "RR:", trade.rrAchieved, "P/L:", profit);
-          }
-          
+          // Direkt profitLoss verwenden
+          const profit = trade.profitLoss !== null && trade.profitLoss !== undefined 
+            ? Number(trade.profitLoss) 
+            : 0;
+            
+          console.log(`PA Trade ${trade.id}: profitLoss = ${profit}`);
           return sum + profit;
         }, 0);
       
-      // EVA Konto Berechnung
+      // EVA Konto Berechnung - nur mit profitLoss
       const evaProfit = filteredTrades
         .filter(trade => trade.accountType === "EVA")
         .reduce((sum, trade) => {
-          // Berechne den Gewinn/Verlust
-          let profit = 0;
+          // Direkt profitLoss verwenden
+          const profit = trade.profitLoss !== null && trade.profitLoss !== undefined 
+            ? Number(trade.profitLoss) 
+            : 0;
           
-          // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
-          if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
-            profit = Number(trade.profitLoss);
-            console.log("EVA Trade:", trade.id, "P/L:", profit);
-          } else if (trade.riskSum !== null && trade.riskSum !== undefined && 
-                     trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
-            profit = Number(trade.riskSum) * Number(trade.rrAchieved);
-            console.log("EVA Trade (berechnet):", trade.id, "Risiko:", trade.riskSum, "RR:", trade.rrAchieved, "P/L:", profit);
-          }
-          
+          console.log(`EVA Trade ${trade.id}: profitLoss = ${profit}`);
           return sum + profit;
         }, 0);
         
@@ -139,7 +141,7 @@ export default function AccountBalanceProgress({
       setCalculatedEvaBalance(Number(settings.evaAccountBalance) + evaProfit);
       
       console.log("Neue Kontostände - PA:", Number(settings.accountBalance) + paProfit, 
-                  "EVA:", Number(settings.evaAccountBalance) + evaProfit);
+                 "EVA:", Number(settings.evaAccountBalance) + evaProfit);
     } else {
       // Wenn keine gefilterten Trades, setze auf null zurück
       setCalculatedPaBalance(null);
