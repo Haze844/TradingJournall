@@ -574,7 +574,7 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
     <Card className="col-span-2">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle>Performance Heatmap</CardTitle>
+          <CardTitle>Session Heatmap</CardTitle>
           <CardDescription>Analyse deiner Trading-Performance nach Wochentag und Uhrzeit</CardDescription>
         </div>
         <div className="flex flex-wrap gap-2">
