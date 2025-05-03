@@ -69,6 +69,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
   const [chartType, setChartType] = useState<ChartType>('line');
   const [activeTab, setActiveTab] = useState<'drawdown' | 'risk-per-trade' | 'position-size' | 'recommendations'>('drawdown');
   const [accountBalance, setAccountBalance] = useState<number>(2500); // Standard-Kontostand: 2500$
+  const [evaAccountBalance, setEvaAccountBalance] = useState<number>(1500); // Standard-EVA-Kontostand: 1500$
   const [accountType, setAccountType] = useState<string>('all'); // Standard: alle Konten
   const { toast } = useToast();
   
@@ -95,6 +96,9 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     if (userSettings?.accountBalance) {
       setAccountBalance(userSettings.accountBalance);
     }
+    if (userSettings?.evaAccountBalance) {
+      setEvaAccountBalance(userSettings.evaAccountBalance);
+    }
     if (userSettings?.accountType) {
       setAccountType(userSettings.accountType);
     }
@@ -102,17 +106,18 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
   
   // Mutation zum Aktualisieren der Benutzereinstellungen
   const updateSettingsMutation = useMutation({
-    mutationFn: async ({ accountBalance, accountType }: { accountBalance: number; accountType: string }) => {
+    mutationFn: async ({ accountBalance, evaAccountBalance, accountType }: { accountBalance: number; evaAccountBalance: number; accountType: string }) => {
       // Da req.user in isAuthenticated nicht gesetzt ist, muss userId explizit übergeben werden
       // userId kommt aus den Props der Komponente
-      console.log('Speichere Einstellungen:', { userId, accountBalance, accountType });
+      console.log('Speichere Einstellungen:', { userId, accountBalance, evaAccountBalance, accountType });
       
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           userId: userId, 
-          accountBalance: accountBalance, 
+          accountBalance: accountBalance,
+          evaAccountBalance: evaAccountBalance,
           accountType: accountType 
         }),
       });
