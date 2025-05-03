@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, PiggyBank, TrendingUp, Edit, Check, X } from "lucide-react";
+import { Wallet, PiggyBank, TrendingUp, Edit, Check, X, Settings } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface AccountBalanceProgressProps {
   className?: string;
@@ -206,60 +207,46 @@ export default function AccountBalanceProgressNew({
     <div className={`space-y-2 border border-primary/20 px-3 py-1.5 rounded-lg bg-black/30 shadow-lg backdrop-blur-md ${className}`}>
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
-          <h3 className="text-sm font-bold flex items-center">
-            <Wallet className="mr-1 h-4 w-4 text-primary" />
-            Kontoentwicklung
-            {paBalanceProgress >= 100 && 
-              <div className="ml-2 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium flex items-center">
-                <TrendingUp className="mr-1 h-3 w-3" />
-                Ziel erreicht
-              </div>
-            }
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-        
-        <div className="mt-2">
-          <Tabs 
-            defaultValue="pa" 
-            value={activeTab} 
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="w-full bg-black/20 border border-primary/10">
-              <TabsTrigger value="pa" className="flex-1 data-[state=active]:bg-primary/70">
-                <PiggyBank className="h-3.5 w-3.5 mr-1" />
-                PA Konto
-              </TabsTrigger>
-              <TabsTrigger value="eva" className="flex-1 data-[state=active]:bg-primary/70">
-                <PiggyBank className="h-3.5 w-3.5 mr-1" />
-                EVA Konto
-              </TabsTrigger>
-            </TabsList>
-            
-          <TabsContent value="pa" className="mt-0 space-y-2">
-            {isLoading ? (
-              <Skeleton className="h-24 w-full" />
-            ) : (
-              <div className="space-y-2">
-                {/* PA Kontostand Einstellungen */}
-                <div className="grid grid-cols-3 gap-x-4 gap-y-1">
-                  {/* Basis-Kontostand */}
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-primary/90 font-medium mb-1">Basis:</span>
+          <div className="flex items-center">
+            <h3 className="text-sm font-bold flex items-center">
+              <Wallet className="mr-1 h-4 w-4 text-primary" />
+              Kontoentwicklung
+              {paBalanceProgress >= 100 && 
+                <div className="ml-2 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium flex items-center">
+                  <TrendingUp className="mr-1 h-3 w-3" />
+                  Ziel erreicht
+                </div>
+              }
+            </h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="ml-2 text-primary/70 hover:text-primary transition-colors p-1 rounded-full hover:bg-primary/10">
+                  <Settings className="h-3.5 w-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4 bg-black/95 border-primary/20 backdrop-blur-md">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm mb-2 text-primary">Kontostand Einstellungen</h4>
+                  
+                  {/* PA Konto Einstellungen */}
+                  <div className="space-y-2 border-b border-primary/10 pb-3">
+                    <h5 className="text-xs font-medium text-primary/90 flex items-center">
+                      <PiggyBank className="h-3.5 w-3.5 mr-1" />
+                      PA Konto
+                    </h5>
                     
-                    {isEditingPA ? (
-                      <div className="flex gap-1 items-center">
-                        <Input
-                          ref={paBalanceInputRef}
-                          defaultValue={basePaBalance}
-                          className="h-7 w-20 text-[13px] px-2"
-                          type="number"
-                          min="0"
-                        />
-                        <div className="flex">
+                    {/* Basis Kontostand */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-muted-foreground">Basis-Kontostand:</span>
+                      {isEditingPA ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            ref={paBalanceInputRef}
+                            defaultValue={basePaBalance}
+                            className="h-7 w-24 text-[13px] px-2"
+                            type="number"
+                            min="0"
+                          />
                           <button 
                             className="p-1 hover:bg-primary/20 rounded-md"
                             onClick={handlePABalanceSubmit}
@@ -273,36 +260,33 @@ export default function AccountBalanceProgressNew({
                             <X className="h-3.5 w-3.5 text-destructive" />
                           </button>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
-                          ${basePaBalance.toLocaleString()}
-                        </span>
-                        <button
-                          className="p-1 hover:bg-primary/10 rounded-md ml-1"
-                          onClick={() => setIsEditingPA(true)}
-                        >
-                          <Edit className="h-3.5 w-3.5 text-primary/70" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Ziel-Kontostand */}
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-primary/90 font-medium mb-1">Ziel:</span>
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                            ${basePaBalance.toLocaleString()}
+                          </span>
+                          <button
+                            className="p-1 hover:bg-primary/10 rounded-md ml-1"
+                            onClick={() => setIsEditingPA(true)}
+                          >
+                            <Edit className="h-3.5 w-3.5 text-primary/70" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     
-                    {isEditingPAGoal ? (
-                      <div className="flex gap-1 items-center">
-                        <Input
-                          ref={paGoalInputRef}
-                          defaultValue={paGoal}
-                          className="h-7 w-20 text-[13px] px-2"
-                          type="number"
-                          min="1"
-                        />
-                        <div className="flex">
+                    {/* Ziel Kontostand */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-muted-foreground">Ziel-Kontostand:</span>
+                      {isEditingPAGoal ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            ref={paGoalInputRef}
+                            defaultValue={paGoal}
+                            className="h-7 w-24 text-[13px] px-2"
+                            type="number"
+                            min="1"
+                          />
                           <button 
                             className="p-1 hover:bg-primary/20 rounded-md"
                             onClick={handlePAGoalSubmit}
@@ -316,26 +300,148 @@ export default function AccountBalanceProgressNew({
                             <X className="h-3.5 w-3.5 text-destructive" />
                           </button>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
-                          ${paGoal.toLocaleString()}
-                        </span>
-                        <button
-                          className="p-1 hover:bg-primary/10 rounded-md ml-1"
-                          onClick={() => setIsEditingPAGoal(true)}
-                        >
-                          <Edit className="h-3.5 w-3.5 text-primary/70" />
-                        </button>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                            ${paGoal.toLocaleString()}
+                          </span>
+                          <button
+                            className="p-1 hover:bg-primary/10 rounded-md ml-1"
+                            onClick={() => setIsEditingPAGoal(true)}
+                          >
+                            <Edit className="h-3.5 w-3.5 text-primary/70" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
-                  {/* Aktueller berechneter Wert */}
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-primary/90 font-medium mb-1">Aktuell:</span>
-                    <span className="font-medium text-[15px] text-primary">${paBalance.toLocaleString()}</span>
+                  {/* EVA Konto Einstellungen */}
+                  <div className="space-y-2 pb-1">
+                    <h5 className="text-xs font-medium text-primary/90 flex items-center">
+                      <PiggyBank className="h-3.5 w-3.5 mr-1" />
+                      EVA Konto
+                    </h5>
+                    
+                    {/* Basis Kontostand */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-muted-foreground">Basis-Kontostand:</span>
+                      {isEditingEVA ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            ref={evaBalanceInputRef}
+                            defaultValue={baseEvaBalance}
+                            className="h-7 w-24 text-[13px] px-2"
+                            type="number"
+                            min="0"
+                          />
+                          <button 
+                            className="p-1 hover:bg-primary/20 rounded-md"
+                            onClick={handleEVABalanceSubmit}
+                          >
+                            <Check className="h-3.5 w-3.5 text-primary" />
+                          </button>
+                          <button 
+                            className="p-1 hover:bg-destructive/20 rounded-md"
+                            onClick={() => setIsEditingEVA(false)}
+                          >
+                            <X className="h-3.5 w-3.5 text-destructive" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                            ${baseEvaBalance.toLocaleString()}
+                          </span>
+                          <button
+                            className="p-1 hover:bg-primary/10 rounded-md ml-1"
+                            onClick={() => setIsEditingEVA(true)}
+                          >
+                            <Edit className="h-3.5 w-3.5 text-primary/70" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Ziel Kontostand */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] text-muted-foreground">Ziel-Kontostand:</span>
+                      {isEditingEVAGoal ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            ref={evaGoalInputRef}
+                            defaultValue={evaGoal}
+                            className="h-7 w-24 text-[13px] px-2"
+                            type="number"
+                            min="1"
+                          />
+                          <button 
+                            className="p-1 hover:bg-primary/20 rounded-md"
+                            onClick={handleEVAGoalSubmit}
+                          >
+                            <Check className="h-3.5 w-3.5 text-primary" />
+                          </button>
+                          <button 
+                            className="p-1 hover:bg-destructive/20 rounded-md"
+                            onClick={() => setIsEditingEVAGoal(false)}
+                          >
+                            <X className="h-3.5 w-3.5 text-destructive" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                            ${evaGoal.toLocaleString()}
+                          </span>
+                          <button
+                            className="p-1 hover:bg-primary/10 rounded-md ml-1"
+                            onClick={() => setIsEditingEVAGoal(true)}
+                          >
+                            <Edit className="h-3.5 w-3.5 text-primary/70" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        
+        <div className="mt-2">
+          <Tabs 
+            defaultValue="pa" 
+            value={activeTab} 
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="w-full h-7 bg-black/20 border border-primary/10 p-0.5">
+              <TabsTrigger value="pa" className="flex-1 h-full text-xs data-[state=active]:bg-primary/70 data-[state=active]:shadow-none">
+                <PiggyBank className="h-3 w-3 mr-1" />
+                PA
+              </TabsTrigger>
+              <TabsTrigger value="eva" className="flex-1 h-full text-xs data-[state=active]:bg-primary/70 data-[state=active]:shadow-none">
+                <PiggyBank className="h-3 w-3 mr-1" />
+                EVA
+              </TabsTrigger>
+            </TabsList>
+            
+          <TabsContent value="pa" className="mt-0 space-y-2">
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : (
+              <div className="space-y-2">
+                {/* PA Kontostand Einstellungen */}
+                <div className="flex justify-between px-1 py-2">
+                  <div className="flex items-center">
+                    <div className="mr-3">
+                      <span className="text-[12px] text-primary/80 block mb-1">Aktueller Wert:</span>
+                      <span className="font-medium text-[16px] text-primary">${paBalance.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
                 
@@ -369,97 +475,12 @@ export default function AccountBalanceProgressNew({
             ) : (
               <div className="space-y-2">
                 {/* EVA Kontostand Einstellungen */}
-                <div className="grid grid-cols-3 gap-x-4 gap-y-1">
-                  {/* Basis-Kontostand */}
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-primary/90 font-medium mb-1">Basis:</span>
-                    
-                    {isEditingEVA ? (
-                      <div className="flex gap-1 items-center">
-                        <Input
-                          ref={evaBalanceInputRef}
-                          defaultValue={baseEvaBalance}
-                          className="h-7 w-20 text-[13px] px-2"
-                          type="number"
-                          min="0"
-                        />
-                        <div className="flex">
-                          <button 
-                            className="p-1 hover:bg-primary/20 rounded-md"
-                            onClick={handleEVABalanceSubmit}
-                          >
-                            <Check className="h-3.5 w-3.5 text-primary" />
-                          </button>
-                          <button 
-                            className="p-1 hover:bg-destructive/20 rounded-md"
-                            onClick={() => setIsEditingEVA(false)}
-                          >
-                            <X className="h-3.5 w-3.5 text-destructive" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
-                          ${baseEvaBalance.toLocaleString()}
-                        </span>
-                        <button
-                          className="p-1 hover:bg-primary/10 rounded-md ml-1"
-                          onClick={() => setIsEditingEVA(true)}
-                        >
-                          <Edit className="h-3.5 w-3.5 text-primary/70" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Ziel-Kontostand */}
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-primary/90 font-medium mb-1">Ziel:</span>
-                    
-                    {isEditingEVAGoal ? (
-                      <div className="flex gap-1 items-center">
-                        <Input
-                          ref={evaGoalInputRef}
-                          defaultValue={evaGoal}
-                          className="h-7 w-20 text-[13px] px-2"
-                          type="number"
-                          min="1"
-                        />
-                        <div className="flex">
-                          <button 
-                            className="p-1 hover:bg-primary/20 rounded-md"
-                            onClick={handleEVAGoalSubmit}
-                          >
-                            <Check className="h-3.5 w-3.5 text-primary" />
-                          </button>
-                          <button 
-                            className="p-1 hover:bg-destructive/20 rounded-md"
-                            onClick={() => setIsEditingEVAGoal(false)}
-                          >
-                            <X className="h-3.5 w-3.5 text-destructive" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <span className="font-medium text-[13px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
-                          ${evaGoal.toLocaleString()}
-                        </span>
-                        <button
-                          className="p-1 hover:bg-primary/10 rounded-md ml-1"
-                          onClick={() => setIsEditingEVAGoal(true)}
-                        >
-                          <Edit className="h-3.5 w-3.5 text-primary/70" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Aktueller berechneter Wert */}
-                  <div className="flex flex-col">
-                    <span className="text-[13px] text-primary/90 font-medium mb-1">Aktuell:</span>
-                    <span className="font-medium text-[15px] text-primary">${evaBalance.toLocaleString()}</span>
+                <div className="flex justify-between px-1 py-2">
+                  <div className="flex items-center">
+                    <div className="mr-3">
+                      <span className="text-[12px] text-primary/80 block mb-1">Aktueller Wert:</span>
+                      <span className="font-medium text-[16px] text-primary">${evaBalance.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
                 
