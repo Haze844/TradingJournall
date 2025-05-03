@@ -304,7 +304,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
   const inputRefs = useRef<Array<HTMLElement | null>>([]);
   
   // Type Definition für blockRefs mit korrekter Definition von blockSequence
-  type BlockRefs = {
+  interface BlockRefs {
     setup: HTMLElement | null;
     trends: HTMLElement | null;
     position: HTMLElement | null;
@@ -313,7 +313,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     ergebnis: HTMLElement | null;
     elements: { [key: string]: Array<HTMLElement | null> };
     blockSequence?: string[];
-  };
+  }
   
   // Refs für Blockkategorien zur besseren Navigation zwischen Blöcken
   const blockRefs = useRef<BlockRefs>({
@@ -359,115 +359,84 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     }
   });
 
-  // Funktion zum Navigieren zum nächsten oder vorherigen Eingabefeld
+  // KOMPLETT NEUE, VEREINFACHTE IMPLEMENTATION DER TASTATURNAVIGATION
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>, index: number) => {
-    // Navigation mit Pfeiltasten (oben/unten) für bessere vertikale Navigation
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      
-      // 1. Element im aktuellen Block finden
-      const currentElement = inputRefs.current[index];
-      if (!currentElement) return;
-      
-      // Finden des nächsten Elements in einer anderen Zeile (üblicherweise unterhalb)
-      // Schrittweite variiert je nach Layout, versuchen wir es mit 2-4 Elementen
-      const navigationSteps = [2, 3, 4]; // Typische Schrittweiten basierend auf Grid-Layout
-      
-      for (const step of navigationSteps) {
-        const nextIndex = index + step;
-        if (nextIndex < inputRefs.current.length && inputRefs.current[nextIndex]) {
-          const nextElement = inputRefs.current[nextIndex];
-          if (nextElement instanceof HTMLButtonElement || 
-              nextElement instanceof HTMLInputElement || 
-              nextElement instanceof HTMLSelectElement) {
-            nextElement.focus();
-            return;
-          }
-        }
-      }
-      
-      // Wenn keine passende Zeile gefunden wurde, versuche zum nächsten Block zu springen
-      const block = currentElement.closest('.bg-muted\\/30');
-      if (block) {
-        const titleEl = block.querySelector('.text-xs.font-medium');
-        if (titleEl) {
-          const titleText = titleEl.textContent?.toLowerCase() || '';
-          const currentBlockType = getBlockTypeFromTitle(titleText);
-          
-          // Zum nächsten Block springen
-          let nextBlockType = '';
-          if (currentBlockType === 'setup') nextBlockType = 'trends';
-          else if (currentBlockType === 'trends') nextBlockType = 'position';
-          else if (currentBlockType === 'position') nextBlockType = 'marktzonen';
-          else if (currentBlockType === 'marktzonen') nextBlockType = 'ergebnis';
-          
-          console.log(`Springe zum nächsten Block von unten: ${nextBlockType}`);
-          
-          if (nextBlockType && blockRefs.current.elements[nextBlockType]?.length > 0) {
-            const firstElementInNextBlock = blockRefs.current.elements[nextBlockType][0];
-            if (firstElementInNextBlock instanceof HTMLButtonElement || 
-                firstElementInNextBlock instanceof HTMLInputElement || 
-                firstElementInNextBlock instanceof HTMLSelectElement) {
-              firstElementInNextBlock.focus();
-              return;
-            }
-          }
-        }
-      }
-    }
+    // Das aktuelle Element finden
+    const currentElement = inputRefs.current[index];
+    if (!currentElement) return;
+
+    // Die Block-Sequenz definieren
+    const blockSequence = ["setup", "trends", "position", "marktzonen", "ergebnis"];
     
-    if (event.key === 'ArrowUp') {
+    // Bei Pfeil-Tasten: Navigation zwischen Elementen
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown' || 
+        event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault();
+
+      // 1. Alle Interaktiven Elemente sammeln und nach Position sortieren
+      const elements = inputRefs.current
+        .filter(Boolean)
+        .map((el, idx) => ({
+          element: el,
+          rect: el.getBoundingClientRect(),
+          index: idx
+        }));
+
+      // Die aktuelle Position merken
+      const currentRect = currentElement.getBoundingClientRect();
+
+      // Das Ziel-Element basierend auf Richtung finden
+      let bestMatch = null;
       
-      // 1. Element im aktuellen Block finden
-      const currentElement = inputRefs.current[index];
-      if (!currentElement) return;
-      
-      // Finden des vorherigen Elements in einer Zeile (üblicherweise oberhalb)
-      // Schrittweite variiert je nach Layout, versuchen wir es mit 2-4 Elementen
-      const navigationSteps = [2, 3, 4]; // Typische Schrittweiten basierend auf Grid-Layout
-      
-      for (const step of navigationSteps) {
-        const prevIndex = index - step;
-        if (prevIndex >= 0 && inputRefs.current[prevIndex]) {
-          const prevElement = inputRefs.current[prevIndex];
-          if (prevElement instanceof HTMLButtonElement || 
-              prevElement instanceof HTMLInputElement || 
-              prevElement instanceof HTMLSelectElement) {
-            prevElement.focus();
-            return;
+      // HOCH/RUNTER NAVIGATION
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        // Vertikal sortieren für einfachere Navigation
+        const sortedByVertical = [...elements].sort((a, b) => 
+          event.key === 'ArrowDown' 
+            ? a.rect.top - b.rect.top  // Für ArrowDown: von oben nach unten
+            : b.rect.bottom - a.rect.bottom  // Für ArrowUp: von unten nach oben
+        );
+        
+        // Das aktuelle Element in der sortierten Liste finden
+        const currentIndex = sortedByVertical.findIndex(item => item.index === index);
+        
+        // Wenn gefunden, zum nächsten/vorherigen Element gehen
+        if (currentIndex !== -1) {
+          const targetIndex = event.key === 'ArrowDown' ? currentIndex + 1 : currentIndex - 1;
+          
+          // Sicherstellen, dass wir innerhalb der Grenzen sind
+          if (targetIndex >= 0 && targetIndex < sortedByVertical.length) {
+            bestMatch = sortedByVertical[targetIndex];
           }
         }
       }
       
-      // Wenn keine passende Zeile gefunden wurde, versuche zum vorherigen Block zu springen
-      const block = currentElement.closest('.bg-muted\\/30');
-      if (block) {
-        const titleEl = block.querySelector('.text-xs.font-medium');
-        if (titleEl) {
-          const titleText = titleEl.textContent?.toLowerCase() || '';
-          const currentBlockType = getBlockTypeFromTitle(titleText);
+      // LINKS/RECHTS NAVIGATION
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        // Horizontal sortieren für einfachere Navigation
+        const sortedByHorizontal = [...elements].sort((a, b) => 
+          event.key === 'ArrowRight' 
+            ? a.rect.left - b.rect.left  // Für ArrowRight: von links nach rechts
+            : b.rect.right - a.rect.right  // Für ArrowLeft: von rechts nach links
+        );
+        
+        // Das aktuelle Element in der sortierten Liste finden
+        const currentIndex = sortedByHorizontal.findIndex(item => item.index === index);
+        
+        // Wenn gefunden, zum nächsten/vorherigen Element gehen
+        if (currentIndex !== -1) {
+          const targetIndex = event.key === 'ArrowRight' ? currentIndex + 1 : currentIndex - 1;
           
-          // Zum vorherigen Block springen
-          let prevBlockType = '';
-          if (currentBlockType === 'trends') prevBlockType = 'setup';
-          else if (currentBlockType === 'position') prevBlockType = 'trends';
-          else if (currentBlockType === 'marktzonen') prevBlockType = 'position';
-          else if (currentBlockType === 'ergebnis') prevBlockType = 'marktzonen';
-          
-          console.log(`Springe zum vorherigen Block von oben: ${prevBlockType}`);
-          
-          if (prevBlockType && blockRefs.current.elements[prevBlockType]?.length > 0) {
-            const lastIndex = blockRefs.current.elements[prevBlockType].length - 1;
-            const lastElementInPrevBlock = blockRefs.current.elements[prevBlockType][lastIndex];
-            if (lastElementInPrevBlock instanceof HTMLButtonElement || 
-                lastElementInPrevBlock instanceof HTMLInputElement || 
-                lastElementInPrevBlock instanceof HTMLSelectElement) {
-              lastElementInPrevBlock.focus();
-              return;
-            }
+          // Sicherstellen, dass wir innerhalb der Grenzen sind
+          if (targetIndex >= 0 && targetIndex < sortedByHorizontal.length) {
+            bestMatch = sortedByHorizontal[targetIndex];
           }
         }
+      }
+      
+      // Wenn ein gültiges Ziel gefunden wurde, dorthin navigieren
+      if (bestMatch && bestMatch.element) {
+        bestMatch.element.focus();
       }
     }
     
@@ -522,153 +491,6 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       } else {
         // Automatisch speichern, wenn das letzte Feld erreicht wurde
         saveChanges();
-      }
-    }
-    
-    // Die verbesserten Navigation mit Pfeiltasten (hoch/runter) am Anfang der Funktion ersetzt diesen Block
-    
-    // Navigation mit Pfeiltasten (links/rechts) für alle Felder
-    // Verbesserte Implementierung, die die Block-Struktur berücksichtigt
-    if (event.key === 'ArrowRight') {
-      event.preventDefault();
-      
-      // 1. Element im aktuellen Block finden
-      const currentElement = inputRefs.current[index];
-      if (!currentElement) return;
-      
-      // 2. Block finden, zu dem das aktuelle Element gehört
-      let currentBlockType: string = 'unknown';
-      const block = currentElement.closest('.bg-muted\\/30');
-      if (block) {
-        const titleEl = block.querySelector('.text-xs.font-medium');
-        if (titleEl) {
-          const titleText = titleEl.textContent?.toLowerCase() || '';
-          currentBlockType = getBlockTypeFromTitle(titleText);
-        }
-      }
-      
-      console.log(`Navigiere von Block: ${currentBlockType}, Element-Index: ${index}`);
-      
-      // 3. Nächstes Element im gleichen Block suchen
-      const rightIndex = index + 1;
-      if (rightIndex < inputRefs.current.length && inputRefs.current[rightIndex]) {
-        const rightElement = inputRefs.current[rightIndex];
-        const rightBlock = rightElement.closest('.bg-muted\\/30');
-        
-        // Prüfen, ob das nächste Element zum gleichen Block gehört
-        if (block === rightBlock) {
-          if (rightElement instanceof HTMLButtonElement || 
-              rightElement instanceof HTMLInputElement || 
-              rightElement instanceof HTMLSelectElement) {
-            rightElement.focus();
-            return;
-          }
-        }
-      }
-      
-      // 4. Wenn kein nächstes Element im aktuellen Block oder wir sind am Ende des Blocks,
-      // versuche zum nächsten Block zu springen
-      
-      // Reihenfolge der Blöcke: setup -> trends -> position -> marktzonen -> ergebnis
-      let nextBlockType = '';
-      if (currentBlockType === 'setup') nextBlockType = 'trends';
-      else if (currentBlockType === 'trends') nextBlockType = 'position';
-      else if (currentBlockType === 'position') nextBlockType = 'marktzonen';
-      else if (currentBlockType === 'marktzonen') nextBlockType = 'ergebnis';
-      
-      console.log(`Springe zum nächsten Block: ${nextBlockType}`);
-      
-      // Erstes Element im nächsten Block finden
-      if (nextBlockType && blockRefs.current.elements[nextBlockType]?.length > 0) {
-        const firstElementInNextBlock = blockRefs.current.elements[nextBlockType][0];
-        if (firstElementInNextBlock instanceof HTMLButtonElement || 
-            firstElementInNextBlock instanceof HTMLInputElement || 
-            firstElementInNextBlock instanceof HTMLSelectElement) {
-          firstElementInNextBlock.focus();
-          return;
-        }
-      }
-      
-      // 5. Fallback: Wenn alles andere fehlschlägt, versuche zum nächsten Element zu navigieren
-      if (rightIndex < inputRefs.current.length && inputRefs.current[rightIndex]) {
-        const nextElement = inputRefs.current[rightIndex];
-        if (nextElement instanceof HTMLButtonElement || 
-            nextElement instanceof HTMLInputElement || 
-            nextElement instanceof HTMLSelectElement) {
-          nextElement.focus();
-        }
-      }
-    }
-    
-    if (event.key === 'ArrowLeft') {
-      event.preventDefault();
-      
-      // 1. Element im aktuellen Block finden
-      const currentElement = inputRefs.current[index];
-      if (!currentElement) return;
-      
-      // 2. Block finden, zu dem das aktuelle Element gehört mit unserer Hilfsfunktion
-      let currentBlockType: string = 'unknown';
-      const block = currentElement.closest('.bg-muted\\/30');
-      if (block) {
-        const titleEl = block.querySelector('.text-xs.font-medium');
-        if (titleEl) {
-          const titleText = titleEl.textContent?.toLowerCase() || '';
-          currentBlockType = getBlockTypeFromTitle(titleText);
-        }
-      }
-      
-      console.log(`Navigiere von Block: ${currentBlockType}, Element-Index: ${index}`);
-      
-      // 3. Vorheriges Element im gleichen Block suchen
-      const leftIndex = index - 1;
-      if (leftIndex >= 0 && inputRefs.current[leftIndex]) {
-        const leftElement = inputRefs.current[leftIndex];
-        const leftBlock = leftElement.closest('.bg-muted\\/30');
-        
-        // Prüfen, ob das vorherige Element zum gleichen Block gehört
-        if (block === leftBlock) {
-          if (leftElement instanceof HTMLButtonElement || 
-              leftElement instanceof HTMLInputElement || 
-              leftElement instanceof HTMLSelectElement) {
-            leftElement.focus();
-            return;
-          }
-        }
-      }
-      
-      // 4. Wenn kein vorheriges Element im aktuellen Block oder wir sind am Anfang des Blocks,
-      // versuche zum vorherigen Block zu springen
-      
-      // Reihenfolge der Blöcke: setup <- trends <- position <- marktzonen <- ergebnis
-      let prevBlockType = '';
-      if (currentBlockType === 'trends') prevBlockType = 'setup';
-      else if (currentBlockType === 'position') prevBlockType = 'trends';
-      else if (currentBlockType === 'marktzonen') prevBlockType = 'position';
-      else if (currentBlockType === 'ergebnis') prevBlockType = 'marktzonen';
-      
-      console.log(`Springe zum vorherigen Block: ${prevBlockType}`);
-      
-      // Letztes Element im vorherigen Block finden
-      if (prevBlockType && blockRefs.current.elements[prevBlockType]?.length > 0) {
-        const lastElementIndex = blockRefs.current.elements[prevBlockType].length - 1;
-        const lastElementInPrevBlock = blockRefs.current.elements[prevBlockType][lastElementIndex];
-        if (lastElementInPrevBlock instanceof HTMLButtonElement || 
-            lastElementInPrevBlock instanceof HTMLInputElement || 
-            lastElementInPrevBlock instanceof HTMLSelectElement) {
-          lastElementInPrevBlock.focus();
-          return;
-        }
-      }
-      
-      // 5. Fallback: Wenn alles andere fehlschlägt, versuche zum vorherigen Element zu navigieren
-      if (leftIndex >= 0 && inputRefs.current[leftIndex]) {
-        const prevElement = inputRefs.current[leftIndex];
-        if (prevElement instanceof HTMLButtonElement || 
-            prevElement instanceof HTMLInputElement || 
-            prevElement instanceof HTMLSelectElement) {
-          prevElement.focus();
-        }
       }
     }
     
