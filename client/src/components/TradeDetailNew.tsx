@@ -479,7 +479,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.internalTrend} 
                           onValueChange={val => updateField('internalTrend', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[5] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 5)}
+                          >
                             <SelectValue placeholder="Int." />
                           </SelectTrigger>
                           <SelectContent>
@@ -503,7 +507,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.microTrend} 
                           onValueChange={val => updateField('microTrend', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[6] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 6)}
+                          >
                             <SelectValue placeholder="Micro" />
                           </SelectTrigger>
                           <SelectContent>
@@ -529,7 +537,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.mainTrendM15} 
                           onValueChange={val => updateField('mainTrendM15', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[7] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 7)}
+                          >
                             <SelectValue placeholder="M15" />
                           </SelectTrigger>
                           <SelectContent>
@@ -553,7 +565,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.internalTrendM5} 
                           onValueChange={val => updateField('internalTrendM5', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[8] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 8)}
+                          >
                             <SelectValue placeholder="M5" />
                           </SelectTrigger>
                           <SelectContent>
@@ -744,6 +760,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           }}
                           className="h-7 text-xs mt-0.5"
                           min="0"
+                          ref={(el) => { inputRefs.current[9] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 9)}
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
@@ -859,6 +877,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           className="h-7 text-xs mt-0.5"
                           min="0"
                           max="30"
+                          ref={(el) => { inputRefs.current[10] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 10)}
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.slPoints !== undefined ? selectedTrade.slPoints : '-'}</div>
