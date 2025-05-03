@@ -428,10 +428,6 @@ export default function SimpleHome() {
                   <Brain className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Muster
                 </TabsTrigger>
-                <TabsTrigger value="ai-assistant" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
-                  <Activity className="mr-1.5 h-4 w-4 md:inline hidden" />
-                  KI-Analyse
-                </TabsTrigger>
                 <TabsTrigger value="market-phases" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
                   <BarChart2 className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Marktphasen
@@ -439,6 +435,10 @@ export default function SimpleHome() {
                 <TabsTrigger value="performance" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
                   <Trophy className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Performance
+                </TabsTrigger>
+                <TabsTrigger value="ai-assistant" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <Activity className="mr-1.5 h-4 w-4 md:inline hidden" />
+                  KI-Analyse
                 </TabsTrigger>
                 <TabsTrigger value="streaks" className="custom-tabs-trigger data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2 relative overflow-hidden group">
                   <Flame className="mr-1.5 h-4 w-4 md:inline hidden group-hover:text-blue-300 transition-colors" />
