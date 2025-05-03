@@ -25,20 +25,21 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Logo-Komponente für einheitliches Design
 export const NxtLvlLogo = ({ className = "" }) => (
-  <div className={`flex items-center justify-start space-x-3 ${className}`}>
-    <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-3 rounded-xl shadow-lg 
-                  border border-blue-400/20 group-hover:shadow-blue-500/20 group-hover:border-blue-400/30 
-                  transition-all duration-300 transform group-hover:scale-105">
-      <LineChart className="h-6 w-6 text-white group-hover:text-blue-100 transition-colors" />
+  <div className={`flex items-center justify-start space-x-4 ${className}`}>
+    <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-3.5 rounded-xl shadow-xl 
+                  border border-blue-400/30 group-hover:shadow-blue-500/30 group-hover:border-blue-400/50 
+                  transition-all duration-300 transform group-hover:scale-105 relative">
+      <div className="absolute inset-0 bg-blue-400/10 rounded-xl blur-sm"></div>
+      <LineChart className="h-8 w-8 text-white group-hover:text-blue-100 transition-colors relative z-10" />
     </div>
-    <div className="text-2xl font-black tracking-tighter leading-none relative">
+    <div className="text-3xl font-black tracking-tighter leading-none relative">
       <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-blue-200 
-                    group-hover:from-white group-hover:to-blue-300 transition-all duration-300">
+                    group-hover:from-white group-hover:to-blue-300 transition-all duration-300 drop-shadow-sm">
         NXT<span className="text-blue-300 group-hover:text-blue-200">LVL</span>
       </span>
       
       {/* "Trading" als Highlight-Element */}
-      <div className="relative mt-0.5">
+      <div className="relative mt-1">
         <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent 
                        bg-gradient-to-r from-blue-300 to-blue-100 
                        group-hover:from-blue-200 group-hover:to-white transition-all duration-300">
@@ -86,9 +87,11 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
         <div className="container mx-auto py-3 pt-5 relative z-10">
           {/* Top-Bereich mit Logo und Benutzerbereich */}
           <div className="flex flex-col items-center mb-4">
-            {/* Kreatives, modernes Logo - zentriert */}
-            <div className="flex justify-center w-full mb-2">
-              <Link href="/" className="group">
+            {/* Kreatives, modernes Logo - zentriert mit Hintergrundeffekt */}
+            <div className="flex justify-center w-full mb-4 relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-16 
+                            bg-blue-500/10 blur-xl rounded-full z-0"></div>
+              <Link href="/" className="group relative z-10">
                 <NxtLvlLogo />
               </Link>
             </div>
