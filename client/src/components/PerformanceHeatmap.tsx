@@ -984,6 +984,48 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       {parseFloat(selectedCell.totalPnL) > 0 ? '+' : ''}{selectedCell.totalPnL}$
                     </div>
                   </div>
+                
+                  {selectedCell.trades && selectedCell.trades.length > 0 && (
+                    <div className="bg-background/50 rounded-sm p-3">
+                      <div className="text-xs font-medium mb-2">Trade-Statistik</div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {/* Konto-Typen */}
+                        <div className="flex flex-col gap-1">
+                          <div className="text-muted-foreground">Konto-Typen:</div>
+                          {Array.from(new Set(selectedCell.trades.map((t: any) => t.accountType || 'Unbekannt'))).map((type: string) => (
+                            <div key={type} className="flex items-center justify-between">
+                              <span>{type}:</span>
+                              <span className="font-medium">
+                                {selectedCell.trades.filter((t: any) => (t.accountType || 'Unbekannt') === type).length}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Setups und Symbole */}
+                        <div className="flex flex-col gap-1">
+                          <div className="text-muted-foreground">Setups:</div>
+                          {Array.from(new Set(selectedCell.trades.map((t: any) => t.setup || 'Unbekannt'))).map((setup: string) => (
+                            <div key={setup} className="flex items-center justify-between">
+                              <span>{setup}:</span>
+                              <span className="font-medium">
+                                {selectedCell.trades.filter((t: any) => (t.setup || 'Unbekannt') === setup).length}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-2">
+                        <button 
+                          className="w-full bg-black/20 hover:bg-black/30 transition-colors text-xs text-primary font-medium py-1 rounded-sm"
+                          onClick={() => setShowTradeDetails(true)}
+                        >
+                          Alle Trade-Details anzeigen
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="pt-2 text-sm text-muted-foreground">
@@ -1082,10 +1124,13 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       <TableHead>Symbol</TableHead>
                       <TableHead>Setup</TableHead>
                       <TableHead>Richtung</TableHead>
-                      <TableHead>Einstieg</TableHead>
-                      <TableHead>Liquidation</TableHead>
+                      <TableHead>Trend</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Session</TableHead>
                       <TableHead>P/L</TableHead>
                       <TableHead>RR</TableHead>
+                      <TableHead>Size</TableHead>
+                      <TableHead>Konto</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1099,12 +1144,15 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                             {trade.entryType}
                           </span>
                         </TableCell>
-                        <TableCell>{trade.entryLevel || '-'}</TableCell>
-                        <TableCell>{trade.liquidation || '-'}</TableCell>
+                        <TableCell>{trade.mainTrendM15 || '-'}</TableCell>
+                        <TableCell>{trade.location || '-'}</TableCell>
+                        <TableCell>{trade.session || '-'}</TableCell>
                         <TableCell className={parseFloat(trade.profitLoss) > 0 ? 'text-green-500' : 'text-red-500'}>
                           {parseFloat(trade.profitLoss) > 0 ? '+' : ''}{trade.profitLoss}$
                         </TableCell>
                         <TableCell>{trade.rrAchieved}</TableCell>
+                        <TableCell>{trade.size || '-'}</TableCell>
+                        <TableCell>{trade.accountType || '-'}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
