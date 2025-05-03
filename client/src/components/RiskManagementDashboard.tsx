@@ -520,7 +520,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">PA Risikosumme (€)</p>
+                          <p className="text-sm text-muted-foreground mb-1">PA Risikosumme ($)</p>
                           <h3 className="text-2xl font-bold">{riskSumByAccountType.PA.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.PA.count} Trades</p>
                         </div>
@@ -536,7 +536,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">EVA Risikosumme (€)</p>
+                          <p className="text-sm text-muted-foreground mb-1">EVA Risikosumme ($)</p>
                           <h3 className="text-2xl font-bold">{riskSumByAccountType.EVA.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.EVA.count} Trades</p>
                         </div>
@@ -547,12 +547,28 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                     </CardContent>
                   </Card>
                   
+                  {/* EK Konto */}
+                  <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border border-cyan-500/20 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">EK Risikosumme ($)</p>
+                          <h3 className="text-2xl font-bold">{riskSumByAccountType.EK?.sum?.toFixed(2) || "0.00"}</h3>
+                          <p className="text-xs text-muted-foreground">{riskSumByAccountType.EK?.count || 0} Trades</p>
+                        </div>
+                        <div className="h-10 w-10 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                          <Wallet className="h-5 w-5 text-cyan-500" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
                   {/* Gesamt */}
                   <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 backdrop-blur-sm">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Gesamt Risikosumme (€)</p>
+                          <p className="text-sm text-muted-foreground mb-1">Gesamt Risikosumme ($)</p>
                           <h3 className="text-2xl font-bold">{riskSumByAccountType.total.sum.toFixed(2)}</h3>
                           <p className="text-xs text-muted-foreground">{riskSumByAccountType.total.count} Trades</p>
                         </div>
