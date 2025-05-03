@@ -66,50 +66,54 @@ export default function AuthPage() {
         </div>
 
         {/* Hero Side */}
-        <div className="hidden md:flex flex-col justify-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold">
-              <span className="moon-text">Trade Smarter</span> <br />
-              Not Harder
+        <div className="hidden md:flex flex-col justify-center space-y-8 relative">
+          {/* Animierte Hintergrundeffekte */}
+          <div className="absolute -z-10 left-20 top-10 w-32 h-32 bg-blue-500/5 rounded-full blur-xl animate-pulse"></div>
+          <div className="absolute -z-10 right-10 bottom-20 w-40 h-40 bg-primary/5 rounded-full blur-xl animate-pulse" style={{ animationDuration: '8s', animationDelay: '2s' }}></div>
+          
+          <div className="space-y-4 relative">
+            <h1 className="text-5xl font-bold tracking-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-primary">Trade Smarter</span> <br />
+              <span className="text-white">Gewinne maximieren</span>
             </h1>
-            <p className="text-xl text-muted-foreground">
-              Unleash your inner diamond hands with AI-powered insights 💎
+            <p className="text-xl text-blue-200/80 max-w-md">
+              Deine Trading-Performance auf ein neues Level bringen mit intelligenten Analysen und Erkenntnissen 🚀
             </p>
           </div>
 
-          <div className="space-y-6 mt-4">
-            <div className="rocket-card p-4 rounded-xl flex items-center gap-4 backdrop-blur-md">
-              <div className="bg-gradient-to-br from-primary to-primary/60 p-3 rounded-xl">
+          <div className="space-y-5 mt-4 relative z-10">
+            <div className="rocket-card p-5 rounded-xl flex items-center gap-5 backdrop-blur-md border border-blue-500/10 transition-all duration-300 hover:border-blue-400/20 hover:shadow-lg hover:shadow-blue-900/10 group">
+              <div className="bg-gradient-to-br from-blue-500 to-primary p-3 rounded-xl group-hover:shadow-md group-hover:shadow-blue-400/20 transition-all">
                 <Rocket className="h-6 w-6 text-black" />
               </div>
               <div>
-                <h3 className="font-bold text-white">One-Click CSV Import</h3>
-                <p className="text-sm text-muted-foreground">
-                  Import your trades directly from CSV files
+                <h3 className="font-bold text-white text-lg">CSV-Import mit einem Klick</h3>
+                <p className="text-sm text-blue-200/70">
+                  Importiere deine Trades direkt aus TradingView oder anderen Plattformen
                 </p>
               </div>
             </div>
             
-            <div className="rocket-card p-4 rounded-xl flex items-center gap-4 backdrop-blur-md">
-              <div className="bg-gradient-to-br from-primary to-primary/60 p-3 rounded-xl">
+            <div className="rocket-card p-5 rounded-xl flex items-center gap-5 backdrop-blur-md border border-blue-500/10 transition-all duration-300 hover:border-blue-400/20 hover:shadow-lg hover:shadow-blue-900/10 group">
+              <div className="bg-gradient-to-br from-blue-500 to-primary p-3 rounded-xl group-hover:shadow-md group-hover:shadow-blue-400/20 transition-all">
                 <TrendingUp className="h-6 w-6 text-black" />
               </div>
               <div>
-                <h3 className="font-bold text-white">Track Performance</h3>
-                <p className="text-sm text-muted-foreground">
-                  Chart your journey to the moon in real-time
+                <h3 className="font-bold text-white text-lg">Performance-Tracking</h3>
+                <p className="text-sm text-blue-200/70">
+                  Detaillierte Statistiken und Visualisierungen für bessere Trading-Entscheidungen
                 </p>
               </div>
             </div>
             
-            <div className="rocket-card p-4 rounded-xl flex items-center gap-4 backdrop-blur-md">
-              <div className="bg-gradient-to-br from-primary to-primary/60 p-3 rounded-xl">
+            <div className="rocket-card p-5 rounded-xl flex items-center gap-5 backdrop-blur-md border border-blue-500/10 transition-all duration-300 hover:border-blue-400/20 hover:shadow-lg hover:shadow-blue-900/10 group">
+              <div className="bg-gradient-to-br from-blue-500 to-primary p-3 rounded-xl group-hover:shadow-md group-hover:shadow-blue-400/20 transition-all">
                 <BrainCircuit className="h-6 w-6 text-black" />
               </div>
               <div>
-                <h3 className="font-bold text-white">AI-Powered Insights</h3>
-                <p className="text-sm text-muted-foreground">
-                  GPT feedback to maximize those gains 📈
+                <h3 className="font-bold text-white text-lg">KI-basierte Erkenntnisse</h3>
+                <p className="text-sm text-blue-200/70">
+                  Präzise Handlungsempfehlungen zur Steigerung deiner Erfolgsquote
                 </p>
               </div>
             </div>
