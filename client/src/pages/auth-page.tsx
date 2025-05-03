@@ -258,11 +258,16 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
     password: "",
     confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -271,6 +276,7 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Passwörter stimmen nicht überein",
+        description: "Bitte überprüfe deine Eingaben",
         variant: "destructive",
       });
       return;
@@ -287,44 +293,82 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="username-register">Benutzername</Label>
+            <Label htmlFor="username-register" className="text-blue-100 font-medium">
+              <User className="w-4 h-4 inline-block mr-2 opacity-70" />
+              Wähle einen Benutzernamen
+            </Label>
             <Input 
               id="username-register" 
               name="username" 
               value={formData.username}
               onChange={handleChange}
               required 
+              className="bg-black/40 border-blue-500/20 focus:border-blue-400/50 focus:ring-blue-400/20 text-blue-50"
+              placeholder="Dein gewünschter Benutzername"
             />
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="password-register">Passwort</Label>
-            <Input 
-              id="password-register" 
-              name="password" 
-              type="password" 
-              value={formData.password}
-              onChange={handleChange}
-              required 
-            />
+            <Label htmlFor="password-register" className="text-blue-100 font-medium">
+              <Shield className="w-4 h-4 inline-block mr-2 opacity-70" />
+              Passwort
+            </Label>
+            <div className="relative">
+              <Input 
+                id="password-register" 
+                name="password" 
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={handleChange}
+                required 
+                className="bg-black/40 border-blue-500/20 focus:border-blue-400/50 focus:ring-blue-400/20 text-blue-50 pr-10"
+                placeholder="Wähle ein sicheres Passwort"
+                minLength={6}
+              />
+              <button 
+                type="button" 
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-blue-200 hover:text-blue-100"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? 
+                  <EyeOff className="h-4 w-4" /> : 
+                  <Eye className="h-4 w-4" />
+                }
+              </button>
+            </div>
+            <p className="text-xs text-blue-300/70">Mindestens 6 Zeichen empfohlen</p>
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Passwort bestätigen</Label>
+            <Label htmlFor="confirm-password" className="text-blue-100 font-medium">
+              <Lock className="w-4 h-4 inline-block mr-2 opacity-70" />
+              Passwort bestätigen
+            </Label>
             <Input 
               id="confirm-password" 
               name="confirmPassword" 
-              type="password" 
+              type={showPassword ? "text" : "password"}
               value={formData.confirmPassword}
               onChange={handleChange}
               required 
+              className="bg-black/40 border-blue-500/20 focus:border-blue-400/50 focus:ring-blue-400/20 text-blue-50"
+              placeholder="Passwort wiederholen"
             />
+          </div>
+
+          <div className="rounded-md p-3 bg-blue-900/20 border border-blue-500/10 mt-4">
+            <p className="text-xs text-blue-200">
+              Mit der Erstellung eines Kontos akzeptierst du unsere Nutzungsbedingungen und Datenschutzrichtlinien. Deine Trading-Daten werden vertraulich behandelt und nur zur Verbesserung deiner Performance verwendet.
+            </p>
           </div>
         </CardContent>
         <div className="px-6 py-4">
           <Button 
             type="submit" 
-            className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold" 
+            className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold relative overflow-hidden group" 
             disabled={registerMutation.isPending}
           >
+            <div className="absolute inset-0 bg-blue-300/20 w-1/3 h-full transform -skew-x-12 -translate-x-full group-hover:translate-x-[400%] transition-transform duration-1000"></div>
             {registerMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -333,7 +377,7 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
             ) : (
               <>
                 <User className="mr-2 h-4 w-4" />
-                Konto erstellen
+                Trading-Konto erstellen
               </>
             )}
           </Button>
