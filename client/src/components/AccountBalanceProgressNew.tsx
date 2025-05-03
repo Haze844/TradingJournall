@@ -200,8 +200,12 @@ export default function AccountBalanceProgressNew({
   const evaBalance = calculatedEvaBalance !== null ? calculatedEvaBalance : baseEvaBalance;
 
   // Berechne Fortschritt in Prozent
-  const paBalanceProgress = paGoal > 0 ? Math.min(100, Math.round((paBalance / paGoal) * 100)) : 0;
-  const evaBalanceProgress = evaGoal > 0 ? Math.min(100, Math.round((evaBalance / evaGoal) * 100)) : 0;
+  const paBalanceProgress = paGoal > 0 && paBalance > basePaBalance 
+    ? Math.min(100, Math.round(((paBalance - basePaBalance) / (paGoal - basePaBalance)) * 100)) 
+    : 0;
+  const evaBalanceProgress = evaGoal > 0 && evaBalance > baseEvaBalance 
+    ? Math.min(100, Math.round(((evaBalance - baseEvaBalance) / (evaGoal - baseEvaBalance)) * 100)) 
+    : 0;
 
   return (
     <div className={`space-y-2 border border-primary/20 px-3 py-1.5 rounded-lg bg-black/30 shadow-lg backdrop-blur-md ${className}`}>
