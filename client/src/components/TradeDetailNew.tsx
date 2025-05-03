@@ -1090,7 +1090,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.marketPhase} 
                           onValueChange={val => updateField('marketPhase', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[27] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 27)}
+                          >
                             <SelectValue placeholder="Phase" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1112,7 +1116,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.unmitZone} 
                           onValueChange={val => updateField('unmitZone', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[28] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 28)}
+                          >
                             <SelectValue placeholder="Zone" />
                           </SelectTrigger>
                           <SelectContent>
