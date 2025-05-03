@@ -261,104 +261,105 @@ export default function SimpleHome() {
             
             {/* Hier war die Kontofortschritt-Komponente, die jetzt in TradeTable integriert ist */}
             
-            {/* Statistik Panel - kleiner gestaltet */}
-            <div className="mb-4 bg-gradient-to-r from-black/40 to-black/20 rounded-xl p-3 border border-primary/20 backdrop-blur-sm shadow-lg">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="bg-black/25 p-4 rounded-lg border border-primary/10 hover:border-primary/30 hover:shadow-md transition-all duration-200 flex flex-col">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center">
-                    <BarChart2 className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
+            {/* Statistik Panel - kompakter gestaltet */}
+            <div className="mb-3 bg-gradient-to-r from-black/20 to-black/10 rounded-lg p-2 border border-primary/10 backdrop-blur-sm shadow-md">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="bg-black/20 p-2 rounded-md border border-primary/5 hover:border-primary/20 transition-all duration-200 flex flex-col">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-0.5 flex items-center">
+                    <BarChart2 className="w-3 h-3 mr-1 text-primary/70" />
                     Trades
                   </h3>
-                  <div className="flex gap-3 items-center mt-1">
-                    <span className="text-2xl font-bold">{tradeStats.count}</span>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center text-xs px-2 py-0.5 rounded-sm bg-emerald-500/10 text-emerald-400">
-                        <ArrowUpRight className="w-3 h-3 mr-1" />
-                        <span>{tradeStats.wins} Wins</span>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-lg font-bold">{tradeStats.count}</span>
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center text-[10px] px-1.5 py-0.5 rounded-sm bg-emerald-500/5 text-emerald-400">
+                        <ArrowUpRight className="w-2.5 h-2.5 mr-0.5" />
+                        <span>{tradeStats.wins}W</span>
                       </div>
-                      <div className="flex items-center text-xs px-2 py-0.5 rounded-sm bg-red-500/10 text-red-400">
-                        <ArrowDownRight className="w-3 h-3 mr-1" />
-                        <span>{tradeStats.losses} Losses</span>
+                      <div className="flex items-center text-[10px] px-1.5 py-0.5 rounded-sm bg-red-500/5 text-red-400">
+                        <ArrowDownRight className="w-2.5 h-2.5 mr-0.5" />
+                        <span>{tradeStats.losses}L</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-black/25 p-4 rounded-lg border border-primary/10 hover:border-primary/30 hover:shadow-md transition-all duration-200 flex flex-col">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center">
-                    <Target className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
+                <div className="bg-black/20 p-2 rounded-md border border-primary/5 hover:border-primary/20 transition-all duration-200 flex flex-col">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-0.5 flex items-center">
+                    <Target className="w-3 h-3 mr-1 text-primary/70" />
                     Win Rate
                   </h3>
-                  <div className="flex gap-3 items-center mt-1">
-                    <span className={`text-2xl font-bold ${tradeStats.winRate >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>{tradeStats.winRate.toFixed(1)}%</span>
-                    <div className={`flex items-center text-xs rounded-sm px-2 py-0.5 ${
-                      tradeStats.winRate >= 65 ? 'bg-emerald-500/20 text-emerald-300' : 
-                      tradeStats.winRate >= 50 ? 'bg-emerald-500/10 text-emerald-400' : 
-                      tradeStats.winRate >= 40 ? 'bg-amber-500/10 text-amber-400' :
-                      'bg-red-500/10 text-red-400'
-                    }`}>
-                      {
-                        tradeStats.winRate >= 65 ? 'Exzellent' :
-                        tradeStats.winRate >= 50 ? 'Profitabel' :
-                        tradeStats.winRate >= 40 ? 'Grenzwertig' :
-                        'Verlust'
-                      }
+                  <div className="flex flex-col">
+                    <div className="flex gap-2 items-center">
+                      <span className={`text-lg font-bold ${tradeStats.winRate >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>{tradeStats.winRate.toFixed(1)}%</span>
+                      <div className={`flex items-center text-[10px] rounded-sm px-1.5 py-0.5 ${
+                        tradeStats.winRate >= 65 ? 'bg-emerald-500/5 text-emerald-400' : 
+                        tradeStats.winRate >= 50 ? 'bg-emerald-500/5 text-emerald-400' : 
+                        tradeStats.winRate >= 40 ? 'bg-amber-500/5 text-amber-400' :
+                        'bg-red-500/5 text-red-400'
+                      }`}>
+                        {
+                          tradeStats.winRate >= 65 ? 'Exz.' :
+                          tradeStats.winRate >= 50 ? 'Profit' :
+                          tradeStats.winRate >= 40 ? 'Grenz' :
+                          'Verlust'
+                        }
+                      </div>
                     </div>
-                  </div>
-                  <div className="w-full mt-2 bg-gray-800/50 rounded-full h-1.5">
-                    <div className="h-1.5 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${Math.min(100, Math.max(tradeStats.winRate, 5))}%`,
-                        background: `${
-                          tradeStats.winRate >= 65 ? 'linear-gradient(90deg, #10b981, #34d399)' : 
-                          tradeStats.winRate >= 50 ? 'linear-gradient(90deg, #34d399, #6ee7b7)' : 
-                          tradeStats.winRate >= 40 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' :
-                          'linear-gradient(90deg, #ef4444, #f87171)'
-                        }`
-                      }}
-                    ></div>
+                    <div className="w-full mt-1 bg-gray-800/30 rounded-full h-1">
+                      <div className="h-1 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min(100, Math.max(tradeStats.winRate, 5))}%`,
+                          background: `${
+                            tradeStats.winRate >= 65 ? 'linear-gradient(90deg, #10b981, #34d399)' : 
+                            tradeStats.winRate >= 50 ? 'linear-gradient(90deg, #34d399, #6ee7b7)' : 
+                            tradeStats.winRate >= 40 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' :
+                            'linear-gradient(90deg, #ef4444, #f87171)'
+                          }`
+                        }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="bg-black/25 p-4 rounded-lg border border-primary/10 hover:border-primary/30 hover:shadow-md transition-all duration-200 flex flex-col">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center">
-                    <DollarSign className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
+                <div className="bg-black/20 p-2 rounded-md border border-primary/5 hover:border-primary/20 transition-all duration-200 flex flex-col">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-0.5 flex items-center">
+                    <DollarSign className="w-3 h-3 mr-1 text-primary/70" />
                     Gesamt P/L
                   </h3>
-                  <div className="flex gap-3 items-center mt-1">
-                    <span className={`text-2xl font-bold ${tradeStats.totalPL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {tradeStats.totalPL >= 0 ? '+' : ''}{tradeStats.totalPL.toFixed(2)}$
+                  <div className="flex gap-2 items-center">
+                    <span className={`text-lg font-bold ${tradeStats.totalPL >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {tradeStats.totalPL >= 0 ? '+' : ''}{tradeStats.totalPL.toFixed(0)}$
                     </span>
-                    <div className={`flex items-center text-xs rounded-sm px-2 py-0.5 ${tradeStats.totalPL >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                      {tradeStats.totalPL > 1000 ? 'Hervorragend' : 
-                       tradeStats.totalPL > 500 ? 'Sehr gut' :
+                    <div className={`flex items-center text-[10px] rounded-sm px-1.5 py-0.5 ${tradeStats.totalPL >= 0 ? 'bg-emerald-500/5 text-emerald-400' : 'bg-red-500/5 text-red-400'}`}>
+                      {tradeStats.totalPL > 1000 ? 'Sehr gut' :
                        tradeStats.totalPL > 0 ? 'Positiv' : 
-                       tradeStats.totalPL > -500 ? 'Negativ' : 'Schlecht'}
+                       'Negativ'}
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-black/25 p-4 rounded-lg border border-primary/10 hover:border-primary/30 hover:shadow-md transition-all duration-200 flex flex-col">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1 flex items-center">
-                    <Activity className="w-3.5 h-3.5 mr-1.5 text-primary/70" />
-                    Durchschnitt RR
+                <div className="bg-black/20 p-2 rounded-md border border-primary/5 hover:border-primary/20 transition-all duration-200 flex flex-col">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-0.5 flex items-center">
+                    <Activity className="w-3 h-3 mr-1 text-primary/70" />
+                    Durchschn. RR
                   </h3>
-                  <div className="flex gap-3 items-center mt-1">
-                    <span className={`text-2xl font-bold ${tradeStats.avgRR >= 1.5 ? 'text-emerald-400' : 
-                                                           tradeStats.avgRR >= 1 ? 'text-blue-400' : 
-                                                           tradeStats.avgRR >= 0 ? 'text-amber-400' : 'text-red-400'}`}>
+                  <div className="flex gap-2 items-center">
+                    <span className={`text-lg font-bold ${tradeStats.avgRR >= 1.5 ? 'text-emerald-400' : 
+                                                         tradeStats.avgRR >= 1 ? 'text-blue-400' : 
+                                                         tradeStats.avgRR >= 0 ? 'text-amber-400' : 'text-red-400'}`}>
                       {tradeStats.avgRR.toFixed(2)}R
                     </span>
-                    <div className={`flex items-center text-xs rounded-sm px-2 py-0.5 ${
-                      tradeStats.avgRR >= 2 ? 'bg-emerald-500/10 text-emerald-400' : 
-                      tradeStats.avgRR >= 1.5 ? 'bg-blue-500/10 text-blue-400' : 
-                      tradeStats.avgRR >= 1 ? 'bg-amber-500/10 text-amber-400' : 
-                      'bg-red-500/10 text-red-400'
+                    <div className={`flex items-center text-[10px] rounded-sm px-1.5 py-0.5 ${
+                      tradeStats.avgRR >= 2 ? 'bg-emerald-500/5 text-emerald-400' : 
+                      tradeStats.avgRR >= 1.5 ? 'bg-blue-500/5 text-blue-400' : 
+                      tradeStats.avgRR >= 1 ? 'bg-amber-500/5 text-amber-400' : 
+                      'bg-red-500/5 text-red-400'
                     }`}>
                       {
-                        tradeStats.avgRR >= 2 ? 'Exzellent' :
+                        tradeStats.avgRR >= 2 ? 'Exz.' :
                         tradeStats.avgRR >= 1.5 ? 'Gut' :
-                        tradeStats.avgRR >= 1 ? 'Akzeptabel' :
+                        tradeStats.avgRR >= 1 ? 'OK' :
                         'Niedrig'
                       }
                     </div>
