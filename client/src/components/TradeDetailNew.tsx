@@ -405,11 +405,15 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         trends: null,
         position: null,
         risk: null,
+        marktzonen: null,
+        ergebnis: null,
         elements: {
           setup: [],
           trends: [],
           position: [],
-          risk: []
+          risk: [],
+          marktzonen: [],
+          ergebnis: []
         }
       };
       
@@ -446,6 +450,14 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                   blockRefs.current.position = block as HTMLElement;
                   blockRefs.current.elements.position.push(element);
                 } 
+                else if (title.includes('marktzonen')) {
+                  blockRefs.current.marktzonen = block as HTMLElement;
+                  blockRefs.current.elements.marktzonen.push(element);
+                } 
+                else if (title.includes('ergebnis')) {
+                  blockRefs.current.ergebnis = block as HTMLElement;
+                  blockRefs.current.elements.ergebnis.push(element);
+                }
                 else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
                   blockRefs.current.risk = block as HTMLElement;
                   blockRefs.current.elements.risk.push(element);
@@ -458,6 +470,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
             setup: blockRefs.current.elements.setup.length,
             trends: blockRefs.current.elements.trends.length,
             position: blockRefs.current.elements.position.length,
+            marktzonen: blockRefs.current.elements.marktzonen.length,
+            ergebnis: blockRefs.current.elements.ergebnis.length,
             risk: blockRefs.current.elements.risk.length,
             totalInputs: inputRefs.current.filter(Boolean).length
           });
