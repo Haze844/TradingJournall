@@ -202,6 +202,26 @@ export default function AccountBalanceProgressNew({
       }
     }
   };
+  
+  const handleEKBalanceSubmit = () => {
+    if (ekBalanceInputRef.current) {
+      const value = Number(ekBalanceInputRef.current.value);
+      if (!isNaN(value) && value >= 0) {
+        updateBalanceMutation.mutate({ accountType: 'EK', balance: value });
+        setIsEditingEK(false);
+      }
+    }
+  };
+
+  const handleEKGoalSubmit = () => {
+    if (ekGoalInputRef.current) {
+      const value = Number(ekGoalInputRef.current.value);
+      if (!isNaN(value) && value > 0) {
+        updateGoalMutation.mutate({ accountType: 'EK', goalBalance: value });
+        setIsEditingEKGoal(false);
+      }
+    }
+  };
 
   // Extrahiere Basiswerte aus den Settings
   const basePaBalance = settings ? settings.accountBalance : 0;
