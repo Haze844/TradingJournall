@@ -170,251 +170,216 @@ export default function AccountBalanceProgress({ className }: AccountBalanceProg
   };
 
   return (
-    <Card className={`overflow-hidden shadow-lg border-primary/20 ${className}`}>
-      <CardHeader className="pb-2 pt-3">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-primary" />
-          Kontoentwicklung
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pb-3">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
-          <TabsList className="grid grid-cols-2 h-8">
-            <TabsTrigger value="pa" className="flex items-center gap-1.5 text-xs py-1">
-              <Wallet className="h-3 w-3" />
-              <span>PA Konto</span>
-            </TabsTrigger>
-            <TabsTrigger value="eva" className="flex items-center gap-1.5 text-xs py-1">
-              <PiggyBank className="h-3 w-3" />
-              <span>EVA Konto</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="pa" className="space-y-3 mt-2">
+    <div className={`bg-gradient-to-r from-black/40 to-black/20 rounded-lg border border-primary/10 overflow-hidden backdrop-blur-sm ${className}`}>
+      <div className="p-1 px-2">
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-[10px] flex items-center gap-1 text-muted-foreground">
+            <TrendingUp className="h-3 w-3 text-primary/70" />
+            <span>Kontoentwicklung</span>
+          </span>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="ml-auto">
+            <TabsList className="grid grid-cols-2 h-6 bg-black/40 p-0.5">
+              <TabsTrigger value="pa" className="flex items-center justify-center gap-1 text-[10px] px-1 py-0.5 h-5">
+                <Wallet className="h-2.5 w-2.5" />
+                <span>PA</span>
+              </TabsTrigger>
+              <TabsTrigger value="eva" className="flex items-center justify-center gap-1 text-[10px] px-1 py-0.5 h-5">
+                <PiggyBank className="h-2.5 w-2.5" />
+                <span>EVA</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        <div className="mt-1.5">
+          <TabsContent value="pa" className="mt-0 space-y-1">
             {isLoading ? (
-              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-6 w-full" />
             ) : (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Aktueller Stand:</span>
+              <div className="space-y-1">
+                {/* Balance info & edit */}
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground">Aktuell:</span>
+                    
+                    {isEditingPA ? (
+                      <div className="flex gap-0.5 items-center">
+                        <Input
+                          ref={paBalanceInputRef}
+                          defaultValue={paBalance}
+                          className="h-5 w-14 text-[10px] px-1"
+                          type="number"
+                          min="0"
+                        />
+                        <button 
+                          className="p-0.5 hover:bg-primary/20 rounded-sm"
+                          onClick={handlePABalanceSubmit}
+                        >
+                          <Check className="h-2 w-2 text-primary" />
+                        </button>
+                        <button 
+                          className="p-0.5 hover:bg-destructive/20 rounded-sm"
+                          onClick={() => setIsEditingPA(false)}
+                        >
+                          <X className="h-2 w-2 text-destructive" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <span className="font-medium text-[11px]">${paBalance.toLocaleString()}</span>
+                        <button
+                          className="p-0.5 hover:bg-primary/10 rounded-sm ml-0.5"
+                          onClick={() => setIsEditingPA(true)}
+                        >
+                          <Edit className="h-2 w-2 text-muted-foreground/70" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   
-                  {isEditingPA ? (
-                    <div className="flex gap-1 items-center">
-                      <Input
-                        ref={paBalanceInputRef}
-                        defaultValue={paBalance}
-                        className="h-7 w-20 text-xs"
-                        type="number"
-                        min="0"
-                      />
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={handlePABalanceSubmit}
-                      >
-                        <Check className="h-3 w-3 text-primary" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={() => setIsEditingPA(false)}
-                      >
-                        <X className="h-3 w-3 text-destructive" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <span className="font-bold text-sm">${paBalance.toLocaleString()}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        onClick={() => setIsEditingPA(true)}
-                      >
-                        <Edit className="h-3 w-3 text-muted-foreground" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-1.5">
-                  <Progress value={paBalanceProgress} className="h-1.5" />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>$0</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground">Ziel:</span>
                     
                     {isEditingPAGoal ? (
-                      <div className="flex gap-1 items-center">
-                        <span>$</span>
+                      <div className="flex gap-0.5 items-center">
                         <Input
                           ref={paGoalInputRef}
                           defaultValue={paGoal}
-                          className="h-6 w-16 text-xs"
+                          className="h-5 w-14 text-[10px] px-1"
                           type="number"
                           min="1"
                         />
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-5 w-5"
+                        <button 
+                          className="p-0.5 hover:bg-primary/20 rounded-sm"
                           onClick={handlePAGoalSubmit}
                         >
-                          <Check className="h-3 w-3 text-primary" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-5 w-5"
+                          <Check className="h-2 w-2 text-primary" />
+                        </button>
+                        <button 
+                          className="p-0.5 hover:bg-destructive/20 rounded-sm"
                           onClick={() => setIsEditingPAGoal(false)}
                         >
-                          <X className="h-3 w-3 text-destructive" />
-                        </Button>
+                          <X className="h-2 w-2 text-destructive" />
+                        </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1">
-                        <span>Ziel: ${paGoal.toLocaleString()}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4"
+                      <div className="flex items-center">
+                        <span className="font-medium text-[11px]">${paGoal.toLocaleString()}</span>
+                        <button
+                          className="p-0.5 hover:bg-primary/10 rounded-sm ml-0.5"
                           onClick={() => setIsEditingPAGoal(true)}
                         >
-                          <Edit className="h-2.5 w-2.5 text-muted-foreground" />
-                        </Button>
+                          <Edit className="h-2 w-2 text-muted-foreground/70" />
+                        </button>
                       </div>
                     )}
                   </div>
                 </div>
                 
-                <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-2 text-xs">
-                  <div className="font-medium mb-0.5 flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3 text-blue-500" />
-                    <span>{paBalanceProgress}% zum Ziel</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    {paBalanceProgress < 100 
-                      ? `Noch $${(paGoal - paBalance).toLocaleString()} bis zum Ziel!`
-                      : "Glückwunsch! Du hast dein Ziel erreicht! 🎉"}
-                  </p>
+                {/* Progress bar with percentage */}
+                <div className="relative mt-0.5">
+                  <Progress value={paBalanceProgress} className="h-1 bg-black/40" />
+                  <span className="absolute right-0 top-1.5 text-[9px] text-muted-foreground">{paBalanceProgress}%</span>
                 </div>
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="eva" className="space-y-3 mt-2">
+          <TabsContent value="eva" className="mt-0 space-y-1">
             {isLoading ? (
-              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-6 w-full" />
             ) : (
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Aktueller Stand:</span>
+              <div className="space-y-1">
+                {/* Balance info & edit */}
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground">Aktuell:</span>
+                    
+                    {isEditingEVA ? (
+                      <div className="flex gap-0.5 items-center">
+                        <Input
+                          ref={evaBalanceInputRef}
+                          defaultValue={evaBalance}
+                          className="h-5 w-14 text-[10px] px-1"
+                          type="number"
+                          min="0"
+                        />
+                        <button 
+                          className="p-0.5 hover:bg-primary/20 rounded-sm"
+                          onClick={handleEVABalanceSubmit}
+                        >
+                          <Check className="h-2 w-2 text-primary" />
+                        </button>
+                        <button 
+                          className="p-0.5 hover:bg-destructive/20 rounded-sm"
+                          onClick={() => setIsEditingEVA(false)}
+                        >
+                          <X className="h-2 w-2 text-destructive" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <span className="font-medium text-[11px]">${evaBalance.toLocaleString()}</span>
+                        <button
+                          className="p-0.5 hover:bg-primary/10 rounded-sm ml-0.5"
+                          onClick={() => setIsEditingEVA(true)}
+                        >
+                          <Edit className="h-2 w-2 text-muted-foreground/70" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   
-                  {isEditingEVA ? (
-                    <div className="flex gap-1 items-center">
-                      <Input
-                        ref={evaBalanceInputRef}
-                        defaultValue={evaBalance}
-                        className="h-7 w-20 text-xs"
-                        type="number"
-                        min="0"
-                      />
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={handleEVABalanceSubmit}
-                      >
-                        <Check className="h-3 w-3 text-primary" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={() => setIsEditingEVA(false)}
-                      >
-                        <X className="h-3 w-3 text-destructive" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <span className="font-bold text-sm">${evaBalance.toLocaleString()}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5"
-                        onClick={() => setIsEditingEVA(true)}
-                      >
-                        <Edit className="h-3 w-3 text-muted-foreground" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-1.5">
-                  <Progress value={evaBalanceProgress} className="h-1.5" />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>$0</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-muted-foreground">Ziel:</span>
                     
                     {isEditingEVAGoal ? (
-                      <div className="flex gap-1 items-center">
-                        <span>$</span>
+                      <div className="flex gap-0.5 items-center">
                         <Input
                           ref={evaGoalInputRef}
                           defaultValue={evaGoal}
-                          className="h-6 w-16 text-xs"
+                          className="h-5 w-14 text-[10px] px-1"
                           type="number"
                           min="1"
                         />
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-5 w-5"
+                        <button 
+                          className="p-0.5 hover:bg-primary/20 rounded-sm"
                           onClick={handleEVAGoalSubmit}
                         >
-                          <Check className="h-3 w-3 text-primary" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-5 w-5"
+                          <Check className="h-2 w-2 text-primary" />
+                        </button>
+                        <button 
+                          className="p-0.5 hover:bg-destructive/20 rounded-sm"
                           onClick={() => setIsEditingEVAGoal(false)}
                         >
-                          <X className="h-3 w-3 text-destructive" />
-                        </Button>
+                          <X className="h-2 w-2 text-destructive" />
+                        </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1">
-                        <span>Ziel: ${evaGoal.toLocaleString()}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-4 w-4"
+                      <div className="flex items-center">
+                        <span className="font-medium text-[11px]">${evaGoal.toLocaleString()}</span>
+                        <button
+                          className="p-0.5 hover:bg-primary/10 rounded-sm ml-0.5"
                           onClick={() => setIsEditingEVAGoal(true)}
                         >
-                          <Edit className="h-2.5 w-2.5 text-muted-foreground" />
-                        </Button>
+                          <Edit className="h-2 w-2 text-muted-foreground/70" />
+                        </button>
                       </div>
                     )}
                   </div>
                 </div>
                 
-                <div className="rounded-lg bg-purple-500/5 border border-purple-500/20 p-2 text-xs">
-                  <div className="font-medium mb-0.5 flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3 text-purple-500" />
-                    <span>{evaBalanceProgress}% zum Ziel</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground">
-                    {evaBalanceProgress < 100 
-                      ? `Noch $${(evaGoal - evaBalance).toLocaleString()} bis zum Ziel!`
-                      : "Glückwunsch! Du hast dein Ziel erreicht! 🎉"}
-                  </p>
+                {/* Progress bar with percentage */}
+                <div className="relative mt-0.5">
+                  <Progress value={evaBalanceProgress} className="h-1 bg-black/40" />
+                  <span className="absolute right-0 top-1.5 text-[9px] text-muted-foreground">{evaBalanceProgress}%</span>
                 </div>
               </div>
             )}
           </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 }
