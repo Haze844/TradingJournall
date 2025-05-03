@@ -460,6 +460,7 @@ export default function AccountBalanceProgressNew({
               </div>
             )}
           </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
