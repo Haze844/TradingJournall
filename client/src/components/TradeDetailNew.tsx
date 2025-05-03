@@ -147,13 +147,15 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       }
     }
     
-    // Navigation mit Pfeiltasten (links/rechts) für Felder in der gleichen Zeile
-    // Annahme: Felder sind in Zweiergruppen angeordnet (links/rechts)
-    if (event.key === 'ArrowRight' && (index % 2 === 0)) {
+    // Navigation mit Pfeiltasten (links/rechts) für alle Felder
+    // Allgemeinere Implementierung, die nicht von der Struktur abhängt
+    if (event.key === 'ArrowRight') {
       event.preventDefault();
       
-      // Versuche, zum Element rechts zu navigieren (index + 1)
+      // Immer zum nächsten Element (index + 1) navigieren
       const rightIndex = index + 1;
+      
+      // Wenn das nächste Element existiert, fokussiere es
       if (rightIndex < inputRefs.current.length && inputRefs.current[rightIndex]) {
         const rightElement = inputRefs.current[rightIndex];
         
@@ -162,14 +164,32 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
             rightElement instanceof HTMLSelectElement) {
           rightElement.focus();
         }
+      } else {
+        // Wenn wir am Ende eines "Blocks" sind, zum nächsten "Block" springen
+        // Ein "Block" könnte eine Spalte oder ein Abschnitt sein
+        // Dies ist nur ein Beispiel - die genaue Logik hängt von der Struktur ab
+        
+        // Versuche, das Element bei index + 2 zu fokussieren (Sprung über Spalten)
+        const nextBlockIndex = index + 2;
+        if (nextBlockIndex < inputRefs.current.length && inputRefs.current[nextBlockIndex]) {
+          const nextBlockElement = inputRefs.current[nextBlockIndex];
+          
+          if (nextBlockElement instanceof HTMLButtonElement || 
+              nextBlockElement instanceof HTMLInputElement || 
+              nextBlockElement instanceof HTMLSelectElement) {
+            nextBlockElement.focus();
+          }
+        }
       }
     }
     
-    if (event.key === 'ArrowLeft' && (index % 2 === 1)) {
+    if (event.key === 'ArrowLeft') {
       event.preventDefault();
       
-      // Versuche, zum Element links zu navigieren (index - 1)
+      // Immer zum vorherigen Element (index - 1) navigieren
       const leftIndex = index - 1;
+      
+      // Wenn das vorherige Element existiert, fokussiere es
       if (leftIndex >= 0 && inputRefs.current[leftIndex]) {
         const leftElement = inputRefs.current[leftIndex];
         
@@ -177,6 +197,20 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
             leftElement instanceof HTMLInputElement || 
             leftElement instanceof HTMLSelectElement) {
           leftElement.focus();
+        }
+      } else {
+        // Wenn wir am Anfang eines "Blocks" sind, zum vorherigen "Block" springen
+        
+        // Versuche, das Element bei index - 2 zu fokussieren (Sprung über Spalten)
+        const prevBlockIndex = index - 2;
+        if (prevBlockIndex >= 0 && inputRefs.current[prevBlockIndex]) {
+          const prevBlockElement = inputRefs.current[prevBlockIndex];
+          
+          if (prevBlockElement instanceof HTMLButtonElement || 
+              prevBlockElement instanceof HTMLInputElement || 
+              prevBlockElement instanceof HTMLSelectElement) {
+            prevBlockElement.focus();
+          }
         }
       }
     }
