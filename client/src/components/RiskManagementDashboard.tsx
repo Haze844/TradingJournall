@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, CartesianGrid, XAxis, YAxis, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import { ChartTypeSelector, type ChartType } from '@/components/ui/chart-type-selector';
 import { format } from 'date-fns';
-import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart, RefreshCcw, Wallet, PiggyBank } from 'lucide-react';
+import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart, RefreshCcw, Wallet, PiggyBank, InfoIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -466,7 +466,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                 disabled
               >
                 <div className="flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-primary/70" />
+                  <InfoIcon className="h-3.5 w-3.5 text-primary/70" />
                   <span className="text-xs">Kontostände aus Kontoentwicklung übernommen</span>
                 </div>
               </Button>
