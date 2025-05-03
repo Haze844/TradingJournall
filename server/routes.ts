@@ -2772,8 +2772,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           syncEnabled: true,
           accountBalance: accountType === "PA" ? balance : 2500,
           evaAccountBalance: accountType === "EVA" ? balance : 1500,
+          ekAccountBalance: accountType === "EK" ? balance : 1000,
           goalBalance: 7500,
-          evaGoalBalance: 7500
+          evaGoalBalance: 7500,
+          ekGoalBalance: 5000
         };
         
         settings = await storage.createAppSettings(newSettingsData);
@@ -2791,8 +2793,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedSettings = await storage.updateAppSettings(settings.id, {
           accountBalance: balance
         });
+      } else if (accountType === "EK") {
+        updatedSettings = await storage.updateAppSettings(settings.id, {
+          ekAccountBalance: balance
+        });
       } else {
-        return res.status(400).json({ message: "Ungültiger Kontotyp. Verwende 'EVA' oder 'PA'." });
+        return res.status(400).json({ message: "Ungültiger Kontotyp. Verwende 'PA', 'EVA' oder 'EK'." });
       }
       
       res.status(200).json(updatedSettings);
@@ -2832,8 +2838,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           syncEnabled: true,
           accountBalance: 2500,
           evaAccountBalance: 1500,
+          ekAccountBalance: 1000,
           goalBalance: accountType === "PA" ? goalBalance : 7500,
-          evaGoalBalance: accountType === "EVA" ? goalBalance : 7500
+          evaGoalBalance: accountType === "EVA" ? goalBalance : 7500,
+          ekGoalBalance: accountType === "EK" ? goalBalance : 5000
         };
         
         settings = await storage.createAppSettings(newSettingsData);
@@ -2851,8 +2859,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updatedSettings = await storage.updateAppSettings(settings.id, {
           goalBalance: goalBalance
         });
+      } else if (accountType === "EK") {
+        updatedSettings = await storage.updateAppSettings(settings.id, {
+          ekGoalBalance: goalBalance
+        });
       } else {
-        return res.status(400).json({ message: "Ungültiger Kontotyp. Verwende 'EVA' oder 'PA'." });
+        return res.status(400).json({ message: "Ungültiger Kontotyp. Verwende 'PA', 'EVA' oder 'EK'." });
       }
       
       res.status(200).json(updatedSettings);
