@@ -424,10 +424,6 @@ export default function SimpleHome() {
           <Tabs defaultValue="patterns" className="w-full">
             <div className="overflow-x-auto pb-2">
               <TabsList className="mb-4 bg-black/40 p-1 rounded-xl w-full flex justify-center">
-                <TabsTrigger value="patterns" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
-                  <Brain className="mr-1.5 h-4 w-4 md:inline hidden" />
-                  Muster
-                </TabsTrigger>
                 <TabsTrigger value="market-phases" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
                   <BarChart2 className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Marktphasen
@@ -436,14 +432,18 @@ export default function SimpleHome() {
                   <Trophy className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Performance
                 </TabsTrigger>
-                <TabsTrigger value="ai-assistant" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
-                  <Activity className="mr-1.5 h-4 w-4 md:inline hidden" />
-                  KI-Analyse
-                </TabsTrigger>
                 <TabsTrigger value="streaks" className="custom-tabs-trigger data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2 relative overflow-hidden group">
                   <Flame className="mr-1.5 h-4 w-4 md:inline hidden group-hover:text-blue-300 transition-colors" />
                   <span className="group-hover:text-blue-300 transition-colors">Streak Tracker</span>
                   <span className="absolute -bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 to-blue-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                </TabsTrigger>
+                <TabsTrigger value="ai-assistant" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <Activity className="mr-1.5 h-4 w-4 md:inline hidden" />
+                  KI-Analyse
+                </TabsTrigger>
+                <TabsTrigger value="patterns" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
+                  <Brain className="mr-1.5 h-4 w-4 md:inline hidden" />
+                  Muster
                 </TabsTrigger>
               </TabsList>
             </div>
