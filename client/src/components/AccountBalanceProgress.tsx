@@ -289,14 +289,14 @@ export default function AccountBalanceProgress({
                 <div className="flex flex-col space-y-2">
                   {/* Basis-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-primary/80 font-medium">Basis-Kontostand:</span>
+                    <span className="text-[13px] text-primary/90 font-medium">Basis-Kontostand:</span>
                     
                     {isEditingPA ? (
                       <div className="flex gap-1 items-center">
                         <Input
                           ref={paBalanceInputRef}
                           defaultValue={basePaBalance}
-                          className="h-6 w-20 text-[11px] px-2"
+                          className="h-7 w-24 text-[13px] px-2"
                           type="number"
                           min="0"
                         />
@@ -304,25 +304,25 @@ export default function AccountBalanceProgress({
                           className="p-1 hover:bg-primary/20 rounded-md"
                           onClick={handlePABalanceSubmit}
                         >
-                          <Check className="h-3 w-3 text-primary" />
+                          <Check className="h-4 w-4 text-primary" />
                         </button>
                         <button 
                           className="p-1 hover:bg-destructive/20 rounded-md"
                           onClick={() => setIsEditingPA(false)}
                         >
-                          <X className="h-3 w-3 text-destructive" />
+                          <X className="h-4 w-4 text-destructive" />
                         </button>
                       </div>
                     ) : (
                       <div className="flex items-center">
-                        <span className="font-medium text-[12px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                        <span className="font-medium text-[14px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
                           ${basePaBalance.toLocaleString()}
                         </span>
                         <button
                           className="p-1 hover:bg-primary/10 rounded-md ml-1"
                           onClick={() => setIsEditingPA(true)}
                         >
-                          <Edit className="h-3 w-3 text-primary/70" />
+                          <Edit className="h-4 w-4 text-primary/70" />
                         </button>
                       </div>
                     )}
@@ -330,14 +330,14 @@ export default function AccountBalanceProgress({
                   
                   {/* Ziel-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-primary/80 font-medium">Ziel-Kontostand:</span>
+                    <span className="text-[13px] text-primary/90 font-medium">Ziel-Kontostand:</span>
                     
                     {isEditingPAGoal ? (
                       <div className="flex gap-1 items-center">
                         <Input
                           ref={paGoalInputRef}
                           defaultValue={paGoal}
-                          className="h-6 w-20 text-[11px] px-2"
+                          className="h-7 w-24 text-[13px] px-2"
                           type="number"
                           min="1"
                         />
@@ -345,25 +345,25 @@ export default function AccountBalanceProgress({
                           className="p-1 hover:bg-primary/20 rounded-md"
                           onClick={handlePAGoalSubmit}
                         >
-                          <Check className="h-3 w-3 text-primary" />
+                          <Check className="h-4 w-4 text-primary" />
                         </button>
                         <button 
                           className="p-1 hover:bg-destructive/20 rounded-md"
                           onClick={() => setIsEditingPAGoal(false)}
                         >
-                          <X className="h-3 w-3 text-destructive" />
+                          <X className="h-4 w-4 text-destructive" />
                         </button>
                       </div>
                     ) : (
                       <div className="flex items-center">
-                        <span className="font-medium text-[12px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                        <span className="font-medium text-[14px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
                           ${paGoal.toLocaleString()}
                         </span>
                         <button
                           className="p-1 hover:bg-primary/10 rounded-md ml-1"
                           onClick={() => setIsEditingPAGoal(true)}
                         >
-                          <Edit className="h-3 w-3 text-primary/70" />
+                          <Edit className="h-4 w-4 text-primary/70" />
                         </button>
                       </div>
                     )}
@@ -371,15 +371,20 @@ export default function AccountBalanceProgress({
                   
                   {/* Aktueller berechneter Wert */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-primary/80 font-medium">Aktueller Wert:</span>
-                    <span className="font-medium text-[13px] text-primary">${paBalance.toLocaleString()}</span>
+                    <span className="text-[13px] text-primary/90 font-medium">Aktueller Wert:</span>
+                    <span className="font-medium text-[15px] text-primary">${paBalance.toLocaleString()}</span>
                   </div>
                 </div>
                 
                 {/* Fortschrittsbalken */}
-                <div className="mt-1 relative">
-                  <Progress value={paBalanceProgress} className="h-2 bg-black/40" />
-                  <span className="absolute right-0 top-2.5 text-[10px] text-primary/80 font-medium">
+                <div className="mt-2 mb-1 relative">
+                  <div className="w-full bg-black/50 rounded-full h-3 border border-primary/10">
+                    <div 
+                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                      style={{ width: `${paBalanceProgress}%` }}
+                    ></div>
+                  </div>
+                  <span className="absolute right-1 top-0 text-[12px] text-white font-medium">
                     {paBalanceProgress}%
                   </span>
                 </div>
@@ -396,14 +401,14 @@ export default function AccountBalanceProgress({
                 <div className="flex flex-col space-y-2">
                   {/* Basis-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-primary/80 font-medium">Basis-Kontostand:</span>
+                    <span className="text-[13px] text-primary/90 font-medium">Basis-Kontostand:</span>
                     
                     {isEditingEVA ? (
                       <div className="flex gap-1 items-center">
                         <Input
                           ref={evaBalanceInputRef}
                           defaultValue={baseEvaBalance}
-                          className="h-6 w-20 text-[11px] px-2"
+                          className="h-7 w-24 text-[13px] px-2"
                           type="number"
                           min="0"
                         />
@@ -411,25 +416,25 @@ export default function AccountBalanceProgress({
                           className="p-1 hover:bg-primary/20 rounded-md"
                           onClick={handleEVABalanceSubmit}
                         >
-                          <Check className="h-3 w-3 text-primary" />
+                          <Check className="h-4 w-4 text-primary" />
                         </button>
                         <button 
                           className="p-1 hover:bg-destructive/20 rounded-md"
                           onClick={() => setIsEditingEVA(false)}
                         >
-                          <X className="h-3 w-3 text-destructive" />
+                          <X className="h-4 w-4 text-destructive" />
                         </button>
                       </div>
                     ) : (
                       <div className="flex items-center">
-                        <span className="font-medium text-[12px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                        <span className="font-medium text-[14px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
                           ${baseEvaBalance.toLocaleString()}
                         </span>
                         <button
                           className="p-1 hover:bg-primary/10 rounded-md ml-1"
                           onClick={() => setIsEditingEVA(true)}
                         >
-                          <Edit className="h-3 w-3 text-primary/70" />
+                          <Edit className="h-4 w-4 text-primary/70" />
                         </button>
                       </div>
                     )}
@@ -437,14 +442,14 @@ export default function AccountBalanceProgress({
                   
                   {/* Ziel-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-primary/80 font-medium">Ziel-Kontostand:</span>
+                    <span className="text-[13px] text-primary/90 font-medium">Ziel-Kontostand:</span>
                     
                     {isEditingEVAGoal ? (
                       <div className="flex gap-1 items-center">
                         <Input
                           ref={evaGoalInputRef}
                           defaultValue={evaGoal}
-                          className="h-6 w-20 text-[11px] px-2"
+                          className="h-7 w-24 text-[13px] px-2"
                           type="number"
                           min="1"
                         />
@@ -452,25 +457,25 @@ export default function AccountBalanceProgress({
                           className="p-1 hover:bg-primary/20 rounded-md"
                           onClick={handleEVAGoalSubmit}
                         >
-                          <Check className="h-3 w-3 text-primary" />
+                          <Check className="h-4 w-4 text-primary" />
                         </button>
                         <button 
                           className="p-1 hover:bg-destructive/20 rounded-md"
                           onClick={() => setIsEditingEVAGoal(false)}
                         >
-                          <X className="h-3 w-3 text-destructive" />
+                          <X className="h-4 w-4 text-destructive" />
                         </button>
                       </div>
                     ) : (
                       <div className="flex items-center">
-                        <span className="font-medium text-[12px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
+                        <span className="font-medium text-[14px] bg-black/30 py-0.5 px-2 rounded border border-primary/10">
                           ${evaGoal.toLocaleString()}
                         </span>
                         <button
                           className="p-1 hover:bg-primary/10 rounded-md ml-1"
                           onClick={() => setIsEditingEVAGoal(true)}
                         >
-                          <Edit className="h-3 w-3 text-primary/70" />
+                          <Edit className="h-4 w-4 text-primary/70" />
                         </button>
                       </div>
                     )}
@@ -478,15 +483,20 @@ export default function AccountBalanceProgress({
                   
                   {/* Aktueller berechneter Wert */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] text-primary/80 font-medium">Aktueller Wert:</span>
-                    <span className="font-medium text-[13px] text-primary">${evaBalance.toLocaleString()}</span>
+                    <span className="text-[13px] text-primary/90 font-medium">Aktueller Wert:</span>
+                    <span className="font-medium text-[15px] text-primary">${evaBalance.toLocaleString()}</span>
                   </div>
                 </div>
                 
                 {/* Fortschrittsbalken */}
-                <div className="mt-1 relative">
-                  <Progress value={evaBalanceProgress} className="h-2 bg-black/40" />
-                  <span className="absolute right-0 top-2.5 text-[10px] text-primary/80 font-medium">
+                <div className="mt-2 mb-1 relative">
+                  <div className="w-full bg-black/50 rounded-full h-3 border border-primary/10">
+                    <div 
+                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                      style={{ width: `${evaBalanceProgress}%` }}
+                    ></div>
+                  </div>
+                  <span className="absolute right-1 top-0 text-[12px] text-white font-medium">
                     {evaBalanceProgress}%
                   </span>
                 </div>
