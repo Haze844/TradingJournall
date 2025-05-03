@@ -25,14 +25,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Logo-Komponente für einheitliches Design
 export const NxtLvlLogo = ({ className = "" }) => (
-  <div className={`flex items-center justify-start space-x-4 ${className}`}>
-    <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-3.5 rounded-xl shadow-xl 
-                  border border-blue-400/30 group-hover:shadow-blue-500/30 group-hover:border-blue-400/50 
-                  transition-all duration-300 transform group-hover:scale-105 relative">
+  <div className={`flex items-center justify-start space-x-3 ${className}`}>
+    <div className="bg-gradient-to-br from-blue-700/80 to-blue-900/80 p-2.5 rounded-xl shadow-lg 
+                  border border-blue-500/20 group-hover:shadow-blue-500/30 group-hover:border-blue-400/30 
+                  transition-all duration-300 transform group-hover:scale-105 relative backdrop-blur-md">
       <div className="absolute inset-0 bg-blue-400/10 rounded-xl blur-sm"></div>
-      <LineChart className="h-8 w-8 text-white group-hover:text-blue-100 transition-colors relative z-10" />
+      <LineChart className="h-6 w-6 text-blue-100 group-hover:text-white transition-colors relative z-10" />
     </div>
-    <div className="text-3xl font-black tracking-tighter leading-none relative">
+    <div className="text-2xl font-black tracking-tighter leading-none relative">
       <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-blue-200 
                     group-hover:from-white group-hover:to-blue-300 transition-all duration-300 drop-shadow-sm">
         NXT<span className="text-blue-300 group-hover:text-blue-200">LVL</span>
@@ -87,12 +87,13 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
         <div className="container mx-auto py-3 pt-5 relative z-10">
           {/* Top-Bereich mit Logo und Benutzerbereich */}
           <div className="flex flex-col items-center mb-4">
-            {/* Kreatives, modernes Logo - zentriert mit Hintergrundeffekt */}
-            <div className="flex justify-center w-full mb-4 relative">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-16 
-                            bg-blue-500/10 blur-xl rounded-full z-0"></div>
+            {/* Kreatives, modernes Logo - angepasst an TabsList Design */}
+            <div className="flex justify-center w-full mb-5 relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-14 
+                            bg-blue-700/10 blur-xl rounded-full z-0"></div>
               <Link href="/" className="group relative z-10">
-                <NxtLvlLogo />
+                <NxtLvlLogo className="backdrop-blur-sm bg-black/50 border border-blue-500/20 rounded-xl px-3 py-2 
+                                      shadow-lg hover:shadow-blue-500/10 transition-shadow duration-300" />
               </Link>
             </div>
             
