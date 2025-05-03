@@ -125,6 +125,175 @@ const getBlockTypeFromTitle = (title: string): string => {
   return 'unknown';
 };
 
+// Funktion zum Finden eines Elements, das sich in einer bestimmten Richtung vom aktuellen Element befindet
+const findElementInDirection = (
+  currentIndex: number, 
+  direction: 'up' | 'down' | 'left' | 'right',
+  inputRefs: React.MutableRefObject<Array<HTMLElement | null>>,
+  blockRefs: React.MutableRefObject<BlockRefs>
+): HTMLElement | null => {
+  // Der aktuelle Referenzpunkt
+  const currentElement = inputRefs.current[currentIndex];
+  if (!currentElement) return null;
+  
+  // Bestimme den Block, in dem sich das aktuelle Element befindet
+  const currentBlock = currentElement.closest('.bg-muted\\/30');
+  if (!currentBlock) return null;
+  
+  // Ermittle den Typ des aktuellen Blocks
+  const titleEl = currentBlock.querySelector('.text-xs.font-medium');
+  if (!titleEl) return null;
+  
+  const titleText = titleEl.textContent?.toLowerCase() || '';
+  const currentBlockType = getBlockTypeFromTitle(titleText);
+  
+  console.log(`Navigationssuch-Start von Block: ${currentBlockType}, Element-Index: ${currentIndex}, Richtung: ${direction}`);
+  
+  // Räumliches Verständnis der Elemente herstellen
+  const elementPositions = new Map<number, DOMRect>();
+  
+  // Positions-Informationen für alle Elemente sammeln
+  inputRefs.current.forEach((el, idx) => {
+    if (!el) return;
+    elementPositions.set(idx, el.getBoundingClientRect());
+  });
+  
+  // Position des aktuellen Elements
+  const currentRect = elementPositions.get(currentIndex);
+  if (!currentRect) return null;
+  
+  let bestMatchIndex = -1;
+  let bestMatchScore = Number.MAX_VALUE;
+  
+  // Die gesamte Block-Sequenz
+  const blockSequence = blockRefs.current.blockSequence || ["setup", "trends", "position", "marktzonen", "ergebnis"];
+  
+  // Wenn wir den Block wechseln müssen, mache dies basierend auf der Reihenfolge
+  let targetBlockType = currentBlockType;
+  
+  if ((direction === 'right' || direction === 'down') && currentBlockType !== 'unknown') {
+    // Zum nächsten Block in der Sequenz
+    const currentIdx = blockSequence.indexOf(currentBlockType);
+    if (currentIdx >= 0 && currentIdx < blockSequence.length - 1) {
+      targetBlockType = blockSequence[currentIdx + 1];
+    }
+  } else if ((direction === 'left' || direction === 'up') && currentBlockType !== 'unknown') {
+    // Zum vorherigen Block in der Sequenz
+    const currentIdx = blockSequence.indexOf(currentBlockType);
+    if (currentIdx > 0 && currentIdx < blockSequence.length) {
+      targetBlockType = blockSequence[currentIdx - 1];
+    }
+  }
+  
+  // Durchlaufe alle Elemente und finde das am besten passende Element in der gewünschten Richtung
+  inputRefs.current.forEach((el, idx) => {
+    if (!el || idx === currentIndex) return;
+    
+    const rect = elementPositions.get(idx);
+    if (!rect) return;
+    
+    // Feststellen, ob dieses Element im selben oder im Ziel-Block ist
+    const elBlock = el.closest('.bg-muted\\/30');
+    if (!elBlock) return;
+    
+    const elTitleEl = elBlock.querySelector('.text-xs.font-medium');
+    if (!elTitleEl) return;
+    
+    const elTitleText = elTitleEl.textContent?.toLowerCase() || '';
+    const elBlockType = getBlockTypeFromTitle(elTitleText);
+    
+    // Prüfen, ob das Element im gewünschten Block ist (innerhalb des Blocks oder im Ziel-Block)
+    const inTargetBlock = 
+      (direction === 'left' || direction === 'right') ? 
+        // Für horizontale Navigation: Bevorzugen Sie Elemente im selben Block
+        elBlockType === currentBlockType || 
+        // Bei Bedarf wechseln Sie zum nächsten/vorherigen Block
+        (currentBlockType !== targetBlockType && elBlockType === targetBlockType)
+      : 
+        // Für vertikale Navigation: Bevorzugen Sie Elemente im gleichen oder Ziel-Block
+        elBlockType === currentBlockType || elBlockType === targetBlockType;
+    
+    if (!inTargetBlock) return;
+    
+    // Berechnungen für horizontale Navigation
+    if (direction === 'right' && rect.left <= currentRect.right) return; // Muss rechts sein
+    if (direction === 'left' && rect.right >= currentRect.left) return;  // Muss links sein
+    
+    // Berechnungen für vertikale Navigation
+    if (direction === 'down' && rect.top <= currentRect.bottom) return; // Muss unten sein
+    if (direction === 'up' && rect.bottom >= currentRect.top) return;   // Muss oben sein
+    
+    // Berechnung eines Näherungswerts für verschiedene Richtungen
+    let score = 0;
+    
+    if (direction === 'right') {
+      // Horizontaler Abstand: je kleiner, desto besser
+      score = rect.left - currentRect.right;
+      // Vertikaler Unterschied (quadriert für stärkere Gewichtung)
+      score += Math.pow(Math.abs(rect.top - currentRect.top), 2) * 0.1;
+    } else if (direction === 'left') {
+      // Horizontaler Abstand: je kleiner, desto besser
+      score = currentRect.left - rect.right;
+      // Vertikaler Unterschied (quadriert für stärkere Gewichtung)
+      score += Math.pow(Math.abs(rect.top - currentRect.top), 2) * 0.1;
+    } else if (direction === 'down') {
+      // Vertikaler Abstand: je kleiner, desto besser
+      score = rect.top - currentRect.bottom;
+      // Horizontaler Unterschied (quadriert für stärkere Gewichtung)
+      score += Math.pow(Math.abs(rect.left - currentRect.left), 2) * 0.1;
+    } else if (direction === 'up') {
+      // Vertikaler Abstand: je kleiner, desto besser
+      score = currentRect.top - rect.bottom;
+      // Horizontaler Unterschied (quadriert für stärkere Gewichtung)
+      score += Math.pow(Math.abs(rect.left - currentRect.left), 2) * 0.1;
+    }
+    
+    // Wenn wir zwischen Blöcken wechseln, fügen wir eine Bevorzugung für das erste oder letzte Element hinzu
+    if (elBlockType !== currentBlockType) {
+      // Bevorzugung für das erste Element des nächsten Blocks (nach rechts/unten)
+      if ((direction === 'right' || direction === 'down') && 
+          blockRefs.current.elements[elBlockType] && 
+          blockRefs.current.elements[elBlockType][0] === el) {
+        score -= 1000; // Starke Bevorzugung für das erste Element
+      }
+      // Bevorzugung für das letzte Element des vorherigen Blocks (nach links/oben)
+      else if ((direction === 'left' || direction === 'up') && 
+              blockRefs.current.elements[elBlockType] && 
+              blockRefs.current.elements[elBlockType][blockRefs.current.elements[elBlockType].length - 1] === el) {
+        score -= 1000; // Starke Bevorzugung für das letzte Element
+      }
+    }
+    
+    // Speichern Sie das Element mit dem besten Score
+    if (score < bestMatchScore) {
+      bestMatchScore = score;
+      bestMatchIndex = idx;
+    }
+  });
+  
+  if (bestMatchIndex !== -1 && inputRefs.current[bestMatchIndex]) {
+    return inputRefs.current[bestMatchIndex];
+  }
+  
+  // Fallback für verschiedene Szenarien
+  
+  // Wenn kein passendes Element gefunden wurde, versuche zum nächsten/vorherigen Block zu springen
+  if (targetBlockType !== currentBlockType) {
+    if (blockRefs.current.elements[targetBlockType]?.length > 0) {
+      if (direction === 'right' || direction === 'down') {
+        // Erstes Element im Ziel-Block
+        return blockRefs.current.elements[targetBlockType][0] as HTMLElement;
+      } else {
+        // Letztes Element im Ziel-Block
+        const lastIdx = blockRefs.current.elements[targetBlockType].length - 1;
+        return blockRefs.current.elements[targetBlockType][lastIdx] as HTMLElement;
+      }
+    }
+  }
+  
+  return null;
+};
+
 export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDetailProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
