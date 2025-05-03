@@ -80,13 +80,13 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
       try {
         const response = await fetch(`/api/settings?userId=${userId}`);
         if (!response.ok) {
-          return { accountBalance: 2500, accountType: 'all' };
+          return { accountBalance: 2500, evaAccountBalance: 1500, accountType: 'all' };
         }
         const data = await response.json();
         return data;
       } catch (error) {
         console.error('Fehler beim Abrufen der Benutzereinstellungen:', error);
-        return { accountBalance: 2500, accountType: 'all' };
+        return { accountBalance: 2500, evaAccountBalance: 1500, accountType: 'all' };
       }
     },
   });

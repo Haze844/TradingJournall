@@ -1775,10 +1775,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // PWA und Multi-Device Routen
-  app.get("/api/settings", isAuthenticated, async (req: Request, res: Response) => {
+  app.get("/api/settings", async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      // Unterstützt jetzt auch userId Parameter für nicht-authentifizierte Anfragen
+      const userId = req.query.userId ? parseInt(req.query.userId as string) 
+                   : req.user ? req.user.id 
+                   : null;
       const deviceId = req.query.deviceId as string;
+
+      if (!userId) {
+        return res.status(401).json({
+          error: "Nicht authentifiziert und keine userId angegeben"
+        });
+      }
 
       const settings = await storage.getAppSettings(userId, deviceId);
       

@@ -305,7 +305,8 @@ export const appSettings = pgTable("app_settings", {
   deviceName: text("device_name"),
   deviceType: text("device_type"),
   // Risikomanagement-Einstellungen
-  accountBalance: real("account_balance").default(2500), // Standard-Kontostand 2500€
+  accountBalance: real("account_balance").default(2500), // Standard-Kontostand 2500$
+  evaAccountBalance: real("eva_account_balance").default(1500), // Standard EVA-Kontostand 1500$
   accountType: text("account_type").default("all"), // Standard: "all" für alle Kontotypen
 })
 
