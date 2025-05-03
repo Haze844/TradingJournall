@@ -252,10 +252,10 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
   };
 
   return (
-    <div className={`bg-gradient-to-r from-black/40 to-black/20 rounded-lg border border-primary/10 overflow-hidden backdrop-blur-sm ${className}`}>
-      <div className="p-1 px-2">
-        <div className="flex items-center justify-between mb-0.5">
-          <span className="text-[10px] flex items-center gap-1 text-muted-foreground">
+    <div className={`bg-gradient-to-r from-black/40 to-black/20 rounded-lg border border-primary/10 overflow-hidden backdrop-blur-sm shadow-md ${className}`}>
+      <div className="p-1.5 px-3">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[11px] flex items-center gap-1 text-muted-foreground">
             <TrendingUp className="h-3 w-3 text-primary/70" />
             <span>Kontoentwicklung</span>
           </span>

@@ -2611,15 +2611,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!settings) {
         console.log(`Keine Einstellungen für userId ${userId} gefunden, sende Standardwerte`);
-        return res.status(200).json({
+        // Erweiterte Debug-Ausgabe
+        const standardSettings = {
           accountBalance: 2500,
           evaAccountBalance: 1500,
           goalBalance: 7500,
           evaGoalBalance: 7500,
           theme: 'dark',
           notifications: true
-        });
+        };
+        console.log("Sende Standardeinstellungen:", standardSettings);
+        return res.status(200).json(standardSettings);
       }
+      
+      // Ausgabe der gefundenen Einstellungen für Debug-Zwecke
+      console.log("Gefundene Einstellungen:", settings);
       
       res.status(200).json(settings);
     } catch (error) {
