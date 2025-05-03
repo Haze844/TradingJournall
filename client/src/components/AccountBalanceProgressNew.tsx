@@ -33,11 +33,17 @@ import {
 interface AccountBalanceProgressProps {
   className?: string;
   filteredTrades?: any[];
+  userId?: number;
+  activeFilters?: any;
+  onBalanceUpdate?: (paBalance: number, evaBalance: number, ekBalance: number) => void;
 }
 
 export default function AccountBalanceProgressNew({ 
   className, 
-  filteredTrades = [] 
+  filteredTrades = [],
+  userId,
+  activeFilters,
+  onBalanceUpdate
 }: AccountBalanceProgressProps) {
   const [activeTab, setActiveTab] = useState<string>("pa");
   const { user } = useAuth();
@@ -103,25 +109,91 @@ export default function AccountBalanceProgressNew({
     enabled: !!user?.id, // Nur aktivieren, wenn user.id existiert
   });
 
+  // Hilfsfunktion zum Erstellen von URL-Parametern für Filter
+  const buildFilterParams = () => {
+    let params = '';
+    
+    if (!activeFilters) return params;
+    
+    // Datumsfilter
+    if (activeFilters.startDate && activeFilters.endDate) {
+      const startDate = new Date(activeFilters.startDate).toISOString().split('T')[0];
+      const endDate = new Date(activeFilters.endDate).toISOString().split('T')[0];
+      params += `&startDate=${startDate}&endDate=${endDate}`;
+    }
+    
+    // Symbole
+    if (activeFilters.symbols && activeFilters.symbols.length > 0) {
+      params += `&symbols=${encodeURIComponent(JSON.stringify(activeFilters.symbols))}`;
+    }
+    
+    // Setups
+    if (activeFilters.setups && activeFilters.setups.length > 0) {
+      params += `&setups=${encodeURIComponent(JSON.stringify(activeFilters.setups))}`;
+    }
+    
+    // Win/Loss
+    if (activeFilters.isWin !== null && activeFilters.isWin !== undefined) {
+      params += `&isWin=${activeFilters.isWin}`;
+    }
+    
+    // Marktphasen
+    if (activeFilters.marketPhases && activeFilters.marketPhases.length > 0) {
+      params += `&marketPhases=${encodeURIComponent(JSON.stringify(activeFilters.marketPhases))}`;
+    }
+    
+    // Zeitzonen/Sessions
+    if (activeFilters.sessions && activeFilters.sessions.length > 0) {
+      params += `&sessions=${encodeURIComponent(JSON.stringify(activeFilters.sessions))}`;
+    }
+    
+    return params;
+  };
+  
+  // Trades basierend auf userId und activeFilters laden
+  const { data: loadedTrades = [] } = useQuery({
+    queryKey: ['/api/trades', userId, activeFilters],
+    queryFn: async () => {
+      try {
+        const effectiveUserId = userId || user?.id;
+        if (!effectiveUserId) return [];
+        
+        const filterParams = buildFilterParams();
+        const response = await fetch(`/api/trades?userId=${effectiveUserId}${filterParams}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch trades');
+        }
+        return response.json();
+      } catch (error) {
+        console.error('Error fetching trades:', error);
+        return [];
+      }
+    },
+    enabled: !!(userId || user?.id), // Nur aktivieren, wenn userId oder user.id existiert
+  });
+  
+  // Verwende entweder die übergebenen filteredTrades oder die geladenen Trades
+  const effectiveTrades = filteredTrades.length > 0 ? filteredTrades : loadedTrades;
+  
   // Berechne Kontostände basierend auf gefilterten Trades
   useEffect(() => {
-    if (settings && Array.isArray(filteredTrades)) {
+    if (settings && Array.isArray(effectiveTrades)) {
       // PA Konto Berechnung
-      const paProfit = filteredTrades
+      const paProfit = effectiveTrades
         .filter(trade => trade.accountType === "PA")
         .reduce((sum, trade) => {
           return sum + (Number(trade.profitLoss) || 0);
         }, 0);
       
       // EVA Konto Berechnung
-      const evaProfit = filteredTrades
+      const evaProfit = effectiveTrades
         .filter(trade => trade.accountType === "EVA")
         .reduce((sum, trade) => {
           return sum + (Number(trade.profitLoss) || 0);
         }, 0);
       
       // EK Konto Berechnung
-      const ekProfit = filteredTrades
+      const ekProfit = effectiveTrades
         .filter(trade => trade.accountType === "EK")
         .reduce((sum, trade) => {
           return sum + (Number(trade.profitLoss) || 0);
@@ -137,7 +209,7 @@ export default function AccountBalanceProgressNew({
       setCalculatedEvaBalance(null);
       setCalculatedEkBalance(null);
     }
-  }, [filteredTrades, settings]);
+  }, [effectiveTrades, settings]);
 
   // Mutation zum Aktualisieren des Kontostands
   const updateBalanceMutation = useMutation({
@@ -292,10 +364,17 @@ export default function AccountBalanceProgressNew({
   const evaGrowthRate = baseEvaBalance > 0 ? (evaGrowth / baseEvaBalance) * 100 : 0;
   const ekGrowthRate = baseEkBalance > 0 ? (ekGrowth / baseEkBalance) * 100 : 0;
   
+  // Übergebe die aktuellen Kontostände an den parent-Component über onBalanceUpdate
+  useEffect(() => {
+    if (onBalanceUpdate && !isNaN(paBalance) && !isNaN(evaBalance) && !isNaN(ekBalance)) {
+      onBalanceUpdate(paBalance, evaBalance, ekBalance);
+    }
+  }, [paBalance, evaBalance, ekBalance, onBalanceUpdate]);
+  
   // Funktion zur Generierung dynamischer Empfehlungshinweise basierend auf Trading-Erfolg
   const getRecommendation = (accountType: 'PA' | 'EVA' | 'EK', growth: number, growthRate: number, progress: number) => {
     // Analysiere die gefilterten Trades für diesen Account-Typ
-    const accountTrades = filteredTrades.filter(trade => trade.accountType === accountType);
+    const accountTrades = effectiveTrades.filter(trade => trade.accountType === accountType);
     const totalTrades = accountTrades.length;
     
     // RR-Analysen
@@ -461,7 +540,7 @@ export default function AccountBalanceProgressNew({
           
           <div className="flex items-center space-x-2">
             <p className="text-[11px] text-muted-foreground flex items-center">
-              {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
+              {effectiveTrades.length} Trade{effectiveTrades.length !== 1 ? 's' : ''}
             </p>
             
             <Popover>
