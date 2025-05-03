@@ -262,32 +262,32 @@ export default function AccountBalanceProgressNew({
     : 0;
 
   return (
-    <div className={`space-y-2 border border-primary/20 px-3 py-1.5 rounded-lg bg-black/30 shadow-lg backdrop-blur-md ${className}`}>
+    <div className={`space-y-1 border border-primary/20 px-2 py-1 rounded-lg bg-black/20 shadow-md backdrop-blur-sm ${className}`}>
       <div className="flex flex-col">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <h3 className="text-sm font-bold flex items-center">
-              <Wallet className="mr-1 h-4 w-4 text-primary" />
+            <h3 className="text-xs font-bold flex items-center">
+              <Wallet className="mr-0.5 h-3.5 w-3.5 text-primary" />
               Kontoentwicklung
               {paBalanceProgress >= 100 && 
-                <div className="ml-2 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium flex items-center">
-                  <TrendingUp className="mr-1 h-3 w-3" />
-                  Ziel erreicht
+                <div className="ml-1 text-[10px] bg-primary/10 text-primary px-1 py-0.5 rounded-full font-medium flex items-center">
+                  <TrendingUp className="mr-0.5 h-2.5 w-2.5" />
+                  Ziel
                 </div>
               }
             </h3>
           </div>
           
-          <div className="flex items-center space-x-3">
-            <p className="text-xs text-muted-foreground flex items-center">
+          <div className="flex items-center space-x-2">
+            <p className="text-[10px] text-muted-foreground flex items-center">
               {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
             </p>
             
             <Popover>
               <PopoverTrigger asChild>
-                <button className="flex items-center justify-center gap-1 bg-primary/10 hover:bg-primary/20 transition-colors p-1.5 px-2.5 rounded-md">
-                  <Settings className="h-4 w-4 text-primary" />
-                  <span className="text-xs text-primary font-medium">Einstellungen</span>
+                <button className="flex items-center justify-center gap-0.5 bg-primary/10 hover:bg-primary/20 transition-colors p-1 px-1.5 rounded-md">
+                  <Settings className="h-3 w-3 text-primary" />
+                  <span className="text-[10px] text-primary font-medium">Einst.</span>
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4 bg-black/95 border-primary/20 backdrop-blur-md">

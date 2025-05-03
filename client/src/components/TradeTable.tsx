@@ -507,11 +507,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
   return (
     <div className="relative w-full">
       <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl h-[70vh]">
-        <CardHeader className="pb-0 pt-4">
-          <div className="flex flex-wrap items-start justify-between gap-2 w-full">
+        <CardHeader className="pb-0 pt-3 px-3">
+          <div className="flex flex-wrap items-start justify-between gap-1 w-full">
             {/* Account Balance Progress mit gefilterten Trades */}
             <AccountBalanceProgressNew 
-              className="w-full flex-grow" 
+              className="w-full md:w-auto flex-grow md:max-w-[340px]" 
               filteredTrades={filteredTrades} 
             />
             
