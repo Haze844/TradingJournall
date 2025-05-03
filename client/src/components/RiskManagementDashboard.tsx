@@ -395,8 +395,13 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
         {/* Konto-Einstellungen für Risikomanagement */}
         <div className="mb-6 p-4 bg-muted rounded-lg">
           <div className="flex flex-col sm:flex-row gap-4 items-end">
-            <div className="w-full sm:w-1/3">
-              <Label htmlFor="accountBalance" className="text-sm font-medium mb-1.5 block">Kontostand ($)</Label>
+            <div className="w-full sm:w-1/4">
+              <Label htmlFor="accountBalance" className="text-sm font-medium mb-1.5 block">
+                <span className="flex items-center gap-1">
+                  <Wallet className="h-3.5 w-3.5" />
+                  PA Kontostand ($)
+                </span>
+              </Label>
               <div className="flex items-center">
                 <Input 
                   id="accountBalance"
@@ -408,7 +413,25 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
               </div>
             </div>
             
-            <div className="w-full sm:w-1/3">
+            <div className="w-full sm:w-1/4">
+              <Label htmlFor="evaAccountBalance" className="text-sm font-medium mb-1.5 block">
+                <span className="flex items-center gap-1">
+                  <PiggyBank className="h-3.5 w-3.5" />
+                  EVA Kontostand ($)
+                </span>
+              </Label>
+              <div className="flex items-center">
+                <Input 
+                  id="evaAccountBalance"
+                  type="number" 
+                  value={evaAccountBalance} 
+                  onChange={(e) => setEvaAccountBalance(parseFloat(e.target.value) || 0)}
+                  className="flex-grow"
+                />
+              </div>
+            </div>
+            
+            <div className="w-full sm:w-1/4">
               <Label htmlFor="accountType" className="text-sm font-medium mb-1.5 block">Kontotyp filtern</Label>
               <Select 
                 value={accountType} 
@@ -426,12 +449,13 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
               </Select>
             </div>
             
-            <div className="w-full sm:w-1/3">
+            <div className="w-full sm:w-1/4">
               <Button 
                 onClick={() => {
                   // Speichere die Einstellungen
                   updateSettingsMutation.mutate({ 
                     accountBalance, 
+                    evaAccountBalance,
                     accountType 
                   });
                 }}
