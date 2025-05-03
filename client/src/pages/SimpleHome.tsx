@@ -421,7 +421,7 @@ export default function SimpleHome() {
             
         <TabsContent value="ai-analysis" className="mt-0">
           {/* Unternavigation für Analyse mit Tabs */}
-          <Tabs defaultValue="patterns" className="w-full">
+          <Tabs defaultValue="market-phases" className="w-full">
             <div className="overflow-x-auto pb-2">
               <TabsList className="mb-4 bg-black/40 p-1 rounded-xl w-full flex justify-center">
                 <TabsTrigger value="market-phases" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
