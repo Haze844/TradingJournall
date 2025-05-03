@@ -298,6 +298,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           <SelectContent>
                             <SelectItem value="PA">PA</SelectItem>
                             <SelectItem value="EVA">EVA</SelectItem>
+                            <SelectItem value="EK">EK</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
