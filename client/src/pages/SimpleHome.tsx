@@ -259,10 +259,7 @@ export default function SimpleHome() {
         <TabsContent value="trades">
           <div className="rocket-card rounded-xl p-2 sm:p-4 min-h-[140vh]" ref={tradesSectionRef}>
             
-            {/* Kontofortschritt-Komponente */}
-            <div className="mb-4">
-              <AccountBalanceProgress className="w-full" />
-            </div>
+            {/* Hier war die Kontofortschritt-Komponente, die jetzt in TradeTable integriert ist */}
             
             {/* Statistik Panel - kleiner gestaltet */}
             <div className="mb-4 bg-gradient-to-r from-black/40 to-black/20 rounded-xl p-3 border border-primary/20 backdrop-blur-sm shadow-lg">

@@ -2749,10 +2749,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Hole die aktuellen Einstellungen
-      const settings = await storage.getAppSettings(userId);
+      let settings = await storage.getAppSettings(userId);
       
+      // Wenn keine Einstellungen vorhanden sind, erstelle sie
       if (!settings) {
-        return res.status(404).json({ message: "Keine Einstellungen gefunden" });
+        console.log(`Keine Einstellungen für userId ${userId} gefunden, erstelle neue`);
+        
+        // Standardwerte für neue Einstellungen
+        const newSettingsData = {
+          userId,
+          deviceId: `default-${userId}`,
+          deviceName: "Standard Gerät",
+          deviceType: "web",
+          theme: "dark",
+          notifications: true,
+          syncEnabled: true,
+          accountBalance: accountType === "PA" ? balance : 2500,
+          evaAccountBalance: accountType === "EVA" ? balance : 1500,
+          goalBalance: 7500,
+          evaGoalBalance: 7500
+        };
+        
+        settings = await storage.createAppSettings(newSettingsData);
+        console.log(`Neue Einstellungen erstellt:`, settings);
+        return res.status(201).json(settings);
       }
       
       // Update basierend auf dem Kontotyp
@@ -2780,23 +2800,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/goal-balance", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const userId = Number(req.body.userId);
-      const { goalBalance } = req.body;
+      const { accountType, goalBalance } = req.body;
       
-      if (!userId || goalBalance === undefined) {
-        return res.status(400).json({ message: "User ID und Ziel-Kontostand sind erforderlich" });
+      if (!userId || !accountType || goalBalance === undefined) {
+        return res.status(400).json({ 
+          message: "User ID, Kontotyp (EVA/PA) und Ziel-Kontostand sind erforderlich" 
+        });
       }
       
       // Hole die aktuellen Einstellungen
-      const settings = await storage.getAppSettings(userId);
+      let settings = await storage.getAppSettings(userId);
       
+      // Wenn keine Einstellungen vorhanden sind, erstelle sie
       if (!settings) {
-        return res.status(404).json({ message: "Keine Einstellungen gefunden" });
+        console.log(`Keine Einstellungen für userId ${userId} gefunden, erstelle neue für Zielwert`);
+        
+        // Standardwerte für neue Einstellungen
+        const newSettingsData = {
+          userId,
+          deviceId: `default-${userId}`,
+          deviceName: "Standard Gerät",
+          deviceType: "web",
+          theme: "dark",
+          notifications: true,
+          syncEnabled: true,
+          accountBalance: 2500,
+          evaAccountBalance: 1500,
+          goalBalance: accountType === "PA" ? goalBalance : 7500,
+          evaGoalBalance: accountType === "EVA" ? goalBalance : 7500
+        };
+        
+        settings = await storage.createAppSettings(newSettingsData);
+        console.log(`Neue Einstellungen mit Zielwert erstellt:`, settings);
+        return res.status(201).json(settings);
       }
       
-      // Update Ziel-Kontostand
-      const updatedSettings = await storage.updateAppSettings(settings.id, {
-        goalBalance: goalBalance
-      });
+      // Update basierend auf dem Kontotyp
+      let updatedSettings;
+      if (accountType === "EVA") {
+        updatedSettings = await storage.updateAppSettings(settings.id, {
+          evaGoalBalance: goalBalance
+        });
+      } else if (accountType === "PA") {
+        updatedSettings = await storage.updateAppSettings(settings.id, {
+          goalBalance: goalBalance
+        });
+      } else {
+        return res.status(400).json({ message: "Ungültiger Kontotyp. Verwende 'EVA' oder 'PA'." });
+      }
       
       res.status(200).json(updatedSettings);
     } catch (error) {
