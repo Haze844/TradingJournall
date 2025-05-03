@@ -94,9 +94,30 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
 
   // Funktion zum Navigieren zum nächsten oder vorherigen Eingabefeld
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>, index: number) => {
-    // Navigation mit Enter-Taste zum nächsten Feld
+    // Navigation mit Enter-Taste zum nächsten Feld - barrierefrei durch alle Blöcke
     if (event.key === 'Enter') {
       event.preventDefault();
+      
+      // Wenn das aktuelle Element ein Dropdown oder eine Schaltfläche ist, überprüfe zuerst, 
+      // ob es bereits geöffnet ist
+      const isDropdown = event.target instanceof HTMLElement && 
+                        (event.target.getAttribute('role') === 'combobox' || 
+                        event.target.getAttribute('aria-haspopup') === 'listbox');
+      
+      const isButton = event.target instanceof HTMLButtonElement;
+      const isDropdownOpen = document.querySelector('[role="listbox"]');
+      
+      // Wenn es ein geschlossenes Dropdown ist, öffne es
+      if (isDropdown && !isDropdownOpen) {
+        (event.target as HTMLElement).click(); // Öffne das Dropdown
+        return; // Stoppe hier, damit der Benutzer zuerst eine Option auswählen kann
+      }
+      
+      // Wenn es ein Button ist, klicke ihn
+      if (isButton) {
+        event.target.click();
+        // Trotzdem zum nächsten Element navigieren (falls es existiert)
+      }
       
       // Suche nach dem nächsten verfügbaren Eingabefeld
       let nextIndex = index + 1;
@@ -115,7 +136,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
           
           // Für SelectTrigger: automatisch öffnen
           if (nextElement.getAttribute('role') === 'combobox') {
-            nextElement.click();
+            // Nicht sofort öffnen, um Benutzern die Möglichkeit zu geben, weiterzutabben
+            console.log("Nächstes Feld ist ein Dropdown: fokussiert aber nicht geöffnet");
           }
         }
       } else {
@@ -945,7 +967,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.location} 
                           onValueChange={val => updateField('location', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[15] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 15)}
+                          >
                             <SelectValue placeholder="Location" />
                           </SelectTrigger>
                           <SelectContent>
@@ -967,7 +993,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.structure} 
                           onValueChange={val => updateField('structure', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[16] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 16)}
+                          >
                             <SelectValue placeholder="Struktur" />
                           </SelectTrigger>
                           <SelectContent>
@@ -991,7 +1021,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.liquidation} 
                           onValueChange={val => updateField('liquidation', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[17] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 17)}
+                          >
                             <SelectValue placeholder="Liquidation" />
                           </SelectTrigger>
                           <SelectContent>
@@ -1013,7 +1047,11 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           value={editData.timeframeEntry} 
                           onValueChange={val => updateField('timeframeEntry', val)}
                         >
-                          <SelectTrigger className="h-7 text-xs mt-0.5">
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[18] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 18)}
+                          >
                             <SelectValue placeholder="TF Entry" />
                           </SelectTrigger>
                           <SelectContent>
