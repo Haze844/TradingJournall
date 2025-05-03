@@ -10,6 +10,22 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type HeatmapDataPoint = {
   day: string;
@@ -887,7 +903,12 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                         selectedCell.day === props.payload.day && 
                         selectedCell.timeframe === props.payload.timeframe 
                         : false}
-                      onClick={setSelectedCell}
+                      onClick={(data) => {
+                        setSelectedCell(data);
+                        if (interactionMode === "click" && data.tradeCount > 0 && data.trades && data.trades.length > 0) {
+                          setShowTradeDetails(true);
+                        }
+                      }}
                     />
                   )}
                 >
@@ -1039,6 +1060,68 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
             </div>
           )}
         </div>
+        
+        {/* Dialog zur Anzeige der Trade-Details */}
+        {showTradeDetails && selectedCell && selectedCell.trades && (
+          <Dialog open={showTradeDetails} onOpenChange={setShowTradeDetails}>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>
+                  Trades für {selectedCell.day}, {selectedCell.timeframe} Uhr
+                </DialogTitle>
+                <DialogDescription>
+                  {selectedCell.tradeCount} Trades mit einer Win-Rate von {selectedCell.winRate}%
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="max-h-[500px] overflow-y-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Datum</TableHead>
+                      <TableHead>Symbol</TableHead>
+                      <TableHead>Setup</TableHead>
+                      <TableHead>Richtung</TableHead>
+                      <TableHead>Einstieg</TableHead>
+                      <TableHead>Ausstieg</TableHead>
+                      <TableHead>P/L</TableHead>
+                      <TableHead>RR</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedCell.trades.map((trade: any) => (
+                      <TableRow key={trade.id}>
+                        <TableCell>{new Date(trade.date).toLocaleDateString()}</TableCell>
+                        <TableCell>{trade.symbol}</TableCell>
+                        <TableCell>{trade.setup}</TableCell>
+                        <TableCell>
+                          <span className={trade.direction === 'Long' ? 'text-green-500' : 'text-red-500'}>
+                            {trade.direction}
+                          </span>
+                        </TableCell>
+                        <TableCell>{trade.entryPrice}</TableCell>
+                        <TableCell>{trade.exitPrice}</TableCell>
+                        <TableCell className={parseFloat(trade.profitLoss) > 0 ? 'text-green-500' : 'text-red-500'}>
+                          {parseFloat(trade.profitLoss) > 0 ? '+' : ''}{trade.profitLoss}$
+                        </TableCell>
+                        <TableCell>{trade.riskRewardRatio}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowTradeDetails(false)}
+                >
+                  Schließen
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardContent>
     </Card>
   );
