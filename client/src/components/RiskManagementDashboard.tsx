@@ -160,7 +160,8 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
   
   // Hilfsfunktion zum Erstellen der Filter-URL-Parameter
   const buildFilterParams = () => {
-    let params = '';
+    // Start mit einem großen Datumsbereich, um sicherzustellen, dass alle Trades erfasst werden
+    let params = '&startDate=2020-01-01&endDate=2030-12-31';
     
     // Kontotyp-Filter hinzufügen, außer wenn "all" ausgewählt ist
     if (accountType !== 'all') {
@@ -170,8 +171,11 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     // Weitere Filter aus activeFilters hinzufügen
     if (!activeFilters) return params;
     
-    // Datumsfilter
+    // Custom Datumsfilter überschreiben den Standard-Datumsbereich
     if (activeFilters.startDate && activeFilters.endDate) {
+      // Entferne die Standard-Datumsfilter
+      params = params.replace('&startDate=2020-01-01&endDate=2030-12-31', '');
+      
       const startDate = new Date(activeFilters.startDate).toISOString().split('T')[0];
       const endDate = new Date(activeFilters.endDate).toISOString().split('T')[0];
       params += `&startDate=${startDate}&endDate=${endDate}`;
