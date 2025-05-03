@@ -2822,7 +2822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!userId || !accountType || goalBalance === undefined) {
         return res.status(400).json({ 
-          message: "User ID, Kontotyp (EVA/PA) und Ziel-Kontostand sind erforderlich" 
+          message: "User ID, Kontotyp (EVA/PA/EK) und Ziel-Kontostand sind erforderlich" 
         });
       }
       

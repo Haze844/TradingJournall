@@ -312,6 +312,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
     const result = {
       PA: { count: 0, sum: 0 },
       EVA: { count: 0, sum: 0 },
+      EK: { count: 0, sum: 0 },
       total: { count: 0, sum: 0 }
     };
     
@@ -340,7 +341,7 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
         const riskAmount = (ticks * 0.5) * size;
         
         // Log der Berechnung für Debugging
-        console.log(`Risiko Berechnung für Trade ${trade.id}: Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskAmount.toFixed(2)}€`);
+        console.log(`Risiko Berechnung für Trade ${trade.id}: Risiko Punkte=${riskPoints}, Size=${size}, Ticks=${ticks}, Risikosumme=${riskAmount.toFixed(2)}$`);
         
         result[type].sum += riskAmount;
         result.total.count += 1;
