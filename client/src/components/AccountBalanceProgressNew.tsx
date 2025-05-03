@@ -224,12 +224,17 @@ export default function AccountBalanceProgressNew({
   };
 
   // Extrahiere Basiswerte aus den Settings
-  const basePaBalance = settings ? settings.accountBalance : 0;
-  const baseEvaBalance = settings ? settings.evaAccountBalance : 0;
-  const baseEkBalance = settings ? settings.ekAccountBalance || 0 : 0;
-  const paGoal = settings ? settings.goalBalance : 0;
-  const evaGoal = settings ? settings.evaGoalBalance : 0;
-  const ekGoal = settings ? settings.ekGoalBalance || 0 : 0;
+  const basePaBalance = settings ? Number(settings.accountBalance || 0) : 0;
+  const baseEvaBalance = settings ? Number(settings.evaAccountBalance || 0) : 0;
+  const baseEkBalance = settings ? Number(settings.ekAccountBalance || 0) : 0;
+  const paGoal = settings ? Number(settings.goalBalance || 0) : 0;
+  const evaGoal = settings ? Number(settings.evaGoalBalance || 0) : 0;
+  const ekGoal = settings ? Number(settings.ekGoalBalance || 0) : 0;
+  
+  console.log("Gespeicherte Werte:", { 
+    basePaBalance, baseEvaBalance, baseEkBalance, 
+    paGoal, evaGoal, ekGoal 
+  });
 
   // Verwende entweder die berechneten Werte oder die Basiswerte
   const paBalance = calculatedPaBalance !== null ? calculatedPaBalance : basePaBalance;
