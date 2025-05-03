@@ -427,58 +427,6 @@ export default function SimpleHome() {
           <Tabs defaultValue="patterns" className="w-full">
             <div className="overflow-x-auto pb-2">
               <TabsList className="mb-4 bg-black/40 p-1 rounded-xl w-full flex justify-center">
-                {/* Trades Tab an erster Stelle - Direkt zur Trades Tabelle zurückkehren */}
-                <TabsTrigger 
-                  value="back-to-trades" 
-                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2"
-                  onClick={(e) => {
-                    e.preventDefault(); // Verhindern, dass die Tabs-Aktion ausgeführt wird
-                    
-                    // Die Trades TabsTrigger in der Hauptnavigation suchen und aktivieren
-                    const mainTabsList = document.querySelector('.main-tabs-list');
-                    if (mainTabsList) {
-                      const mainTradesTrigger = mainTabsList.querySelector('[value="trades"]') as HTMLElement;
-                      if (mainTradesTrigger) {
-                        mainTradesTrigger.click();
-                        return;
-                      }
-                    }
-                    
-                    // Fallback, wenn wir die Hauptnavigation nicht finden
-                    const tradesTabContent = document.querySelector('[role="tabpanel"][data-state="active"]');
-                    if (tradesTabContent) {
-                      // Setze active state auf die Trades TabsContent
-                      const mainTabs = document.getElementById('main-tabs');
-                      if (mainTabs) {
-                        const tabsValues = mainTabs.querySelectorAll('[role="tab"]');
-                        tabsValues.forEach(tab => {
-                          if (tab.getAttribute('value') === 'trades') {
-                            tab.setAttribute('data-state', 'active');
-                          } else {
-                            tab.setAttribute('data-state', '');
-                          }
-                        });
-                        
-                        const tabPanels = mainTabs.querySelectorAll('[role="tabpanel"]');
-                        tabPanels.forEach(panel => {
-                          if (panel.getAttribute('value') === 'trades') {
-                            panel.setAttribute('data-state', 'active');
-                          } else {
-                            panel.setAttribute('data-state', '');
-                          }
-                        });
-                        
-                        // Zur Trades-Tabelle scrollen
-                        setTimeout(() => {
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }, 50);
-                      }
-                    }
-                  }}
-                >
-                  <DollarSign className="mr-1.5 h-4 w-4 md:inline hidden" />
-                  Trades
-                </TabsTrigger>
                 <TabsTrigger value="patterns" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary px-2">
                   <Brain className="mr-1.5 h-4 w-4 md:inline hidden" />
                   Muster
