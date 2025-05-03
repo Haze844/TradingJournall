@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Wallet, PiggyBank, TrendingUp, Edit, Check, X } from "lucide-react";
@@ -7,7 +6,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,7 +14,10 @@ interface AccountBalanceProgressProps {
   filteredTrades?: any[];
 }
 
-export default function AccountBalanceProgress({ className, filteredTrades = [] }: AccountBalanceProgressProps) {
+export default function AccountBalanceProgress({ 
+  className, 
+  filteredTrades = [] 
+}: AccountBalanceProgressProps) {
   const [activeTab, setActiveTab] = useState<string>("pa");
   const { user } = useAuth();
   const { toast } = useToast();
@@ -38,7 +39,7 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
   const [calculatedPaBalance, setCalculatedPaBalance] = useState<number | null>(null);
   const [calculatedEvaBalance, setCalculatedEvaBalance] = useState<number | null>(null);
 
-  // Benutzereinstellungen abrufen mit mehr Debugging-Ausgaben
+  // Benutzereinstellungen abrufen
   const { data: settings, isLoading } = useQuery({
     queryKey: ['/api/settings', user?.id],
     queryFn: async () => {
@@ -101,12 +102,13 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
           // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
           if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
             profit = Number(trade.profitLoss);
+            console.log("PA Trade:", trade.id, "P/L:", profit);
           } else if (trade.riskSum !== null && trade.riskSum !== undefined && 
                      trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
             profit = Number(trade.riskSum) * Number(trade.rrAchieved);
+            console.log("PA Trade (berechnet):", trade.id, "Risiko:", trade.riskSum, "RR:", trade.rrAchieved, "P/L:", profit);
           }
           
-          console.log("PA Trade:", trade.id, "P/L:", profit);
           return sum + profit;
         }, 0);
       
@@ -120,12 +122,13 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
           // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
           if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
             profit = Number(trade.profitLoss);
+            console.log("EVA Trade:", trade.id, "P/L:", profit);
           } else if (trade.riskSum !== null && trade.riskSum !== undefined && 
                      trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
             profit = Number(trade.riskSum) * Number(trade.rrAchieved);
+            console.log("EVA Trade (berechnet):", trade.id, "Risiko:", trade.riskSum, "RR:", trade.rrAchieved, "P/L:", profit);
           }
           
-          console.log("EVA Trade:", trade.id, "P/L:", profit);
           return sum + profit;
         }, 0);
         
@@ -199,34 +202,6 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
     }
   });
 
-  // Berechne Werte
-  const basePaBalance = settings?.accountBalance || 2500;
-  // Debug-Ausgabe für berechnete Werte
-  const paBalance = calculatedPaBalance !== null ? calculatedPaBalance : basePaBalance;
-  const paGoal = settings?.goalBalance || 7500;
-  const paBalanceProgress = Math.min(Math.round((paBalance / paGoal) * 100), 100);
-  
-  const baseEvaBalance = settings?.evaAccountBalance || 1500;
-  const evaBalance = calculatedEvaBalance !== null ? calculatedEvaBalance : baseEvaBalance;
-  const evaGoal = settings?.evaGoalBalance || 7500;
-  const evaBalanceProgress = Math.min(Math.round((evaBalance / evaGoal) * 100), 100);
-  
-  // Zusätzliche Debug-Ausgabe
-  useEffect(() => {
-    if (filteredTrades && filteredTrades.length > 0) {
-      console.log("Detaillierte filteredTrades Analyse:");
-      filteredTrades.forEach((trade, index) => {
-        console.log(`Trade ${index+1}:`, 
-          `ID=${trade.id}`, 
-          `Kontoart=${trade.accountType}`, 
-          `P/L=${trade.profitLoss}`, 
-          `RR=${trade.rrAchieved}`,
-          `Risiko=${trade.riskSum}`
-        );
-      });
-    }
-  }, [filteredTrades]);
-
   // Handler-Funktionen
   const handlePABalanceSubmit = () => {
     if (paBalanceInputRef.current) {
@@ -268,10 +243,21 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
     }
   };
 
+  // Berechne Werte
+  const basePaBalance = settings?.accountBalance || 2500;
+  const paBalance = calculatedPaBalance !== null ? calculatedPaBalance : basePaBalance;
+  const paGoal = settings?.goalBalance || 7500;
+  const paBalanceProgress = Math.min(Math.round((paBalance / paGoal) * 100), 100);
+  
+  const baseEvaBalance = settings?.evaAccountBalance || 1500;
+  const evaBalance = calculatedEvaBalance !== null ? calculatedEvaBalance : baseEvaBalance;
+  const evaGoal = settings?.evaGoalBalance || 7500;
+  const evaBalanceProgress = Math.min(Math.round((evaBalance / evaGoal) * 100), 100);
+
   return (
     <div className={`bg-gradient-to-r from-black/50 to-black/30 rounded-lg border border-primary/20 overflow-hidden backdrop-blur-md shadow-lg ${className}`}>
-      <div className="p-2 px-3">
-        <div className="flex items-center justify-between mb-1.5">
+      <div className="p-2">
+        <div className="flex items-center justify-between mb-2">
           <span className="text-[12px] flex items-center gap-1 text-primary/80 font-medium">
             <TrendingUp className="h-3.5 w-3.5 text-primary/80" />
             <span>Kontoentwicklung</span>
@@ -291,26 +277,23 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
           </Tabs>
         </div>
         
-        <div className="mt-1.5">
-          <TabsContent value="pa" className="mt-0 space-y-1">
+        <div className="mt-2">
+          <TabsContent value="pa" className="mt-0 space-y-2">
             {isLoading ? (
-              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-24 w-full" />
             ) : (
-              <div className="space-y-1">
-                {/* Balance info & edit */}
+              <div className="space-y-2">
+                {/* PA Kontostand Einstellungen */}
                 <div className="flex flex-col space-y-2">
-                  {/* Aktueller PA-Kontostand */}
+                  {/* Basis-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[11px] text-primary/80 font-medium">PA Kontostand:</span>
-                    </div>
+                    <span className="text-[11px] text-primary/80 font-medium">Basis-Kontostand:</span>
                     
                     {isEditingPA ? (
-                      <div className="flex gap-0.5 items-center">
+                      <div className="flex gap-1 items-center">
                         <Input
                           ref={paBalanceInputRef}
-                          defaultValue={basePaBalance}  
-                          // Basisbetrag statt berechneter Betrag
+                          defaultValue={basePaBalance}
                           className="h-6 w-20 text-[11px] px-2"
                           type="number"
                           min="0"
@@ -343,14 +326,12 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
                     )}
                   </div>
                   
-                  {/* PA Zielkontostand */}
+                  {/* Ziel-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[11px] text-primary/80 font-medium">PA Ziel:</span>
-                    </div>
+                    <span className="text-[11px] text-primary/80 font-medium">Ziel-Kontostand:</span>
                     
                     {isEditingPAGoal ? (
-                      <div className="flex gap-0.5 items-center">
+                      <div className="flex gap-1 items-center">
                         <Input
                           ref={paGoalInputRef}
                           defaultValue={paGoal}
@@ -385,42 +366,41 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
                       </div>
                     )}
                   </div>
-                
-                  {/* Aktueller Kontostand (berechnet) */}
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-[11px] text-muted-foreground">Aktueller Wert:</span>
-                    <span className="font-medium text-[12px] text-primary">${paBalance.toLocaleString()}</span>
+                  
+                  {/* Aktueller berechneter Wert */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-primary/80 font-medium">Aktueller Wert:</span>
+                    <span className="font-medium text-[13px] text-primary">${paBalance.toLocaleString()}</span>
                   </div>
                 </div>
                 
-                {/* Progress bar with percentage */}
-                <div className="relative mt-0.5">
-                  <Progress value={paBalanceProgress} className="h-1 bg-black/40" />
-                  <span className="absolute right-0 top-1.5 text-[9px] text-muted-foreground">{paBalanceProgress}%</span>
+                {/* Fortschrittsbalken */}
+                <div className="mt-1 relative">
+                  <Progress value={paBalanceProgress} className="h-2 bg-black/40" />
+                  <span className="absolute right-0 top-2.5 text-[10px] text-primary/80 font-medium">
+                    {paBalanceProgress}%
+                  </span>
                 </div>
               </div>
             )}
           </TabsContent>
-
-          <TabsContent value="eva" className="mt-0 space-y-1">
+          
+          <TabsContent value="eva" className="mt-0 space-y-2">
             {isLoading ? (
-              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-24 w-full" />
             ) : (
-              <div className="space-y-1">
-                {/* Balance info & edit */}
+              <div className="space-y-2">
+                {/* EVA Kontostand Einstellungen */}
                 <div className="flex flex-col space-y-2">
-                  {/* Aktueller EVA-Kontostand */}
+                  {/* Basis-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[11px] text-primary/80 font-medium">EVA Kontostand:</span>
-                    </div>
+                    <span className="text-[11px] text-primary/80 font-medium">Basis-Kontostand:</span>
                     
                     {isEditingEVA ? (
-                      <div className="flex gap-0.5 items-center">
+                      <div className="flex gap-1 items-center">
                         <Input
                           ref={evaBalanceInputRef}
                           defaultValue={baseEvaBalance}
-                          // Basisbetrag statt berechneter Betrag
                           className="h-6 w-20 text-[11px] px-2"
                           type="number"
                           min="0"
@@ -453,14 +433,12 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
                     )}
                   </div>
                   
-                  {/* EVA Zielkontostand */}
+                  {/* Ziel-Kontostand */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[11px] text-primary/80 font-medium">EVA Ziel:</span>
-                    </div>
+                    <span className="text-[11px] text-primary/80 font-medium">Ziel-Kontostand:</span>
                     
                     {isEditingEVAGoal ? (
-                      <div className="flex gap-0.5 items-center">
+                      <div className="flex gap-1 items-center">
                         <Input
                           ref={evaGoalInputRef}
                           defaultValue={evaGoal}
@@ -495,18 +473,20 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
                       </div>
                     )}
                   </div>
-                
-                  {/* Aktueller Kontostand (berechnet) */}
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-[11px] text-muted-foreground">Aktueller Wert:</span>
-                    <span className="font-medium text-[12px] text-primary">${evaBalance.toLocaleString()}</span>
+                  
+                  {/* Aktueller berechneter Wert */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-primary/80 font-medium">Aktueller Wert:</span>
+                    <span className="font-medium text-[13px] text-primary">${evaBalance.toLocaleString()}</span>
                   </div>
                 </div>
                 
-                {/* Progress bar with percentage */}
-                <div className="relative mt-0.5">
-                  <Progress value={evaBalanceProgress} className="h-1 bg-black/40" />
-                  <span className="absolute right-0 top-1.5 text-[9px] text-muted-foreground">{evaBalanceProgress}%</span>
+                {/* Fortschrittsbalken */}
+                <div className="mt-1 relative">
+                  <Progress value={evaBalanceProgress} className="h-2 bg-black/40" />
+                  <span className="absolute right-0 top-2.5 text-[10px] text-primary/80 font-medium">
+                    {evaBalanceProgress}%
+                  </span>
                 </div>
               </div>
             )}
