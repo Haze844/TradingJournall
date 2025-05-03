@@ -52,7 +52,11 @@ import {
   Plus,
   X,
   Shield,
-  CircleDot
+  CircleDot,
+  PlusCircle,
+  FilePlus,
+  ListPlus,
+  LayoutDashboard
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -519,16 +523,16 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
             <div className="flex flex-col sm:flex-row gap-2 items-center w-full">
               <div className="flex-1 order-2 sm:order-1 flex justify-center">
                 <Button 
-                  variant="outline" 
+                  variant="default" 
                   size="sm"
-                  className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
+                  className="text-xs h-9 bg-blue-600/80 hover:bg-blue-500 text-white font-medium border-blue-700/50 shadow-md shadow-blue-900/20 transition-all duration-200 ease-in-out transform hover:scale-105 rounded-lg"
                   onClick={() => {
                     // Ein neues Event erstellen und dispatchen
                     const event = new CustomEvent('add-trade-clicked');
                     window.dispatchEvent(event);
                   }}
                 >
-                  <Plus className="h-3 w-3 mr-1" />
+                  <LayoutDashboard className="h-4 w-4 mr-2 animate-pulse" />
                   Trade Hinzufügen
                 </Button>
               </div>
