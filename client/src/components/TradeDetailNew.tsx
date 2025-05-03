@@ -305,19 +305,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         const titleEl = block.querySelector('.text-xs.font-medium');
         if (titleEl) {
           const titleText = titleEl.textContent?.toLowerCase() || '';
-          if (titleText.includes('setup') || titleText.includes('einstieg')) {
-            currentBlockType = 'setup';
-          } else if (titleText.includes('trend')) {
-            currentBlockType = 'trends';
-          } else if (titleText.includes("marktzonen")) {
-            currentBlockType = "marktzonen";
-          } else if (titleText.includes("ergebnis") || titleText.includes("rr")) {
-            currentBlockType = "ergebnis";
-          } else if (titleText.includes('position') || titleText.includes('struktur')) {
-            currentBlockType = 'position';
-          } else if (titleText.includes('risk') || titleText.includes('reward') || titleText.includes('r/r')) {
-            currentBlockType = 'risk';
-          }
+          currentBlockType = getBlockTypeFromTitle(titleText);
         }
       }
       
@@ -381,26 +369,14 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       const currentElement = inputRefs.current[index];
       if (!currentElement) return;
       
-      // 2. Block finden, zu dem das aktuelle Element gehört
+      // 2. Block finden, zu dem das aktuelle Element gehört mit unserer Hilfsfunktion
       let currentBlockType: string = 'unknown';
       const block = currentElement.closest('.bg-muted\\/30');
       if (block) {
         const titleEl = block.querySelector('.text-xs.font-medium');
         if (titleEl) {
           const titleText = titleEl.textContent?.toLowerCase() || '';
-          if (titleText.includes('setup') || titleText.includes('einstieg')) {
-            currentBlockType = 'setup';
-          } else if (titleText.includes('trend')) {
-            currentBlockType = 'trends';
-          } else if (titleText.includes("marktzonen")) {
-            currentBlockType = "marktzonen";
-          } else if (titleText.includes("ergebnis") || titleText.includes("rr")) {
-            currentBlockType = "ergebnis";
-          } else if (titleText.includes('position') || titleText.includes('struktur')) {
-            currentBlockType = 'position';
-          } else if (titleText.includes('risk') || titleText.includes('reward') || titleText.includes('r/r')) {
-            currentBlockType = 'risk';
-          }
+          currentBlockType = getBlockTypeFromTitle(titleText);
         }
       }
       
