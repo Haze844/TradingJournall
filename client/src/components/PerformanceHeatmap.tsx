@@ -253,8 +253,11 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
       // URL mit Parametern aufbauen
       let url = `/api/performance-heatmap?userId=2`;
       
+      console.log("Fetching heatmap data with URL:", url);
+      
       // Die activeFilters von der TradeTable übertragen, wenn sie existieren
       if (activeFilters) {
+        console.log("Active filters from TradeTable:", activeFilters);
         // Nutze die Daten aus der TradeTable für eine präzisere Heatmap-Darstellung
         
         // Datumsfilter aus TradeTable
@@ -335,6 +338,19 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
         throw new Error('Fehler beim Laden der Heatmap-Daten');
       }
       const data = await response.json();
+      
+      console.log("Heatmap API Response:", data);
+      
+      // Überprüfe, ob Trades in den Daten enthalten sind
+      if (data.data && data.data.length > 0) {
+        console.log("Stichprobe erster Datenpunkt:", data.data[0]);
+        console.log("Trades in erstem Datenpunkt:", data.data[0].trades ? data.data[0].trades.length : "keine Trades");
+        
+        // Wenn Trades vorhanden sind, einen Trade zur Überprüfung ausgeben
+        if (data.data[0].trades && data.data[0].trades.length > 0) {
+          console.log("Beispiel-Trade:", data.data[0].trades[0]);
+        }
+      }
       
       // Stelle sicher, dass alle Daten valide sind, bereinige leere Werte
       // Reinige die Daten und entferne leere Werte aus den Filtern
