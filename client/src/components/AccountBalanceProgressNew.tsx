@@ -218,10 +218,17 @@ export default function AccountBalanceProgressNew({
                 </div>
               }
             </h3>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <p className="text-xs text-muted-foreground flex items-center">
+              {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
+            </p>
+            
             <Popover>
               <PopoverTrigger asChild>
-                <button className="ml-2 text-primary/70 hover:text-primary transition-colors p-1 rounded-full hover:bg-primary/10">
-                  <Settings className="h-3.5 w-3.5" />
+                <button className="flex items-center justify-center bg-primary/10 hover:bg-primary/20 transition-colors p-1.5 rounded-md">
+                  <Settings className="h-4 w-4 text-primary" />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4 bg-black/95 border-primary/20 backdrop-blur-md">
@@ -407,9 +414,6 @@ export default function AccountBalanceProgressNew({
               </PopoverContent>
             </Popover>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
-          </p>
         </div>
         
         <div className="mt-2">
