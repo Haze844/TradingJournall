@@ -72,8 +72,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     }
   });
 
-  // Funktion zum Navigieren zum nächsten Eingabefeld
+  // Funktion zum Navigieren zum nächsten oder vorherigen Eingabefeld
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>, index: number) => {
+    // Navigation mit Enter-Taste zum nächsten Feld
     if (event.key === 'Enter') {
       event.preventDefault();
       
@@ -92,15 +93,98 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
             nextElement instanceof HTMLSelectElement) {
           nextElement.focus();
           
-          // Für SelectTrigger muss ein Klick simuliert werden
-          if (nextElement.classList.contains('SelectTrigger')) {
+          // Für SelectTrigger: automatisch öffnen
+          if (nextElement.getAttribute('role') === 'combobox') {
             nextElement.click();
           }
         }
       } else {
-        // Kein weiteres Feld gefunden, beende den Bearbeitungsmodus
+        // Automatisch speichern, wenn das letzte Feld erreicht wurde
         saveChanges();
       }
+    }
+    
+    // Navigation mit Pfeiltasten (hoch/runter)
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      
+      // Suche nach dem vorherigen verfügbaren Eingabefeld
+      let prevIndex = index - 1;
+      while (prevIndex >= 0 && !inputRefs.current[prevIndex]) {
+        prevIndex--;
+      }
+      
+      // Wenn ein vorheriges Feld existiert, fokussiere es
+      if (prevIndex >= 0 && inputRefs.current[prevIndex]) {
+        const prevElement = inputRefs.current[prevIndex];
+        
+        if (prevElement instanceof HTMLButtonElement || 
+            prevElement instanceof HTMLInputElement || 
+            prevElement instanceof HTMLSelectElement) {
+          prevElement.focus();
+        }
+      }
+    }
+    
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      
+      // Suche nach dem nächsten verfügbaren Eingabefeld
+      let nextIndex = index + 1;
+      while (nextIndex < inputRefs.current.length && !inputRefs.current[nextIndex]) {
+        nextIndex++;
+      }
+      
+      // Wenn ein nächstes Feld existiert, fokussiere es
+      if (nextIndex < inputRefs.current.length && inputRefs.current[nextIndex]) {
+        const nextElement = inputRefs.current[nextIndex];
+        
+        if (nextElement instanceof HTMLButtonElement || 
+            nextElement instanceof HTMLInputElement || 
+            nextElement instanceof HTMLSelectElement) {
+          nextElement.focus();
+        }
+      }
+    }
+    
+    // Navigation mit Pfeiltasten (links/rechts) für Felder in der gleichen Zeile
+    // Annahme: Felder sind in Zweiergruppen angeordnet (links/rechts)
+    if (event.key === 'ArrowRight' && (index % 2 === 0)) {
+      event.preventDefault();
+      
+      // Versuche, zum Element rechts zu navigieren (index + 1)
+      const rightIndex = index + 1;
+      if (rightIndex < inputRefs.current.length && inputRefs.current[rightIndex]) {
+        const rightElement = inputRefs.current[rightIndex];
+        
+        if (rightElement instanceof HTMLButtonElement || 
+            rightElement instanceof HTMLInputElement || 
+            rightElement instanceof HTMLSelectElement) {
+          rightElement.focus();
+        }
+      }
+    }
+    
+    if (event.key === 'ArrowLeft' && (index % 2 === 1)) {
+      event.preventDefault();
+      
+      // Versuche, zum Element links zu navigieren (index - 1)
+      const leftIndex = index - 1;
+      if (leftIndex >= 0 && inputRefs.current[leftIndex]) {
+        const leftElement = inputRefs.current[leftIndex];
+        
+        if (leftElement instanceof HTMLButtonElement || 
+            leftElement instanceof HTMLInputElement || 
+            leftElement instanceof HTMLSelectElement) {
+          leftElement.focus();
+        }
+      }
+    }
+    
+    // Escape-Taste zum Abbrechen der Bearbeitung
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      cancelEditMode();
     }
   };
   
