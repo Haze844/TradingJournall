@@ -52,17 +52,23 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     trends: HTMLElement | null;
     position: HTMLElement | null;
     risk: HTMLElement | null;
+    marktzonen: HTMLElement | null;
+    ergebnis: HTMLElement | null;
     elements: { [key: string]: Array<HTMLElement | null> }
   }>({
     setup: null,       // Setup & Einstieg Block
     trends: null,      // Trends Block
     position: null,    // Position & Struktur Block
     risk: null,        // R/R Block
+    marktzonen: null,  // Marktzonen Block
+    ergebnis: null,    // Ergebnis & RR Block
     elements: {
       setup: [],
       trends: [],
       position: [],
-      risk: []
+      risk: [],
+      marktzonen: [],
+      ergebnis: []
     }
   });
   
