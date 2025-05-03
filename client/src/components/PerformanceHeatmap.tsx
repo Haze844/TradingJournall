@@ -207,6 +207,7 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
   const [compareMode, setCompareMode] = useState<string>("none");
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
+  const [showTradeDetails, setShowTradeDetails] = useState<boolean>(false);
   const { toast } = useToast();
   
   // Berechne Datumsgrenzen basierend auf dem ausgewählten Zeitraum
