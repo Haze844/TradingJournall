@@ -1,13 +1,14 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertTradeSchema, insertUserSchema } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, insertAppSettingsSchema } from "@shared/schema";
 import OpenAI from "openai";
 import { setupAuth } from "./auth";
 import path from "path";
 import fs from "fs";
 import puppeteer from "puppeteer";
 import { Readable } from "stream";
+import { z } from "zod";
 
 // Helper function to handle error messages safely
 function errorMessage(error: unknown): string {
@@ -2592,6 +2593,216 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const variance = squareDiffs.reduce((sum, value) => sum + value, 0) / values.length;
     return Math.sqrt(variance);
   }
+
+  // App Settings API routes
+  // Alias route für Kompatibilität mit dem Frontend
+  app.get("/api/settings", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.query.userId);
+      
+      console.log(`GET /api/settings für userId: ${userId}`);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID ist erforderlich" });
+      }
+      
+      // Hole Einstellungen für diesen Benutzer
+      const settings = await storage.getAppSettings(userId);
+      
+      if (!settings) {
+        console.log(`Keine Einstellungen für userId ${userId} gefunden, sende Standardwerte`);
+        return res.status(200).json({
+          accountBalance: 2500,
+          evaAccountBalance: 1500,
+          goalBalance: 7500,
+          theme: 'dark',
+          notifications: true
+        });
+      }
+      
+      res.status(200).json(settings);
+    } catch (error) {
+      console.error("Fehler beim Abrufen der App-Einstellungen:", error);
+      res.status(500).json({ message: errorMessage(error) });
+    }
+  });
+  
+  app.get("/api/app-settings", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.query.userId);
+      const deviceId = req.query.deviceId as string | undefined;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID ist erforderlich" });
+      }
+      
+      console.log(`API-Anfrage für App-Einstellungen - UserId: ${userId}, DeviceId: ${deviceId || 'nicht angegeben'}`);
+      
+      // Get settings for this user and optional device ID
+      const settings = await storage.getAppSettings(userId, deviceId);
+      
+      if (!settings) {
+        // If no settings found and deviceId provided, create default settings
+        if (deviceId) {
+          console.log(`Keine Einstellungen gefunden. Erstelle Standardeinstellungen für UserId: ${userId}, DeviceId: ${deviceId}`);
+          const newSettings = await storage.createAppSettings({
+            userId,
+            deviceId,
+            theme: 'dark',
+            notifications: true,
+            goalBalance: 7500,
+            evaAccountBalance: 1500,
+            accountBalance: 0,
+          });
+          return res.status(200).json(newSettings);
+        }
+        
+        return res.status(404).json({ message: "Keine Einstellungen gefunden" });
+      }
+      
+      res.status(200).json(settings);
+    } catch (error) {
+      console.error("Fehler beim Abrufen der App-Einstellungen:", error);
+      res.status(500).json({ message: errorMessage(error) });
+    }
+  });
+  
+  app.post("/api/app-settings", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      // Validate request data
+      const settingsData = insertAppSettingsSchema.parse(req.body);
+      const userId = Number(req.body.userId);
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID ist erforderlich" });
+      }
+      
+      console.log(`Erstelle neue App-Einstellungen für User ID: ${userId}`);
+      
+      // Create new settings
+      const newSettings = await storage.createAppSettings(settingsData);
+      res.status(201).json(newSettings);
+    } catch (error) {
+      console.error("Fehler beim Erstellen der App-Einstellungen:", error);
+      res.status(500).json({ message: errorMessage(error) });
+    }
+  });
+  
+  app.put("/api/app-settings/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const settingsId = Number(req.params.id);
+      const userId = Number(req.body.userId);
+      
+      if (!settingsId || !userId) {
+        return res.status(400).json({ message: "Settings ID und User ID sind erforderlich" });
+      }
+      
+      // Update settings
+      const updatedSettings = await storage.updateAppSettings(settingsId, req.body);
+      
+      if (!updatedSettings) {
+        return res.status(404).json({ message: "Einstellungen nicht gefunden" });
+      }
+      
+      res.status(200).json(updatedSettings);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren der App-Einstellungen:", error);
+      res.status(500).json({ message: errorMessage(error) });
+    }
+  });
+  
+  // Device sync route - Sync settings across devices
+  app.post("/api/app-settings/sync", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.body.userId);
+      const deviceId = req.body.deviceId as string;
+      
+      if (!userId || !deviceId) {
+        return res.status(400).json({ message: "User ID und Device ID sind erforderlich" });
+      }
+      
+      // Sync settings
+      const syncedSettings = await storage.syncAppSettings(userId, deviceId);
+      
+      if (!syncedSettings) {
+        return res.status(404).json({ message: "Keine Einstellungen für Synchronisation gefunden" });
+      }
+      
+      res.status(200).json(syncedSettings);
+    } catch (error) {
+      console.error("Fehler bei der Synchronisation der App-Einstellungen:", error);
+      res.status(500).json({ message: errorMessage(error) });
+    }
+  });
+
+  // Konto-Aktualisierungsroute (EVA und PA Kontostände)
+  app.put("/api/account-balance", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.body.userId);
+      const { accountType, balance } = req.body;
+      
+      if (!userId || !accountType || balance === undefined) {
+        return res.status(400).json({ 
+          message: "User ID, Kontotyp (EVA/PA) und Kontostand sind erforderlich" 
+        });
+      }
+      
+      // Hole die aktuellen Einstellungen
+      const settings = await storage.getAppSettings(userId);
+      
+      if (!settings) {
+        return res.status(404).json({ message: "Keine Einstellungen gefunden" });
+      }
+      
+      // Update basierend auf dem Kontotyp
+      let updatedSettings;
+      if (accountType === "EVA") {
+        updatedSettings = await storage.updateAppSettings(settings.id, {
+          evaAccountBalance: balance
+        });
+      } else if (accountType === "PA") {
+        updatedSettings = await storage.updateAppSettings(settings.id, {
+          accountBalance: balance
+        });
+      } else {
+        return res.status(400).json({ message: "Ungültiger Kontotyp. Verwende 'EVA' oder 'PA'." });
+      }
+      
+      res.status(200).json(updatedSettings);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren des Kontostands:", error);
+      res.status(500).json({ message: errorMessage(error) });
+    }
+  });
+  
+  // Ziel-Aktualisierungsroute
+  app.put("/api/goal-balance", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.body.userId);
+      const { goalBalance } = req.body;
+      
+      if (!userId || goalBalance === undefined) {
+        return res.status(400).json({ message: "User ID und Ziel-Kontostand sind erforderlich" });
+      }
+      
+      // Hole die aktuellen Einstellungen
+      const settings = await storage.getAppSettings(userId);
+      
+      if (!settings) {
+        return res.status(404).json({ message: "Keine Einstellungen gefunden" });
+      }
+      
+      // Update Ziel-Kontostand
+      const updatedSettings = await storage.updateAppSettings(settings.id, {
+        goalBalance: goalBalance
+      });
+      
+      res.status(200).json(updatedSettings);
+    } catch (error) {
+      console.error("Fehler beim Aktualisieren des Ziel-Kontostands:", error);
+      res.status(500).json({ message: errorMessage(error) });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
