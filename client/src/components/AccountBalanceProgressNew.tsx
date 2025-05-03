@@ -203,21 +203,23 @@ export default function AccountBalanceProgressNew({
   const evaBalanceProgress = evaGoal > 0 ? Math.min(100, Math.round((evaBalance / evaGoal) * 100)) : 0;
 
   return (
-    <div className={`space-y-3 border-2 border-primary/20 p-3 rounded-lg bg-black/30 shadow-lg ${className}`}>
+    <div className={`space-y-3 border border-primary/20 px-3 py-2 rounded-lg bg-black/30 shadow-lg backdrop-blur-md ${className}`}>
       <div className="flex flex-col">
-        <h3 className="text-sm font-bold flex items-center">
-          <Wallet className="mr-1 h-4 w-4 text-primary" />
-          Kontoentwicklung
-          {paBalanceProgress >= 100 && 
-            <div className="ml-2 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium flex items-center">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              Ziel erreicht
-            </div>
-          }
-        </h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Basis-Kontostand + Performance aus {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
-        </p>
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-bold flex items-center">
+            <Wallet className="mr-1 h-4 w-4 text-primary" />
+            Kontoentwicklung
+            {paBalanceProgress >= 100 && 
+              <div className="ml-2 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium flex items-center">
+                <TrendingUp className="mr-1 h-3 w-3" />
+                Ziel erreicht
+              </div>
+            }
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            {filteredTrades.length} Trade{filteredTrades.length !== 1 ? 's' : ''}
+          </p>
+        </div>
         
         <div className="mt-2">
           <Tabs 
@@ -335,15 +337,23 @@ export default function AccountBalanceProgressNew({
                 
                 {/* Fortschrittsbalken */}
                 <div className="mt-2 mb-1 relative">
-                  <div className="w-full bg-black/50 rounded-full h-3 border border-primary/10">
+                  <div className="w-full bg-black/50 rounded-full h-5 border border-primary/20">
                     <div 
-                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out flex items-center justify-end pr-2"
                       style={{ width: `${paBalanceProgress}%` }}
-                    ></div>
+                    >
+                      {paBalanceProgress > 15 && (
+                        <span className="text-[12px] text-white font-medium">
+                          {paBalanceProgress}%
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="absolute right-1 top-0 text-[12px] text-white font-medium">
-                    {paBalanceProgress}%
-                  </span>
+                  {paBalanceProgress <= 15 && (
+                    <span className="absolute right-1 top-1 text-[12px] text-white font-medium">
+                      {paBalanceProgress}%
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -447,15 +457,23 @@ export default function AccountBalanceProgressNew({
                 
                 {/* Fortschrittsbalken */}
                 <div className="mt-2 mb-1 relative">
-                  <div className="w-full bg-black/50 rounded-full h-3 border border-primary/10">
+                  <div className="w-full bg-black/50 rounded-full h-5 border border-primary/20">
                     <div 
-                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                      className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out flex items-center justify-end pr-2"
                       style={{ width: `${evaBalanceProgress}%` }}
-                    ></div>
+                    >
+                      {evaBalanceProgress > 15 && (
+                        <span className="text-[12px] text-white font-medium">
+                          {evaBalanceProgress}%
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="absolute right-1 top-0 text-[12px] text-white font-medium">
-                    {evaBalanceProgress}%
-                  </span>
+                  {evaBalanceProgress <= 15 && (
+                    <span className="absolute right-1 top-1 text-[12px] text-white font-medium">
+                      {evaBalanceProgress}%
+                    </span>
+                  )}
                 </div>
               </div>
             )}
