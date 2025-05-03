@@ -46,6 +46,26 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
   // Refs für alle Eingabefelder, um Navigation per Enter zu ermöglichen
   const inputRefs = useRef<Array<HTMLElement | null>>([]);
   
+  // Refs für Blockkategorien zur besseren Navigation zwischen Blöcken
+  const blockRefs = useRef<{
+    setup: HTMLElement | null;
+    trends: HTMLElement | null;
+    position: HTMLElement | null;
+    risk: HTMLElement | null;
+    elements: { [key: string]: Array<HTMLElement | null> }
+  }>({
+    setup: null,       // Setup & Einstieg Block
+    trends: null,      // Trends Block
+    position: null,    // Position & Struktur Block
+    risk: null,        // R/R Block
+    elements: {
+      setup: [],
+      trends: [],
+      position: [],
+      risk: []
+    }
+  });
+  
   // Nur ein einziger State für alle Bearbeitungen
   const [editData, setEditData] = useState<Partial<Trade>>({});
   
@@ -148,37 +168,81 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     }
     
     // Navigation mit Pfeiltasten (links/rechts) für alle Felder
-    // Allgemeinere Implementierung, die nicht von der Struktur abhängt
+    // Verbesserte Implementierung, die die Block-Struktur berücksichtigt
     if (event.key === 'ArrowRight') {
       event.preventDefault();
       
-      // Immer zum nächsten Element (index + 1) navigieren
-      const rightIndex = index + 1;
+      // 1. Element im aktuellen Block finden
+      const currentElement = inputRefs.current[index];
+      if (!currentElement) return;
       
-      // Wenn das nächste Element existiert, fokussiere es
+      // 2. Block finden, zu dem das aktuelle Element gehört
+      let currentBlockType: string = 'unknown';
+      const block = currentElement.closest('.bg-muted\\/30');
+      if (block) {
+        const titleEl = block.querySelector('.text-xs.font-medium');
+        if (titleEl) {
+          const title = titleEl.textContent?.toLowerCase() || '';
+          if (title.includes('setup') || title.includes('einstieg')) {
+            currentBlockType = 'setup';
+          } else if (title.includes('trend')) {
+            currentBlockType = 'trends';
+          } else if (title.includes('position') || title.includes('struktur')) {
+            currentBlockType = 'position';
+          } else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
+            currentBlockType = 'risk';
+          }
+        }
+      }
+      
+      console.log(`Navigiere von Block: ${currentBlockType}, Element-Index: ${index}`);
+      
+      // 3. Nächstes Element im gleichen Block suchen
+      const rightIndex = index + 1;
       if (rightIndex < inputRefs.current.length && inputRefs.current[rightIndex]) {
         const rightElement = inputRefs.current[rightIndex];
+        const rightBlock = rightElement.closest('.bg-muted\\/30');
         
-        if (rightElement instanceof HTMLButtonElement || 
-            rightElement instanceof HTMLInputElement || 
-            rightElement instanceof HTMLSelectElement) {
-          rightElement.focus();
-        }
-      } else {
-        // Wenn wir am Ende eines "Blocks" sind, zum nächsten "Block" springen
-        // Ein "Block" könnte eine Spalte oder ein Abschnitt sein
-        // Dies ist nur ein Beispiel - die genaue Logik hängt von der Struktur ab
-        
-        // Versuche, das Element bei index + 2 zu fokussieren (Sprung über Spalten)
-        const nextBlockIndex = index + 2;
-        if (nextBlockIndex < inputRefs.current.length && inputRefs.current[nextBlockIndex]) {
-          const nextBlockElement = inputRefs.current[nextBlockIndex];
-          
-          if (nextBlockElement instanceof HTMLButtonElement || 
-              nextBlockElement instanceof HTMLInputElement || 
-              nextBlockElement instanceof HTMLSelectElement) {
-            nextBlockElement.focus();
+        // Prüfen, ob das nächste Element zum gleichen Block gehört
+        if (block === rightBlock) {
+          if (rightElement instanceof HTMLButtonElement || 
+              rightElement instanceof HTMLInputElement || 
+              rightElement instanceof HTMLSelectElement) {
+            rightElement.focus();
+            return;
           }
+        }
+      }
+      
+      // 4. Wenn kein nächstes Element im aktuellen Block oder wir sind am Ende des Blocks,
+      // versuche zum nächsten Block zu springen
+      
+      // Reihenfolge der Blöcke: setup -> trends -> position -> risk
+      let nextBlockType = '';
+      if (currentBlockType === 'setup') nextBlockType = 'trends';
+      else if (currentBlockType === 'trends') nextBlockType = 'position';
+      else if (currentBlockType === 'position') nextBlockType = 'risk';
+      
+      console.log(`Springe zum nächsten Block: ${nextBlockType}`);
+      
+      // Erstes Element im nächsten Block finden
+      if (nextBlockType && blockRefs.current.elements[nextBlockType]?.length > 0) {
+        const firstElementInNextBlock = blockRefs.current.elements[nextBlockType][0];
+        if (firstElementInNextBlock instanceof HTMLButtonElement || 
+            firstElementInNextBlock instanceof HTMLInputElement || 
+            firstElementInNextBlock instanceof HTMLSelectElement) {
+          firstElementInNextBlock.focus();
+          return;
+        }
+      }
+      
+      // 5. Fallback: Wenn alles andere fehlschlägt, versuche zum nächsten Element zu navigieren
+      if (rightIndex < inputRefs.current.length && inputRefs.current[rightIndex]) {
+        const nextElement = inputRefs.current[rightIndex];
+        if (nextElement instanceof HTMLButtonElement || 
+            nextElement instanceof HTMLInputElement || 
+            nextElement instanceof HTMLSelectElement) {
+          nextElement.focus();
         }
       }
     }
@@ -186,31 +250,78 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
       
-      // Immer zum vorherigen Element (index - 1) navigieren
-      const leftIndex = index - 1;
+      // 1. Element im aktuellen Block finden
+      const currentElement = inputRefs.current[index];
+      if (!currentElement) return;
       
-      // Wenn das vorherige Element existiert, fokussiere es
+      // 2. Block finden, zu dem das aktuelle Element gehört
+      let currentBlockType: string = 'unknown';
+      const block = currentElement.closest('.bg-muted\\/30');
+      if (block) {
+        const titleEl = block.querySelector('.text-xs.font-medium');
+        if (titleEl) {
+          const title = titleEl.textContent?.toLowerCase() || '';
+          if (title.includes('setup') || title.includes('einstieg')) {
+            currentBlockType = 'setup';
+          } else if (title.includes('trend')) {
+            currentBlockType = 'trends';
+          } else if (title.includes('position') || title.includes('struktur')) {
+            currentBlockType = 'position';
+          } else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
+            currentBlockType = 'risk';
+          }
+        }
+      }
+      
+      console.log(`Navigiere von Block: ${currentBlockType}, Element-Index: ${index}`);
+      
+      // 3. Vorheriges Element im gleichen Block suchen
+      const leftIndex = index - 1;
       if (leftIndex >= 0 && inputRefs.current[leftIndex]) {
         const leftElement = inputRefs.current[leftIndex];
+        const leftBlock = leftElement.closest('.bg-muted\\/30');
         
-        if (leftElement instanceof HTMLButtonElement || 
-            leftElement instanceof HTMLInputElement || 
-            leftElement instanceof HTMLSelectElement) {
-          leftElement.focus();
-        }
-      } else {
-        // Wenn wir am Anfang eines "Blocks" sind, zum vorherigen "Block" springen
-        
-        // Versuche, das Element bei index - 2 zu fokussieren (Sprung über Spalten)
-        const prevBlockIndex = index - 2;
-        if (prevBlockIndex >= 0 && inputRefs.current[prevBlockIndex]) {
-          const prevBlockElement = inputRefs.current[prevBlockIndex];
-          
-          if (prevBlockElement instanceof HTMLButtonElement || 
-              prevBlockElement instanceof HTMLInputElement || 
-              prevBlockElement instanceof HTMLSelectElement) {
-            prevBlockElement.focus();
+        // Prüfen, ob das vorherige Element zum gleichen Block gehört
+        if (block === leftBlock) {
+          if (leftElement instanceof HTMLButtonElement || 
+              leftElement instanceof HTMLInputElement || 
+              leftElement instanceof HTMLSelectElement) {
+            leftElement.focus();
+            return;
           }
+        }
+      }
+      
+      // 4. Wenn kein vorheriges Element im aktuellen Block oder wir sind am Anfang des Blocks,
+      // versuche zum vorherigen Block zu springen
+      
+      // Reihenfolge der Blöcke: setup <- trends <- position <- risk
+      let prevBlockType = '';
+      if (currentBlockType === 'trends') prevBlockType = 'setup';
+      else if (currentBlockType === 'position') prevBlockType = 'trends';
+      else if (currentBlockType === 'risk') prevBlockType = 'position';
+      
+      console.log(`Springe zum vorherigen Block: ${prevBlockType}`);
+      
+      // Letztes Element im vorherigen Block finden
+      if (prevBlockType && blockRefs.current.elements[prevBlockType]?.length > 0) {
+        const lastElementIndex = blockRefs.current.elements[prevBlockType].length - 1;
+        const lastElementInPrevBlock = blockRefs.current.elements[prevBlockType][lastElementIndex];
+        if (lastElementInPrevBlock instanceof HTMLButtonElement || 
+            lastElementInPrevBlock instanceof HTMLInputElement || 
+            lastElementInPrevBlock instanceof HTMLSelectElement) {
+          lastElementInPrevBlock.focus();
+          return;
+        }
+      }
+      
+      // 5. Fallback: Wenn alles andere fehlschlägt, versuche zum vorherigen Element zu navigieren
+      if (leftIndex >= 0 && inputRefs.current[leftIndex]) {
+        const prevElement = inputRefs.current[leftIndex];
+        if (prevElement instanceof HTMLButtonElement || 
+            prevElement instanceof HTMLInputElement || 
+            prevElement instanceof HTMLSelectElement) {
+          prevElement.focus();
         }
       }
     }
@@ -254,11 +365,73 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       });
       
       // Initialisiere die inputRefs-Array mit leeren Elementen
-      // Diese werden im JSX durch die ref-Attribute gefüllt
-      inputRefs.current = Array(20).fill(null);
+      inputRefs.current = Array(30).fill(null); // Erhöht auf 30 für mehr Elemente
       
-      // Fokussiere auf das erste Eingabefeld, wenn der Edit-Modus gestartet wird
+      // Zurücksetzen der Block-Referenzen
+      blockRefs.current = {
+        setup: null,
+        trends: null,
+        position: null,
+        risk: null,
+        elements: {
+          setup: [],
+          trends: [],
+          position: [],
+          risk: []
+        }
+      };
+      
+      // Identifiziere die verschiedenen Blöcke und deren Elemente
       setTimeout(() => {
+        if (cardRef.current) {
+          // Finde interaktive Elemente
+          const interactiveElements = cardRef.current.querySelectorAll(
+            'button, input, select, [role="combobox"]'
+          );
+          
+          // Fülle die Refs mit den gefundenen Elementen
+          interactiveElements.forEach((el, index) => {
+            const element = el as HTMLElement;
+            inputRefs.current[index] = element;
+            
+            // Identifiziere Blöcke basierend auf dem Inhalt
+            const block = element.closest('.bg-muted\\/30');
+            if (block) {
+              const titleEl = block.querySelector('.text-xs.font-medium');
+              if (titleEl) {
+                const title = titleEl.textContent?.toLowerCase() || '';
+                
+                // Identifiziere den Block-Typ basierend auf dem Titel
+                if (title.includes('setup') || title.includes('einstieg')) {
+                  blockRefs.current.setup = block as HTMLElement;
+                  blockRefs.current.elements.setup.push(element);
+                } 
+                else if (title.includes('trend')) {
+                  blockRefs.current.trends = block as HTMLElement;
+                  blockRefs.current.elements.trends.push(element);
+                } 
+                else if (title.includes('position') || title.includes('struktur')) {
+                  blockRefs.current.position = block as HTMLElement;
+                  blockRefs.current.elements.position.push(element);
+                } 
+                else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
+                  blockRefs.current.risk = block as HTMLElement;
+                  blockRefs.current.elements.risk.push(element);
+                }
+              }
+            }
+          });
+          
+          console.log('Block-Elemente identifiziert:', {
+            setup: blockRefs.current.elements.setup.length,
+            trends: blockRefs.current.elements.trends.length,
+            position: blockRefs.current.elements.position.length,
+            risk: blockRefs.current.elements.risk.length,
+            totalInputs: inputRefs.current.filter(Boolean).length
+          });
+        }
+        
+        // Fokussiere auf das erste Eingabefeld
         if (inputRefs.current[0]) {
           const firstElement = inputRefs.current[0];
           if (firstElement instanceof HTMLElement) {
