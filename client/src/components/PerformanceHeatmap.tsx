@@ -1083,7 +1083,7 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                       <TableHead>Setup</TableHead>
                       <TableHead>Richtung</TableHead>
                       <TableHead>Einstieg</TableHead>
-                      <TableHead>Ausstieg</TableHead>
+                      <TableHead>Liquidation</TableHead>
                       <TableHead>P/L</TableHead>
                       <TableHead>RR</TableHead>
                     </TableRow>
@@ -1091,20 +1091,20 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                   <TableBody>
                     {selectedCell.trades.map((trade: any) => (
                       <TableRow key={trade.id}>
-                        <TableCell>{new Date(trade.date).toLocaleDateString()}</TableCell>
+                        <TableCell>{typeof trade.date === 'string' ? trade.date : new Date(trade.date).toLocaleDateString()}</TableCell>
                         <TableCell>{trade.symbol}</TableCell>
                         <TableCell>{trade.setup}</TableCell>
                         <TableCell>
-                          <span className={trade.direction === 'Long' ? 'text-green-500' : 'text-red-500'}>
-                            {trade.direction}
+                          <span className={trade.entryType === 'Long' ? 'text-green-500' : 'text-red-500'}>
+                            {trade.entryType}
                           </span>
                         </TableCell>
-                        <TableCell>{trade.entryPrice}</TableCell>
-                        <TableCell>{trade.exitPrice}</TableCell>
+                        <TableCell>{trade.entryLevel || '-'}</TableCell>
+                        <TableCell>{trade.liquidation || '-'}</TableCell>
                         <TableCell className={parseFloat(trade.profitLoss) > 0 ? 'text-green-500' : 'text-red-500'}>
                           {parseFloat(trade.profitLoss) > 0 ? '+' : ''}{trade.profitLoss}$
                         </TableCell>
-                        <TableCell>{trade.riskRewardRatio}</TableCell>
+                        <TableCell>{trade.rrAchieved}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
