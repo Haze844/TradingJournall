@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Rocket, TrendingUp, BarChart3, BrainCircuit, Lock, User, Loader2 } from "lucide-react";
+import { Rocket, TrendingUp, BarChart3, BrainCircuit, Lock, User, Loader2, Shield, Eye, EyeOff } from "lucide-react";
 import { NxtLvlLogo } from "@/components/Header";
+import { saveLoginCredentials, getSavedLoginCredentials, clearSavedLoginCredentials } from "@/lib/utils";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -125,6 +126,31 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
     password: "",
     rememberMe: false
   });
+  const { toast } = useToast();
+
+  // Beim Start gespeicherte Anmeldedaten abrufen, falls vorhanden
+  useEffect(() => {
+    try {
+      const savedCredentials = getSavedLoginCredentials();
+      if (savedCredentials) {
+        setFormData(prev => ({
+          ...prev,
+          username: savedCredentials.username,
+          password: savedCredentials.password,
+          rememberMe: true
+        }));
+        toast({
+          title: "Gespeicherte Anmeldedaten geladen",
+          description: "Deine Anmeldedaten wurden wiederhergestellt.",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Fehler beim Laden der gespeicherten Anmeldedaten:", error);
+      // Bei Fehlern die gespeicherten Daten löschen
+      clearSavedLoginCredentials();
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -136,6 +162,15 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Anmeldedaten speichern, wenn "Eingeloggt bleiben" aktiviert ist
+    if (formData.rememberMe) {
+      saveLoginCredentials(formData.username, formData.password);
+    } else {
+      // Gespeicherte Daten löschen, wenn die Option deaktiviert wurde
+      clearSavedLoginCredentials();
+    }
+    
     loginMutation.mutate(formData);
   };
 
@@ -144,17 +179,25 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Benutzername</Label>
+            <Label htmlFor="username" className="text-blue-100 font-medium">
+              <User className="w-4 h-4 inline-block mr-2 opacity-70" />
+              Benutzername
+            </Label>
             <Input 
               id="username" 
               name="username" 
               value={formData.username}
               onChange={handleChange}
               required 
+              className="bg-black/40 border-blue-500/20 focus:border-blue-400/50 focus:ring-blue-400/20 text-blue-50"
+              placeholder="Gib deinen Benutzernamen ein"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Passwort</Label>
+            <Label htmlFor="password" className="text-blue-100 font-medium">
+              <Lock className="w-4 h-4 inline-block mr-2 opacity-70" />
+              Passwort
+            </Label>
             <Input 
               id="password" 
               name="password" 
@@ -162,9 +205,11 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
               value={formData.password}
               onChange={handleChange}
               required 
+              className="bg-black/40 border-blue-500/20 focus:border-blue-400/50 focus:ring-blue-400/20 text-blue-50"
+              placeholder="Gib dein Passwort ein"
             />
           </div>
-          <div className="flex items-center space-x-2 mt-3">
+          <div className="flex items-center space-x-2 mt-4 bg-blue-900/20 p-2 rounded-md border border-blue-500/10">
             <Checkbox 
               id="rememberMe" 
               name="rememberMe"
@@ -172,30 +217,32 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
               onCheckedChange={(checked) => {
                 setFormData(prev => ({ ...prev, rememberMe: !!checked }));
               }}
+              className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
             />
             <Label 
               htmlFor="rememberMe" 
-              className="text-sm font-medium cursor-pointer"
+              className="text-sm font-medium cursor-pointer text-blue-200"
             >
-              Eingeloggt bleiben
+              Zugangsdaten merken
             </Label>
           </div>
         </CardContent>
         <div className="px-6 py-4">
           <Button 
             type="submit" 
-            className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold" 
+            className="w-full pulse-btn bg-gradient-to-r from-primary to-blue-400 hover:from-primary hover:to-blue-300 text-black font-bold relative overflow-hidden group" 
             disabled={loginMutation.isPending}
           >
+            <div className="absolute inset-0 bg-blue-300/20 w-1/3 h-full transform -skew-x-12 -translate-x-full group-hover:translate-x-[400%] transition-transform duration-1000"></div>
             {loginMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Preparing for Launch...
+                Anmelden...
               </>
             ) : (
               <>
                 <Lock className="mr-2 h-4 w-4" />
-                Launch to Dashboard 🚀
+                Trading Dashboard starten 🚀
               </>
             )}
           </Button>

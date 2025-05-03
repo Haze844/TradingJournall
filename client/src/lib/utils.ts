@@ -72,3 +72,30 @@ export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + "...";
 }
+
+// Funktion zum Speichern der Anmeldedaten im localStorage
+export function saveLoginCredentials(username: string, password: string) {
+  localStorage.setItem('nxtlvl_username', username);
+  // Die Passwörter sollten in einer realen Produktionsumgebung
+  // NIEMALS im Klartext gespeichert werden
+  localStorage.setItem('nxtlvl_password', btoa(password)); // Simple encoding (nicht sicher!)
+}
+
+// Funktion zum Abrufen der gespeicherten Anmeldedaten
+export function getSavedLoginCredentials() {
+  const username = localStorage.getItem('nxtlvl_username');
+  const encodedPassword = localStorage.getItem('nxtlvl_password');
+  
+  if (!username || !encodedPassword) return null;
+  
+  return {
+    username,
+    password: atob(encodedPassword) // Decode
+  };
+}
+
+// Funktion zum Löschen der gespeicherten Anmeldedaten
+export function clearSavedLoginCredentials() {
+  localStorage.removeItem('nxtlvl_username');
+  localStorage.removeItem('nxtlvl_password');
+}
