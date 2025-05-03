@@ -302,7 +302,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType || 'PA'}</div>
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.accountType && selectedTrade.accountType !== '' ? selectedTrade.accountType : '-'}</div>
                       )}
                     </div>
                     <div className="bg-background/50 rounded-sm p-1.5">
@@ -345,7 +345,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">
-                          {selectedTrade.size !== undefined ? selectedTrade.size : '-'}
+                          {selectedTrade.size !== undefined && selectedTrade.size !== null && selectedTrade.size !== '' ? selectedTrade.size : '-'}
                         </div>
                       )}
                     </div>
@@ -366,7 +366,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         />
                       ) : (
                         <div className="font-medium text-sm mt-0.5">
-                          {selectedTrade.riskSum !== undefined ? selectedTrade.riskSum : '-'}
+                          {selectedTrade.riskSum !== undefined && selectedTrade.riskSum !== null && selectedTrade.riskSum !== '' ? selectedTrade.riskSum : '-'}
                         </div>
                       )}
                     </div>
