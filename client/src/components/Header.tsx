@@ -75,14 +75,14 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
   return (
     <header className="w-full main-header mb-6 backdrop-blur-xl">
       {/* Kreatives Header-Design mit übergreifendem Logo und weicheren Übergängen */}
-      <div className="bg-gradient-to-r from-blue-950 via-blue-800 to-blue-900 shadow-xl relative overflow-hidden 
-                      border-b border-blue-400/20 rounded-b-xl">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-400/10 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-purple-600/10 via-transparent to-transparent"></div>
+      <div className="bg-gradient-to-r from-black/90 via-blue-950/95 to-black/90 shadow-xl relative overflow-hidden 
+                      border-b border-blue-500/20 rounded-b-xl">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/15 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-indigo-600/15 via-transparent to-transparent"></div>
         
         {/* Animiertes Hintergrund-Element */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
         
         <div className="container mx-auto py-3 pt-5 relative z-10">
           {/* Top-Bereich mit Logo und Benutzerbereich */}
@@ -186,7 +186,7 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
           {/* Navigations-Tabs am unteren Rand des Headers */}
           <div className="flex justify-center items-center pb-1">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="flex justify-center w-full">
-              <TabsList className="main-tabs-list bg-black/60 p-1.5 rounded-xl shadow-lg border border-primary/10 
+              <TabsList className="main-tabs-list bg-gradient-to-r from-black/70 via-blue-950/30 to-black/70 p-1.5 rounded-xl shadow-lg border border-blue-500/20 
                                 overflow-hidden backdrop-blur-sm mx-auto">
                 <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md px-4 py-1.5 transition-all duration-200 rounded-lg">
                   <BarChart2 className="w-4 h-4 mr-1.5" /> Dashboard
