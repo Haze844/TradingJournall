@@ -227,8 +227,9 @@ export default function AccountBalanceProgressNew({
             
             <Popover>
               <PopoverTrigger asChild>
-                <button className="flex items-center justify-center bg-primary/10 hover:bg-primary/20 transition-colors p-1.5 rounded-md">
+                <button className="flex items-center justify-center gap-1 bg-primary/10 hover:bg-primary/20 transition-colors p-1.5 px-2.5 rounded-md">
                   <Settings className="h-4 w-4 text-primary" />
+                  <span className="text-xs text-primary font-medium">Einstellungen</span>
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4 bg-black/95 border-primary/20 backdrop-blur-md">
