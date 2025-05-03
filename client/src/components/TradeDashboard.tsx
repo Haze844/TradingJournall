@@ -582,6 +582,16 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
     primaryDark: '#2563eb'
   };
 
+  // Zurücksetzen der Filter-Funktionen
+  const resetAllFilters = () => {
+    setSelectedSetup("all");
+    setSelectedTimeRange("all");
+    setStartDate(null);
+    setEndDate(null);
+    setStartDateInput("");
+    setEndDateInput("");
+  };
+
   return (
     <div className="space-y-6">
       {/* Filter Options */}
@@ -689,6 +699,17 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
               </PopoverContent>
             </Popover>
           </div>
+          
+          {/* Reset Button */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={resetAllFilters}
+            className="bg-blue-950/40 hover:bg-blue-900/50 border-blue-500/30 hover:border-blue-400/40 text-blue-200"
+          >
+            <RotateCcw className="h-4 w-4 mr-1.5" />
+            Zurücksetzen
+          </Button>
           
           {/* Filter Badges */}
           <div className="flex flex-wrap gap-2">
