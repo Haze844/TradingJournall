@@ -474,17 +474,31 @@ export class MemStorage implements IStorage {
   
   // App Settings operations
   async getAppSettings(userId: number, deviceId?: string): Promise<AppSettings | undefined> {
+    console.log(`getAppSettings für userId ${userId} und deviceId ${deviceId || 'nicht angegeben'}`);
+    
     const userSettings = Array.from(this.appSettings.values())
       .filter(settings => settings.userId === userId);
     
+    console.log(`Gefundene Einstellungen für userId ${userId}: ${userSettings.length}`);
+    
+    if (userSettings.length === 0) {
+      console.log(`Keine Einstellungen für userId ${userId} gefunden`);
+      return undefined;
+    }
+    
     if (deviceId) {
-      return userSettings.find(settings => settings.deviceId === deviceId);
+      const deviceSettings = userSettings.find(settings => settings.deviceId === deviceId);
+      console.log(`Geräte-spezifische Einstellungen ${deviceSettings ? 'gefunden' : 'nicht gefunden'}`);
+      return deviceSettings;
     }
     
     // Return the most recently synced settings
-    return userSettings.sort((a, b) => 
-      new Date(b.lastSyncedAt).getTime() - new Date(a.lastSyncedAt).getTime()
-    )[0];
+    const sortedSettings = userSettings.sort((a, b) => 
+      new Date(b.lastSyncedAt || new Date()).getTime() - new Date(a.lastSyncedAt || new Date()).getTime()
+    );
+    
+    console.log(`Neueste Einstellungen für userId ${userId} zurückgegeben:`, sortedSettings[0]);
+    return sortedSettings[0];
   }
   
   async createAppSettings(settings: InsertAppSettings): Promise<AppSettings> {
@@ -516,17 +530,29 @@ export class MemStorage implements IStorage {
   }
   
   async syncAppSettings(userId: number, deviceId: string): Promise<AppSettings | undefined> {
+    console.log(`syncAppSettings aufgerufen für userId ${userId} und deviceId ${deviceId}`);
+    
     // Find settings for this device
     const deviceSettings = await this.getAppSettings(userId, deviceId);
     
     if (!deviceSettings) {
-      return undefined;
+      console.log(`Keine Einstellungen für diese Geräte-ID gefunden, erstelle neue Einstellungen`);
+      return this.createAppSettings({
+        userId,
+        deviceId,
+        theme: 'dark',
+        notifications: true,
+        goalBalance: 7500,
+        evaAccountBalance: 1500,
+        accountBalance: 0,
+      });
     }
     
     // Find most up-to-date settings across all devices
     const latestSettings = await this.getAppSettings(userId);
     
     if (!latestSettings || latestSettings.id === deviceSettings.id) {
+      console.log(`Keine neueren Einstellungen gefunden, verwende aktuelle Geräteeinstellungen`);
       return deviceSettings;
     }
     
@@ -543,6 +569,7 @@ export class MemStorage implements IStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
+    // Initialisiere alle Maps korrekt (ohne Duplikate)
     this.users = new Map();
     this.trades = new Map();
     this.weeklySummaries = new Map();
@@ -555,13 +582,8 @@ export class MemStorage implements IStorage {
     this.strategyComments = new Map();
     this.appSettings = new Map();
     this.tradingStreaks = new Map();
-    this.coachingGoals = new Map();
-    this.coachingFeedback = new Map();
-    this.macroEconomicEvents = new Map();
-    this.tradingStrategies = new Map();
-    this.strategyComments = new Map();
-    this.appSettings = new Map();
     
+    // Initialisiere alle Zähler
     this.userIdCounter = 1;
     this.tradeIdCounter = 1;
     this.summaryIdCounter = 1;
@@ -574,6 +596,8 @@ export class MemStorage implements IStorage {
     this.strategyCommentIdCounter = 1;
     this.appSettingsIdCounter = 1;
     this.tradingStreakIdCounter = 1;
+    
+    console.log("MemStorage initialisiert - Map-Instanzen erstellt und Zähler gesetzt");
   }
   
   // Trading Streak Methoden
