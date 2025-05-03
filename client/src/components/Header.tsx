@@ -25,14 +25,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Logo-Komponente für einheitliches Design
 export const NxtLvlLogo = ({ className = "" }) => (
-  <div className={`flex items-center justify-start space-x-3 ${className}`}>
-    <div className="bg-gradient-to-br from-blue-950/90 to-black/90 p-3 rounded-xl shadow-lg 
+  <div className={`flex items-center justify-start space-x-4 ${className}`}>
+    <div className="bg-gradient-to-br from-blue-950/90 to-black/90 p-3.5 rounded-xl shadow-lg 
                   border border-blue-500/20 group-hover:shadow-blue-500/30 group-hover:border-blue-400/30 
                   transition-all duration-300 transform group-hover:scale-105 relative backdrop-blur-md">
       <div className="absolute inset-0 bg-blue-800/10 rounded-xl blur-sm"></div>
-      <LineChart className="h-7 w-7 text-blue-300 group-hover:text-blue-100 transition-colors relative z-10" />
+      <LineChart className="h-9 w-9 text-blue-300 group-hover:text-blue-100 transition-colors relative z-10" />
     </div>
-    <div className="text-3xl font-black tracking-tighter leading-none relative">
+    <div className="text-4xl font-black tracking-tighter leading-none relative">
       <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-blue-200 
                     group-hover:from-white group-hover:to-blue-300 transition-all duration-300 drop-shadow-sm">
         NXT<span className="text-blue-300 group-hover:text-blue-200">LVL</span>
@@ -88,13 +88,13 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
           {/* Top-Bereich mit Logo und Benutzerbereich */}
           <div className="flex flex-col items-center mb-4">
             {/* Kreatives, modernes Logo - angepasst an TabsList Design */}
-            <div className="flex justify-center w-full mb-5 relative">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-14 
+            <div className="flex justify-center w-full mb-2 relative">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-16 
                             bg-blue-950/20 blur-xl rounded-full z-0"></div>
-              <Link href="/" className="group relative z-10">
+              <Link href="/" className="group relative z-10 w-auto max-w-[28rem]">
                 <NxtLvlLogo className="backdrop-blur-sm bg-gradient-to-r from-black/70 via-blue-950/30 to-black/70 
-                                      border border-blue-500/20 rounded-xl px-3.5 py-2.5 
-                                      shadow-lg hover:shadow-blue-500/10 transition-shadow duration-300" />
+                                      border border-blue-500/20 rounded-xl px-5 py-3
+                                      w-full shadow-lg hover:shadow-blue-500/10 transition-shadow duration-300" />
               </Link>
             </div>
             
