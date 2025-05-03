@@ -106,6 +106,25 @@ interface TradeDetailProps {
   onTradeSelected: (trade: Trade) => void;
 }
 
+// Hilfsfunktion zum Erkennen des Block-Typs anhand des Titels
+const getBlockTypeFromTitle = (title: string): string => {
+  title = title.toLowerCase();
+  if (title.includes('setup') || title.includes('einstieg')) {
+    return 'setup';
+  } else if (title.includes('trend')) {
+    return 'trends';
+  } else if (title.includes('position') || title.includes('struktur')) {
+    return 'position';
+  } else if (title.includes('marktzonen')) {
+    return 'marktzonen';
+  } else if (title.includes('ergebnis') || title.includes('rr')) {
+    return 'ergebnis';
+  } else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
+    return 'risk';
+  }
+  return 'unknown';
+};
+
 export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDetailProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -115,16 +134,20 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
   // Refs für alle Eingabefelder, um Navigation per Enter zu ermöglichen
   const inputRefs = useRef<Array<HTMLElement | null>>([]);
   
-  // Refs für Blockkategorien zur besseren Navigation zwischen Blöcken
-  const blockRefs = useRef<{
+  // Type Definition für blockRefs mit korrekter Definition von blockSequence
+  type BlockRefs = {
     setup: HTMLElement | null;
     trends: HTMLElement | null;
     position: HTMLElement | null;
     risk: HTMLElement | null;
     marktzonen: HTMLElement | null;
     ergebnis: HTMLElement | null;
-    elements: { [key: string]: Array<HTMLElement | null> }
-  }>({
+    elements: { [key: string]: Array<HTMLElement | null> };
+    blockSequence?: string[];
+  };
+  
+  // Refs für Blockkategorien zur besseren Navigation zwischen Blöcken
+  const blockRefs = useRef<BlockRefs>({
     setup: null,       // Setup & Einstieg Block
     trends: null,      // Trends Block
     position: null,    // Position & Struktur Block
@@ -519,8 +542,14 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                 // Verwende die getBlockTypeFromTitle-Funktion für konsistente Erkennung
                 const blockType = getBlockTypeFromTitle(titleText);
                 
-                if (blockType !== 'unknown' && blockRefs.current[blockType]) {
+                // Sicherstellen, dass blockType einer der gültigen Block-Typen ist
+                if (blockType === 'setup' || blockType === 'trends' || 
+                    blockType === 'position' || blockType === 'marktzonen' || 
+                    blockType === 'ergebnis' || blockType === 'risk') {
+                    
+                  // Setze den Block-Referenz
                   blockRefs.current[blockType] = block as HTMLElement;
+                  // Füge das Element zur Liste der Elemente dieses Blocks hinzu
                   blockRefs.current.elements[blockType].push(element);
                 }
               }
