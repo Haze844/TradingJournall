@@ -308,6 +308,8 @@ export const appSettings = pgTable("app_settings", {
   accountBalance: real("account_balance").default(2500), // Standard-Kontostand 2500$
   evaAccountBalance: real("eva_account_balance").default(1500), // Standard EVA-Kontostand 1500$
   accountType: text("account_type").default("all"), // Standard: "all" für alle Kontotypen
+  goalBalance: real("goal_balance").default(7500), // Standard-Zielkontostand 7500$
+  evaGoalBalance: real("eva_goal_balance").default(7500), // Standard EVA-Zielkontostand 7500$
 })
 
 export const insertAppSettingsSchema = createInsertSchema(appSettings).omit({

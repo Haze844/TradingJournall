@@ -2615,6 +2615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           accountBalance: 2500,
           evaAccountBalance: 1500,
           goalBalance: 7500,
+          evaGoalBalance: 7500,
           theme: 'dark',
           notifications: true
         });
