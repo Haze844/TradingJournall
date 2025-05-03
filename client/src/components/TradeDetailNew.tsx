@@ -129,7 +129,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         slType: selectedTrade.slType || '',
         slPoints: selectedTrade.slPoints,
         accountType: selectedTrade.accountType || 'PA', 
-        riskSum: selectedTrade.riskSum ?? 200,
+        riskPoints: selectedTrade.riskPoints ?? 10,
+        riskAmount: selectedTrade.riskAmount ?? calculateRiskAmount(selectedTrade.riskPoints, selectedTrade.size),
         entryPoints: selectedTrade.entryPoints,
         session: selectedTrade.session || ''
       });
@@ -150,9 +151,35 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     }
   }, [selectedTrade, editMode]);
 
+  // Berechnet die Risikosumme basierend auf der Formel: (Risiko Punkte * 4 * 0.5) * Size
+  const calculateRiskAmount = (riskPoints: number | undefined, size: number | undefined): number | undefined => {
+    if (riskPoints === undefined || size === undefined) return undefined;
+    
+    // Risiko Punkte * 4 = Ticks, dann (Ticks * 0.5) * Size = Risikosumme
+    const ticks = riskPoints * 4;
+    const riskAmount = (ticks * 0.5) * size;
+    return parseFloat(riskAmount.toFixed(2)); // Auf 2 Nachkommastellen runden
+  };
+
   // Update-Funktion für Felder
   const updateField = <K extends keyof Trade>(field: K, value: Trade[K]) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
+    setEditData(prev => {
+      const newState = { ...prev, [field]: value };
+      
+      // Wenn Risiko Punkte oder Size geändert werden, berechne die Risikosumme neu
+      if (field === 'riskPoints' || field === 'size') {
+        const riskPoints = field === 'riskPoints' ? value as number : prev.riskPoints;
+        const size = field === 'size' ? value as number : prev.size;
+        
+        // Automatische Berechnung der Risikosumme
+        const riskAmount = calculateRiskAmount(riskPoints, size);
+        if (riskAmount !== undefined) {
+          newState.riskAmount = riskAmount;
+        }
+      }
+      
+      return newState;
+    });
   };
 
   // Start Edit Mode
@@ -412,23 +439,46 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Risiko Punkte</div>
                       {editMode ? (
-                        <Input
-                          type="number"
-                          value={editData.riskSum === undefined ? "" : editData.riskSum}
-                          onChange={(e) => {
-                            const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
-                            // Direkt den eingegebenen Wert als Risiko-Punkte speichern
-                            updateField('riskSum', inputValue);
-                          }}
-                          className="h-7 text-xs mt-0.5"
-                          min="0"
-                          placeholder="0"
-                          ref={(el) => { inputRefs.current[3] = el; }}
-                          onKeyDown={(e) => handleKeyDown(e, 3)}
-                        />
+                        <div>
+                          <Input
+                            type="number"
+                            value={editData.riskPoints === undefined ? "" : editData.riskPoints}
+                            onChange={(e) => {
+                              const inputValue = e.target.value === "" ? undefined : parseFloat(e.target.value);
+                              updateField('riskPoints', inputValue);
+                            }}
+                            className="h-7 text-xs mt-0.5"
+                            min="0"
+                            placeholder="0"
+                            ref={(el) => { inputRefs.current[3] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 3)}
+                          />
+                          {editData.riskPoints !== undefined && editData.size !== undefined && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              <span className="font-medium text-primary">
+                                Risikosumme: ${calculateRiskAmount(editData.riskPoints, editData.size)}
+                              </span>
+                              <br />
+                              <span className="text-[10px]">
+                                ({editData.riskPoints} Punkte = {editData.riskPoints * 4} Ticks)
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <div className="font-medium text-sm mt-0.5">
-                          {selectedTrade.riskSum !== undefined && selectedTrade.riskSum !== null && selectedTrade.riskSum !== '' ? selectedTrade.riskSum : '-'}
+                          {selectedTrade.riskPoints !== undefined && selectedTrade.riskPoints !== null ? (
+                            <div>
+                              <div>{selectedTrade.riskPoints} Punkte</div>
+                              {selectedTrade.size && (
+                                <div className="text-xs text-muted-foreground">
+                                  Risikosumme: ${calculateRiskAmount(selectedTrade.riskPoints, selectedTrade.size)}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            '-'
+                          )}
                         </div>
                       )}
                     </div>
