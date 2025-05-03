@@ -1,6 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, PiggyBank, TrendingUp, Edit, Check, X, Settings } from "lucide-react";
+import { 
+  Wallet, 
+  PiggyBank, 
+  TrendingUp, 
+  Edit, 
+  Check, 
+  X, 
+  Settings, 
+  TrendingDown, 
+  AlertTriangle, 
+  ArrowUp, 
+  ArrowDown, 
+  BadgeCheck,
+  Award,
+  Lightbulb
+} from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
@@ -8,6 +23,12 @@ import { Input } from "@/components/ui/input";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AccountBalanceProgressProps {
   className?: string;
@@ -260,6 +281,86 @@ export default function AccountBalanceProgressNew({
   const ekBalanceProgress = ekGoal > 0 && ekBalance > baseEkBalance 
     ? Math.min(100, Math.round(((ekBalance - baseEkBalance) / (ekGoal - baseEkBalance)) * 100)) 
     : 0;
+    
+  // Berechne Wachstum/Verlust gegenüber Basiswert
+  const paGrowth = paBalance - basePaBalance;
+  const evaGrowth = evaBalance - baseEvaBalance;
+  const ekGrowth = ekBalance - baseEkBalance;
+  
+  // Berechne Wachstumsrate in Prozent
+  const paGrowthRate = basePaBalance > 0 ? (paGrowth / basePaBalance) * 100 : 0;
+  const evaGrowthRate = baseEvaBalance > 0 ? (evaGrowth / baseEvaBalance) * 100 : 0;
+  const ekGrowthRate = baseEkBalance > 0 ? (ekGrowth / baseEkBalance) * 100 : 0;
+  
+  // Funktion zur Generierung dynamischer Empfehlungshinweise
+  const getRecommendation = (accountType: 'PA' | 'EVA' | 'EK', growth: number, growthRate: number, progress: number) => {
+    if (growth < 0) {
+      // Verlust
+      if (growthRate < -20) {
+        return {
+          icon: <AlertTriangle className="h-4 w-4 text-red-500" />,
+          message: "Kritischer Verlust! Überprüfe deine Risikomanagement-Strategie.",
+          color: "red"
+        };
+      } else if (growthRate < -10) {
+        return {
+          icon: <TrendingDown className="h-4 w-4 text-orange-500" />, 
+          message: "Bedeutender Verlust. Reduziere die Position und überdenke deine Strategie.",
+          color: "orange"
+        };
+      } else {
+        return {
+          icon: <ArrowDown className="h-4 w-4 text-yellow-500" />,
+          message: "Leichter Verlust. Analysiere deine letzten Trades genauer.",
+          color: "yellow"
+        };
+      }
+    } else if (growth === 0) {
+      return {
+        icon: <Lightbulb className="h-4 w-4 text-blue-400" />,
+        message: "Starte deine Trading-Reise und überwache deinen Fortschritt.",
+        color: "blue"
+      };
+    } else {
+      // Gewinn
+      if (progress >= 100) {
+        return {
+          icon: <Award className="h-4 w-4 text-green-500" />,
+          message: "Ziel erreicht! Setze dir ein neues, höheres Ziel.",
+          color: "green"
+        };
+      } else if (progress >= 75) {
+        return {
+          icon: <BadgeCheck className="h-4 w-4 text-emerald-500" />,
+          message: "Ausgezeichneter Fortschritt! Du bist auf dem besten Weg zum Ziel.",
+          color: "emerald"
+        };
+      } else if (progress >= 50) {
+        return {
+          icon: <TrendingUp className="h-4 w-4 text-green-400" />,
+          message: "Guter Fortschritt. Bleib bei deiner erfolgreichen Strategie.",
+          color: "green"
+        };
+      } else if (progress >= 25) {
+        return {
+          icon: <ArrowUp className="h-4 w-4 text-teal-400" />,
+          message: "Positive Entwicklung. Halte an deinem Plan fest.",
+          color: "teal"
+        };
+      } else {
+        return {
+          icon: <Lightbulb className="h-4 w-4 text-blue-400" />,
+          message: "Guter Start. Analysiere erfolgreiche Trades für mehr Wachstum.",
+          color: "blue"
+        };
+      }
+    }
+  };
+  
+  // Empfehlungen für jede Kontoart
+  const paRecommendation = getRecommendation('PA', paGrowth, paGrowthRate, paBalanceProgress);
+  const evaRecommendation = getRecommendation('EVA', evaGrowth, evaGrowthRate, evaBalanceProgress);
+  const ekRecommendation = getRecommendation('EK', ekGrowth, ekGrowthRate, ekBalanceProgress);
 
   return (
     <div className={`space-y-2 border border-primary/10 px-2 py-1 rounded-lg bg-black/10 shadow-sm backdrop-blur-sm ${className}`}>
@@ -612,11 +713,18 @@ export default function AccountBalanceProgressNew({
                           <span className="text-[13px] text-primary/80 font-medium">{paBalanceProgress}%</span>
                         </div>
                         
-                        <div className="w-full bg-black/30 rounded-full h-2 border border-primary/10">
+                        <div className="w-full bg-black/30 rounded-full h-3 border border-primary/10 overflow-hidden">
                           <div 
-                            className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                            className="bg-gradient-to-r from-blue-500/70 to-blue-400 h-full rounded-full transition-all duration-1000 ease-out animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]"
                             style={{ width: `${paBalanceProgress}%` }}
                           ></div>
+                        </div>
+
+                        <div className="mt-2 px-2 py-1.5 bg-gradient-to-r from-black/30 to-black/10 rounded-md border border-primary/10 flex items-start gap-2">
+                          {paRecommendation.icon}
+                          <span className={`text-xs text-${paRecommendation.color}-500`}>
+                            {paRecommendation.message}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -637,11 +745,18 @@ export default function AccountBalanceProgressNew({
                           <span className="text-[13px] text-primary/80 font-medium">{evaBalanceProgress}%</span>
                         </div>
                         
-                        <div className="w-full bg-black/30 rounded-full h-2 border border-primary/10">
+                        <div className="w-full bg-black/30 rounded-full h-3 border border-primary/10 overflow-hidden">
                           <div 
-                            className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                            className="bg-gradient-to-r from-indigo-500/70 to-indigo-400 h-full rounded-full transition-all duration-1000 ease-out animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.5)]"
                             style={{ width: `${evaBalanceProgress}%` }}
                           ></div>
+                        </div>
+
+                        <div className="mt-2 px-2 py-1.5 bg-gradient-to-r from-black/30 to-black/10 rounded-md border border-primary/10 flex items-start gap-2">
+                          {evaRecommendation.icon}
+                          <span className={`text-xs text-${evaRecommendation.color}-500`}>
+                            {evaRecommendation.message}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -662,11 +777,18 @@ export default function AccountBalanceProgressNew({
                           <span className="text-[13px] text-primary/80 font-medium">{ekBalanceProgress}%</span>
                         </div>
                         
-                        <div className="w-full bg-black/30 rounded-full h-2 border border-primary/10">
+                        <div className="w-full bg-black/30 rounded-full h-3 border border-primary/10 overflow-hidden">
                           <div 
-                            className="bg-gradient-to-r from-primary/70 to-primary h-full rounded-full transition-all duration-500 ease-in-out"
+                            className="bg-gradient-to-r from-cyan-500/70 to-cyan-400 h-full rounded-full transition-all duration-1000 ease-out animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.5)]"
                             style={{ width: `${ekBalanceProgress}%` }}
                           ></div>
+                        </div>
+                        
+                        <div className="mt-2 px-2 py-1.5 bg-gradient-to-r from-black/30 to-black/10 rounded-md border border-primary/10 flex items-start gap-2">
+                          {ekRecommendation.icon}
+                          <span className={`text-xs text-${ekRecommendation.color}-500`}>
+                            {ekRecommendation.message}
+                          </span>
                         </div>
                       </div>
                     </div>
