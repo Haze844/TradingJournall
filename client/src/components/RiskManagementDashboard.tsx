@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { accountTypeValues } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
+import AccountBalanceProgressNew from '@/components/AccountBalanceProgressNew';
 
 // Gemeinsame Stilkonfiguration für professionellere Diagramme
 const chartConfig = {
@@ -68,8 +69,10 @@ interface RiskRecommendation {
 export default function RiskManagementDashboard({ userId, activeFilters }: { userId: number, activeFilters?: any }) {
   const [chartType, setChartType] = useState<ChartType>('line');
   const [activeTab, setActiveTab] = useState<'drawdown' | 'risk-per-trade' | 'position-size' | 'recommendations'>('drawdown');
-  const [accountBalance, setAccountBalance] = useState<number>(2500); // Standard-Kontostand: 2500$
-  const [evaAccountBalance, setEvaAccountBalance] = useState<number>(1500); // Standard-EVA-Kontostand: 1500$
+  // Diese Werte werden dynamisch aus der AccountBalanceProgressNew-Komponente übernommen
+  const [accountBalance, setAccountBalance] = useState<number>(2500); // PA Konto-Kontostand
+  const [evaAccountBalance, setEvaAccountBalance] = useState<number>(1500); // EVA Konto-Kontostand  
+  const [ekAccountBalance, setEkAccountBalance] = useState<number>(500); // EK Konto-Kontostand
   const [accountType, setAccountType] = useState<string>('all'); // Standard: alle Konten
   const { toast } = useToast();
   
@@ -93,31 +96,34 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
   
   // Einstellungen aktualisieren, wenn sie geladen werden
   useEffect(() => {
-    if (userSettings?.accountBalance) {
-      setAccountBalance(userSettings.accountBalance);
-    }
-    if (userSettings?.evaAccountBalance) {
-      setEvaAccountBalance(userSettings.evaAccountBalance);
-    }
+    // Wir behalten nur die accountType-Einstellung bei
     if (userSettings?.accountType) {
       setAccountType(userSettings.accountType);
     }
+    // Kontostände werden dynamisch aus der AccountBalanceProgressNew-Komponente übernommen
   }, [userSettings]);
   
-  // Mutation zum Aktualisieren der Benutzereinstellungen
+  // Callback-Funktion, die von AccountBalanceProgressNew aufgerufen wird,
+  // wenn sich die Kontostände ändern
+  const handleBalanceUpdate = (paBalance: number, evaBalance: number, ekBalance: number) => {
+    setAccountBalance(paBalance);
+    setEvaAccountBalance(evaBalance);
+    setEkAccountBalance(ekBalance);
+    console.log('Kontostände aktualisiert:', { paBalance, evaBalance, ekBalance });
+  };
+
+  // Mutation zum Aktualisieren der Benutzereinstellungen (nur für Kontotyp-Filter)
   const updateSettingsMutation = useMutation({
-    mutationFn: async ({ accountBalance, evaAccountBalance, accountType }: { accountBalance: number; evaAccountBalance: number; accountType: string }) => {
+    mutationFn: async ({ accountType }: { accountType: string }) => {
       // Da req.user in isAuthenticated nicht gesetzt ist, muss userId explizit übergeben werden
       // userId kommt aus den Props der Komponente
-      console.log('Speichere Einstellungen:', { userId, accountBalance, evaAccountBalance, accountType });
+      console.log('Speichere Einstellungen:', { userId, accountType });
       
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           userId: userId, 
-          accountBalance: accountBalance,
-          evaAccountBalance: evaAccountBalance,
           accountType: accountType 
         }),
       });
@@ -392,46 +398,19 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* AccountBalanceProgressNew für Kontoentwicklung */}
+        <div className="mb-5">
+          <AccountBalanceProgressNew 
+            userId={userId} 
+            activeFilters={activeFilters}
+            onBalanceUpdate={handleBalanceUpdate}
+          />
+        </div>
+        
         {/* Konto-Einstellungen für Risikomanagement */}
         <div className="mb-6 p-4 bg-muted rounded-lg">
           <div className="flex flex-col sm:flex-row gap-4 items-end">
-            <div className="w-full sm:w-1/4">
-              <Label htmlFor="accountBalance" className="text-sm font-medium mb-1.5 block">
-                <span className="flex items-center gap-1">
-                  <Wallet className="h-3.5 w-3.5" />
-                  PA Kontostand ($)
-                </span>
-              </Label>
-              <div className="flex items-center">
-                <Input 
-                  id="accountBalance"
-                  type="number" 
-                  value={accountBalance} 
-                  onChange={(e) => setAccountBalance(parseFloat(e.target.value) || 0)}
-                  className="flex-grow"
-                />
-              </div>
-            </div>
-            
-            <div className="w-full sm:w-1/4">
-              <Label htmlFor="evaAccountBalance" className="text-sm font-medium mb-1.5 block">
-                <span className="flex items-center gap-1">
-                  <PiggyBank className="h-3.5 w-3.5" />
-                  EVA Kontostand ($)
-                </span>
-              </Label>
-              <div className="flex items-center">
-                <Input 
-                  id="evaAccountBalance"
-                  type="number" 
-                  value={evaAccountBalance} 
-                  onChange={(e) => setEvaAccountBalance(parseFloat(e.target.value) || 0)}
-                  className="flex-grow"
-                />
-              </div>
-            </div>
-            
-            <div className="w-full sm:w-1/4">
+            <div className="w-full sm:w-1/3">
               <Label htmlFor="accountType" className="text-sm font-medium mb-1.5 block">Kontotyp filtern</Label>
               <Select 
                 value={accountType} 
@@ -449,13 +428,11 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
               </Select>
             </div>
             
-            <div className="w-full sm:w-1/4">
+            <div className="w-full sm:w-1/3">
               <Button 
                 onClick={() => {
                   // Speichere die Einstellungen
                   updateSettingsMutation.mutate({ 
-                    accountBalance, 
-                    evaAccountBalance,
                     accountType 
                   });
                 }}
@@ -464,6 +441,27 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
                 <RefreshCcw className="h-4 w-4" />
                 Risikodaten aktualisieren
               </Button>
+            </div>
+            
+            <div className="w-full sm:w-1/3 flex items-center justify-between bg-black/20 rounded-md px-4 py-2 border border-primary/10">
+              <div className="flex gap-2 items-center">
+                <Wallet className="h-4 w-4 text-primary" />
+                <span className="text-sm">Aktive Kontostände</span>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex items-center">
+                  <span className="text-xs text-primary/60">PA:</span>
+                  <span className="ml-1 text-sm font-medium">${accountBalance}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-primary/60">EVA:</span>
+                  <span className="ml-1 text-sm font-medium">${evaAccountBalance}</span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs text-primary/60">EK:</span>
+                  <span className="ml-1 text-sm font-medium">${ekAccountBalance}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
