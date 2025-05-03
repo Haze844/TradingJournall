@@ -1294,7 +1294,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
           
-          const tradeDate = new Date(trade.date);
+          // Verschiedene Datumsformate behandeln
+          let tradeDate: Date;
+          
+          // Prüfen, ob das Datum im Format "MM/DD/YYYY HH:MM:SS" vorliegt
+          if (typeof trade.date === 'string' && trade.date.includes('/')) {
+            console.log(`Trade Datum im MM/DD/YYYY Format erkannt: ${trade.date}`);
+            // Parsen des Formats "MM/DD/YYYY HH:MM:SS"
+            const parts = trade.date.split(' ');
+            const dateParts = parts[0].split('/');
+            const timeParts = parts[1]?.split(':') || ['00', '00', '00'];
+            
+            const month = parseInt(dateParts[0]) - 1; // Monate sind 0-basiert in JavaScript
+            const day = parseInt(dateParts[1]);
+            const year = parseInt(dateParts[2]);
+            const hour = parseInt(timeParts[0]);
+            const minute = parseInt(timeParts[1]);
+            const second = parseInt(timeParts[2]);
+            
+            tradeDate = new Date(year, month, day, hour, minute, second);
+            console.log(`Parsed Datum: ${tradeDate}, Jahr: ${year}, Monat: ${month}, Tag: ${day}, Stunde: ${hour}`);
+          } else {
+            // Standard Date-Parsing für ISO-Strings oder Date-Objekte
+            tradeDate = new Date(trade.date);
+          }
+          
           console.log(`Trade Datum: ${tradeDate}, Original: ${trade.date}`);
           
           const dayOfWeek = tradeDate.getDay(); // 0 (Sonntag) bis 6 (Samstag)
