@@ -247,11 +247,12 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       // 4. Wenn kein nächstes Element im aktuellen Block oder wir sind am Ende des Blocks,
       // versuche zum nächsten Block zu springen
       
-      // Reihenfolge der Blöcke: setup -> trends -> position -> risk
+      // Reihenfolge der Blöcke: setup -> trends -> position -> marktzonen -> ergebnis
       let nextBlockType = '';
       if (currentBlockType === 'setup') nextBlockType = 'trends';
       else if (currentBlockType === 'trends') nextBlockType = 'position';
-      else if (currentBlockType === 'position') nextBlockType = 'risk';
+      else if (currentBlockType === 'position') nextBlockType = 'marktzonen';
+      else if (currentBlockType === 'marktzonen') nextBlockType = 'ergebnis';
       
       console.log(`Springe zum nächsten Block: ${nextBlockType}`);
       
@@ -325,11 +326,12 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       // 4. Wenn kein vorheriges Element im aktuellen Block oder wir sind am Anfang des Blocks,
       // versuche zum vorherigen Block zu springen
       
-      // Reihenfolge der Blöcke: setup <- trends <- position <- risk
+      // Reihenfolge der Blöcke: setup <- trends <- position <- marktzonen <- ergebnis
       let prevBlockType = '';
       if (currentBlockType === 'trends') prevBlockType = 'setup';
       else if (currentBlockType === 'position') prevBlockType = 'trends';
-      else if (currentBlockType === 'risk') prevBlockType = 'position';
+      else if (currentBlockType === 'marktzonen') prevBlockType = 'position';
+      else if (currentBlockType === 'ergebnis') prevBlockType = 'marktzonen';
       
       console.log(`Springe zum vorherigen Block: ${prevBlockType}`);
       
