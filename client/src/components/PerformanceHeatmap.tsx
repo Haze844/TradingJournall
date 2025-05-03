@@ -27,6 +27,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Define a simplified trade interface for the heatmap
+type HeatmapTrade = {
+  id: number;
+  symbol: string;
+  setup: string;
+  isWin: boolean;
+  profitLoss: number;
+  rrAchieved: number;
+  accountType: string;
+  date: string;
+  size: number;
+  direction: string;
+  session: string;
+  location: string;
+  [key: string]: any; // For any other properties
+};
+
 type HeatmapDataPoint = {
   day: string;
   timeframe: string;
@@ -39,7 +56,7 @@ type HeatmapDataPoint = {
   y?: number;
   isComparison?: boolean;
   valueLabel?: string;
-  trades?: any[]; // Liste der Trades für diese Zelle
+  trades: HeatmapTrade[]; // Explizite Liste der Trades für diese Zelle
 };
 
 type HeatmapRecommendation = {
@@ -130,7 +147,7 @@ interface CustomPointProps {
   winRate?: number;
   avgRR?: string;
   totalPnL?: string;
-  trades?: any[];
+  trades?: HeatmapTrade[]; // Use our defined type
   onClick: (data: HeatmapDataPoint) => void;
 }
 
@@ -160,8 +177,9 @@ const CustomPoint = (props: CustomPointProps) => {
   };
 
   const handleClick = () => {
+    console.log("CustomPoint clicked - original props:", props);
     // Alle Eigenschaften der Zelle an den Handler übergeben
-    onClick({
+    const cellData = {
       day: props.day,
       timeframe: props.timeframe,
       value: props.value,
@@ -172,7 +190,12 @@ const CustomPoint = (props: CustomPointProps) => {
       x: props.x,
       y: props.y,
       trades: props.trades || [] // Liste der dazugehörigen Trades weitergeben
-    });
+    };
+    
+    console.log("Passing cell data to onClick handler:", cellData);
+    console.log("Trade data being passed:", cellData.trades);
+    
+    onClick(cellData);
   };
 
   return (
@@ -420,6 +443,16 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
       
       // Funktion zum Transformieren von Daten für die Visualisierung
       const transformData = (data: HeatmapDataPoint[], isComparison = false) => {
+        console.log("Transformiere Daten für Visualisierung:", data);
+        
+        // Prüfe, ob Trades in den Daten vorhanden sind
+        const pointsWithTrades = data.filter(point => point.trades && point.trades.length > 0);
+        console.log(`${pointsWithTrades.length} von ${data.length} Punkten haben Trades`);
+        
+        if (pointsWithTrades.length > 0) {
+          console.log("Beispiel-Punkt mit Trades:", pointsWithTrades[0]);
+        }
+        
         return data.map((point) => {
           const dayIndex = heatmapData.days.indexOf(point.day);
           const timeIndex = heatmapData.timeframe.indexOf(point.timeframe);
@@ -437,13 +470,20 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
             valueLabel = '$';
           }
           
+          // Stelle sicher, dass trades übergeben werden
+          if (!point.trades) {
+            console.warn("Punkt ohne Trades gefunden:", point);
+          }
+          
           return {
             ...point,
             x: timeIndex,
             y: dayIndex,
             value: value,
             valueLabel,
-            isComparison
+            isComparison,
+            // Sicherstellen, dass trades explizit kopiert wird
+            trades: point.trades || []
           };
         });
       };
@@ -920,9 +960,24 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
                         selectedCell.timeframe === props.payload.timeframe 
                         : false}
                       onClick={(data) => {
+                        console.log("Cell clicked - data:", data);
+                        console.log("Cell trades data:", data.trades);
+                        console.log("Trade count:", data.tradeCount);
+                        
                         setSelectedCell(data);
-                        if (interactionMode === "click" && data.tradeCount > 0 && data.trades && data.trades.length > 0) {
-                          setShowTradeDetails(true);
+                        
+                        if (interactionMode === "click" && data.tradeCount > 0) {
+                          if (data.trades && data.trades.length > 0) {
+                            console.log("Trade details available, showing details");
+                            setShowTradeDetails(true);
+                          } else {
+                            console.warn("Trade count > 0 but no trades array available:", data);
+                            toast({
+                              title: "Hinweis",
+                              description: "Für diese Zelle sind keine detaillierten Trade-Daten verfügbar.",
+                              variant: "destructive",
+                            });
+                          }
                         }
                       }}
                     />
