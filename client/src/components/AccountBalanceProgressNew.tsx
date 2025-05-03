@@ -292,65 +292,145 @@ export default function AccountBalanceProgressNew({
   const evaGrowthRate = baseEvaBalance > 0 ? (evaGrowth / baseEvaBalance) * 100 : 0;
   const ekGrowthRate = baseEkBalance > 0 ? (ekGrowth / baseEkBalance) * 100 : 0;
   
-  // Funktion zur Generierung dynamischer Empfehlungshinweise
+  // Funktion zur Generierung dynamischer Empfehlungshinweise basierend auf Trading-Erfolg
   const getRecommendation = (accountType: 'PA' | 'EVA' | 'EK', growth: number, growthRate: number, progress: number) => {
+    // Analysiere die gefilterten Trades für diesen Account-Typ
+    const accountTrades = filteredTrades.filter(trade => trade.accountType === accountType);
+    const totalTrades = accountTrades.length;
+    
+    // RR-Analysen
+    const avgRR = totalTrades > 0 
+      ? accountTrades.reduce((sum, trade) => sum + (Number(trade.rrAchieved) || 0), 0) / totalTrades 
+      : 0;
+    
+    // Risikomanagement-Analyse
+    const riskSum = totalTrades > 0 
+      ? accountTrades.reduce((sum, trade) => sum + (Number(trade.riskSum) || 0), 0) 
+      : 0;
+    const avgRisk = totalTrades > 0 ? riskSum / totalTrades : 0;
+    
+    // Win/Loss-Analyse
+    const winTrades = accountTrades.filter(trade => trade.isWin === true || (trade.profitLoss !== undefined && Number(trade.profitLoss) > 0)).length;
+    const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+    
+    // Messung der Kontovolatilität
+    const pnlValues = accountTrades.map(trade => Number(trade.profitLoss) || 0);
+    const volatility = totalTrades > 1 
+      ? Math.sqrt(pnlValues.reduce((sum, val) => sum + Math.pow(val - (growth / totalTrades), 2), 0) / totalTrades)
+      : 0;
+    
+    // Setups und Bewertung der Setup-Qualität
+    const setupPerformance = new Map();
+    accountTrades.forEach(trade => {
+      if (trade.setup) {
+        const setup = trade.setup;
+        if (!setupPerformance.has(setup)) {
+          setupPerformance.set(setup, { count: 0, profit: 0 });
+        }
+        const data = setupPerformance.get(setup);
+        data.count++;
+        data.profit += Number(trade.profitLoss) || 0;
+        setupPerformance.set(setup, data);
+      }
+    });
+    
+    // Ermittle das profitabelste Setup
+    let bestSetup = '';
+    let bestSetupProfit = 0;
+    setupPerformance.forEach((data, setup) => {
+      if (data.profit > bestSetupProfit) {
+        bestSetupProfit = data.profit;
+        bestSetup = setup;
+      }
+    });
+    
+    // Ermittle das unrentabelste Setup
+    let worstSetup = '';
+    let worstSetupProfit = 0;
+    setupPerformance.forEach((data, setup) => {
+      if (data.profit < worstSetupProfit) {
+        worstSetupProfit = data.profit;
+        worstSetup = setup;
+      }
+    });
+    
     if (growth < 0) {
-      // Verlust
+      // Verluste analysieren
       if (growthRate < -20) {
         return {
           icon: <AlertTriangle className="h-4 w-4 text-red-500" />,
-          message: "Kritischer Verlust! Überprüfe deine Risikomanagement-Strategie.",
+          message: totalTrades > 0 
+            ? `Kritischer Verlust! ${winRate < 40 ? 'Deine Win-Rate von ' + winRate.toFixed(0) + '% ist zu niedrig. ' : ''}${avgRisk > 2 ? 'Reduziere dein Risiko pro Trade (aktuell $' + avgRisk.toFixed(0) + '). ' : ''}Mache eine Handelspause.`
+            : "Kritischer Verlust! Überprüfe deine Risikomanagement-Strategie umgehend.",
           color: "red"
         };
       } else if (growthRate < -10) {
         return {
           icon: <TrendingDown className="h-4 w-4 text-orange-500" />, 
-          message: "Bedeutender Verlust. Reduziere die Position und überdenke deine Strategie.",
+          message: totalTrades > 0
+            ? `Verluste überwiegen. ${worstSetup ? 'Vermeide das Setup "' + worstSetup + '". ' : ''}${volatility > Math.abs(growth/2) ? 'Deine Trades sind zu volatil. ' : ''}Achte auf bessere Einstiege.`
+            : "Bedeutender Verlust. Reduziere die Position und überdenke deine Strategie.",
           color: "orange"
         };
       } else {
         return {
           icon: <ArrowDown className="h-4 w-4 text-yellow-500" />,
-          message: "Leichter Verlust. Analysiere deine letzten Trades genauer.",
+          message: totalTrades > 0
+            ? `Leichter Verlust. ${avgRR < 1 ? 'Erhöhe dein Risk/Reward-Verhältnis (aktuell ' + avgRR.toFixed(1) + 'R). ' : ''}Mehr Geduld bei Gewinnmitnahmen.`
+            : "Leichter Verlust. Analysiere deine letzten Trades genauer.",
           color: "yellow"
         };
       }
-    } else if (growth === 0) {
+    } else if (growth === 0 || totalTrades === 0) {
       return {
         icon: <Lightbulb className="h-4 w-4 text-blue-400" />,
-        message: "Starte deine Trading-Reise und überwache deinen Fortschritt.",
+        message: accountType === 'PA' 
+          ? "Starte mit kleinen Positionen im PA-Konto und teste verschiedene Setups."
+          : accountType === 'EVA' 
+            ? "EVA-Konto ideal für das Testen neuer Strategien mit kontrolliertem Risiko."
+            : "EK-Konto bereit für den Einsatz. Starte mit einem strukturierten Tradingplan.",
         color: "blue"
       };
     } else {
-      // Gewinn
+      // Gewinne analysieren
       if (progress >= 100) {
         return {
           icon: <Award className="h-4 w-4 text-green-500" />,
-          message: "Ziel erreicht! Setze dir ein neues, höheres Ziel.",
+          message: totalTrades > 0
+            ? `Ziel erreicht! ${bestSetup ? 'Das Setup "' + bestSetup + '" war besonders profitabel. ' : ''}${winRate > 60 ? 'Win-Rate von ' + winRate.toFixed(0) + '% beibehalten. ' : ''}Erhöhe nun dein Ziel.`
+            : "Ziel erreicht! Setze dir ein neues, höheres Ziel und bleibe konsequent.",
           color: "green"
         };
       } else if (progress >= 75) {
         return {
           icon: <BadgeCheck className="h-4 w-4 text-emerald-500" />,
-          message: "Ausgezeichneter Fortschritt! Du bist auf dem besten Weg zum Ziel.",
+          message: totalTrades > 0
+            ? `Ausgezeichneter Fortschritt! ${avgRR > 1.5 ? 'Dein R/R von ' + avgRR.toFixed(1) + ' ist stark. ' : ''}${bestSetup ? 'Fokussiere auf Setup "' + bestSetup + '". ' : ''}Bleib konsistent.`
+            : "Ausgezeichneter Fortschritt! Du bist auf dem besten Weg zum Ziel.",
           color: "emerald"
         };
       } else if (progress >= 50) {
         return {
           icon: <TrendingUp className="h-4 w-4 text-green-400" />,
-          message: "Guter Fortschritt. Bleib bei deiner erfolgreichen Strategie.",
+          message: totalTrades > 0
+            ? `Guter Fortschritt. ${winRate > 50 ? 'Win-Rate von ' + winRate.toFixed(0) + '% beibehalten. ' : ''}${volatility < growth/3 ? 'Deine Trades sind sehr konsistent. ' : ''}Setze klare SL und TP.`
+            : "Guter Fortschritt. Bleib bei deiner erfolgreichen Strategie und optimiere sie.",
           color: "green"
         };
       } else if (progress >= 25) {
         return {
           icon: <ArrowUp className="h-4 w-4 text-teal-400" />,
-          message: "Positive Entwicklung. Halte an deinem Plan fest.",
+          message: totalTrades > 0
+            ? `Positive Entwicklung. ${avgRR < 1 ? 'Verbessere dein R/R (aktuell ' + avgRR.toFixed(1) + '). ' : ''}${bestSetup ? 'Setup "' + bestSetup + '" funktioniert gut. ' : ''}Dokumentiere Erfolge.`
+            : "Positive Entwicklung. Halte an deinem Plan fest und verbessere deine Einträge.",
           color: "teal"
         };
       } else {
         return {
           icon: <Lightbulb className="h-4 w-4 text-blue-400" />,
-          message: "Guter Start. Analysiere erfolgreiche Trades für mehr Wachstum.",
+          message: totalTrades > 0
+            ? `Guter Start. ${winRate < 50 ? 'Verbessere deine Win-Rate von ' + winRate.toFixed(0) + '%. ' : ''}${avgRisk > 0 ? 'Risiko von $' + avgRisk.toFixed(0) + ' pro Trade angemessen. ' : ''}Weiter so!`
+            : "Guter Start. Analysiere erfolgreiche Trades und wiederhole ihre Muster.",
           color: "blue"
         };
       }
