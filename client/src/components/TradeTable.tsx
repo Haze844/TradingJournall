@@ -511,7 +511,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
           <div className="flex flex-wrap items-start justify-between gap-2 w-full">
             {/* Account Balance Progress mit gefilterten Trades - Hälfte der Größe des Statistikpanels */}
             <AccountBalanceProgress 
-              className="w-auto min-w-[200px] max-w-[300px] flex-none" 
+              className="w-auto min-w-[280px] max-w-[450px] flex-none border border-primary/20 p-2 rounded-lg bg-black/30" 
               filteredTrades={filteredTrades} 
             />
             
