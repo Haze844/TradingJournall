@@ -45,6 +45,8 @@ import {
 import { format, subDays, subMonths, parseISO, isValid } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 // Konstanten für Zeitraumfilterung
 type TimeRangeOption = {
@@ -625,24 +627,67 @@ export default function TradeDashboard({ trades }: TradeDashboardProps) {
             </SelectContent>
           </Select>
           
-          {/* Benutzerdefinierter Datumsbereich */}
+          {/* Benutzerdefinierter Datumsbereich mit Kalender-Popover */}
           <div className="flex gap-2 items-center">
-            <div className="relative">
-              <CalendarRange className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-8 w-[140px] bg-black/50 border-border"
-                placeholder="TT.MM.JJJJ"
-                value={startDateInput}
-                onChange={(e) => setStartDateInput(e.target.value)}
-              />
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="relative cursor-pointer group">
+                  <CalendarRange className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <Input
+                    className="pl-8 w-[140px] bg-black/50 border-border cursor-pointer group-hover:border-primary/50 transition-colors"
+                    placeholder="TT.MM.JJJJ"
+                    value={startDateInput}
+                    readOnly
+                  />
+                  <div className="absolute inset-0" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-black/80 border-blue-500/30 backdrop-blur-md">
+                <CalendarComponent
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setStartDate(date);
+                      setStartDateInput(formatDateDE(date));
+                    }
+                  }}
+                  initialFocus
+                  className="rounded-md border-blue-500/20"
+                />
+              </PopoverContent>
+            </Popover>
+            
             <span className="text-muted-foreground">-</span>
-            <Input
-              className="w-[140px] bg-black/50 border-border"
-              placeholder="TT.MM.JJJJ"
-              value={endDateInput}
-              onChange={(e) => setEndDateInput(e.target.value)}
-            />
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="relative cursor-pointer group">
+                  <CalendarRange className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <Input
+                    className="pl-8 w-[140px] bg-black/50 border-border cursor-pointer group-hover:border-primary/50 transition-colors"
+                    placeholder="TT.MM.JJJJ"
+                    value={endDateInput}
+                    readOnly
+                  />
+                  <div className="absolute inset-0" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-black/80 border-blue-500/30 backdrop-blur-md">
+                <CalendarComponent
+                  mode="single"
+                  selected={endDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setEndDate(date);
+                      setEndDateInput(formatDateDE(date));
+                    }
+                  }}
+                  initialFocus
+                  className="rounded-md border-blue-500/20"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           
           {/* Filter Badges */}
