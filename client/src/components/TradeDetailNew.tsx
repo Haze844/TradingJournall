@@ -109,12 +109,14 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       
       // Wenn es ein geschlossenes Dropdown ist, öffne es
       if (isDropdown && !isDropdownOpen) {
-        (event.target as HTMLElement).click(); // Öffne das Dropdown
-        return; // Stoppe hier, damit der Benutzer zuerst eine Option auswählen kann
+        if (event.target instanceof HTMLElement) {
+          event.target.click(); // Öffne das Dropdown
+          return; // Stoppe hier, damit der Benutzer zuerst eine Option auswählen kann
+        }
       }
       
       // Wenn es ein Button ist, klicke ihn
-      if (isButton) {
+      if (isButton && event.target instanceof HTMLButtonElement) {
         event.target.click();
         // Trotzdem zum nächsten Element navigieren (falls es existiert)
       }
@@ -1149,8 +1151,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">Session</div>
                       {editMode ? (
-                        <div className="flex gap-1 flex-wrap mt-0.5">
-                          {["London", "London Neverland", "NY AM", "NY AM Neverland", "NY PM"].map((session) => (
+                        <div 
+                          className="flex gap-1 flex-wrap mt-0.5"
+                          tabIndex={0}
+                          ref={(el) => { inputRefs.current[19] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 19)}
+                        >
+                          {["London", "London Neverland", "NY AM", "NY AM Neverland", "NY PM"].map((session, idx) => (
                             <Button
                               key={session}
                               type="button"
@@ -1158,6 +1165,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className="p-1 h-6 text-[10px]"
                               onClick={() => updateField('session', session)}
+                              // Nur den ersten Button erhält einen Ref
+                              ref={idx === 0 ? (el) => { inputRefs.current[20] = el; } : undefined}
+                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 20) : undefined}
                             >
                               {session}
                             </Button>
@@ -1181,8 +1191,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">RR Achieved</div>
                       {editMode ? (
-                        <div className="flex gap-1 flex-wrap mt-0.5">
-                          {[-1, ...[1, 2, 3, 4, 5, 6, 7]].map(val => (
+                        <div 
+                          className="flex gap-1 flex-wrap mt-0.5"
+                          tabIndex={0}
+                          ref={(el) => { inputRefs.current[21] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 21)}
+                        >
+                          {[-1, ...[1, 2, 3, 4, 5, 6, 7]].map((val, idx) => (
                             <Button
                               key={val}
                               type="button"
@@ -1190,6 +1205,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className={`p-1 h-6 text-[10px] flex-1 ${val === -1 ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : ''}`}
                               onClick={() => updateField('rrAchieved', val)}
+                              // Nur der erste Button erhält einen Ref
+                              ref={idx === 0 ? (el) => { inputRefs.current[22] = el; } : undefined}
+                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 22) : undefined}
                             >
                               {val}R
                             </Button>
@@ -1202,8 +1220,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">RR Potential</div>
                       {editMode ? (
-                        <div className="flex gap-1 flex-wrap mt-0.5">
-                          {[1, 2, 3, 4, 5, 6, 7].map(val => (
+                        <div 
+                          className="flex gap-1 flex-wrap mt-0.5"
+                          tabIndex={0}
+                          ref={(el) => { inputRefs.current[23] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 23)}
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7].map((val, idx) => (
                             <Button
                               key={val}
                               type="button"
@@ -1211,6 +1234,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className="p-1 h-6 text-[10px] flex-1"
                               onClick={() => updateField('rrPotential', val)}
+                              // Nur der erste Button erhält einen Ref
+                              ref={idx === 0 ? (el) => { inputRefs.current[24] = el; } : undefined}
+                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 24) : undefined}
                             >
                               {val}R
                             </Button>
@@ -1225,8 +1251,13 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                     <div className="bg-background/50 rounded-sm p-1.5">
                       <div className="text-xs text-muted-foreground font-medium">SL Typ</div>
                       {editMode ? (
-                        <div className="flex gap-1 flex-wrap mt-0.5">
-                          {["Sweep", "zerstört"].map((type) => (
+                        <div 
+                          className="flex gap-1 flex-wrap mt-0.5"
+                          tabIndex={0}
+                          ref={(el) => { inputRefs.current[25] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 25)}
+                        >
+                          {["Sweep", "zerstört"].map((type, idx) => (
                             <Button
                               key={type}
                               type="button"
@@ -1234,6 +1265,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                               size="sm"
                               className="p-1 h-6 text-[10px] flex-1"
                               onClick={() => updateField('slType', type)}
+                              // Nur der erste Button erhält einen Ref
+                              ref={idx === 0 ? (el) => { inputRefs.current[26] = el; } : undefined}
+                              onKeyDown={idx === 0 ? (e) => handleKeyDown(e, 26) : undefined}
                             >
                               {type}
                             </Button>
