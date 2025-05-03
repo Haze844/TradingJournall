@@ -38,12 +38,13 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
   const [calculatedPaBalance, setCalculatedPaBalance] = useState<number | null>(null);
   const [calculatedEvaBalance, setCalculatedEvaBalance] = useState<number | null>(null);
 
-  // Benutzereinstellungen abrufen
+  // Benutzereinstellungen abrufen mit mehr Debugging-Ausgaben
   const { data: settings, isLoading } = useQuery({
     queryKey: ['/api/settings', user?.id],
     queryFn: async () => {
       try {
         if (!user) {
+          console.log("Kein angemeldeter Benutzer, verwende Standardwerte");
           return { 
             accountBalance: 2500, 
             evaAccountBalance: 1500,
@@ -52,11 +53,24 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
           };
         }
         
+        console.log(`Einstellungen abfragen für User-ID: ${user.id}`);
         const response = await fetch(`/api/settings?userId=${user.id}`);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch account settings');
+          throw new Error(`Failed to fetch account settings, status: ${response.status}`);
         }
-        return response.json();
+        
+        const data = await response.json();
+        console.log("Erhaltene Einstellungen:", data);
+        
+        // Sicherstellen, dass alle erforderlichen Werte vorhanden sind
+        return {
+          accountBalance: data.accountBalance || 2500,
+          evaAccountBalance: data.evaAccountBalance || 1500,
+          goalBalance: data.goalBalance || 7500,
+          evaGoalBalance: data.evaGoalBalance || 7500,
+          ...data
+        };
       } catch (error) {
         console.error('Error fetching account settings:', error);
         return { 
@@ -72,42 +86,62 @@ export default function AccountBalanceProgress({ className, filteredTrades = [] 
   
   // Berechne Kontostände basierend auf gefilterten Trades
   useEffect(() => {
-    if (settings && filteredTrades.length > 0) {
+    if (settings && Array.isArray(filteredTrades)) {
+      // Debug-Output
+      console.log("Berechne Kontostände aus", filteredTrades.length, "gefilterten Trades");
+      console.log("Basis PA:", settings.accountBalance, "EVA:", settings.evaAccountBalance);
+      
       // PA Konto Berechnung
       const paProfit = filteredTrades
         .filter(trade => trade.accountType === "PA")
         .reduce((sum, trade) => {
+          // Berechne den Gewinn/Verlust
+          let profit = 0;
+          
           // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
           if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
-            return sum + trade.profitLoss;
-          } else if (trade.riskPoints !== null && trade.riskPoints !== undefined && 
+            profit = Number(trade.profitLoss);
+          } else if (trade.riskSum !== null && trade.riskSum !== undefined && 
                      trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
-            return sum + (trade.riskPoints * trade.rrAchieved);
+            profit = Number(trade.riskSum) * Number(trade.rrAchieved);
           }
-          return sum;
+          
+          console.log("PA Trade:", trade.id, "P/L:", profit);
+          return sum + profit;
         }, 0);
       
       // EVA Konto Berechnung
       const evaProfit = filteredTrades
         .filter(trade => trade.accountType === "EVA")
         .reduce((sum, trade) => {
+          // Berechne den Gewinn/Verlust
+          let profit = 0;
+          
           // Verwende profitLoss wenn vorhanden, sonst berechne aus riskPoints und rrAchieved
           if (trade.profitLoss !== null && trade.profitLoss !== undefined) {
-            return sum + trade.profitLoss;
-          } else if (trade.riskPoints !== null && trade.riskPoints !== undefined && 
+            profit = Number(trade.profitLoss);
+          } else if (trade.riskSum !== null && trade.riskSum !== undefined && 
                      trade.rrAchieved !== null && trade.rrAchieved !== undefined) {
-            return sum + (trade.riskPoints * trade.rrAchieved);
+            profit = Number(trade.riskSum) * Number(trade.rrAchieved);
           }
-          return sum;
+          
+          console.log("EVA Trade:", trade.id, "P/L:", profit);
+          return sum + profit;
         }, 0);
         
+      console.log("Berechneter PA Profit:", paProfit, "EVA Profit:", evaProfit);
+        
       // Aktualisiere die berechneten Balancen
-      setCalculatedPaBalance(settings.accountBalance + paProfit);
-      setCalculatedEvaBalance(settings.evaAccountBalance + evaProfit);
+      setCalculatedPaBalance(Number(settings.accountBalance) + paProfit);
+      setCalculatedEvaBalance(Number(settings.evaAccountBalance) + evaProfit);
+      
+      console.log("Neue Kontostände - PA:", Number(settings.accountBalance) + paProfit, 
+                  "EVA:", Number(settings.evaAccountBalance) + evaProfit);
     } else {
       // Wenn keine gefilterten Trades, setze auf null zurück
       setCalculatedPaBalance(null);
       setCalculatedEvaBalance(null);
+      console.log("Keine Trades gefiltert oder Settings nicht geladen");
     }
   }, [filteredTrades, settings]);
 
