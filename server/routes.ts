@@ -1786,6 +1786,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!settings) {
         return res.json({
           accountBalance: 2500, 
+          evaAccountBalance: 1500, // EVA Kontostand hinzugefügt für die Fortschrittsanzeige
           accountType: 'all',
           theme: 'dark',
           notifications: true,

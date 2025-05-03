@@ -6,6 +6,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import AccountBalanceProgress from "@/components/AccountBalanceProgress";
 import { 
   Popover,
   PopoverContent,
@@ -507,31 +508,35 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
     <div className="relative w-full">
       <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl h-[70vh]">
         <CardHeader className="pb-0 pt-4">
-          <div className="flex flex-wrap md:flex-nowrap justify-end gap-3 items-center">
+          <div className="flex flex-col w-full gap-3">
+            {/* Account Balance Progress */}
+            <AccountBalanceProgress className="w-full" />
             
-            <div className="flex gap-2 md:ml-auto flex-nowrap">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                onClick={resetFilters}
-              >
-                <X className="h-3 w-3 mr-1" />
-                Filter zurücksetzen
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                onClick={() => {
-                  // Ein neues Event erstellen und dispatchen
-                  const event = new CustomEvent('add-trade-clicked');
-                  window.dispatchEvent(event);
-                }}
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Hinzufügen
-              </Button>
+            <div className="flex flex-wrap md:flex-nowrap justify-end gap-3 items-center">
+              <div className="flex gap-2 md:ml-auto flex-nowrap">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
+                  onClick={resetFilters}
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Filter zurücksetzen
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
+                  onClick={() => {
+                    // Ein neues Event erstellen und dispatchen
+                    const event = new CustomEvent('add-trade-clicked');
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Hinzufügen
+                </Button>
+              </div>
             </div>
           </div>
         </CardHeader>
