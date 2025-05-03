@@ -40,7 +40,7 @@ export const locationTypes = [
   "Sweep"
 ] as const;
 export const structureTypes = ["Hauptstruktur", "Internal", "Micro"] as const;
-export const sessionTypes = ["London", "London Neverland", "NY PM"] as const;
+export const sessionTypes = ["London", "London Neverland", "NY AM", "NY AM Neverland", "NY PM"] as const;
 export const unmitZoneTypes = ["Ja", "Nein", "Mehrere"] as const;
 export const marketPhaseTypes = ["Long", "stark Long", "Short", "stark Short", "Range"] as const;
 export const rrValues = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
@@ -61,7 +61,7 @@ export const trades = pgTable("trades", {
   liquidation: text("liquidation").default(''),
   location: text("location").default(''),
   accountType: text("account_type").default('PA'), // Kontoart: EVA oder PA
-  session: text("session").default(''), // Handels-Session: London, London Neverland, NY PM
+  session: text("session").default(''), // Handels-Session: London, London Neverland, NY AM, NY AM Neverland, NY PM
   rrAchieved: real("rr_achieved").default(0),
   rrPotential: real("rr_potential").default(0),
   profitLoss: real("profit_loss").default(0), // Gewinn/Verlust in $

@@ -665,22 +665,45 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
-                  <div className="bg-background/50 rounded-sm p-1.5">
-                    <div className="text-xs text-muted-foreground font-medium">Range Punkte</div>
-                    {editMode ? (
-                      <Input
-                        type="number"
-                        value={editData.rangePoints === undefined ? "" : editData.rangePoints}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? undefined : parseInt(e.target.value);
-                          updateField('rangePoints', value);
-                        }}
-                        className="h-7 text-xs mt-0.5"
-                        min="0"
-                      />
-                    ) : (
-                      <div className="font-medium text-sm mt-0.5">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
-                    )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Range Punkte</div>
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          value={editData.rangePoints === undefined ? "" : editData.rangePoints}
+                          onChange={(e) => {
+                            const value = e.target.value === "" ? undefined : parseInt(e.target.value);
+                            updateField('rangePoints', value);
+                          }}
+                          className="h-7 text-xs mt-0.5"
+                          min="0"
+                        />
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">{(selectedTrade.rangePoints !== undefined && selectedTrade.rangePoints !== null) ? `${selectedTrade.rangePoints}` : '-'}</div>
+                      )}
+                    </div>
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Session</div>
+                      {editMode ? (
+                        <div className="flex gap-1 flex-wrap mt-0.5">
+                          {["London", "London Neverland", "NY AM", "NY AM Neverland", "NY PM"].map((session) => (
+                            <Button
+                              key={session}
+                              type="button"
+                              variant={editData.session === session ? "default" : "outline"}
+                              size="sm"
+                              className="p-1 h-6 text-[10px]"
+                              onClick={() => updateField('session', session)}
+                            >
+                              {session}
+                            </Button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.session || '-'}</div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
