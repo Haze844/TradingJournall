@@ -412,12 +412,9 @@ export default function SimpleHome() {
         </TabsContent>
         
         {/* AI Analysis Tab - Mit Sub-Navigation */}
-        {/* Risiko Tab in der Hauptnavigation */}
+        {/* Risk-Manager Tab in der Hauptnavigation */}
         <TabsContent value="risk" className="mt-0">
           <div className="rocket-card rounded-xl p-2 sm:p-4">
-            <h2 className="text-lg font-bold mb-2 sm:mb-3 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-2" /> Risikomanagement
-            </h2>
             <RiskManagementDashboard userId={userId} activeFilters={activeFilters} />
           </div>
         </TabsContent>
