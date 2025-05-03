@@ -570,26 +570,26 @@ export default function AccountBalanceProgressNew({
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <div className="flex flex-col md:flex-row gap-2 md:gap-4">
-              <div className="w-full md:w-auto">
-                <TabsList className="w-full h-8 bg-black/20 border border-primary/5 p-0.5 flex justify-center gap-2">
+            <div className="flex flex-col gap-3">
+              <div className="w-full flex justify-center">
+                <TabsList className="w-auto h-8 bg-black/20 border border-primary/5 p-0.5 flex justify-center gap-2 mx-auto">
                   <TabsTrigger 
                     value="pa" 
-                    className="text-[13px] h-7 rounded-md flex-grow data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+                    className="text-[13px] h-7 rounded-md w-20 data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
                   >
                     <PiggyBank className="h-3.5 w-3.5 mr-1" />
                     PA
                   </TabsTrigger>
                   <TabsTrigger 
                     value="eva" 
-                    className="text-[13px] h-7 rounded-md flex-grow data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+                    className="text-[13px] h-7 rounded-md w-20 data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
                   >
                     <PiggyBank className="h-3.5 w-3.5 mr-1" />
                     EVA
                   </TabsTrigger>
                   <TabsTrigger 
                     value="ek" 
-                    className="text-[13px] h-7 rounded-md flex-grow data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+                    className="text-[13px] h-7 rounded-md w-20 data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
                   >
                     <PiggyBank className="h-3.5 w-3.5 mr-1" />
                     EK
@@ -597,7 +597,7 @@ export default function AccountBalanceProgressNew({
                 </TabsList>
               </div>
             
-              <div className="flex-grow">
+              <div className="flex-grow w-full">
                 <TabsContent value="pa" className="m-0 p-0">
                   {isLoading ? (
                     <Skeleton className="h-12 w-full" />
