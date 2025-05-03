@@ -1800,6 +1800,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({
           accountBalance: 2500, 
           evaAccountBalance: 1500, // EVA Kontostand hinzugefügt für die Fortschrittsanzeige
+          ekAccountBalance: 1000, // EK Kontostand hinzugefügt
+          goalBalance: 7500,
+          evaGoalBalance: 7500,
+          ekGoalBalance: 5000,
           accountType: 'all',
           theme: 'dark',
           notifications: true,
@@ -2615,8 +2619,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const standardSettings = {
           accountBalance: 2500,
           evaAccountBalance: 1500,
+          ekAccountBalance: 1000,
           goalBalance: 7500,
           evaGoalBalance: 7500,
+          ekGoalBalance: 5000,
           theme: 'dark',
           notifications: true
         };

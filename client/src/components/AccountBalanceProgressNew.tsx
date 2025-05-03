@@ -49,28 +49,37 @@ export default function AccountBalanceProgressNew({
     queryKey: ['/api/settings', user?.id],
     queryFn: async () => {
       try {
-        const response = await apiRequest("GET", "/api/settings");
+        console.log("Rufe Einstellungen für userId:", user?.id);
+        // Wichtig: userId als Parameter hinzufügen
+        const response = await apiRequest("GET", `/api/settings?userId=${user?.id}`);
         if (response.ok) {
           const data = await response.json();
+          console.log("Einstellungen erfolgreich abgerufen:", data);
           return data;
         } else {
+          console.warn("Fallback zu Default-Einstellungen, API-Antwort nicht ok");
           return { 
             accountBalance: 2500, 
-            goalBalance: 5000,
+            goalBalance: 7500,
             evaAccountBalance: 1500,
-            evaGoalBalance: 5000
+            evaGoalBalance: 7500,
+            ekAccountBalance: 1000,
+            ekGoalBalance: 5000
           };
         }
       } catch (err) {
+        console.error("Fehler beim Abrufen der Einstellungen:", err);
         return { 
           accountBalance: 2500, 
           goalBalance: 7500,
           evaAccountBalance: 1500,
           evaGoalBalance: 7500,
+          ekAccountBalance: 1000,
+          ekGoalBalance: 5000
         };
       }
     },
-    enabled: true,
+    enabled: !!user?.id, // Nur aktivieren, wenn user.id existiert
   });
 
   // Berechne Kontostände basierend auf gefilterten Trades
