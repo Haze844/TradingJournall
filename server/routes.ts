@@ -1784,15 +1784,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const deviceId = req.query.deviceId as string;
 
       if (!userId) {
-        return res.status(401).json({
-          error: "Nicht authentifiziert und keine userId angegeben"
+        return res.status(400).json({
+          error: "userId ist erforderlich"
         });
       }
+      
+      console.log("GET /api/settings für userId:", userId);
 
       const settings = await storage.getAppSettings(userId, deviceId);
       
       // Standard-Einstellungen, falls keine gefunden wurden
       if (!settings) {
+        console.log("Keine Einstellungen für userId", userId, "gefunden, sende Standardwerte");
         return res.json({
           accountBalance: 2500, 
           evaAccountBalance: 1500, // EVA Kontostand hinzugefügt für die Fortschrittsanzeige
@@ -1800,10 +1803,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           theme: 'dark',
           notifications: true,
           syncEnabled: true,
-          offlineModeEnabled: false
+          offlineModeEnabled: false,
+          userId
         });
       }
       
+      console.log("Einstellungen für userId", userId, "gefunden:", settings);
       res.json(settings);
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -1811,14 +1816,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/settings", isAuthenticated, async (req: Request, res: Response) => {
+  app.post("/api/settings", async (req: Request, res: Response) => {
     try {
-      const userId = req.user!.id;
+      // Unterstützt sowohl authentifizierte Benutzer, als auch userId im Body
+      const userId = req.isAuthenticated() ? req.user!.id 
+                  : req.body.userId ? parseInt(req.body.userId) 
+                  : null;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "userId ist erforderlich" });
+      }
+      
+      console.log("POST /api/settings Anfrage:", req.body);
       
       // Prüfe, ob bereits Einstellungen für diesen Benutzer existieren
       const existingSettings = await storage.getAppSettings(userId);
       
       if (existingSettings) {
+        console.log("Aktualisiere vorhandene Einstellungen für Benutzer-ID:", userId);
         // Aktualisiere vorhandene Einstellungen
         const updatedSettings = await storage.updateAppSettings(existingSettings.id, {
           ...req.body,
@@ -1832,6 +1847,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(updatedSettings);
       }
       
+      console.log("Erstelle neue Einstellungen für Benutzer-ID:", userId);
       // Erstelle neue Einstellungen, falls keine existieren
       const settings = {
         ...req.body,

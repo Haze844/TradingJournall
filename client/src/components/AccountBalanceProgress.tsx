@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Wallet, PiggyBank, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 
 interface AccountBalanceProgressProps {
   className?: string;
@@ -13,13 +14,18 @@ interface AccountBalanceProgressProps {
 export default function AccountBalanceProgress({ className }: AccountBalanceProgressProps) {
   const [activeTab, setActiveTab] = useState<string>("pa");
   const goalBalance = 7500; // $7500 Zielwert
+  const { user } = useAuth();
 
   // Benutzereinstellungen abrufen
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['/api/settings'],
+    queryKey: ['/api/settings', user?.id],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/settings');
+        if (!user) {
+          return { accountBalance: 2500, evaAccountBalance: 1500 };
+        }
+        
+        const response = await fetch(`/api/settings?userId=${user.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch account settings');
         }
@@ -29,6 +35,7 @@ export default function AccountBalanceProgress({ className }: AccountBalanceProg
         return { accountBalance: 2500, evaAccountBalance: 1500 };
       }
     },
+    enabled: !!user,
   });
 
   // Berechne für die PA-Fortschrittsanzeige
