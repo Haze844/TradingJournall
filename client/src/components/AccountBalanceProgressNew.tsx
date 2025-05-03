@@ -423,12 +423,18 @@ export default function AccountBalanceProgressNew({
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="w-full h-7 bg-black/20 border border-primary/10 p-0.5">
-              <TabsTrigger value="pa" className="flex-1 h-full text-xs data-[state=active]:bg-primary/70 data-[state=active]:shadow-none">
+            <TabsList className="w-full h-7 bg-black/20 border border-primary/10 p-0.5 grid grid-cols-2 gap-2">
+              <TabsTrigger 
+                value="pa" 
+                className="text-xs min-w-0 w-auto rounded-md data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+              >
                 <PiggyBank className="h-3 w-3 mr-1" />
                 PA
               </TabsTrigger>
-              <TabsTrigger value="eva" className="flex-1 h-full text-xs data-[state=active]:bg-primary/70 data-[state=active]:shadow-none">
+              <TabsTrigger 
+                value="eva" 
+                className="text-xs min-w-0 w-auto rounded-md data-[state=active]:bg-primary/70 data-[state=active]:shadow-none"
+              >
                 <PiggyBank className="h-3 w-3 mr-1" />
                 EVA
               </TabsTrigger>
