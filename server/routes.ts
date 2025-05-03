@@ -1235,13 +1235,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Hilfsfunktion, um den Stunden-Zeitraum eines Trades zu bestimmen
       const getTimeframeForHour = (hour: number): string => {
-        if (hour >= 4 && hour < 8) return "04-08";
-        if (hour >= 8 && hour < 10) return "08-10";
-        if (hour >= 10 && hour < 12) return "10-12";
-        if (hour >= 12 && hour < 14) return "12-14";
-        if (hour >= 14 && hour < 16) return "14-16";
-        if (hour >= 16 && hour < 18) return "16-18";
-        if (hour >= 18 && hour < 22) return "18-22";
+        console.log(`Zeitkategorisierung für Stunde ${hour}`);
+        if (hour >= 4 && hour < 8) {
+          console.log(`Stunde ${hour} = 04-08`);
+          return "04-08";
+        }
+        if (hour >= 8 && hour < 10) {
+          console.log(`Stunde ${hour} = 08-10`);
+          return "08-10";
+        }
+        if (hour >= 10 && hour < 12) {
+          console.log(`Stunde ${hour} = 10-12`);
+          return "10-12";
+        }
+        if (hour >= 12 && hour < 14) {
+          console.log(`Stunde ${hour} = 12-14`);
+          return "12-14";
+        }
+        if (hour >= 14 && hour < 16) {
+          console.log(`Stunde ${hour} = 14-16`);
+          return "14-16";
+        }
+        if (hour >= 16 && hour < 18) {
+          console.log(`Stunde ${hour} = 16-18`);
+          return "16-18";
+        }
+        if (hour >= 18 && hour < 22) {
+          console.log(`Stunde ${hour} = 18-22`);
+          return "18-22";
+        }
+        console.log(`Stunde ${hour} = other (außerhalb der Zeitrahmen)`);
         return "other";
       };
       
@@ -1258,28 +1281,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         });
         
+        // Debugging für erhaltene Trades
+        console.log(`Processing ${tradesData.length} trades for heatmap`);
+        if (tradesData.length > 0) {
+          console.log("Sample trade data:", JSON.stringify(tradesData[0]));
+        }
+        
         // Füge Trades zu den entsprechenden Gruppen hinzu
         for (const trade of tradesData) {
-          if (!trade.date) continue;
+          if (!trade.date) {
+            console.log(`Trade hat kein Datum, überspringe: ${JSON.stringify(trade)}`);
+            continue;
+          }
           
           const tradeDate = new Date(trade.date);
+          console.log(`Trade Datum: ${tradeDate}, Original: ${trade.date}`);
+          
           const dayOfWeek = tradeDate.getDay(); // 0 (Sonntag) bis 6 (Samstag)
+          console.log(`Trade Wochentag: ${dayOfWeek} (0=Sonntag, 6=Samstag)`);
           
           // Wir ignorieren Wochenende (0 = Sonntag, 6 = Samstag)
-          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+          if (dayOfWeek === 0 || dayOfWeek === 6) {
+            console.log(`Trade am Wochenende, überspringe`);
+            continue;
+          }
           
           // Konvertierung von 0-basiertem Tag zu unserem Format
           const dayIndex = dayOfWeek - 1; // 0 = Montag, ..., 4 = Freitag
           const day = days[dayIndex];
+          console.log(`Trade Tag: ${day} (Index: ${dayIndex})`);
           
           const hour = tradeDate.getHours();
+          console.log(`Trade Stunde: ${hour}`);
+          
           const timeframeSlot = getTimeframeForHour(hour);
+          console.log(`Trade Zeitslot: ${timeframeSlot}`);
           
           // Ignoriere Zeitslots außerhalb unserer definierten Zeitrahmen
-          if (timeframeSlot === "other") continue;
+          if (timeframeSlot === "other") {
+            console.log(`Trade außerhalb definierter Zeitrahmen, überspringe`);
+            continue;
+          }
           
           if (groupedTrades[day] && groupedTrades[day][timeframeSlot]) {
+            console.log(`Füge Trade zu ${day}, ${timeframeSlot} hinzu`);
             groupedTrades[day][timeframeSlot].push(trade);
+          } else {
+            console.log(`Fehler: Gruppe für ${day}, ${timeframeSlot} nicht gefunden!`);
           }
         }
         
