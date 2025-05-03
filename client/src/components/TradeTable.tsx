@@ -516,29 +516,33 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
             />
             
             {/* Filter Buttons */}
-            <div className="flex gap-2 items-start">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                onClick={resetFilters}
-              >
-                <X className="h-3 w-3 mr-1" />
-                Filter zurücksetzen
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                onClick={() => {
-                  // Ein neues Event erstellen und dispatchen
-                  const event = new CustomEvent('add-trade-clicked');
-                  window.dispatchEvent(event);
-                }}
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Hinzufügen
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-2 items-center w-full">
+              <div className="flex-1 order-2 sm:order-1 flex justify-center">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs h-8 bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
+                  onClick={() => {
+                    // Ein neues Event erstellen und dispatchen
+                    const event = new CustomEvent('add-trade-clicked');
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Trade Hinzufügen
+                </Button>
+              </div>
+              <div className="order-1 sm:order-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs h-8 bg-black/30 hover:bg-red-500/20 hover:text-red-500 border-primary/10"
+                  onClick={resetFilters}
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Filter zurücksetzen
+                </Button>
+              </div>
             </div>
           </div>
         </CardHeader>
