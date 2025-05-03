@@ -398,13 +398,29 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* AccountBalanceProgressNew für Kontoentwicklung */}
-        <div className="mb-5">
+        {/* Versteckte AccountBalanceProgressNew-Komponente nur zum Abrufen der Kontostände */}
+        <div className="hidden">
           <AccountBalanceProgressNew 
             userId={userId} 
             activeFilters={activeFilters}
             onBalanceUpdate={handleBalanceUpdate}
           />
+        </div>
+        
+        {/* Anzeige der aktuellen Kontostände */}
+        <div className="mb-5 grid grid-cols-3 gap-4">
+          <div className="flex flex-col space-y-1 p-3 rounded-lg bg-blue-950/30 border border-blue-500/20">
+            <span className="text-xs text-muted-foreground">PA Kontostand</span>
+            <span className="text-xl font-bold text-blue-400">${accountBalance.toLocaleString()}</span>
+          </div>
+          <div className="flex flex-col space-y-1 p-3 rounded-lg bg-indigo-950/30 border border-indigo-500/20">
+            <span className="text-xs text-muted-foreground">EVA Kontostand</span>
+            <span className="text-xl font-bold text-indigo-400">${evaAccountBalance.toLocaleString()}</span>
+          </div>
+          <div className="flex flex-col space-y-1 p-3 rounded-lg bg-cyan-950/30 border border-cyan-500/20">
+            <span className="text-xs text-muted-foreground">EK Kontostand</span>
+            <span className="text-xl font-bold text-cyan-400">${ekAccountBalance.toLocaleString()}</span>
+          </div>
         </div>
         
         {/* Konto-Einstellungen für Risikomanagement */}
@@ -443,25 +459,17 @@ export default function RiskManagementDashboard({ userId, activeFilters }: { use
               </Button>
             </div>
             
-            <div className="w-full sm:w-1/3 flex items-center justify-between bg-black/20 rounded-md px-4 py-2 border border-primary/10">
-              <div className="flex gap-2 items-center">
-                <Wallet className="h-4 w-4 text-primary" />
-                <span className="text-sm">Aktive Kontostände</span>
-              </div>
-              <div className="flex gap-3">
-                <div className="flex items-center">
-                  <span className="text-xs text-primary/60">PA:</span>
-                  <span className="ml-1 text-sm font-medium">${accountBalance}</span>
+            <div className="w-full sm:w-1/3">
+              <Button 
+                variant="outline"
+                className="w-full bg-black/20 text-muted-foreground hover:text-primary border-primary/10"
+                disabled
+              >
+                <div className="flex items-center gap-1.5">
+                  <Info className="h-3.5 w-3.5 text-primary/70" />
+                  <span className="text-xs">Kontostände aus Kontoentwicklung übernommen</span>
                 </div>
-                <div className="flex items-center">
-                  <span className="text-xs text-primary/60">EVA:</span>
-                  <span className="ml-1 text-sm font-medium">${evaAccountBalance}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="text-xs text-primary/60">EK:</span>
-                  <span className="ml-1 text-sm font-medium">${ekAccountBalance}</span>
-                </div>
-              </div>
+              </Button>
             </div>
           </div>
         </div>
