@@ -49,6 +49,7 @@ const ButtonGroupWrapper = ({
   const containerRef = useRef<HTMLDivElement>(null);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Wenn der übergeordnete Handler existiert, zuerst ausführen
     if (onKeyDown) {
       onKeyDown(e);
     }
@@ -280,18 +281,18 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       if (block) {
         const titleEl = block.querySelector('.text-xs.font-medium');
         if (titleEl) {
-          const title = titleEl.textContent?.toLowerCase() || '';
-          if (title.includes('setup') || title.includes('einstieg')) {
+          const titleText = titleEl.textContent?.toLowerCase() || '';
+          if (titleText.includes('setup') || titleText.includes('einstieg')) {
             currentBlockType = 'setup';
-          } else if (title.includes('trend')) {
+          } else if (titleText.includes('trend')) {
             currentBlockType = 'trends';
-          } else if (title.includes("marktzonen")) {
+          } else if (titleText.includes("marktzonen")) {
             currentBlockType = "marktzonen";
-          } else if (title.includes("ergebnis") || title.includes("rr")) {
+          } else if (titleText.includes("ergebnis") || titleText.includes("rr")) {
             currentBlockType = "ergebnis";
-          } else if (title.includes('position') || title.includes('struktur')) {
+          } else if (titleText.includes('position') || titleText.includes('struktur')) {
             currentBlockType = 'position';
-          } else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
+          } else if (titleText.includes('risk') || titleText.includes('reward') || titleText.includes('r/r')) {
             currentBlockType = 'risk';
           }
         }
@@ -363,18 +364,18 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       if (block) {
         const titleEl = block.querySelector('.text-xs.font-medium');
         if (titleEl) {
-          const title = titleEl.textContent?.toLowerCase() || '';
-          } else if (title.includes("marktzonen")) {
-            currentBlockType = "marktzonen";
-          } else if (title.includes("ergebnis") || title.includes("rr")) {
-            currentBlockType = "ergebnis";
-          if (title.includes('setup') || title.includes('einstieg')) {
+          const titleText = titleEl.textContent?.toLowerCase() || '';
+          if (titleText.includes('setup') || titleText.includes('einstieg')) {
             currentBlockType = 'setup';
-          } else if (title.includes('trend')) {
+          } else if (titleText.includes('trend')) {
             currentBlockType = 'trends';
-          } else if (title.includes('position') || title.includes('struktur')) {
+          } else if (titleText.includes("marktzonen")) {
+            currentBlockType = "marktzonen";
+          } else if (titleText.includes("ergebnis") || titleText.includes("rr")) {
+            currentBlockType = "ergebnis";
+          } else if (titleText.includes('position') || titleText.includes('struktur')) {
             currentBlockType = 'position';
-          } else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
+          } else if (titleText.includes('risk') || titleText.includes('reward') || titleText.includes('r/r')) {
             currentBlockType = 'risk';
           }
         }
@@ -475,7 +476,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
       // Initialisiere die inputRefs-Array mit leeren Elementen
       inputRefs.current = Array(30).fill(null); // Erhöht auf 30 für mehr Elemente
       
-      // Zurücksetzen der Block-Referenzen
+      // Zurücksetzen der Block-Referenzen mit definierten Block-Sequenzen für verbesserte Navigation
       blockRefs.current = {
         setup: null,
         trends: null,
@@ -490,7 +491,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
           risk: [],
           marktzonen: [],
           ergebnis: []
-        }
+        },
+        // Definierte Reihenfolge der Blöcke für die Navigation
+        blockSequence: ["setup", "trends", "position", "marktzonen", "ergebnis"]
       };
       
       // Identifiziere die verschiedenen Blöcke und deren Elemente
@@ -511,32 +514,14 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
             if (block) {
               const titleEl = block.querySelector('.text-xs.font-medium');
               if (titleEl) {
-                const title = titleEl.textContent?.toLowerCase() || '';
+                const titleText = titleEl.textContent?.toLowerCase() || '';
                 
-                // Identifiziere den Block-Typ basierend auf dem Titel
-                if (title.includes('setup') || title.includes('einstieg')) {
-                  blockRefs.current.setup = block as HTMLElement;
-                  blockRefs.current.elements.setup.push(element);
-                } 
-                else if (title.includes('trend')) {
-                  blockRefs.current.trends = block as HTMLElement;
-                  blockRefs.current.elements.trends.push(element);
-                } 
-                else if (title.includes('position') || title.includes('struktur')) {
-                  blockRefs.current.position = block as HTMLElement;
-                  blockRefs.current.elements.position.push(element);
-                } 
-                else if (title.includes('marktzonen')) {
-                  blockRefs.current.marktzonen = block as HTMLElement;
-                  blockRefs.current.elements.marktzonen.push(element);
-                } 
-                else if (title.includes('ergebnis') || title.includes('rr')) {
-                  blockRefs.current.ergebnis = block as HTMLElement;
-                  blockRefs.current.elements.ergebnis.push(element);
-                }
-                else if (title.includes('risk') || title.includes('reward') || title.includes('r/r')) {
-                  blockRefs.current.risk = block as HTMLElement;
-                  blockRefs.current.elements.risk.push(element);
+                // Verwende die getBlockTypeFromTitle-Funktion für konsistente Erkennung
+                const blockType = getBlockTypeFromTitle(titleText);
+                
+                if (blockType !== 'unknown' && blockRefs.current[blockType]) {
+                  blockRefs.current[blockType] = block as HTMLElement;
+                  blockRefs.current.elements[blockType].push(element);
                 }
               }
             }
