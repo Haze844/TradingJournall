@@ -100,6 +100,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
     // SL Filter
     slTypes: new Set<string>(),
     slPointsRanges: new Set<string>(),
+    // Risiko Summe Filter
+    riskSumRanges: new Set<string>(),
     // Standarddatum auf einen weiten Bereich setzen, damit alle Trades angezeigt werden
     startDate: new Date('2020-01-01'),
     endDate: new Date('2030-12-31')
@@ -391,6 +393,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
         sessions: Array.from(filters.sessions),
         rrRanges: Array.from(filters.rrRanges),
         plRanges: Array.from(filters.plRanges),
+        riskSumRanges: Array.from(filters.riskSumRanges), // Neue Filter für Risiko Summe
         trends: Array.from(filters.trends),
         internalTrendsNew: Array.from(filters.internalTrendsNew),
         microTrends: Array.from(filters.microTrends),
@@ -1327,10 +1330,74 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                 </Popover>
               </th>
               <th className="p-3 text-left whitespace-nowrap">
-                <div className="flex items-center gap-1">
-                  Risiko Summe ($)
-                  <Wallet className="h-3 w-3 ml-1" />
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Risiko Summe ($)
+                      <Wallet className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Risiko Summe filtern</h4>
+                      <div className="space-y-2 px-1">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="risk-sum-0-100" 
+                            checked={filters.riskSumRanges.has('0-100')}
+                            onCheckedChange={() => toggleFilter('riskSumRanges', '0-100')}
+                          />
+                          <Label htmlFor="risk-sum-0-100" className="text-sm cursor-pointer">
+                            $0 - $100
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="risk-sum-100-200" 
+                            checked={filters.riskSumRanges.has('100-200')}
+                            onCheckedChange={() => toggleFilter('riskSumRanges', '100-200')}
+                          />
+                          <Label htmlFor="risk-sum-100-200" className="text-sm cursor-pointer">
+                            $100 - $200
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="risk-sum-200-300" 
+                            checked={filters.riskSumRanges.has('200-300')}
+                            onCheckedChange={() => toggleFilter('riskSumRanges', '200-300')}
+                          />
+                          <Label htmlFor="risk-sum-200-300" className="text-sm cursor-pointer">
+                            $200 - $300
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox 
+                            id="risk-sum-300-plus" 
+                            checked={filters.riskSumRanges.has('>300')}
+                            onCheckedChange={() => toggleFilter('riskSumRanges', '>300')}
+                          />
+                          <Label htmlFor="risk-sum-300-plus" className="text-sm cursor-pointer">
+                            &gt; $300
+                          </Label>
+                        </div>
+                      </div>
+                      {filters.riskSumRanges.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, riskSumRanges: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </th>
               <th className="p-3 text-left whitespace-nowrap">
                 <Popover>
