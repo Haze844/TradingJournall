@@ -85,6 +85,12 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
 
   return (
     <header className="w-full main-header mb-6 backdrop-blur-xl">
+      {/* Passwort-Dialog */}
+      <PasswordChangeDialog 
+        open={passwordDialogOpen} 
+        onOpenChange={setPasswordDialogOpen} 
+      />
+
       {/* Kreatives Header-Design mit übergreifendem Logo und weicheren Übergängen */}
       <div className="bg-gradient-to-r from-black/90 via-blue-950/95 to-black/90 shadow-xl relative overflow-hidden 
                       border-b border-blue-500/20 rounded-b-xl">
@@ -132,9 +138,11 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
                     <DropdownMenuContent align="end" className="w-48 bg-blue-900/90 backdrop-blur-xl border-blue-400/30 shadow-xl">
                       <DropdownMenuLabel className="text-blue-200">Kontoeinstellungen</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-blue-500/20" />
-                      <DropdownMenuItem className="hover:bg-blue-800/60 text-blue-100">
-                        <Settings className="w-4 h-4 mr-2 text-blue-300" />
-                        <span>Einstellungen</span>
+                      <DropdownMenuItem 
+                        onClick={() => setPasswordDialogOpen(true)}
+                        className="hover:bg-blue-800/60 text-blue-100">
+                        <Lock className="w-4 h-4 mr-2 text-blue-300" />
+                        <span>Passwort ändern</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-blue-500/20" />
                       <DropdownMenuItem onClick={handleLogout} className="hover:bg-red-900/30 text-red-200">
@@ -175,9 +183,11 @@ export default function Header({ activeTab = "dashboard", onTabChange }: HeaderP
                     <DropdownMenuContent align="end" className="w-48 bg-blue-900/90 backdrop-blur-xl border-blue-400/30 shadow-xl">
                       <DropdownMenuLabel className="text-blue-200">Kontoeinstellungen</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-blue-500/20" />
-                      <DropdownMenuItem className="hover:bg-blue-800/60 text-blue-100">
-                        <Settings className="w-4 h-4 mr-2 text-blue-300" />
-                        <span>Einstellungen</span>
+                      <DropdownMenuItem 
+                        onClick={() => setPasswordDialogOpen(true)}
+                        className="hover:bg-blue-800/60 text-blue-100">
+                        <Lock className="w-4 h-4 mr-2 text-blue-300" />
+                        <span>Passwort ändern</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-blue-500/20" />
                       <DropdownMenuItem onClick={handleLogout} className="hover:bg-red-900/30 text-red-200">
