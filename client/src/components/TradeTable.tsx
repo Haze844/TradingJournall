@@ -310,6 +310,26 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       }
     }
     
+    // Risiko Summe range filter
+    if (filters.riskSumRanges.size > 0 && trade.riskSum !== undefined) {
+      const riskSum = Number(trade.riskSum);
+      let matchesAnyRange = false;
+      
+      if (filters.riskSumRanges.has('0-100') && riskSum >= 0 && riskSum <= 100) {
+        matchesAnyRange = true;
+      } else if (filters.riskSumRanges.has('100-200') && riskSum > 100 && riskSum <= 200) {
+        matchesAnyRange = true;
+      } else if (filters.riskSumRanges.has('200-300') && riskSum > 200 && riskSum <= 300) {
+        matchesAnyRange = true;
+      } else if (filters.riskSumRanges.has('>300') && riskSum > 300) {
+        matchesAnyRange = true;
+      }
+      
+      if (!matchesAnyRange) {
+        return false;
+      }
+    }
+    
     // Date range filter
     if (trade.date) {
       // Erstelle eine neue Date aus dem Trade-Datum
@@ -461,6 +481,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       sessions: new Set<string>(),
       rrRanges: new Set<string>(),
       plRanges: new Set<string>(),
+      riskSumRanges: new Set<string>(), // Risiko Summe Filter zurücksetzen
       isWin: null,
       // Neue Filter zurücksetzen
       trends: new Set<string>(),
