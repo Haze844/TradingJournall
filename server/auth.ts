@@ -159,6 +159,46 @@ export function setupAuth(app: Express) {
     res.json(userWithoutPassword);
   });
   
+  // Endpunkt für Passwortänderung
+  app.post("/api/change-password", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Nicht authentifiziert" });
+    }
+    
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Aktuelles Passwort und neues Passwort sind erforderlich" });
+    }
+    
+    try {
+      const user = await storage.getUser(req.user!.id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "Benutzer nicht gefunden" });
+      }
+      
+      // Überprüfen des aktuellen Passworts
+      // Im Dev-Modus einfacher String-Vergleich, in Produktion comparePasswords verwenden
+      // if (!(await comparePasswords(currentPassword, user.password))) {
+      if (currentPassword !== user.password) {
+        return res.status(400).json({ message: "Aktuelles Passwort ist falsch" });
+      }
+      
+      // Passwort ändern
+      // In Produktion hashedPassword verwenden
+      // const hashedNewPassword = await hashPassword(newPassword);
+      await storage.updateUser(user.id, {
+        password: newPassword
+      });
+      
+      return res.status(200).json({ message: "Passwort erfolgreich geändert" });
+    } catch (error) {
+      console.error("Fehler beim Ändern des Passworts:", error);
+      return res.status(500).json({ message: "Fehler beim Ändern des Passworts" });
+    }
+  });
+  
   // Seed initial users if they don't exist - for development purposes
   (async () => {
     try {
