@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar,
   Users, TrendingDown, DollarSign, AlertCircle, LogOut, LineChart, User,
-  ChevronDown, ChevronRight, Menu, Flame
+  ChevronDown, ChevronRight, Menu, Flame, Lock
 } from "lucide-react";
 
 import {
@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+import PasswordChangeDialog from "./PasswordChangeDialog";
 
 // Logo-Komponente für einheitliches Design
 export const NxtLvlLogo = ({ className = "" }) => {
@@ -69,6 +71,7 @@ type HeaderProps = {
 export default function Header({ activeTab = "dashboard", onTabChange }: HeaderProps) {
   const { user, logoutMutation } = useAuth();
   const [location, navigate] = useLocation();
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   const handleLogout = () => {
     logoutMutation.mutate();

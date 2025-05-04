@@ -68,7 +68,7 @@ export default function PasswordChangeDialog({ open, onOpenChange }: PasswordCha
       toast({
         title: "Passwort erfolgreich geändert",
         description: "Dein Passwort wurde erfolgreich aktualisiert.",
-        variant: "success",
+        variant: "default",
       });
       
       // Dialog schließen und Formular zurücksetzen
