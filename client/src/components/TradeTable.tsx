@@ -1711,6 +1711,48 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   </PopoverContent>
                 </Popover>
               </th>
+              <th className="p-3 text-left whitespace-nowrap">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
+                      Liquidation Entry
+                      <Filter className="h-3 w-3 ml-1" />
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56" align="start">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Liquidation Entry filtern</h4>
+                      <div className="space-y-2 px-1">
+                        {timeframeOptions.map(option => (
+                          <div key={option} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`liquidation-entry-${option}`} 
+                              checked={filters.liquidationEntries.has(option)}
+                              onCheckedChange={() => toggleFilter('liquidationEntries', option)}
+                            />
+                            <Label htmlFor={`liquidation-entry-${option}`} className="text-sm cursor-pointer">
+                              {option}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {filters.liquidationEntries.size > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setFilters({...filters, liquidationEntries: new Set()});
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Filter zurücksetzen
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </th>
               <th className="sticky top-0 bg-background">
                 <div className="text-center text-xs font-medium flex items-center justify-center px-3 py-2 bg-background">
                   Aktion
@@ -1732,6 +1774,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-14" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-12" /></td>
                   <td className="p-3"><Skeleton className="h-5 w-16" /></td>
                 </tr>
@@ -1802,6 +1845,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   </td>
                   <td className="p-3 text-xs">
                     <BadgeWinLoss isWin={trade.isWin} size="xs" />
+                  </td>
+                  <td className="p-3 text-xs">
+                    {trade.liquidationEntry || '-'}
                   </td>
                   <td className="p-3 text-xs">
                     <Button 
