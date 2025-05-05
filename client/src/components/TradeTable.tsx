@@ -85,6 +85,9 @@ interface TradeTableProps {
   onActiveFiltersChange?: (activeFilters: any) => void; // Hinzugefügt für Heatmap-Kommunikation
 }
 
+// Options for Liquidation Entry dropdown
+const timeframeOptions = ['M1', 'M5', 'M15', 'H1'];
+
 export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFilteredTradesChange, onActiveFiltersChange }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 20;
@@ -1723,7 +1726,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">Liquidation Entry filtern</h4>
                       <div className="space-y-2 px-1">
-                        {timeframeOptions.map(option => (
+                        {timeframeOptions.map((option: string) => (
                           <div key={option} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`liquidation-entry-${option}`} 
