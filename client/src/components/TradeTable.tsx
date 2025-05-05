@@ -56,12 +56,26 @@ import {
   PlusCircle,
   FilePlus,
   ListPlus,
-  LayoutDashboard
+  LayoutDashboard,
+  Trash2
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface TradeTableProps {
   trades: Trade[];
@@ -74,6 +88,33 @@ interface TradeTableProps {
 export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFilteredTradesChange, onActiveFiltersChange }: TradeTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const tradesPerPage = 20;
+  const [tradeToDelete, setTradeToDelete] = useState<Trade | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { toast } = useToast();
+  
+  // Mutation für das Löschen eines Trades
+  const deleteTradeMutation = useMutation({
+    mutationFn: async (tradeId: number) => {
+      await apiRequest('DELETE', `/api/trades/${tradeId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Trade gelöscht",
+        description: "Der Trade wurde erfolgreich gelöscht.",
+        variant: "default",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      setDeleteDialogOpen(false);
+      setTradeToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Fehler beim Löschen",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
   
   // Filter state
   const [filters, setFilters] = useState({
