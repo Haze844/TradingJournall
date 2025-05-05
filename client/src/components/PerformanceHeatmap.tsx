@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Tooltip, ResponsiveContainer, XAxis, YAxis, Tooltip as RechartsTooltip, Rectangle, ScatterChart, Scatter, Cell, Legend } from "recharts";
 import { Loader2, MousePointer, Hand, Download, ZoomIn, ZoomOut, RefreshCw, SlidersHorizontal, Lightbulb, TrendingUp } from "lucide-react";
@@ -248,6 +249,7 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
   const [showRecommendations, setShowRecommendations] = useState<boolean>(false);
   const [showTradeDetails, setShowTradeDetails] = useState<boolean>(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // Berechne Datumsgrenzen basierend auf dem ausgewählten Zeitraum
   const getDateRange = () => {
@@ -271,10 +273,10 @@ export default function PerformanceHeatmap({ activeFilters }: PerformanceHeatmap
 
   // Daten aus der API abrufen
   const { data: heatmapData, isLoading, error } = useQuery<HeatmapData>({
-    queryKey: ["/api/performance-heatmap", timeRange, setupFilter, symbolFilter, directionFilter, compareMode, activeFilters],
+    queryKey: ["/api/performance-heatmap", timeRange, setupFilter, symbolFilter, directionFilter, compareMode, activeFilters, user?.id],
     queryFn: async () => {
-      // URL mit Parametern aufbauen
-      let url = `/api/performance-heatmap?userId=2`;
+      // URL mit Parametern aufbauen - dynamische userId vom eingeloggten Benutzer verwenden
+      let url = `/api/performance-heatmap?userId=${user?.id || ''}`;
       
       console.log("Fetching heatmap data with URL:", url);
       
