@@ -1790,6 +1790,20 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   <td className="p-3 text-xs">
                     <BadgeWinLoss isWin={trade.isWin} size="xs" />
                   </td>
+                  <td className="p-3 text-xs">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Verhindert, dass der Trade ausgewählt wird
+                        setTradeToDelete(trade);
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </td>
                 </tr>
               ))
             ) : (
@@ -1842,6 +1856,31 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
         </div>
       </div>
     </Card>
+    
+    {/* Lösch-Bestätigungsdialog */}
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Trade löschen</AlertDialogTitle>
+          <AlertDialogDescription>
+            Möchten Sie diesen Trade wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={() => {
+              if (tradeToDelete) {
+                deleteTradeMutation.mutate(tradeToDelete.id);
+              }
+            }}
+            disabled={deleteTradeMutation.isPending}
+          >
+            {deleteTradeMutation.isPending ? "Wird gelöscht..." : "Löschen"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
   );
 }
