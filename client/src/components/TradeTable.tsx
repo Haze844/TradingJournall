@@ -1841,13 +1841,13 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                     </span>
                   </td>
                   <td className="p-3 text-xs">
+                    <BadgeWinLoss isWin={trade.isWin} size="xs" />
+                  </td>
+                  <td className="p-3 text-xs">
                     {trade.slType || '-'}
                   </td>
                   <td className="p-3 text-xs">
                     {trade.slPoints || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    <BadgeWinLoss isWin={trade.isWin} size="xs" />
                   </td>
                   <td className="p-3 text-xs">
                     {trade.liquidationEntry || '-'}
