@@ -627,8 +627,53 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     return parseFloat(riskAmount.toFixed(2)); // Auf 2 Nachkommastellen runden
   };
 
+  // Prüft, ob ein Feld leer ist
+  const isEmptyField = (value: any): boolean => {
+    if (value === undefined || value === null || value === '') return true;
+    if (typeof value === 'number' && isNaN(value)) return true;
+    return false;
+  };
+
   // Update-Funktion für Felder
   const updateField = <K extends keyof Trade>(field: K, value: Trade[K]) => {
+    // Prüfe, ob das Feld leer ist und zuvor noch nicht angeklickt wurde
+    const isEmpty = isEmptyField(value);
+    const fieldId = String(field);
+    
+    if (isEmpty) {
+      // Wenn das Feld zum ersten Mal angeklickt wird (und leer ist)
+      if (!firstClickFields[fieldId]) {
+        console.log(`Erster Klick auf leeres Feld: ${fieldId}`);
+        
+        // Markiere das Feld als "einmal angeklickt"
+        setFirstClickFields(prev => ({
+          ...prev,
+          [fieldId]: true
+        }));
+        
+        // Nicht in editData speichern beim ersten Klick
+        return;
+      }
+      
+      // Beim zweiten Klick auf das leere Feld, zurücksetzen und speichern
+      console.log(`Zweiter Klick auf leeres Feld: ${fieldId} - wird gespeichert`);
+      setFirstClickFields(prev => {
+        const newState = { ...prev };
+        delete newState[fieldId]; // Zurücksetzen des "ersten Klicks"
+        return newState;
+      });
+    } else {
+      // Wenn das Feld nicht leer ist, setze den ersten Klick zurück
+      if (firstClickFields[fieldId]) {
+        setFirstClickFields(prev => {
+          const newState = { ...prev };
+          delete newState[fieldId];
+          return newState;
+        });
+      }
+    }
+    
+    // Aktualisiere die editData
     setEditData(prev => {
       const newState = { ...prev, [field]: value };
       
@@ -658,6 +703,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
   const cancelEditMode = () => {
     setEditMode(false);
     setEditData({});
+    setFirstClickFields({}); // Reset der Klick-Zustände
   };
 
   // Speichern der Änderungen
@@ -684,6 +730,18 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     
     // Sofort die UI mit den aktuellen Daten aktualisieren
     onTradeSelected(updatedTradeData);
+    
+    // Alle "ersten Klick"-Status zurücksetzen
+    setFirstClickFields({});
+    
+    // Hinweis für den Benutzer einblenden
+    if (Object.keys(firstClickFields).length > 0) {
+      toast({
+        title: "Hinweis",
+        description: "Leere Felder werden erst nach dem zweiten Klick gespeichert.",
+        duration: 3000
+      });
+    }
   };
 
   // Chart-Upload Mutation
@@ -736,6 +794,16 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     });
   };
 
+  // State um zu verfolgen, ob einmal auf den Hintergrund geklickt wurde
+  const [backgroundClicked, setBackgroundClicked] = useState(false);
+  
+  // Zurücksetzen des Background-Click-Status, wenn der Edit-Modus beendet wird
+  useEffect(() => {
+    if (!editMode) {
+      setBackgroundClicked(false);
+    }
+  }, [editMode]);
+
   // Klick-Handler zum Starten oder Beenden des Edit-Modus
   const handleCardClick = (e: React.MouseEvent) => {
     // Prüfe, ob auf ein Interaktionselement geklickt wurde
@@ -755,8 +823,22 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
         (e.target as HTMLElement).tagName === 'DIV';
       
       if (isBackgroundClick) {
-        // Speichere vorhandene Änderungen
+        // Beim ersten Klick auf den Hintergrund
+        if (!backgroundClicked) {
+          // Nur markieren, dass einmal geklickt wurde
+          setBackgroundClicked(true);
+          toast({
+            title: "Hinweis",
+            description: "Klicken Sie erneut, um die Bearbeitung zu speichern.",
+            duration: 3000
+          });
+          return;
+        }
+        
+        // Beim zweiten Klick auf den Hintergrund
+        // Speichere vorhandene Änderungen und beende den Edit-Modus
         saveChanges();
+        setBackgroundClicked(false); // Zurücksetzen für nächste Bearbeitung
         return;
       }
     }
@@ -777,7 +859,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
           {selectedTrade && editMode && (
             <div className="text-xs text-muted-foreground flex items-center">
               <Pencil className="h-3 w-3 mr-1" />
-              Bearbeitungsmodus aktiv - Klicke zum Speichern
+              {backgroundClicked 
+                ? "Klicken Sie erneut auf den Hintergrund, um zu speichern" 
+                : "Bearbeitungsmodus aktiv - Doppelklick zum Speichern"}
             </div>
           )}
         </div>
