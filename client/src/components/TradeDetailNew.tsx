@@ -1446,22 +1446,29 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                           inputRef={(el) => { inputRefs.current[21] = el; }}
                           onKeyDown={(e) => handleKeyDown(e, 21)}
                         >
-                          {[-1, ...[1, 2, 3, 4, 5, 6, 7]].map((val) => (
+                          {[-1, 0, ...[1, 2, 3, 4, 5, 6, 7]].map((val) => (
                             <Button
                               key={val}
                               type="button"
                               variant={editData.rrAchieved === val ? "default" : "outline"}
                               size="sm"
-                              className={`p-1 h-6 text-[10px] flex-1 ${val === -1 ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : ''}`}
+                              className={`p-1 h-6 text-[10px] flex-1 ${
+                                val === -1 ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 
+                                val === 0 ? 'bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400' : ''
+                              }`}
                               onClick={() => updateField('rrAchieved', val)}
                               tabIndex={-1}
                             >
-                              {val}R
+                              {val === 0 ? 'BE' : `${val}R`}
                             </Button>
                           ))}
                         </ButtonGroupWrapper>
                       ) : (
-                        <div className="font-medium text-sm mt-0.5">{selectedTrade.rrAchieved ? `${selectedTrade.rrAchieved}R` : '-'}</div>
+                        <div className="font-medium text-sm mt-0.5">
+                          {selectedTrade.rrAchieved !== null ? 
+                            (selectedTrade.rrAchieved === 0 ? 'BE' : `${selectedTrade.rrAchieved}R`) 
+                            : '-'}
+                        </div>
                       )}
                     </div>
                     <div className="bg-background/50 rounded-sm p-1.5">
