@@ -336,6 +336,9 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
   // Nur ein einziger State für alle Bearbeitungen
   const [editData, setEditData] = useState<Partial<Trade>>({});
   
+  // State für Felder, auf die einmal geklickt wurde (erste Klick)
+  const [firstClickFields, setFirstClickFields] = useState<Record<string, boolean>>({});
+  
   // Mutation für das Update der Trade-Daten
   const updateTradeMutation = useMutation({
     mutationFn: async (updateData: Partial<Trade> & { id: number }) => {
