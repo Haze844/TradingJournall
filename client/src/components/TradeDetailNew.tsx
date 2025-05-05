@@ -711,18 +711,26 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
     // Aktualisierte Trade-Daten mit neuem Chart-Bild
     const updatedTradeData = {
       ...selectedTrade,
-      chartImage: base64Image
+      chartImage: base64Image,
+      ...editData // Füge alle aktuellen bearbeiteten Daten hinzu
     };
     
-    // API-Aufruf
-    updateChartImageMutation.mutate({
+    // API-Aufruf mit allen Trade-Details
+    updateTradeMutation.mutate({
       id: selectedTrade.id,
       chartImage: base64Image,
+      ...editData, // Speichere alle Änderungen, nicht nur das Chart-Bild
       userId: selectedTrade.userId || 2
     });
     
     // Sofort die UI mit den aktuellen Daten aktualisieren
     onTradeSelected(updatedTradeData);
+    
+    // Feedback für den Benutzer
+    toast({
+      title: "Trade gespeichert",
+      description: "Der Chart und alle Trade-Details wurden erfolgreich gespeichert."
+    });
   };
 
   // Klick-Handler zum Starten oder Beenden des Edit-Modus
