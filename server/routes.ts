@@ -245,6 +245,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
     
+    // DELETE-Anfragen für Trades behandeln
+    if (req.method === "DELETE" && req.path.startsWith("/api/trades/")) {
+      req.query.userId = String(defaultUserId);
+      console.log("DELETE Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
+      return next();
+    }
+    
     console.log("Zugriff verweigert - Path:", req.path);
     res.status(401).json({ message: "Nicht authentifiziert" });
   }
