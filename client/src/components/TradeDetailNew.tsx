@@ -1274,7 +1274,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                             <SelectValue placeholder="Liquidation" />
                           </SelectTrigger>
                           <SelectContent>
-                            {liquidationTypes.map((liq) => (
+                            {liquidationTypes.filter(liq => liq !== "M5" && liq !== "M15").map((liq) => (
                               <SelectItem key={liq} value={liq}>
                                 {liq}
                               </SelectItem>
@@ -1300,7 +1300,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                             <SelectValue placeholder="TF Entry" />
                           </SelectTrigger>
                           <SelectContent>
-                            {timeframeTypes.map((tf) => (
+                            {timeframeTypes.filter(tf => tf !== "M5" && tf !== "M15").map((tf) => (
                               <SelectItem key={tf} value={tf}>
                                 {tf}
                               </SelectItem>
