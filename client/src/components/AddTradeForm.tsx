@@ -343,7 +343,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
                   <SelectValue placeholder="Timeframe auswählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  {liquidationTypes.map((liq) => (
+                  {liquidationTypes.filter(liq => liq !== "M5" && liq !== "M15").map((liq) => (
                     <SelectItem key={liq} value={liq}>
                       {liq}
                     </SelectItem>

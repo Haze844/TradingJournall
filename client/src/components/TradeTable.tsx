@@ -1072,7 +1072,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">TF Entry filtern</h4>
                       <div className="space-y-2 px-1">
-                        {timeframeTypes.map(tf => (
+                        {timeframeTypes.filter(tf => tf !== "M5" && tf !== "M15").map(tf => (
                           <div key={tf} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`timeframe-${tf}`} 
@@ -1160,7 +1160,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">Liquidation filtern</h4>
                       <div className="space-y-2 px-1">
-                        {liquidationTypes.map(liq => (
+                        {liquidationTypes.filter(liq => liq !== "M5" && liq !== "M15").map(liq => (
                           <div key={liq} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`liquidation-${liq}`} 
