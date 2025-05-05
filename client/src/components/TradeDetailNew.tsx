@@ -1174,7 +1174,32 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.location || '-'}</div>
                       )}
                     </div>
-
+                    <div className="bg-background/50 rounded-sm p-1.5">
+                      <div className="text-xs text-muted-foreground font-medium">Liquidation Entry</div>
+                      {editMode ? (
+                        <Select 
+                          value={editData.liquidationEntry || ''}
+                          onValueChange={val => updateField('liquidationEntry', val)}
+                        >
+                          <SelectTrigger 
+                            className="h-7 text-xs mt-0.5"
+                            ref={(el) => { inputRefs.current[14] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 14)}
+                          >
+                            <SelectValue placeholder="TF Auswählen" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["M1", "M5", "M15", "H1"].map((tf) => (
+                              <SelectItem key={tf} value={tf}>
+                                {tf}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="font-medium text-sm mt-0.5">{selectedTrade.liquidationEntry || '-'}</div>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 mb-1">
                     <div className="bg-background/50 rounded-sm p-1.5">

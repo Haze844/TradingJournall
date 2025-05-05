@@ -83,7 +83,8 @@ export const trades = pgTable("trades", {
   riskSum: real("risk_sum").default(200), // Alte Risiko Summe in $, Standard 200$
   riskPoints: integer("risk_points").default(10), // Risiko in Punkten (neu)
   riskAmount: real("risk_amount"), // Berechnete Risikosumme basierend auf riskPoints und size
-  size: integer("size") // Position Size in Zahlen
+  size: integer("size"), // Position Size in Zahlen
+  liquidationEntry: text("liquidation_entry").default('') // Liquidation Entry Timeframe: M1, M5, M15, H1
 });
 
 export const insertTradeSchema = createInsertSchema(trades).omit({
