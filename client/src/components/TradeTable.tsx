@@ -480,37 +480,51 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
   const currentTrades = filteredTrades.slice(indexOfFirstTrade, indexOfLastTrade);
   const totalPages = Math.ceil(filteredTrades.length / tradesPerPage);
   
-  // Handle page change
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  // Pagination change handler
+  const paginate = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
   
-  // Toggle filter for a value
-  const toggleFilter = (filterType: keyof typeof filters, value: string) => {
-    const newFilters = { ...filters };
-    const filterSet = new Set(filters[filterType] as Set<string>);
+  // Toggle filter for a set-based filter (symbols, setups, etc.)
+  const toggleFilter = (filterType: string, value: string) => {
+    // Create a new Set from the current filter values
+    const filterSet = new Set(filters[filterType as keyof typeof filters] as Set<string>);
     
+    // Toggle the value: if it exists, remove it; otherwise, add it
     if (filterSet.has(value)) {
       filterSet.delete(value);
     } else {
       filterSet.add(value);
     }
     
-    // Reset to first page when applying filter
-    setCurrentPage(1);
-    
-    // @ts-ignore - This is fine because we know the type
-    newFilters[filterType] = filterSet;
-    setFilters(newFilters);
+    // Update the filters state with the new Set
+    setFilters(prevFilters => {
+      const newFilters = { ...prevFilters };
+      // Reset pagination when filters change
+      setCurrentPage(1);
+      
+      // @ts-ignore - This is fine because we know the type
+      newFilters[filterType] = filterSet;
+      return newFilters;
+    });
   };
   
-  // Toggle win/loss filter
-  const toggleWinLossFilter = (value: boolean | null) => {
-    setFilters(prev => ({
-      ...prev,
-      isWin: prev.isWin === value ? null : value
-    }));
+  // Set filter for a non-set-based filter (isWin, dates)
+  const setFilter = (filterType: string, value: any) => {
+    setFilters(prevFilters => {
+      const newFilters = { ...prevFilters };
+      // Reset pagination when filters change
+      setCurrentPage(1);
+      
+      // @ts-ignore - This is fine because we know the type
+      newFilters[filterType] = value;
+      return newFilters;
+    });
   };
   
-  // Reset all filters
+  // Clear all filters
   const resetFilters = () => {
     setFilters({
       symbols: new Set<string>(),
@@ -522,9 +536,9 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       sessions: new Set<string>(),
       rrRanges: new Set<string>(),
       plRanges: new Set<string>(),
-      riskSumRanges: new Set<string>(), // Risiko Summe Filter zurücksetzen
       isWin: null,
-      // Neue Filter zurücksetzen
+      
+      // Neue Filter
       trends: new Set<string>(),
       internalTrendsNew: new Set<string>(),
       microTrends: new Set<string>(),
@@ -534,1314 +548,856 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       locations: new Set<string>(),
       unmitZones: new Set<string>(),
       marketPhases: new Set<string>(),
-      // SL Filter zurücksetzen
+      // SL Filter
       slTypes: new Set<string>(),
       slPointsRanges: new Set<string>(),
-      // Datum zurücksetzen
+      
+      // Risiko Summe Filter
+      riskSumRanges: new Set<string>(),
+      
+      // Reset dates to show all trades
       startDate: new Date('2020-01-01'),
       endDate: new Date('2030-12-31')
     });
+    
+    // Reset to first page
     setCurrentPage(1);
   };
   
-  // Type für die Filter-Buttons verbessert
-  const renderFilterButtons = (filterType: 'accountTypes' | 'setups' | 'mainTrends' | 'internalTrends' | 'entryTypes' | 'sessions', options: string[], label: string) => {
+  // Check if any filters are active
+  const areFiltersActive = () => {
     return (
-      <div className="mb-3">
-        <div className="font-medium text-sm mb-1">{label}</div>
-        <div className="flex flex-wrap gap-1">
-          {options.map(option => {
-            const isActive = (filters[filterType] as Set<string>).has(option);
-            
-            return (
-              <Button
-                key={option}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                className={`text-xs ${isActive ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
-                onClick={() => toggleFilter(filterType, option)}
-              >
-                {filterType === 'mainTrends' || filterType === 'internalTrends' 
-                  ? <BadgeTrend trend={option} className="text-xs py-0 px-1" />
-                  : option
-                }
-              </Button>
-            );
-          })}
-        </div>
-      </div>
+      filters.symbols.size > 0 ||
+      filters.setups.size > 0 ||
+      filters.mainTrends.size > 0 ||
+      filters.internalTrends.size > 0 ||
+      filters.entryTypes.size > 0 ||
+      filters.accountTypes.size > 0 ||
+      filters.sessions.size > 0 ||
+      filters.rrRanges.size > 0 ||
+      filters.plRanges.size > 0 ||
+      filters.isWin !== null ||
+      filters.trends.size > 0 ||
+      filters.internalTrendsNew.size > 0 ||
+      filters.microTrends.size > 0 ||
+      filters.structures.size > 0 ||
+      filters.timeframeEntries.size > 0 ||
+      filters.liquidations.size > 0 ||
+      filters.locations.size > 0 ||
+      filters.unmitZones.size > 0 ||
+      filters.marketPhases.size > 0 ||
+      filters.slTypes.size > 0 ||
+      filters.slPointsRanges.size > 0 ||
+      filters.riskSumRanges.size > 0 ||
+      // Check if date filter is different from the default
+      filters.startDate.getTime() !== new Date('2020-01-01').getTime() ||
+      filters.endDate.getTime() !== new Date('2030-12-31').getTime()
     );
   };
   
+  // Pre-defined date ranges for quick filtering
+  const setDateRange = (range: string) => {
+    let { startDate, endDate } = filters;
+    
+    if (range === 'today') {
+      const todayDates = getTodayDates();
+      startDate = todayDates.startDate;
+      endDate = todayDates.endDate;
+    } else if (range === 'this-week') {
+      const weekDates = getWeekDates();
+      startDate = weekDates.startDate;
+      endDate = weekDates.endDate;
+    } else if (range === 'this-month') {
+      const monthDates = getLastMonthDates();
+      startDate = monthDates.startDate;
+      endDate = monthDates.endDate;
+    } else if (range === 'all-time') {
+      startDate = new Date('2020-01-01');
+      endDate = new Date('2030-12-31');
+    }
+    
+    setFilters(prevFilters => ({ ...prevFilters, startDate, endDate }));
+    setCurrentPage(1);
+  };
+  
+  // Format count for display in filter chips
+  const formatCount = (count: number): string => {
+    if (count > 999) {
+      return `${(count / 1000).toFixed(1)}k`;
+    }
+    return count.toString();
+  };
+  
+  // Calculate the win rate from the filtered trades
+  const calculateWinRate = (trades: Trade[]): number => {
+    if (trades.length === 0) return 0;
+    
+    const winningTrades = trades.filter(trade => trade.isWin).length;
+    return (winningTrades / trades.length) * 100;
+  };
+  
+  // Handle Trade Deletion
+  const handleDeleteClick = (trade: Trade, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setTradeToDelete(trade);
+    setDeleteDialogOpen(true);
+  };
+  
   return (
-    <div className="relative w-full">
-      <Card className="bg-black/40 backdrop-blur-sm border-primary/10 shadow-xl h-[70vh]">
-        <CardHeader className="pb-0 pt-3 px-3">
-          <div className="flex flex-wrap items-start justify-between gap-1 w-full">
-            {/* Account Balance Progress mit gefilterten Trades - über die volle Breite */}
-            <AccountBalanceProgressNew 
-              className="w-full flex-grow" 
-              filteredTrades={filteredTrades} 
-            />
-            
-            {/* Filter Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 items-center w-full">
-              <div className="flex-1 order-2 sm:order-1 flex justify-center">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  className="text-xs h-9 bg-blue-600/80 hover:bg-blue-500 text-white font-medium border-blue-700/50 shadow-md shadow-blue-900/20 transition-all duration-200 ease-in-out transform hover:scale-105 rounded-lg"
-                  onClick={() => {
-                    // Ein neues Event erstellen und dispatchen
-                    const event = new CustomEvent('add-trade-clicked');
-                    window.dispatchEvent(event);
-                  }}
-                >
-                  <LayoutDashboard className="h-4 w-4 mr-2 animate-pulse" />
-                  Trade Hinzufügen
-                </Button>
-              </div>
-              <div className="order-1 sm:order-2">
+    <div>
+      <Card className="rounded-md shadow-md bg-gradient-to-b from-black/70 via-blue-950/30 to-black/70 text-white overflow-visible">
+        {/* Card header with filter section */}
+        <CardHeader className="p-4 border-b border-border">
+          <div className="flex flex-col space-y-4">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg font-semibold">
+                Trading Journal
+              </CardTitle>
+              
+              <div className="flex gap-2">
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="text-xs h-8 bg-black/30 hover:bg-red-500/20 hover:text-red-500 border-primary/10"
-                  onClick={resetFilters}
+                  onClick={() => setDateRange('today')}
+                  className={`text-xs ${filters.startDate.getTime() === getTodayDates().startDate.getTime() ? 'bg-primary/20' : ''}`}
                 >
-                  <X className="h-3 w-3 mr-1" />
-                  Filter zurücksetzen
+                  <CalendarDays className="w-3 h-3 mr-1" />
+                  Heute
                 </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setDateRange('this-week')}
+                  className={`text-xs ${filters.startDate.getTime() === getWeekDates().startDate.getTime() ? 'bg-primary/20' : ''}`}
+                >
+                  <CalendarDays className="w-3 h-3 mr-1" />
+                  Woche
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setDateRange('this-month')}
+                  className={`text-xs ${filters.startDate.getTime() === getLastMonthDates().startDate.getTime() ? 'bg-primary/20' : ''}`}
+                >
+                  <CalendarDays className="w-3 h-3 mr-1" />
+                  Monat
+                </Button>
+                
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs">
+                      <Filter className="w-3 h-3 mr-1" />
+                      Filter
+                      {areFiltersActive() && <span className="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-primary/80">!</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-96 max-h-[500px] overflow-y-auto p-4" align="end">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">Filter</h3>
+                        {areFiltersActive() && (
+                          <Button variant="ghost" size="sm" onClick={resetFilters} className="h-7 text-xs px-2">
+                            <X className="h-3 w-3 mr-1" />
+                            Zurücksetzen
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {/* Symbol Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Symbol</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {uniqueValues.symbols.map(symbol => (
+                            <Button
+                              key={symbol}
+                              variant={filters.symbols.has(symbol) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('symbols', symbol)}
+                            >
+                              {symbol}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Setup Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Setup</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {setupTypes.map(setup => (
+                            <Button
+                              key={setup}
+                              variant={filters.setups.has(setup) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('setups', setup)}
+                            >
+                              {setup}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Account Type Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Account</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {accountTypes.map(accountType => (
+                            <Button
+                              key={accountType}
+                              variant={filters.accountTypes.has(accountType) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('accountTypes', accountType)}
+                            >
+                              {accountType}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Session Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Session</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {sessionTypes.map(session => (
+                            <Button
+                              key={session}
+                              variant={filters.sessions.has(session) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('sessions', session)}
+                            >
+                              {session}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Entry Type Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Entry Type</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {simpleTrendTypes.map(entryType => (
+                            <Button
+                              key={entryType}
+                              variant={filters.entryTypes.has(entryType) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('entryTypes', entryType)}
+                            >
+                              {entryType}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Win/Loss Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Ergebnis</h4>
+                        <div className="flex gap-1">
+                          <Button
+                            variant={filters.isWin === true ? "default" : "outline"}
+                            className={`h-6 px-2 text-xs ${filters.isWin === true ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                            onClick={() => setFilter('isWin', filters.isWin === true ? null : true)}
+                          >
+                            Win
+                          </Button>
+                          <Button
+                            variant={filters.isWin === false ? "default" : "outline"}
+                            className={`h-6 px-2 text-xs ${filters.isWin === false ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                            onClick={() => setFilter('isWin', filters.isWin === false ? null : false)}
+                          >
+                            Loss
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Risk/Reward Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">R:R Ratio</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {['< 1', '1-2', '2-3', '3+'].map(range => (
+                            <Button
+                              key={range}
+                              variant={filters.rrRanges.has(range) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('rrRanges', range)}
+                            >
+                              {range}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Profit/Loss Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Profit/Loss ($)</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {['< -1000', '-1000 to -500', '-500 to 0', '0 to 500', '500 to 1000', '> 1000'].map(range => (
+                            <Button
+                              key={range}
+                              variant={filters.plRanges.has(range) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('plRanges', range)}
+                            >
+                              {range}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Risk Sum Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Risiko Summe ($)</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {['0-100', '100-200', '200-300', '>300'].map(range => (
+                            <Button
+                              key={range}
+                              variant={filters.riskSumRanges.has(range) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('riskSumRanges', range)}
+                            >
+                              {range}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Trend Filters */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Trends</h4>
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          <span className="text-xs text-muted-foreground w-full">Haupttrend</span>
+                          {simpleTrendTypes.map(trend => (
+                            <Button
+                              key={`trend-${trend}`}
+                              variant={filters.trends.has(trend) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('trends', trend)}
+                            >
+                              {trend}
+                            </Button>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          <span className="text-xs text-muted-foreground w-full">Interner Trend</span>
+                          {simpleTrendTypes.map(trend => (
+                            <Button
+                              key={`internal-${trend}`}
+                              variant={filters.internalTrendsNew.has(trend) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('internalTrendsNew', trend)}
+                            >
+                              {trend}
+                            </Button>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="text-xs text-muted-foreground w-full">Mikrotrend</span>
+                          {simpleTrendTypes.map(trend => (
+                            <Button
+                              key={`micro-${trend}`}
+                              variant={filters.microTrends.has(trend) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('microTrends', trend)}
+                            >
+                              {trend}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Structure Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Struktur</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {structureTypes.map(structure => (
+                            <Button
+                              key={structure}
+                              variant={filters.structures.has(structure) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('structures', structure)}
+                            >
+                              {structure}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Timeframe Entry Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Timeframe Entry</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {timeframeTypes.map(timeframe => (
+                            <Button
+                              key={timeframe}
+                              variant={filters.timeframeEntries.has(timeframe) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('timeframeEntries', timeframe)}
+                            >
+                              {timeframe}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Location Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Location</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {['Normal', 'With Trend', 'Counter Trend', 'Block Deviation'].map(location => (
+                            <Button
+                              key={location}
+                              variant={filters.locations.has(location) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('locations', location)}
+                            >
+                              {location}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Liquidation Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Liquidation</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {liquidationTypes.map(liquidation => (
+                            <Button
+                              key={liquidation}
+                              variant={filters.liquidations.has(liquidation) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('liquidations', liquidation)}
+                            >
+                              {liquidation}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Unmittelbare Zone Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Unmittelbare Zone</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {unmitZoneTypes.map(zone => (
+                            <Button
+                              key={zone}
+                              variant={filters.unmitZones.has(zone) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('unmitZones', zone)}
+                            >
+                              {zone}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Market Phase Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">Marktphase</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {marketPhaseTypes.map(phase => (
+                            <Button
+                              key={phase}
+                              variant={filters.marketPhases.has(phase) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('marketPhases', phase)}
+                            >
+                              {phase}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* SL Type Filter */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">SL Typ</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {slTypes.map(type => (
+                            <Button
+                              key={type}
+                              variant={filters.slTypes.has(type) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('slTypes', type)}
+                            >
+                              {type}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* SL Points Ranges */}
+                      <div>
+                        <h4 className="text-sm font-semibold mb-1">SL Punkte</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {['1-10', '11-20', '21-30'].map(range => (
+                            <Button
+                              key={range}
+                              variant={filters.slPointsRanges.has(range) ? "default" : "outline"}
+                              className="h-6 px-2 text-xs"
+                              onClick={() => toggleFilter('slPointsRanges', range)}
+                            >
+                              {range}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
+                {areFiltersActive() && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={resetFilters}
+                    className="text-xs"
+                  >
+                    <X className="w-3 h-3 mr-1" />
+                    Reset
+                  </Button>
+                )}
               </div>
             </div>
+            
+            {/* Active filters display */}
+            {areFiltersActive() && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {[
+                  { key: 'symbols', label: 'Symbol' },
+                  { key: 'setups', label: 'Setup' },
+                  { key: 'accountTypes', label: 'Account' },
+                  { key: 'sessions', label: 'Session' },
+                  { key: 'trends', label: 'Trend' },
+                  { key: 'internalTrendsNew', label: 'Internal Trend' },
+                  { key: 'microTrends', label: 'Micro Trend' },
+                  { key: 'entryTypes', label: 'Entry Type' },
+                  { key: 'structures', label: 'Structure' },
+                  { key: 'timeframeEntries', label: 'Timeframe' },
+                  { key: 'locations', label: 'Location' },
+                  { key: 'liquidations', label: 'Liquidation' },
+                  { key: 'unmitZones', label: 'Zone' },
+                  { key: 'marketPhases', label: 'Market Phase' },
+                  { key: 'slTypes', label: 'SL Type' },
+                  { key: 'slPointsRanges', label: 'SL Points' },
+                  { key: 'rrRanges', label: 'R:R' },
+                  { key: 'plRanges', label: 'P/L' },
+                  { key: 'riskSumRanges', label: 'Risk' }
+                ].map(({ key, label }) => {
+                  const filterSet = filters[key as keyof typeof filters] as Set<string>;
+                  if (filterSet.size > 0) {
+                    return (
+                      <div key={key} className="flex items-center">
+                        <span className="text-xs px-2 py-1 rounded-l-md bg-gray-800 text-white">
+                          {label}
+                        </span>
+                        <span className="text-xs px-2 py-1 rounded-r-md bg-primary/20 text-white">
+                          {filterSet.size === 1 ? Array.from(filterSet)[0] : `${formatCount(filterSet.size)} selected`}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+                
+                {/* Win/Loss filter chip */}
+                {filters.isWin !== null && (
+                  <div className="flex items-center">
+                    <span className="text-xs px-2 py-1 rounded-l-md bg-gray-800 text-white">
+                      Result
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-r-md ${filters.isWin ? 'bg-green-500/20' : 'bg-red-500/20'} text-white`}>
+                      {filters.isWin ? 'Win' : 'Loss'}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Date range filter chip */}
+                {(filters.startDate.getTime() !== new Date('2020-01-01').getTime() ||
+                  filters.endDate.getTime() !== new Date('2030-12-31').getTime()) && (
+                  <div className="flex items-center">
+                    <span className="text-xs px-2 py-1 rounded-l-md bg-gray-800 text-white">
+                      Date
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-r-md bg-primary/20 text-white">
+                      {formatDate(filters.startDate)} - {formatDate(filters.endDate)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </CardHeader>
         
-        <div className="overflow-x-visible overflow-y-auto max-h-[70vh]">
-          <table className="w-full text-xs">
-            <thead className="bg-gradient-to-r from-blue-900/20 to-black/30 border-y border-primary/20 sticky top-0 z-10">
-              <tr>
-                <th className="p-3 text-left whitespace-nowrap">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                        Datum
-                        <CalendarDays className="h-3 w-3 ml-1" />
-                      </div>
-                    </PopoverTrigger>
-                  <PopoverContent className="w-auto p-4 bg-black/95 border-primary/20 backdrop-blur-md" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm text-primary">Zeitraum filtern</h4>
-                      <div className="grid gap-2">
-                        <div className="grid gap-1">
-                          <Label htmlFor="date-from" className="text-xs">Von</Label>
-                          <Input
-                            id="date-from"
-                            type="date"
-                            className="h-8 bg-black/50 border-primary/10"
-                            value={filters.startDate.toISOString().split('T')[0]}
-                            onChange={(e) => {
-                              const newDate = e.target.value ? new Date(e.target.value) : new Date();
-                              setFilters({...filters, startDate: newDate});
-                              setCurrentPage(1);
-                            }}
-                          />
-                        </div>
-                        <div className="grid gap-1">
-                          <Label htmlFor="date-to" className="text-xs">Bis</Label>
-                          <Input
-                            id="date-to"
-                            type="date"
-                            className="h-8 bg-black/50 border-primary/10"
-                            value={filters.endDate.toISOString().split('T')[0]}
-                            onChange={(e) => {
-                              const newDate = e.target.value ? new Date(e.target.value) : new Date();
-                              setFilters({...filters, endDate: newDate});
-                              setCurrentPage(1);
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 pt-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                          onClick={() => {
-                            const {startDate, endDate} = getLastMonthDates();
-                            setFilters({...filters, startDate, endDate});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Letzter Monat
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                          onClick={() => {
-                            const {weekStart, weekEnd} = getWeekDates();
-                            setFilters({...filters, startDate: weekStart, endDate: weekEnd});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Diese Woche
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                          onClick={() => {
-                            const {startDate, endDate} = getTodayDates();
-                            setFilters({...filters, startDate, endDate});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Heute
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-xs bg-black/30 hover:bg-primary/20 hover:text-primary border-primary/10"
-                          onClick={() => {
-                            setFilters({
-                              ...filters, 
-                              startDate: new Date('2020-01-01'), 
-                              endDate: new Date('2030-12-31')
-                            });
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Alle Trades
-                        </Button>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Kontoart
-                      <Wallet className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Kontoart filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {accountTypes.map(type => (
-                          <div key={type} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`account-${type}`} 
-                              checked={filters.accountTypes.has(type)}
-                              onCheckedChange={() => toggleFilter('accountTypes', type)}
-                            />
-                            <Label htmlFor={`account-${type}`} className="text-sm cursor-pointer">
-                              {type}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.accountTypes.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, accountTypes: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Session
-                      <Clock className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Session filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {sessionTypes.map(session => (
-                          <div key={session} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`session-${session}`} 
-                              checked={filters.sessions.has(session)}
-                              onCheckedChange={() => toggleFilter('sessions', session)}
-                            />
-                            <Label htmlFor={`session-${session}`} className="text-sm cursor-pointer">
-                              {session}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.sessions.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, sessions: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Symbol
-                      <BarChart4 className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Symbol filtern</h4>
-                      <ScrollArea className="h-48">
-                        <div className="space-y-2 px-1">
-                          {uniqueValues.symbols.map(symbol => (
-                            <div key={symbol} className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`symbol-${symbol}`} 
-                                checked={filters.symbols.has(symbol)}
-                                onCheckedChange={() => toggleFilter('symbols', symbol)}
-                              />
-                              <Label htmlFor={`symbol-${symbol}`} className="text-sm cursor-pointer">
-                                {symbol}
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                      {filters.symbols.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, symbols: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Setup
-                      <LineChart className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Setup filtern</h4>
-                      <ScrollArea className="h-48">
-                        <div className="space-y-2 px-1">
-                          {setupTypes.map(setup => (
-                            <div key={setup} className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`setup-${setup}`} 
-                                checked={filters.setups.has(setup)}
-                                onCheckedChange={() => toggleFilter('setups', setup)}
-                              />
-                              <Label htmlFor={`setup-${setup}`} className="text-sm cursor-pointer">
-                                {setup}
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                      {filters.setups.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, setups: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Trend
-                      <TrendingUp className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Trend filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {simpleTrendTypes.map(trend => (
-                          <div key={trend} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`trend-${trend}`} 
-                              checked={filters.trends.has(trend)}
-                              onCheckedChange={() => toggleFilter('trends', trend)}
-                            />
-                            <Label htmlFor={`trend-${trend}`} className="text-sm cursor-pointer">
-                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.trends.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, trends: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Int. Trend
-                      <TrendingUp className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Internen Trend filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {simpleTrendTypes.map(trend => (
-                          <div key={trend} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`int-trend-${trend}`} 
-                              checked={filters.internalTrendsNew.has(trend)}
-                              onCheckedChange={() => toggleFilter('internalTrendsNew', trend)}
-                            />
-                            <Label htmlFor={`int-trend-${trend}`} className="text-sm cursor-pointer">
-                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.internalTrendsNew.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, internalTrendsNew: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Micro Trend
-                      <TrendingUp className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Micro Trend filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {simpleTrendTypes.map(trend => (
-                          <div key={trend} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`micro-trend-${trend}`} 
-                              checked={filters.microTrends.has(trend)}
-                              onCheckedChange={() => toggleFilter('microTrends', trend)}
-                            />
-                            <Label htmlFor={`micro-trend-${trend}`} className="text-sm cursor-pointer">
-                              <BadgeTrend trend={trend} className="text-xs py-0 px-1" />
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.microTrends.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, microTrends: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Struktur
-                      <Award className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Struktur filtern</h4>
-                      <ScrollArea className="h-48">
-                        <div className="space-y-2 px-1">
-                          {structureTypes.map(structure => (
-                            <div key={structure} className="flex items-center space-x-2">
-                              <Checkbox 
-                                id={`structure-${structure}`} 
-                                checked={filters.structures.has(structure)}
-                                onCheckedChange={() => toggleFilter('structures', structure)}
-                              />
-                              <Label htmlFor={`structure-${structure}`} className="text-sm cursor-pointer">
-                                {structure}
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                      {filters.structures.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, structures: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      TF Entry
-                      <Clock className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">TF Entry filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {timeframeTypes.map(tf => (
-                          <div key={tf} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`timeframe-${tf}`} 
-                              checked={filters.timeframeEntries.has(tf)}
-                              onCheckedChange={() => toggleFilter('timeframeEntries', tf)}
-                            />
-                            <Label htmlFor={`timeframe-${tf}`} className="text-sm cursor-pointer">
-                              {tf}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.timeframeEntries.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, timeframeEntries: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Location
-                      <Target className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Location filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {uniqueValues.locations.length > 0 ? uniqueValues.locations.map(location => (
-                          <div key={location} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`location-${location}`} 
-                              checked={filters.locations.has(location)}
-                              onCheckedChange={() => toggleFilter('locations', location)}
-                            />
-                            <Label htmlFor={`location-${location}`} className="text-sm cursor-pointer">
-                              {location}
-                            </Label>
-                          </div>
-                        )) : (
-                          <div className="text-sm text-muted-foreground">
-                            Keine Locations verfügbar
-                          </div>
-                        )}
-                      </div>
-                      {filters.locations.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, locations: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Liquidation
-                      <Target className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Liquidation filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {liquidationTypes.map(liq => (
-                          <div key={liq} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`liquidation-${liq}`} 
-                              checked={filters.liquidations.has(liq)}
-                              onCheckedChange={() => toggleFilter('liquidations', liq)}
-                            />
-                            <Label htmlFor={`liquidation-${liq}`} className="text-sm cursor-pointer">
-                              {liq}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.liquidations.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, liquidations: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Unmit. Zone
-                      <Target className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Unmit. Zone filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {unmitZoneTypes.map(zone => (
-                          <div key={zone} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`unmitZone-${zone}`} 
-                              checked={filters.unmitZones.has(zone)}
-                              onCheckedChange={() => toggleFilter('unmitZones', zone)}
-                            />
-                            <Label htmlFor={`unmitZone-${zone}`} className="text-sm cursor-pointer">
-                              {zone}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.unmitZones.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, unmitZones: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                  Range Pkt.
-                </div>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Marktphase
-                      <BarChart4 className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Marktphase filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {marketPhaseTypes.map(phase => (
-                          <div key={phase} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`marketPhase-${phase}`} 
-                              checked={filters.marketPhases.has(phase)}
-                              onCheckedChange={() => toggleFilter('marketPhases', phase)}
-                            />
-                            <Label htmlFor={`marketPhase-${phase}`} className="text-sm cursor-pointer">
-                              {phase}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.marketPhases.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, marketPhases: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Einstieg
-                      <ArrowUpDown className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Einstieg filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {simpleTrendTypes.map(entry => (
-                          <div key={entry} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`entry-${entry}`} 
-                              checked={filters.entryTypes.has(entry)}
-                              onCheckedChange={() => toggleFilter('entryTypes', entry)}
-                            />
-                            <Label htmlFor={`entry-${entry}`} className="text-sm cursor-pointer">
-                              <BadgeTrend trend={entry} className="text-xs py-0 px-1" />
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.entryTypes.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, entryTypes: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      RR
-                      <Target className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Risk/Reward filtern</h4>
-                      <div className="space-y-2 px-1">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="rr-lt-1" 
-                            checked={filters.rrRanges.has('< 1')}
-                            onCheckedChange={() => toggleFilter('rrRanges', '< 1')}
-                          />
-                          <Label htmlFor="rr-lt-1" className="text-sm cursor-pointer">
-                            &lt; 1R
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="rr-1-2" 
-                            checked={filters.rrRanges.has('1-2')}
-                            onCheckedChange={() => toggleFilter('rrRanges', '1-2')}
-                          />
-                          <Label htmlFor="rr-1-2" className="text-sm cursor-pointer">
-                            1R - 2R
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="rr-2-3" 
-                            checked={filters.rrRanges.has('2-3')}
-                            onCheckedChange={() => toggleFilter('rrRanges', '2-3')}
-                          />
-                          <Label htmlFor="rr-2-3" className="text-sm cursor-pointer">
-                            2R - 3R
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="rr-3-plus" 
-                            checked={filters.rrRanges.has('3+')}
-                            onCheckedChange={() => toggleFilter('rrRanges', '3+')}
-                          />
-                          <Label htmlFor="rr-3-plus" className="text-sm cursor-pointer">
-                            3R+
-                          </Label>
-                        </div>
-                      </div>
-                      {filters.rrRanges.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, rrRanges: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Risiko Summe ($)
-                      <Wallet className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Risiko Summe filtern</h4>
-                      <div className="space-y-2 px-1">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="risk-sum-0-100" 
-                            checked={filters.riskSumRanges.has('0-100')}
-                            onCheckedChange={() => toggleFilter('riskSumRanges', '0-100')}
-                          />
-                          <Label htmlFor="risk-sum-0-100" className="text-sm cursor-pointer">
-                            $0 - $100
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="risk-sum-100-200" 
-                            checked={filters.riskSumRanges.has('100-200')}
-                            onCheckedChange={() => toggleFilter('riskSumRanges', '100-200')}
-                          />
-                          <Label htmlFor="risk-sum-100-200" className="text-sm cursor-pointer">
-                            $100 - $200
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="risk-sum-200-300" 
-                            checked={filters.riskSumRanges.has('200-300')}
-                            onCheckedChange={() => toggleFilter('riskSumRanges', '200-300')}
-                          />
-                          <Label htmlFor="risk-sum-200-300" className="text-sm cursor-pointer">
-                            $200 - $300
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="risk-sum-300-plus" 
-                            checked={filters.riskSumRanges.has('>300')}
-                            onCheckedChange={() => toggleFilter('riskSumRanges', '>300')}
-                          />
-                          <Label htmlFor="risk-sum-300-plus" className="text-sm cursor-pointer">
-                            &gt; $300
-                          </Label>
-                        </div>
-                      </div>
-                      {filters.riskSumRanges.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, riskSumRanges: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      P/L ($)
-                      <DollarSign className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">P/L filtern</h4>
-                      <div className="space-y-2 px-1">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="pl-neg-1000" 
-                            checked={filters.plRanges.has('< -1000')}
-                            onCheckedChange={() => toggleFilter('plRanges', '< -1000')}
-                          />
-                          <Label htmlFor="pl-neg-1000" className="text-sm cursor-pointer text-red-500">
-                            &lt; -$1000
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="pl-neg-500-1000" 
-                            checked={filters.plRanges.has('-1000 to -500')}
-                            onCheckedChange={() => toggleFilter('plRanges', '-1000 to -500')}
-                          />
-                          <Label htmlFor="pl-neg-500-1000" className="text-sm cursor-pointer text-red-400">
-                            -$1000 bis -$500
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="pl-neg-500-0" 
-                            checked={filters.plRanges.has('-500 to 0')}
-                            onCheckedChange={() => toggleFilter('plRanges', '-500 to 0')}
-                          />
-                          <Label htmlFor="pl-neg-500-0" className="text-sm cursor-pointer text-red-300">
-                            -$500 bis $0
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="pl-0-500" 
-                            checked={filters.plRanges.has('0 to 500')}
-                            onCheckedChange={() => toggleFilter('plRanges', '0 to 500')}
-                          />
-                          <Label htmlFor="pl-0-500" className="text-sm cursor-pointer text-green-300">
-                            $0 bis $500
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="pl-500-1000" 
-                            checked={filters.plRanges.has('500 to 1000')}
-                            onCheckedChange={() => toggleFilter('plRanges', '500 to 1000')}
-                          />
-                          <Label htmlFor="pl-500-1000" className="text-sm cursor-pointer text-green-400">
-                            $500 bis $1000
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="pl-1000-plus" 
-                            checked={filters.plRanges.has('> 1000')}
-                            onCheckedChange={() => toggleFilter('plRanges', '> 1000')}
-                          />
-                          <Label htmlFor="pl-1000-plus" className="text-sm cursor-pointer text-green-500">
-                            &gt; $1000
-                          </Label>
-                        </div>
-                      </div>
-                      {filters.plRanges.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, plRanges: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      Status
-                      <Filter className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">Status filtern</h4>
-                      <div className="space-y-2 px-1">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="win-status" 
-                            checked={filters.isWin === true}
-                            onCheckedChange={() => toggleWinLossFilter(true)}
-                          />
-                          <Label htmlFor="win-status" className="text-sm cursor-pointer">
-                            <span className="text-green-500">Win</span>
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="loss-status" 
-                            checked={filters.isWin === false}
-                            onCheckedChange={() => toggleWinLossFilter(false)}
-                          />
-                          <Label htmlFor="loss-status" className="text-sm cursor-pointer">
-                            <span className="text-red-500">Loss</span>
-                          </Label>
-                        </div>
-                      </div>
-                      {filters.isWin !== null && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, isWin: null});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      SL
-                      <Filter className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">SL-Typ filtern</h4>
-                      <div className="space-y-2 px-1">
-                        {slTypes.map(type => (
-                          <div key={type} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`sl-type-${type}`} 
-                              checked={filters.slTypes.has(type)}
-                              onCheckedChange={() => toggleFilter('slTypes', type)}
-                            />
-                            <Label htmlFor={`sl-type-${type}`} className="text-sm cursor-pointer">
-                              {type}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {filters.slTypes.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, slTypes: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-              <th className="p-3 text-left whitespace-nowrap">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center gap-1 cursor-pointer hover:text-primary transition-colors">
-                      SL Punkte
-                      <Target className="h-3 w-3 ml-1" />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56" align="start">
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm">SL-Punkte filtern</h4>
-                      <div className="space-y-2 px-1">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="sl-points-1-10" 
-                            checked={filters.slPointsRanges.has('1-10')}
-                            onCheckedChange={() => toggleFilter('slPointsRanges', '1-10')}
-                          />
-                          <Label htmlFor="sl-points-1-10" className="text-sm cursor-pointer">
-                            1-10
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="sl-points-11-20" 
-                            checked={filters.slPointsRanges.has('11-20')}
-                            onCheckedChange={() => toggleFilter('slPointsRanges', '11-20')}
-                          />
-                          <Label htmlFor="sl-points-11-20" className="text-sm cursor-pointer">
-                            11-20
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="sl-points-21-30" 
-                            checked={filters.slPointsRanges.has('21-30')}
-                            onCheckedChange={() => toggleFilter('slPointsRanges', '21-30')}
-                          />
-                          <Label htmlFor="sl-points-21-30" className="text-sm cursor-pointer">
-                            21-30
-                          </Label>
-                        </div>
-                      </div>
-                      {filters.slPointsRanges.size > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="w-full text-xs"
-                          onClick={() => {
-                            setFilters({...filters, slPointsRanges: new Set()});
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Filter zurücksetzen
-                        </Button>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              // Loading state
-              Array(5).fill(0).map((_, index) => (
-                <tr key={index} className="border-b border-border">
-                  <td className="p-3"><Skeleton className="h-5 w-24" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-10" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-16" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-14" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-8" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-12" /></td>
-                  <td className="p-3"><Skeleton className="h-5 w-16" /></td>
-                </tr>
-              ))
-            ) : currentTrades.length > 0 ? (
-              // Trades list
-              currentTrades.map((trade) => (
-                <tr 
-                  key={trade.id} 
-                  className="border-b border-border hover:bg-muted/50 cursor-pointer" 
-                  onClick={() => onTradeSelect(trade)}
-                >
-                  <td className="p-3 text-xs">
-                    <div className="flex flex-col">
-                      <span>{formatDate(trade.date)}</span>
-                      <span className="text-[10px] text-muted-foreground">{formatTime(trade.date)}</span>
-                    </div>
-                  </td>
-                  <td className="p-3 text-xs">{trade.accountType || '-'}</td>
-                  <td className="p-3 text-xs">{trade.session || '-'}</td>
-                  <td className="p-3 text-xs">{trade.symbol}</td>
-                  <td className="p-3 text-xs">{trade.setup}</td>
-                  <td className="p-3 text-xs">
-                    {trade.trend ? <BadgeTrend trend={trade.trend} size="xs" /> : '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.internalTrend ? <BadgeTrend trend={trade.internalTrend} size="xs" /> : '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.microTrend ? <BadgeTrend trend={trade.microTrend} size="xs" /> : '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.structure || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.timeframeEntry || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.location || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.liquidation || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.unmitZone || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.rangePoints || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.marketPhase || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.entryType ? <BadgeTrend trend={trade.entryType} size="xs" /> : '-'}
-                  </td>
-                  <td className="p-3 text-xs">{trade.rrAchieved}</td>
-                  <td className="p-3 text-xs">{trade.riskSum ? `${trade.riskSum}$` : '-'}</td>
-                  <td className="p-3 text-xs">
-                    <span className={`${trade.profitLoss && trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss && trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
-                      {trade.profitLoss ? `${trade.profitLoss > 0 ? '+' : ''}${trade.profitLoss.toFixed(2)}` : '-'}
-                    </span>
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.slType || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    {trade.slPoints || '-'}
-                  </td>
-                  <td className="p-3 text-xs">
-                    <BadgeWinLoss isWin={trade.isWin} size="xs" />
-                  </td>
-                </tr>
-              ))
-            ) : (
-              // Empty state
-              <tr>
-                <td colSpan={20} className="p-6 text-center text-muted-foreground">
-                  Keine Trades gefunden
-                </td>
+        {/* Statistics Section */}
+        <div className="grid grid-cols-6 gap-4 p-4 border-b border-border">
+          <div className="flex flex-col items-center justify-center bg-black/20 p-2.5 rounded-md">
+            <span className="text-xs text-muted-foreground">Trades</span>
+            <span className="text-xl font-semibold">{filteredTrades.length}</span>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center bg-black/20 p-2.5 rounded-md">
+            <span className="text-xs text-muted-foreground">Win Rate</span>
+            <span className="text-xl font-semibold">{calculateWinRate(filteredTrades).toFixed(1)}%</span>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center bg-black/20 p-2.5 rounded-md">
+            <span className="text-xs text-muted-foreground">Avg R:R</span>
+            <span className="text-xl font-semibold">{calculateAverageRR(filteredTrades).toFixed(2)}</span>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center bg-black/20 p-2.5 rounded-md">
+            <span className="text-xs text-muted-foreground">Profit/Loss</span>
+            <span className={`text-xl font-semibold ${calculateTotalPL(filteredTrades) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              ${calculateTotalPL(filteredTrades).toFixed(2)}
+            </span>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center bg-black/20 p-2.5 rounded-md">
+            <span className="text-xs text-muted-foreground">Avg P/L</span>
+            <span className={`text-xl font-semibold ${filteredTrades.length > 0 && calculateTotalPL(filteredTrades) / filteredTrades.length >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              ${filteredTrades.length > 0 ? (calculateTotalPL(filteredTrades) / filteredTrades.length).toFixed(2) : '0.00'}
+            </span>
+          </div>
+          
+          <div className="flex flex-col items-center justify-center bg-black/20 p-2.5 rounded-md">
+            <span className="text-xs text-muted-foreground">Setups</span>
+            <span className="text-xl font-semibold">
+              {new Set(filteredTrades.map(t => t.setup).filter(Boolean)).size}
+            </span>
+          </div>
+        </div>
+        
+        {/* Trade Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-black/30">
+              <tr className="text-xs">
+                <th className="p-3 text-left">Datum</th>
+                <th className="p-3 text-left">Account</th>
+                <th className="p-3 text-left">Session</th>
+                <th className="p-3 text-left">Symbol</th>
+                <th className="p-3 text-left">Setup</th>
+                <th className="p-3 text-left">Trend</th>
+                <th className="p-3 text-left">Intern</th>
+                <th className="p-3 text-left">Mikro</th>
+                <th className="p-3 text-left">Struct</th>
+                <th className="p-3 text-left">TF</th>
+                <th className="p-3 text-left">Location</th>
+                <th className="p-3 text-left">Liquid</th>
+                <th className="p-3 text-left">Zone</th>
+                <th className="p-3 text-left">Range</th>
+                <th className="p-3 text-left">Phase</th>
+                <th className="p-3 text-left">Entry</th>
+                <th className="p-3 text-left">R:R</th>
+                <th className="p-3 text-left">Risiko</th>
+                <th className="p-3 text-left">P/L</th>
+                <th className="p-3 text-left">SL Typ</th>
+                <th className="p-3 text-left">SL Punkte</th>
+                <th className="p-3 text-left">Ergebnis</th>
+                <th className="p-3 text-left">Aktion</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      
-      {/* Pagination */}
-      <div className="p-4 flex justify-between items-center border-t border-border">
-        <div>
-          <span className="text-sm text-muted-foreground">
-            Zeige {indexOfFirstTrade + 1}-{Math.min(indexOfLastTrade, filteredTrades.length)} von {filteredTrades.length} Trades
-          </span>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                // Loading skeleton
+                Array.from({ length: 5 }).map((_, index) => (
+                  <tr key={index} className="border-b border-border opacity-50">
+                    <td className="p-3"><Skeleton className="h-5 w-20" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-16" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-20" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-16" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-12" /></td>
+                    <td className="p-3"><Skeleton className="h-5 w-8" /></td>
+                  </tr>
+                ))
+              ) : currentTrades.length > 0 ? (
+                // Trades list
+                currentTrades.map((trade) => (
+                  <tr 
+                    key={trade.id} 
+                    className="border-b border-border hover:bg-muted/50 cursor-pointer" 
+                    onClick={(e) => {
+                      if (e.target instanceof HTMLElement && e.target.closest('.delete-button')) {
+                        // Wenn der Klick auf den Löschbutton war, nicht den Trade öffnen
+                        e.stopPropagation();
+                        return;
+                      }
+                      onTradeSelect(trade);
+                    }}
+                  >
+                    <td className="p-3 text-xs">
+                      <div className="flex flex-col">
+                        <span>{formatDate(trade.date)}</span>
+                        <span className="text-[10px] text-muted-foreground">{formatTime(trade.date)}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-xs">{trade.accountType || '-'}</td>
+                    <td className="p-3 text-xs">{trade.session || '-'}</td>
+                    <td className="p-3 text-xs">{trade.symbol}</td>
+                    <td className="p-3 text-xs">{trade.setup}</td>
+                    <td className="p-3 text-xs">
+                      {trade.trend ? <BadgeTrend trend={trade.trend} size="xs" /> : '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.internalTrend ? <BadgeTrend trend={trade.internalTrend} size="xs" /> : '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.microTrend ? <BadgeTrend trend={trade.microTrend} size="xs" /> : '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.structure || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.timeframeEntry || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.location || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.liquidation || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.unmitZone || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.rangePoints || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.marketPhase || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.entryType ? <BadgeTrend trend={trade.entryType} size="xs" /> : '-'}
+                    </td>
+                    <td className="p-3 text-xs">{trade.rrAchieved}</td>
+                    <td className="p-3 text-xs">{trade.riskSum ? `${trade.riskSum}$` : '-'}</td>
+                    <td className="p-3 text-xs">
+                      <span className={`${trade.profitLoss && trade.profitLoss > 0 ? 'text-green-500' : trade.profitLoss && trade.profitLoss < 0 ? 'text-red-500' : ''}`}>
+                        {trade.profitLoss ? `${trade.profitLoss > 0 ? '+' : ''}${trade.profitLoss.toFixed(2)}` : '-'}
+                      </span>
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.slType || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      {trade.slPoints || '-'}
+                    </td>
+                    <td className="p-3 text-xs">
+                      <BadgeWinLoss isWin={trade.isWin} size="xs" />
+                    </td>
+                    <td className="p-3 text-xs">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 delete-button" 
+                        onClick={(e) => handleDeleteClick(trade, e)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                // Empty state
+                <tr>
+                  <td colSpan={23} className="p-6 text-center text-muted-foreground">
+                    Keine Trades gefunden
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <i className="fas fa-chevron-left"></i>
-          </Button>
-          
-          {Array.from({ length: Math.min(totalPages, 3) }).map((_, index) => (
+        
+        {/* Pagination */}
+        <div className="p-4 flex justify-between items-center border-t border-border">
+          <div>
+            <span className="text-sm text-muted-foreground">
+              Zeige {indexOfFirstTrade + 1}-{Math.min(indexOfLastTrade, filteredTrades.length)} von {filteredTrades.length} Trades
+            </span>
+          </div>
+          <div className="flex gap-2">
             <Button
-              key={index}
-              variant={currentPage === index + 1 ? "default" : "secondary"}
-              onClick={() => paginate(index + 1)}
+              variant="secondary"
+              size="icon"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
             >
-              {index + 1}
+              <i className="fas fa-chevron-left"></i>
             </Button>
-          ))}
-          
-          <Button
-            variant="secondary"
-            size="icon"
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages || totalPages === 0}
-          >
-            <i className="fas fa-chevron-right"></i>
-          </Button>
+            
+            {Array.from({ length: Math.min(totalPages, 3) }).map((_, index) => (
+              <Button
+                key={index}
+                variant={currentPage === index + 1 ? "default" : "secondary"}
+                onClick={() => paginate(index + 1)}
+              >
+                {index + 1}
+              </Button>
+            ))}
+            
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              <i className="fas fa-chevron-right"></i>
+            </Button>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+  
+    {/* Lösch-Bestätigungsdialog */}
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Trade löschen</AlertDialogTitle>
+          <AlertDialogDescription>
+            Möchten Sie diesen Trade wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+            {tradeToDelete && (
+              <div className="mt-2 p-3 bg-muted/30 rounded-md text-sm">
+                <div><span className="font-semibold">Symbol:</span> {tradeToDelete.symbol}</div>
+                <div><span className="font-semibold">Datum:</span> {formatDate(tradeToDelete.date)}</div>
+                <div><span className="font-semibold">Ergebnis:</span> 
+                  <span className={tradeToDelete.profitLoss && tradeToDelete.profitLoss > 0 ? 'text-green-500' : 
+                    tradeToDelete.profitLoss && tradeToDelete.profitLoss < 0 ? 'text-red-500' : ''}>
+                    {tradeToDelete.profitLoss ? `${tradeToDelete.profitLoss > 0 ? '+' : ''}${tradeToDelete.profitLoss.toFixed(2)}$` : '-'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={() => {
+              if (tradeToDelete) {
+                deleteTradeMutation.mutate(tradeToDelete.id);
+              }
+            }}
+            className="bg-red-500 hover:bg-red-600"
+          >
+            Löschen
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
   );
 }
