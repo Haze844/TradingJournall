@@ -135,6 +135,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
     structures: new Set<string>(),
     timeframeEntries: new Set<string>(),
     liquidations: new Set<string>(),
+    liquidationEntries: new Set<string>(),  // Neuer Filter für Liquidation Entry
     locations: new Set<string>(),
     unmitZones: new Set<string>(),
     marketPhases: new Set<string>(),
@@ -251,6 +252,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
     
     // Liquidation filter
     if (filters.liquidations.size > 0 && trade.liquidation && !filters.liquidations.has(trade.liquidation)) {
+      return false;
+    }
+    
+    // Liquidation Entry filter
+    if (filters.liquidationEntries.size > 0 && trade.liquidationEntry && !filters.liquidationEntries.has(trade.liquidationEntry)) {
       return false;
     }
     
@@ -461,6 +467,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
         structures: Array.from(filters.structures),
         timeframeEntries: Array.from(filters.timeframeEntries),
         liquidations: Array.from(filters.liquidations),
+        liquidationEntries: Array.from(filters.liquidationEntries),
         locations: Array.from(filters.locations),
         unmitZones: Array.from(filters.unmitZones),
         marketPhases: Array.from(filters.marketPhases),
@@ -531,6 +538,7 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       structures: new Set<string>(),
       timeframeEntries: new Set<string>(),
       liquidations: new Set<string>(),
+      liquidationEntries: new Set<string>(), // Neuer Filter für Liquidation Entry
       locations: new Set<string>(),
       unmitZones: new Set<string>(),
       marketPhases: new Set<string>(),
