@@ -525,7 +525,7 @@ export default function AddTradeForm({ userId, onAddSuccess }: AddTradeFormProps
                   <SelectValue placeholder="Timeframe auswählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeframeTypes.filter(tf => tf !== "M5" && tf !== "M15").map((tf) => (
+                  {timeframeTypes.map((tf) => (
                     <SelectItem key={tf} value={tf}>
                       {tf}
                     </SelectItem>
