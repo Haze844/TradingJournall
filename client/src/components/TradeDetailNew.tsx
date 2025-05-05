@@ -1137,64 +1137,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">M15</div>
-                      {editMode ? (
-                        <Select 
-                          value={editData.mainTrendM15} 
-                          onValueChange={val => updateField('mainTrendM15', val)}
-                        >
-                          <SelectTrigger 
-                            className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[7] = el; }}
-                            onKeyDown={(e) => handleKeyDown(e, 7)}
-                          >
-                            <SelectValue placeholder="M15" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {trendTypes.map((trend) => (
-                              <SelectItem key={trend} value={trend}>
-                                {trend}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="mt-0.5">
-                          <BadgeTrend trend={selectedTrade.mainTrendM15 || '-'} size="sm" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">M5</div>
-                      {editMode ? (
-                        <Select 
-                          value={editData.internalTrendM5} 
-                          onValueChange={val => updateField('internalTrendM5', val)}
-                        >
-                          <SelectTrigger 
-                            className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[8] = el; }}
-                            onKeyDown={(e) => handleKeyDown(e, 8)}
-                          >
-                            <SelectValue placeholder="M5" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {trendTypes.map((trend) => (
-                              <SelectItem key={trend} value={trend}>
-                                {trend}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="mt-0.5">
-                          <BadgeTrend trend={selectedTrade.internalTrendM5 || '-'} size="sm" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {/* M15 und M5 Spalten wurden entfernt */}
                 </div>
               </div>
             </div>
@@ -1214,8 +1157,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         >
                           <SelectTrigger 
                             className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[15] = el; }} 
-                            onKeyDown={(e) => handleKeyDown(e, 15)}
+                            ref={(el) => { inputRefs.current[13] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 13)}
                           >
                             <SelectValue placeholder="Location" />
                           </SelectTrigger>
@@ -1240,8 +1183,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         >
                           <SelectTrigger 
                             className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[16] = el; }} 
-                            onKeyDown={(e) => handleKeyDown(e, 16)}
+                            ref={(el) => { inputRefs.current[14] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 14)}
                           >
                             <SelectValue placeholder="Struktur" />
                           </SelectTrigger>
@@ -1268,8 +1211,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         >
                           <SelectTrigger 
                             className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[17] = el; }} 
-                            onKeyDown={(e) => handleKeyDown(e, 17)}
+                            ref={(el) => { inputRefs.current[15] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 15)}
                           >
                             <SelectValue placeholder="Liquidation" />
                           </SelectTrigger>
@@ -1294,8 +1237,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         >
                           <SelectTrigger 
                             className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[18] = el; }} 
-                            onKeyDown={(e) => handleKeyDown(e, 18)}
+                            ref={(el) => { inputRefs.current[16] = el; }} 
+                            onKeyDown={(e) => handleKeyDown(e, 16)}
                           >
                             <SelectValue placeholder="TF Entry" />
                           </SelectTrigger>
@@ -1405,8 +1348,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          inputRef={(el) => { inputRefs.current[19] = el; }}
-                          onKeyDown={(e) => handleKeyDown(e, 19)}
+                          inputRef={(el) => { inputRefs.current[17] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 17)}
                         >
                           {["London", "London Neverland", "NY AM", "NY AM Neverland", "NY PM"].map((session) => (
                             <Button
