@@ -1703,6 +1703,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   </PopoverContent>
                 </Popover>
               </th>
+              <th className="sticky top-0 bg-background">
+                <div className="text-center text-xs font-medium flex items-center justify-center px-3 py-2 bg-background">
+                  Aktion
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody>
