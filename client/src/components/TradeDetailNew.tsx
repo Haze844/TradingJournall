@@ -1278,8 +1278,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         >
                           <SelectTrigger 
                             className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[27] = el; }}
-                            onKeyDown={(e) => handleKeyDown(e, 27)}
+                            ref={(el) => { inputRefs.current[25] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 25)}
                           >
                             <SelectValue placeholder="Phase" />
                           </SelectTrigger>
@@ -1304,8 +1304,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         >
                           <SelectTrigger 
                             className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[28] = el; }}
-                            onKeyDown={(e) => handleKeyDown(e, 28)}
+                            ref={(el) => { inputRefs.current[26] = el; }}
+                            onKeyDown={(e) => handleKeyDown(e, 26)}
                           >
                             <SelectValue placeholder="Zone" />
                           </SelectTrigger>
@@ -1386,8 +1386,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          inputRef={(el) => { inputRefs.current[21] = el; }}
-                          onKeyDown={(e) => handleKeyDown(e, 21)}
+                          inputRef={(el) => { inputRefs.current[19] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 19)}
                         >
                           {[-1, 0, ...[1, 2, 3, 4, 5, 6, 7]].map((val) => (
                             <Button
@@ -1420,8 +1420,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          inputRef={(el) => { inputRefs.current[23] = el; }}
-                          onKeyDown={(e) => handleKeyDown(e, 23)}
+                          inputRef={(el) => { inputRefs.current[21] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 21)}
                         >
                           {[-1, 0, ...[1, 2, 3, 4, 5, 6, 7]].map((val) => (
                             <Button
@@ -1456,8 +1456,8 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         <ButtonGroupWrapper 
                           className="flex gap-1 flex-wrap mt-0.5"
                           tabIndex={0}
-                          inputRef={(el) => { inputRefs.current[25] = el; }}
-                          onKeyDown={(e) => handleKeyDown(e, 25)}
+                          inputRef={(el) => { inputRefs.current[23] = el; }}
+                          onKeyDown={(e) => handleKeyDown(e, 23)}
                         >
                           {["Sweep", "zerstört"].map((type) => (
                             <Button
