@@ -566,6 +566,11 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
   
   // Check if any filters are active
   const areFiltersActive = () => {
+    const defaultStartDate = new Date('2020-01-01').getTime();
+    const defaultEndDate = new Date('2030-12-31').getTime();
+    const currentStartDate = filters.startDate ? filters.startDate.getTime() : null;
+    const currentEndDate = filters.endDate ? filters.endDate.getTime() : null;
+    
     return (
       filters.symbols.size > 0 ||
       filters.setups.size > 0 ||
@@ -590,8 +595,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       filters.slPointsRanges.size > 0 ||
       filters.riskSumRanges.size > 0 ||
       // Check if date filter is different from the default
-      filters.startDate.getTime() !== new Date('2020-01-01').getTime() ||
-      filters.endDate.getTime() !== new Date('2030-12-31').getTime()
+      (currentStartDate !== null && currentStartDate !== defaultStartDate) ||
+      (currentEndDate !== null && currentEndDate !== defaultEndDate)
     );
   };
   
@@ -605,12 +610,12 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
       endDate = todayDates.endDate;
     } else if (range === 'this-week') {
       const weekDates = getWeekDates();
-      startDate = weekDates.startDate;
-      endDate = weekDates.endDate;
+      startDate = weekDates.weekStart; // Korrigiert: weekStart statt startDate
+      endDate = weekDates.weekEnd;     // Korrigiert: weekEnd statt endDate
     } else if (range === 'this-month') {
       const monthDates = getLastMonthDates();
-      startDate = monthDates.startDate;
-      endDate = monthDates.endDate;
+      startDate = monthDates.monthStart; // Korrigiert: monthStart statt startDate
+      endDate = monthDates.monthEnd;     // Korrigiert: monthEnd statt endDate 
     } else if (range === 'all-time') {
       startDate = new Date('2020-01-01');
       endDate = new Date('2030-12-31');
@@ -659,7 +664,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   variant="outline" 
                   size="sm"
                   onClick={() => setDateRange('today')}
-                  className={`text-xs ${filters.startDate.getTime() === getTodayDates().startDate.getTime() ? 'bg-primary/20' : ''}`}
+                  className={`text-xs ${filters.startDate && getTodayDates().startDate && 
+                    filters.startDate.getTime() === getTodayDates().startDate.getTime() ? 'bg-primary/20' : ''}`}
                 >
                   <CalendarDays className="w-3 h-3 mr-1" />
                   Heute
@@ -668,7 +674,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   variant="outline" 
                   size="sm"
                   onClick={() => setDateRange('this-week')}
-                  className={`text-xs ${filters.startDate.getTime() === getWeekDates().startDate.getTime() ? 'bg-primary/20' : ''}`}
+                  className={`text-xs ${filters.startDate && getWeekDates().weekStart && 
+                    filters.startDate.getTime() === getWeekDates().weekStart.getTime() ? 'bg-primary/20' : ''}`}
                 >
                   <CalendarDays className="w-3 h-3 mr-1" />
                   Woche
@@ -677,7 +684,8 @@ export default function TradeTable({ trades = [], isLoading, onTradeSelect, onFi
                   variant="outline" 
                   size="sm"
                   onClick={() => setDateRange('this-month')}
-                  className={`text-xs ${filters.startDate.getTime() === getLastMonthDates().startDate.getTime() ? 'bg-primary/20' : ''}`}
+                  className={`text-xs ${filters.startDate && getLastMonthDates().monthStart && 
+                    filters.startDate.getTime() === getLastMonthDates().monthStart.getTime() ? 'bg-primary/20' : ''}`}
                 >
                   <CalendarDays className="w-3 h-3 mr-1" />
                   Monat

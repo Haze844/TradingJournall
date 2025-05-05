@@ -48,18 +48,18 @@ export function getWeekDates(): { weekStart: Date; weekEnd: Date } {
   return { weekStart, weekEnd };
 }
 
-export function getLastMonthDates(): { startDate: Date; endDate: Date } {
+export function getLastMonthDates(): { monthStart: Date; monthEnd: Date } {
   const now = new Date();
   
   // Start date: First day of previous month
-  const startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  startDate.setHours(0, 0, 0, 0);
+  const monthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  monthStart.setHours(0, 0, 0, 0);
   
   // End date: Last day of previous month
-  const endDate = new Date(now.getFullYear(), now.getMonth(), 0);
-  endDate.setHours(23, 59, 59, 999);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+  monthEnd.setHours(23, 59, 59, 999);
   
-  return { startDate, endDate };
+  return { monthStart, monthEnd };
 }
 
 export function calculateWinRate(winCount: number, totalCount: number): number {
