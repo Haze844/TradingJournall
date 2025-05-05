@@ -1174,32 +1174,7 @@ export default function TradeDetail({ selectedTrade, onTradeSelected }: TradeDet
                         <div className="font-medium text-sm mt-0.5">{selectedTrade.location || '-'}</div>
                       )}
                     </div>
-                    <div className="bg-background/50 rounded-sm p-1.5">
-                      <div className="text-xs text-muted-foreground font-medium">Struktur</div>
-                      {editMode ? (
-                        <Select 
-                          value={editData.structure} 
-                          onValueChange={val => updateField('structure', val)}
-                        >
-                          <SelectTrigger 
-                            className="h-7 text-xs mt-0.5"
-                            ref={(el) => { inputRefs.current[14] = el; }} 
-                            onKeyDown={(e) => handleKeyDown(e, 14)}
-                          >
-                            <SelectValue placeholder="Struktur" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {structureTypes.map((structure) => (
-                              <SelectItem key={structure} value={structure}>
-                                {structure}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="font-medium text-sm mt-0.5">{selectedTrade.structure || '-'}</div>
-                      )}
-                    </div>
+
                   </div>
                   <div className="grid grid-cols-2 gap-2 mb-1">
                     <div className="bg-background/50 rounded-sm p-1.5">
