@@ -1,10 +1,20 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "outputDirectory": ".",
+  "buildCommand": "cd client && npx vite build --outDir ../dist/client && cd .. && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist/server",
+  "installCommand": "npm install",
+  "outputDirectory": "dist/client",
+  "framework": null,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "dist/index.js" },
-    { "source": "/(.*)", "destination": "dist/public/index.html" }
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ],
+  "functions": {
+    "api/**": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api/.*", "dest": "/api" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
