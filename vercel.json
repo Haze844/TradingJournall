@@ -2,9 +2,9 @@
   "version": 2,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "outputDirectory": "dist/public",
+  "outputDirectory": ".",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": "dist/index.js" },
+    { "source": "/(.*)", "destination": "dist/public/index.html" }
   ]
 }

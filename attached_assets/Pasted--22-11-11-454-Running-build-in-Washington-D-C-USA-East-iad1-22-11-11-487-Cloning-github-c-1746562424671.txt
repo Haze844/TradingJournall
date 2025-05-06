@@ -1,0 +1,54 @@
+[22:11:11.454] Running build in Washington, D.C., USA (East) – iad1
+[22:11:11.487] Cloning github.com/Haze844/TradingJournall (Branch: main, Commit: 3e3abf9)
+[22:11:11.675] Skipping build cache, deployment was triggered without cache.
+[22:11:12.088] Cloning completed: 599.000ms
+[22:11:12.539] Running "vercel build"
+[22:11:13.038] Vercel CLI 41.7.0
+[22:11:13.954] Running "install" command: `npm install`...
+[22:11:20.019] npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+[22:11:21.436] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[22:11:21.462] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[22:11:41.757] 
+[22:11:41.758] added 762 packages, and audited 763 packages in 28s
+[22:11:41.759] 
+[22:11:41.759] 74 packages are looking for funding
+[22:11:41.759]   run `npm fund` for details
+[22:11:41.807] 
+[22:11:41.807] 7 moderate severity vulnerabilities
+[22:11:41.808] 
+[22:11:41.808] To address issues that do not require attention, run:
+[22:11:41.808]   npm audit fix
+[22:11:41.808] 
+[22:11:41.809] To address all issues (including breaking changes), run:
+[22:11:41.809]   npm audit fix --force
+[22:11:41.809] 
+[22:11:41.809] Run `npm audit` for details.
+[22:11:42.174] 
+[22:11:42.175] > rest-express@1.0.0 build
+[22:11:42.175] > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+[22:11:42.175] 
+[22:11:42.668] [36mvite v5.4.14 [32mbuilding for production...[36m[39m
+[22:11:42.752] transforming...
+[22:11:43.092] Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+[22:11:43.094]   npx update-browserslist-db@latest
+[22:11:43.094]   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[22:11:55.448] [32m✓[39m 3503 modules transformed.
+[22:11:56.612] rendering chunks...
+[22:11:56.635] computing gzip size...
+[22:11:56.722] [2m../dist/public/[22m[32mindex.html                 [39m[1m[2m    1.91 kB[22m[1m[22m[2m │ gzip:   0.75 kB[22m
+[22:11:56.723] [2m../dist/public/[22m[2massets/[22m[35mindex-DwInJFNv.css  [39m[1m[2m   99.04 kB[22m[1m[22m[2m │ gzip:  16.34 kB[22m
+[22:11:56.723] [2m../dist/public/[22m[2massets/[22m[36mindex-B66qbuBO.js   [39m[1m[33m1,391.46 kB[39m[22m[2m │ gzip: 374.02 kB[22m
+[22:11:56.724] [33m
+[22:11:56.724] (!) Some chunks are larger than 500 kB after minification. Consider:
+[22:11:56.724] - Using dynamic import() to code-split the application
+[22:11:56.724] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[22:11:56.725] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[22:11:56.725] [32m✓ built in 14.03s[39m
+[22:11:56.810] 
+[22:11:56.812]   dist/index.js  159.6kb
+[22:11:56.812] 
+[22:11:56.812] ⚡ Done in 20ms
+[22:11:56.832] Error: No Output Directory named "dist" found after the Build completed. You can configure the Output Directory in your Project Settings.
+[22:11:56.833] Learn More: https://vercel.link/missing-public-directory
+[22:11:57.258] 
+[22:12:00.051] Exiting build container
