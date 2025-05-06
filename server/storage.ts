@@ -15,8 +15,13 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { db } from "./db";
+import { eq, and, between, desc, asc } from "drizzle-orm";
+import { pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 // Interface for storage methods
 export interface IStorage {
@@ -1244,4 +1249,753 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true
+    });
+  }
+
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  // Trade operations
+  async getTrades(userId: number, filters?: Partial<Trade>): Promise<Trade[]> {
+    let query = db.select().from(trades).where(eq(trades.userId, userId));
+    
+    if (filters) {
+      if (filters.setup) {
+        query = query.where(eq(trades.setup, filters.setup));
+      }
+      if (filters.trend) {
+        query = query.where(eq(trades.trend, filters.trend));
+      }
+      if (filters.session) {
+        query = query.where(eq(trades.session, filters.session));
+      }
+      if (filters.isWin !== undefined) {
+        query = query.where(eq(trades.isWin, filters.isWin));
+      }
+      if (filters.accountType) {
+        query = query.where(eq(trades.accountType, filters.accountType));
+      }
+    }
+    
+    const results = await query.orderBy(desc(trades.date));
+    return results;
+  }
+
+  async getTradeById(id: number): Promise<Trade | undefined> {
+    const [trade] = await db.select().from(trades).where(eq(trades.id, id));
+    return trade;
+  }
+
+  async createTrade(trade: InsertTrade & { userId: number }): Promise<Trade> {
+    const [newTrade] = await db.insert(trades).values(trade).returning();
+    return newTrade;
+  }
+
+  async updateTrade(id: number, tradeUpdate: Partial<Trade>): Promise<Trade | undefined> {
+    const [updatedTrade] = await db
+      .update(trades)
+      .set(tradeUpdate)
+      .where(eq(trades.id, id))
+      .returning();
+    return updatedTrade;
+  }
+
+  async deleteTrade(id: number): Promise<boolean> {
+    const result = await db.delete(trades).where(eq(trades.id, id)).returning({ id: trades.id });
+    return result.length > 0;
+  }
+
+  // Weekly summary operations
+  async getWeeklySummary(userId: number, weekStart: Date, weekEnd: Date): Promise<WeeklySummary | undefined> {
+    const [summary] = await db
+      .select()
+      .from(weeklySummaries)
+      .where(
+        and(
+          eq(weeklySummaries.userId, userId),
+          eq(weeklySummaries.weekStart, weekStart),
+          eq(weeklySummaries.weekEnd, weekEnd)
+        )
+      );
+    return summary;
+  }
+
+  async createWeeklySummary(summary: InsertWeeklySummary & { userId: number }): Promise<WeeklySummary> {
+    const [newSummary] = await db.insert(weeklySummaries).values(summary).returning();
+    return newSummary;
+  }
+
+  async updateWeeklySummary(id: number, summaryUpdate: Partial<WeeklySummary>): Promise<WeeklySummary | undefined> {
+    const [updatedSummary] = await db
+      .update(weeklySummaries)
+      .set(summaryUpdate)
+      .where(eq(weeklySummaries.id, id))
+      .returning();
+    return updatedSummary;
+  }
+
+  // Performance data operations
+  async getPerformanceData(userId: number, startDate?: Date, endDate?: Date): Promise<PerformanceData[]> {
+    let query = db.select().from(performanceData).where(eq(performanceData.userId, userId));
+    
+    if (startDate && endDate) {
+      query = query.where(
+        between(performanceData.date, startDate, endDate)
+      );
+    }
+    
+    const results = await query.orderBy(asc(performanceData.date));
+    return results;
+  }
+
+  async createPerformanceData(data: InsertPerformanceData & { userId: number }): Promise<PerformanceData> {
+    const [newData] = await db.insert(performanceData).values(data).returning();
+    return newData;
+  }
+
+  // Setup win rate operations
+  async getSetupWinRates(userId: number): Promise<SetupWinRate[]> {
+    const results = await db
+      .select()
+      .from(setupWinRates)
+      .where(eq(setupWinRates.userId, userId));
+    return results;
+  }
+
+  async updateSetupWinRate(userId: number, setup: string, winRate: number): Promise<SetupWinRate> {
+    const [existingRate] = await db
+      .select()
+      .from(setupWinRates)
+      .where(
+        and(
+          eq(setupWinRates.userId, userId),
+          eq(setupWinRates.setup, setup)
+        )
+      );
+    
+    if (existingRate) {
+      const [updatedRate] = await db
+        .update(setupWinRates)
+        .set({ winRate })
+        .where(eq(setupWinRates.id, existingRate.id))
+        .returning();
+      return updatedRate;
+    } else {
+      const [newRate] = await db
+        .insert(setupWinRates)
+        .values({ userId, setup, winRate })
+        .returning();
+      return newRate;
+    }
+  }
+
+  // Statistics operations
+  async calculateWeeklySummary(userId: number, weekStart: Date, weekEnd: Date): Promise<InsertWeeklySummary & { userId: number }> {
+    const tradesInWeek = await db
+      .select()
+      .from(trades)
+      .where(
+        and(
+          eq(trades.userId, userId),
+          between(trades.date, weekStart, weekEnd)
+        )
+      );
+    
+    const totalRR = tradesInWeek.reduce((sum, trade) => sum + (trade.rrAchieved || 0), 0);
+    const tradeCount = tradesInWeek.length;
+    const winCount = tradesInWeek.filter(trade => trade.isWin).length;
+    const winRate = tradeCount > 0 ? winCount / tradeCount : 0;
+    
+    return {
+      weekStart,
+      weekEnd,
+      totalRR,
+      tradeCount,
+      winRate,
+      userId
+    };
+  }
+
+  async calculateSetupWinRates(userId: number): Promise<void> {
+    const allTrades = await this.getTrades(userId);
+    
+    const setupStats: Record<string, { wins: number, total: number }> = {};
+    
+    for (const trade of allTrades) {
+      if (!trade.setup) continue;
+      
+      if (!setupStats[trade.setup]) {
+        setupStats[trade.setup] = { wins: 0, total: 0 };
+      }
+      
+      setupStats[trade.setup].total++;
+      
+      if (trade.isWin) {
+        setupStats[trade.setup].wins++;
+      }
+    }
+    
+    for (const [setup, stats] of Object.entries(setupStats)) {
+      if (stats.total >= 3) { // Only consider setups with enough data
+        const winRate = stats.wins / stats.total;
+        await this.updateSetupWinRate(userId, setup, winRate);
+      }
+    }
+  }
+
+  // Coaching Goals operations
+  async getCoachingGoals(userId: number, completed?: boolean): Promise<CoachingGoal[]> {
+    let query = db.select().from(coachingGoals).where(eq(coachingGoals.userId, userId));
+    
+    if (completed !== undefined) {
+      query = query.where(eq(coachingGoals.completed, completed));
+    }
+    
+    return await query;
+  }
+
+  async getCoachingGoalById(id: number): Promise<CoachingGoal | undefined> {
+    const [goal] = await db.select().from(coachingGoals).where(eq(coachingGoals.id, id));
+    return goal;
+  }
+
+  async createCoachingGoal(goal: InsertCoachingGoal): Promise<CoachingGoal> {
+    const [newGoal] = await db.insert(coachingGoals).values(goal).returning();
+    return newGoal;
+  }
+
+  async updateCoachingGoal(id: number, goalUpdate: Partial<CoachingGoal>): Promise<CoachingGoal | undefined> {
+    const [updatedGoal] = await db
+      .update(coachingGoals)
+      .set(goalUpdate)
+      .where(eq(coachingGoals.id, id))
+      .returning();
+    return updatedGoal;
+  }
+
+  async deleteCoachingGoal(id: number): Promise<boolean> {
+    const result = await db.delete(coachingGoals).where(eq(coachingGoals.id, id)).returning({ id: coachingGoals.id });
+    return result.length > 0;
+  }
+
+  // Coaching Feedback operations
+  async getCoachingFeedback(userId: number, acknowledged?: boolean): Promise<CoachingFeedback[]> {
+    let query = db.select().from(coachingFeedback).where(eq(coachingFeedback.userId, userId));
+    
+    if (acknowledged !== undefined) {
+      query = query.where(eq(coachingFeedback.acknowledged, acknowledged));
+    }
+    
+    return await query.orderBy(desc(coachingFeedback.importance), desc(coachingFeedback.createdAt));
+  }
+
+  async createCoachingFeedback(feedback: InsertCoachingFeedback): Promise<CoachingFeedback> {
+    const [newFeedback] = await db.insert(coachingFeedback).values(feedback).returning();
+    return newFeedback;
+  }
+
+  async acknowledgeCoachingFeedback(id: number): Promise<CoachingFeedback | undefined> {
+    const [updatedFeedback] = await db
+      .update(coachingFeedback)
+      .set({ acknowledged: true })
+      .where(eq(coachingFeedback.id, id))
+      .returning();
+    return updatedFeedback;
+  }
+
+  async generateCoachingFeedback(userId: number): Promise<CoachingFeedback[]> {
+    // Fetch user trades to analyze
+    const userTrades = await this.getTrades(userId);
+    
+    if (userTrades.length === 0) {
+      return [];
+    }
+    
+    const feedback: CoachingFeedback[] = [];
+    
+    // Analyze trading patterns
+    const setupCounts: Record<string, { total: number, wins: number }> = {};
+    const trendCounts: Record<string, { total: number, wins: number }> = {};
+    
+    for (const trade of userTrades) {
+      // Track setup statistics
+      if (trade.setup) {
+        if (!setupCounts[trade.setup]) {
+          setupCounts[trade.setup] = { total: 0, wins: 0 };
+        }
+        setupCounts[trade.setup].total++;
+        if (trade.isWin) {
+          setupCounts[trade.setup].wins++;
+        }
+      }
+      
+      // Track trend statistics
+      if (trade.internalTrendM5) {
+        if (!trendCounts[trade.internalTrendM5]) {
+          trendCounts[trade.internalTrendM5] = { total: 0, wins: 0 };
+        }
+        trendCounts[trade.internalTrendM5].total++;
+        if (trade.isWin) {
+          trendCounts[trade.internalTrendM5].wins++;
+        }
+      }
+    }
+    
+    // Find best and worst setups
+    let bestSetup = '';
+    let bestSetupWinRate = 0;
+    let worstSetup = '';
+    let worstSetupWinRate = 1;
+    
+    for (const [setup, stats] of Object.entries(setupCounts)) {
+      if (stats.total >= 5) { // Only consider setups with enough data
+        const winRate = stats.wins / stats.total;
+        if (winRate > bestSetupWinRate) {
+          bestSetupWinRate = winRate;
+          bestSetup = setup;
+        }
+        if (winRate < worstSetupWinRate) {
+          worstSetupWinRate = winRate;
+          worstSetup = setup;
+        }
+      }
+    }
+    
+    // Generate strategy feedback
+    if (bestSetup && bestSetupWinRate > 0.6) {
+      const newFeedback = await this.createCoachingFeedback({
+        userId,
+        category: "strategy",
+        message: `Dein Setup "${bestSetup}" zeigt eine starke Performance mit einer Win-Rate von ${Math.round(bestSetupWinRate * 100)}%. Fokussiere dich mehr auf dieses Setup.`,
+        importance: 3,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+      feedback.push(newFeedback);
+    }
+    
+    if (worstSetup && worstSetupWinRate < 0.4) {
+      const newFeedback = await this.createCoachingFeedback({
+        userId,
+        category: "strategy",
+        message: `Dein Setup "${worstSetup}" hat eine niedrige Win-Rate von ${Math.round(worstSetupWinRate * 100)}%. Überprüfe deine Einstiegskriterien oder vermeide dieses Setup.`,
+        importance: 4,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+      feedback.push(newFeedback);
+    }
+    
+    // Analyze risk management
+    const recentTrades = userTrades.slice(0, 20); // Consider last 20 trades
+    const hasConsecutiveLosses = this.hasConsecutiveLosses(recentTrades, 3);
+    const riskReward = this.calculateAverageRiskReward(recentTrades);
+    
+    if (hasConsecutiveLosses) {
+      const newFeedback = await this.createCoachingFeedback({
+        userId,
+        category: "psychology",
+        message: "Du hast mehrere Verluste in Folge. Überdenke deine aktuelle Strategie und nimm dir Zeit, um dich zu erholen. Überhandle nicht.",
+        importance: 5,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+      feedback.push(newFeedback);
+    }
+    
+    if (riskReward < 1.5) {
+      const newFeedback = await this.createCoachingFeedback({
+        userId,
+        category: "risk",
+        message: `Dein durchschnittliches Risiko-Ertrags-Verhältnis von ${riskReward.toFixed(2)} ist zu niedrig. Strebe ein Verhältnis von mindestens 2:1 an.`,
+        importance: 4,
+        acknowledged: false,
+        createdAt: new Date()
+      });
+      feedback.push(newFeedback);
+    }
+    
+    return feedback;
+  }
+
+  // Helper methods for coaching feedback
+  private hasConsecutiveLosses(trades: Trade[], count: number): boolean {
+    let consecutiveLosses = 0;
+    
+    for (const trade of trades) {
+      if (!trade.isWin) {
+        consecutiveLosses++;
+        if (consecutiveLosses >= count) {
+          return true;
+        }
+      } else {
+        consecutiveLosses = 0;
+      }
+    }
+    
+    return false;
+  }
+
+  private calculateAverageRiskReward(trades: Trade[]): number {
+    if (trades.length === 0) {
+      return 0;
+    }
+    
+    const validTrades = trades.filter(trade => trade.rrAchieved !== null && trade.rrAchieved !== undefined);
+    if (validTrades.length === 0) {
+      return 0;
+    }
+    
+    const totalRR = validTrades.reduce((sum, trade) => sum + (trade.rrAchieved || 0), 0);
+    return totalRR / validTrades.length;
+  }
+
+  // Macroeconomic Events operations
+  async getMacroEconomicEvents(startDate: Date, endDate: Date): Promise<MacroEconomicEvent[]> {
+    const events = await db
+      .select()
+      .from(macroEconomicEvents)
+      .where(between(macroEconomicEvents.date, startDate, endDate))
+      .orderBy(asc(macroEconomicEvents.date));
+    return events;
+  }
+
+  async getMacroEconomicEventById(id: number): Promise<MacroEconomicEvent | undefined> {
+    const [event] = await db.select().from(macroEconomicEvents).where(eq(macroEconomicEvents.id, id));
+    return event;
+  }
+
+  async createMacroEconomicEvent(event: InsertMacroEconomicEvent): Promise<MacroEconomicEvent> {
+    const [newEvent] = await db.insert(macroEconomicEvents).values(event).returning();
+    return newEvent;
+  }
+
+  async updateMacroEconomicEvent(id: number, eventUpdate: Partial<MacroEconomicEvent>): Promise<MacroEconomicEvent | undefined> {
+    const [updatedEvent] = await db
+      .update(macroEconomicEvents)
+      .set(eventUpdate)
+      .where(eq(macroEconomicEvents.id, id))
+      .returning();
+    return updatedEvent;
+  }
+
+  async deleteMacroEconomicEvent(id: number): Promise<boolean> {
+    const result = await db.delete(macroEconomicEvents).where(eq(macroEconomicEvents.id, id)).returning({ id: macroEconomicEvents.id });
+    return result.length > 0;
+  }
+
+  // Trading Strategies operations
+  async getTradingStrategies(userId?: number, publicOnly?: boolean): Promise<TradingStrategy[]> {
+    let query = db.select().from(tradingStrategies);
+    
+    if (userId !== undefined) {
+      if (publicOnly) {
+        query = query.where(
+          or(
+            eq(tradingStrategies.userId, userId),
+            eq(tradingStrategies.public, true)
+          )
+        );
+      } else {
+        query = query.where(eq(tradingStrategies.userId, userId));
+      }
+    } else if (publicOnly) {
+      query = query.where(eq(tradingStrategies.public, true));
+    }
+    
+    return await query.orderBy(desc(tradingStrategies.rating));
+  }
+
+  async getTradingStrategyById(id: number): Promise<TradingStrategy | undefined> {
+    const [strategy] = await db.select().from(tradingStrategies).where(eq(tradingStrategies.id, id));
+    return strategy;
+  }
+
+  async createTradingStrategy(strategy: InsertTradingStrategy): Promise<TradingStrategy> {
+    const now = new Date();
+    const [newStrategy] = await db
+      .insert(tradingStrategies)
+      .values({
+        ...strategy,
+        rating: 0,
+        ratingCount: 0,
+        createdAt: now,
+        updatedAt: now
+      })
+      .returning();
+    return newStrategy;
+  }
+
+  async updateTradingStrategy(id: number, strategyUpdate: Partial<TradingStrategy>): Promise<TradingStrategy | undefined> {
+    const [updatedStrategy] = await db
+      .update(tradingStrategies)
+      .set({
+        ...strategyUpdate,
+        updatedAt: new Date()
+      })
+      .where(eq(tradingStrategies.id, id))
+      .returning();
+    return updatedStrategy;
+  }
+
+  async deleteTradingStrategy(id: number): Promise<boolean> {
+    const result = await db.delete(tradingStrategies).where(eq(tradingStrategies.id, id)).returning({ id: tradingStrategies.id });
+    return result.length > 0;
+  }
+
+  // Strategy Comments operations
+  async getStrategyComments(strategyId: number): Promise<StrategyComment[]> {
+    const comments = await db
+      .select()
+      .from(strategyComments)
+      .where(eq(strategyComments.strategyId, strategyId))
+      .orderBy(desc(strategyComments.createdAt));
+    return comments;
+  }
+
+  async createStrategyComment(comment: InsertStrategyComment): Promise<StrategyComment> {
+    const [newComment] = await db
+      .insert(strategyComments)
+      .values({
+        ...comment,
+        createdAt: new Date()
+      })
+      .returning();
+    return newComment;
+  }
+
+  async deleteStrategyComment(id: number): Promise<boolean> {
+    const result = await db.delete(strategyComments).where(eq(strategyComments.id, id)).returning({ id: strategyComments.id });
+    return result.length > 0;
+  }
+
+  // App Settings operations
+  async getAppSettings(userId: number, deviceId?: string): Promise<AppSettings | undefined> {
+    let query = db.select().from(appSettings).where(eq(appSettings.userId, userId));
+    
+    if (deviceId) {
+      query = query.where(eq(appSettings.deviceId, deviceId));
+    }
+    
+    const [settings] = await query;
+    return settings;
+  }
+
+  async createAppSettings(settings: InsertAppSettings): Promise<AppSettings> {
+    const [newSettings] = await db
+      .insert(appSettings)
+      .values({
+        ...settings,
+        lastSyncedAt: new Date()
+      })
+      .returning();
+    return newSettings;
+  }
+
+  async updateAppSettings(id: number, settingsUpdate: Partial<AppSettings>): Promise<AppSettings | undefined> {
+    const [updatedSettings] = await db
+      .update(appSettings)
+      .set({
+        ...settingsUpdate,
+        lastSyncedAt: new Date()
+      })
+      .where(eq(appSettings.id, id))
+      .returning();
+    return updatedSettings;
+  }
+
+  async syncAppSettings(userId: number, deviceId: string): Promise<AppSettings | undefined> {
+    const allSettings = await db
+      .select()
+      .from(appSettings)
+      .where(eq(appSettings.userId, userId))
+      .orderBy(desc(appSettings.lastSyncedAt));
+    
+    if (allSettings.length === 0) {
+      return undefined;
+    }
+    
+    const [latestSettings] = allSettings;
+    const currentDeviceSettings = allSettings.find(s => s.deviceId === deviceId);
+    
+    if (!currentDeviceSettings) {
+      // Create new settings for this device
+      const newSettings = await this.createAppSettings({
+        ...latestSettings,
+        deviceId,
+        deviceName: 'New Device',
+        deviceType: 'unknown',
+        lastSyncedAt: new Date()
+      });
+      return newSettings;
+    } else if (currentDeviceSettings.id !== latestSettings.id) {
+      // Update current device settings with latest
+      const updatedSettings = await this.updateAppSettings(currentDeviceSettings.id, {
+        theme: latestSettings.theme,
+        notifications: latestSettings.notifications,
+        offlineModeEnabled: latestSettings.offlineModeEnabled,
+        accountBalance: latestSettings.accountBalance,
+        evaAccountBalance: latestSettings.evaAccountBalance,
+        ekAccountBalance: latestSettings.ekAccountBalance,
+        accountType: latestSettings.accountType,
+        goalBalance: latestSettings.goalBalance,
+        evaGoalBalance: latestSettings.evaGoalBalance,
+        ekGoalBalance: latestSettings.ekGoalBalance
+      });
+      return updatedSettings;
+    }
+    
+    return currentDeviceSettings;
+  }
+
+  // Trading Streak operations
+  async getTradingStreak(userId: number): Promise<TradingStreak | undefined> {
+    const [streak] = await db.select().from(tradingStreaks).where(eq(tradingStreaks.userId, userId));
+    return streak;
+  }
+
+  async createTradingStreak(streak: InsertTradingStreak & { userId: number }): Promise<TradingStreak> {
+    const [newStreak] = await db
+      .insert(tradingStreaks)
+      .values({
+        ...streak,
+        lastUpdated: new Date()
+      })
+      .returning();
+    return newStreak;
+  }
+
+  async updateTradingStreak(userId: number, streakUpdate: Partial<TradingStreak>): Promise<TradingStreak | undefined> {
+    const [updatedStreak] = await db
+      .update(tradingStreaks)
+      .set({
+        ...streakUpdate,
+        lastUpdated: new Date()
+      })
+      .where(eq(tradingStreaks.userId, userId))
+      .returning();
+    return updatedStreak;
+  }
+
+  async updateStreakOnTradeResult(userId: number, isWin: boolean): Promise<TradingStreak> {
+    const existingStreak = await this.getTradingStreak(userId);
+    
+    if (!existingStreak) {
+      // Create new streak record
+      return await this.createTradingStreak({
+        userId,
+        currentStreak: isWin ? 1 : 0,
+        longestStreak: isWin ? 1 : 0,
+        currentLossStreak: isWin ? 0 : 1,
+        longestLossStreak: isWin ? 0 : 1,
+        totalTrades: 1,
+        totalWins: isWin ? 1 : 0,
+        lastTradeDate: new Date(),
+        streakLevel: 1,
+        experiencePoints: isWin ? 10 : 5,
+        badges: []
+      });
+    } else {
+      // Update existing streak
+      const updates: Partial<TradingStreak> = {
+        totalTrades: existingStreak.totalTrades + 1,
+        lastTradeDate: new Date()
+      };
+      
+      if (isWin) {
+        updates.totalWins = existingStreak.totalWins + 1;
+        updates.currentStreak = existingStreak.currentStreak + 1;
+        updates.currentLossStreak = 0;
+        updates.experiencePoints = existingStreak.experiencePoints + 10;
+        
+        if (updates.currentStreak > existingStreak.longestStreak) {
+          updates.longestStreak = updates.currentStreak;
+        }
+      } else {
+        updates.currentStreak = 0;
+        updates.currentLossStreak = existingStreak.currentLossStreak + 1;
+        updates.experiencePoints = existingStreak.experiencePoints + 5;
+        
+        if (updates.currentLossStreak > existingStreak.longestLossStreak) {
+          updates.longestLossStreak = updates.currentLossStreak;
+        }
+      }
+      
+      // Level up logic
+      const expNeededForNextLevel = existingStreak.streakLevel * 100;
+      if ((updates.experiencePoints || 0) >= expNeededForNextLevel) {
+        updates.streakLevel = existingStreak.streakLevel + 1;
+      }
+      
+      const updatedStreak = await this.updateTradingStreak(userId, updates);
+      return updatedStreak!;
+    }
+  }
+
+  async getTopStreaks(): Promise<TradingStreak[]> {
+    const topStreaks = await db
+      .select()
+      .from(tradingStreaks)
+      .orderBy(desc(tradingStreaks.longestStreak))
+      .limit(10);
+    return topStreaks;
+  }
+
+  async earnBadge(userId: number, badgeType: typeof badgeTypes[number]): Promise<TradingStreak | undefined> {
+    const streak = await this.getTradingStreak(userId);
+    
+    if (!streak) {
+      return undefined;
+    }
+    
+    const badges = streak.badges || [];
+    
+    // Only add badge if not already earned
+    if (!badges.includes(badgeType)) {
+      badges.push(badgeType);
+      
+      const updatedStreak = await this.updateTradingStreak(userId, {
+        badges,
+        experiencePoints: streak.experiencePoints + 25 // Bonus XP for badge
+      });
+      
+      return updatedStreak;
+    }
+    
+    return streak;
+  }
+}
+
+// Wähle die Storage-Implementation basierend auf der Umgebung
+export const storage = process.env.DATABASE_URL 
+  ? new DatabaseStorage() 
+  : new MemStorage();
