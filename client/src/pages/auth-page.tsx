@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "../hooks/use-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
+import { Label } from "../components/ui/label";
+import { Checkbox } from "../components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { useToast } from "../hooks/use-toast";
 import { Rocket, TrendingUp, BarChart3, BrainCircuit, Lock, User, Loader2, Shield, Eye, EyeOff } from "lucide-react";
-import { NxtLvlLogo } from "@/components/Header";
-import { saveLoginCredentials, getSavedLoginCredentials, clearSavedLoginCredentials } from "@/lib/utils";
+import { NxtLvlLogo } from "../components/Header";
+import { saveLoginCredentials, getSavedLoginCredentials, clearSavedLoginCredentials } from "../lib/utils";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
