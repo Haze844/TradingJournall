@@ -1,24 +1,24 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "../hooks/use-auth";
+import { useToast } from "../hooks/use-toast";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Textarea } from "./ui/textarea";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { format, addMonths, subMonths } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight, Clock, Edit, Plus, Trash } from "lucide-react";
 import { cn } from "../lib/utils";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Calendar } from "@/components/ui/calendar";
+import { queryClient } from "../lib/queryClient";
+import { Calendar } from "./ui/calendar";
 
 // Formschema für Makroökonomische Ereignisse
 const eventFormSchema = z.object({
@@ -49,8 +49,10 @@ export default function MacroEconomicCalendar() {
   
   const { data: events, isLoading } = useQuery({
     queryKey: ["/api/macro-events", startOfMonth.toISOString(), endOfMonth.toISOString()],
-    queryFn: () => apiRequest("GET", `/api/macro-events?startDate=${startOfMonth.toISOString()}&endDate=${endOfMonth.toISOString()}`)
-      .then(res => res.json())
+    queryFn: async () => {
+      const res = await fetch(`/api/macro-events?startDate=${startOfMonth.toISOString()}&endDate=${endOfMonth.toISOString()}`);
+      return await res.json();
+    }
   });
   
   const { toast } = useToast();
@@ -75,7 +77,11 @@ export default function MacroEconomicCalendar() {
   
   const createEventMutation = useMutation({
     mutationFn: async (values: EventFormValues) => {
-      const res = await apiRequest("POST", "/api/macro-events", values);
+      const res = await fetch("/api/macro-events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
+      });
       return await res.json();
     },
     onSuccess: () => {
@@ -98,7 +104,11 @@ export default function MacroEconomicCalendar() {
   
   const updateEventMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: EventFormValues }) => {
-      const res = await apiRequest("PUT", `/api/macro-events/${id}`, data);
+      const res = await fetch(`/api/macro-events/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
       return await res.json();
     },
     onSuccess: () => {
@@ -123,7 +133,9 @@ export default function MacroEconomicCalendar() {
   
   const deleteEventMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/macro-events/${id}`);
+      await fetch(`/api/macro-events/${id}`, {
+        method: "DELETE"
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/macro-events"] });
