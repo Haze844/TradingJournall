@@ -297,18 +297,18 @@ export default function AdvancedTradeAnalysis({ trade }: AdvancedTradeAnalysisPr
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium">Risikomanagement</h3>
-                  <Badge variant={analysis?.riskManagement.score >= 0.7 ? 'success' : 'destructive'}>
-                    {Math.round(analysis?.riskManagement.score * 100)}%
+                  <Badge variant={analysis?.riskManagement?.score >= 0.7 ? 'default' : 'destructive'}>
+                    {Math.round((analysis?.riskManagement?.score || 0) * 100)}%
                   </Badge>
                 </div>
                 
                 <p className="text-sm text-muted-foreground mb-3">
-                  {analysis?.riskManagement.comments.join(' ')}
+                  {analysis?.riskManagement?.comments?.join(' ') || ''}
                 </p>
                 
                 <div className="border border-border rounded-md p-3 mb-3">
                   <h4 className="text-sm text-muted-foreground mb-1">Optimales Risk/Reward</h4>
-                  <div className="font-medium text-lg">{analysis?.riskManagement.optimalRR}:1</div>
+                  <div className="font-medium text-lg">{analysis?.riskManagement?.optimalRR || '-'}:1</div>
                 </div>
                 
                 <div className="border border-border rounded-md p-3">
@@ -317,9 +317,9 @@ export default function AdvancedTradeAnalysis({ trade }: AdvancedTradeAnalysisPr
                     Empfehlungen
                   </h4>
                   <ul className="list-disc list-inside text-sm space-y-1">
-                    {analysis?.riskManagement.suggestions.map((suggestion, i) => (
+                    {analysis?.riskManagement?.suggestions?.map((suggestion, i) => (
                       <li key={i} className="text-sm text-muted-foreground">{suggestion}</li>
-                    ))}
+                    )) || <li className="text-sm text-muted-foreground">Keine Vorschläge verfügbar</li>}
                   </ul>
                 </div>
               </div>
