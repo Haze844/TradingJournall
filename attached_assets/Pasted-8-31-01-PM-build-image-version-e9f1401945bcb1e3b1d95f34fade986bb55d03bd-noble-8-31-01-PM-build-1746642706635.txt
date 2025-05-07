@@ -1,0 +1,150 @@
+8:31:01 PM: build-image version: e9f1401945bcb1e3b1d95f34fade986bb55d03bd (noble)
+8:31:01 PM: buildbot version: f00f63bc86b0227bdd7223c38a003e085279854f
+8:31:01 PM: Building without cache
+8:31:01 PM: Starting to prepare the repo for build
+8:31:01 PM: No cached dependencies found. Cloning fresh repo
+8:31:01 PM: git clone --filter=blob:none https://github.com/Haze844/TradingJournall
+8:31:01 PM: Preparing Git Reference refs/heads/main
+8:31:03 PM: Custom publish path detected. Proceeding with the specified path: 'dist/public'
+8:31:03 PM: Custom build command detected. Proceeding with the specified command: 'npm install && cd client && npx vite build --outDir ../dist/public'
+8:31:03 PM: Starting to install dependencies
+8:31:03 PM: Python version set to 3.13.3
+8:31:03 PM: Ruby version set to 2.7.2
+8:31:03 PM: mise go@1.19         install
+8:31:03 PM: mise go@1.19         download go1.19.linux-amd64.tar.gz
+8:31:05 PM: mise go@1.19         checksum go1.19.linux-amd64.tar.gz
+8:31:05 PM: mise go@1.19         extract go1.19.linux-amd64.tar.gz
+8:31:07 PM: mise go@1.19         go version
+8:31:07 PM: mise go@1.19         go version go1.19 linux/amd64
+8:31:07 PM: mise go@1.19       ✓ installed
+8:31:07 PM: Go version set to 1.19
+8:31:08 PM: Using PHP version 8.3
+8:31:09 PM: Downloading and installing node v20.19.1...
+8:31:09 PM: Downloading https://nodejs.org/dist/v20.19.1/node-v20.19.1-linux-x64.tar.xz...
+8:31:10 PM: Computing checksum with sha256sum
+8:31:10 PM: Checksums matched!
+8:31:12 PM: Now using node v20.19.1 (npm v10.8.2)
+8:31:12 PM: Enabling Node.js Corepack
+8:31:12 PM: Started restoring cached build plugins
+8:31:12 PM: Finished restoring cached build plugins
+8:31:12 PM: Started restoring cached corepack dependencies
+8:31:12 PM: Finished restoring cached corepack dependencies
+8:31:12 PM: No npm workspaces detected
+8:31:12 PM: Started restoring cached node modules
+8:31:12 PM: Finished restoring cached node modules
+8:31:12 PM: Installing npm packages using npm version 10.8.2
+8:31:17 PM: npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+8:31:17 PM: npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+8:31:30 PM: added 763 packages, and audited 764 packages in 17s
+8:31:30 PM: 74 packages are looking for funding
+8:31:30 PM:   run `npm fund` for details
+8:31:30 PM: 7 moderate severity vulnerabilities
+8:31:30 PM: To address issues that do not require attention, run:
+8:31:30 PM:   npm audit fix
+8:31:30 PM: To address all issues (including breaking changes), run:
+8:31:30 PM:   npm audit fix --force
+8:31:30 PM: Run `npm audit` for details.
+8:31:30 PM: npm packages installed
+8:31:30 PM: Successfully installed dependencies
+8:31:30 PM: Starting build script
+8:31:31 PM: Detected 1 framework(s)
+8:31:31 PM: "vite" at version "5.4.14"
+8:31:31 PM: Section completed: initializing
+8:31:32 PM: ​
+8:31:32 PM: Netlify Build                                                 
+8:31:32 PM: ────────────────────────────────────────────────────────────────
+8:31:32 PM: ​
+8:31:32 PM: ❯ Version
+8:31:32 PM:   @netlify/build 32.1.0
+8:31:32 PM: ​
+8:31:32 PM: ❯ Flags
+8:31:32 PM:   accountId: 681a6e637489e961cf78753d
+8:31:32 PM:   baseRelDir: true
+8:31:32 PM:   buildId: 681ba6e27489e967d678744e
+8:31:32 PM:   deployId: 681ba6e27489e967d6787450
+8:31:32 PM: ​
+8:31:32 PM: ❯ Current directory
+8:31:32 PM:   /opt/build/repo
+8:31:32 PM: ​
+8:31:32 PM: ❯ Config file
+8:31:32 PM:   /opt/build/repo/netlify.toml
+8:31:32 PM: ​
+8:31:32 PM: ❯ Context
+8:31:32 PM:   production
+8:31:32 PM: ​
+8:31:32 PM: build.command from netlify.toml                               
+8:31:32 PM: ────────────────────────────────────────────────────────────────
+8:31:32 PM: ​
+8:31:32 PM: $ npm install && cd client && npx vite build --outDir ../dist/public
+8:31:35 PM: Failed during stage 'building site': Build script returned non-zero exit code: 2
+8:31:33 PM: up to date, audited 764 packages in 893ms
+8:31:33 PM: 74 packages are looking for funding
+8:31:33 PM:   run `npm fund` for details
+8:31:33 PM: 7 moderate severity vulnerabilities
+8:31:33 PM: To address issues that do not require attention, run:
+8:31:33 PM:   npm audit fix
+8:31:33 PM: To address all issues (including breaking changes), run:
+8:31:33 PM:   npm audit fix --force
+8:31:33 PM: Run `npm audit` for details.
+8:31:34 PM: vite v5.4.14 building for production...
+8:31:34 PM: 
+8:31:34 PM: (!) outDir /opt/build/repo/dist/public is not inside project root and will not be emptied.
+8:31:34 PM: Use --emptyOutDir to override.
+8:31:34 PM: 
+8:31:34 PM: transforming...
+8:31:34 PM: Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+8:31:34 PM:   npx update-browserslist-db@latest
+8:31:34 PM:   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+8:31:34 PM: warn - The `content` option in your Tailwind CSS configuration is missing or empty.
+8:31:34 PM: warn - Configure your content sources or your generated CSS will be missing styles.
+8:31:34 PM: warn - https://tailwindcss.com/docs/content-configuration
+8:31:34 PM: ✓ 9 modules transformed.
+8:31:34 PM: x Build failed in 444ms
+8:31:34 PM: error during build:
+8:31:34 PM: [vite]: Rollup failed to resolve import "@/hooks/use-auth" from "/opt/build/repo/client/src/lib/protected-route.tsx".
+8:31:34 PM: This is most likely unintended because it can break your application at runtime.
+8:31:34 PM: If you do want to externalize this module explicitly add it to
+8:31:34 PM: `build.rollupOptions.external`
+8:31:34 PM:     at viteWarn (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65747:17)
+8:31:34 PM:     at onRollupWarning (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65779:5)
+8:31:34 PM:     at onwarn (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65442:7)
+8:31:34 PM:     at file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:19452:13
+8:31:34 PM:     at Object.logger [as onLog] (file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:21178:9)
+8:31:34 PM:     at ModuleLoader.handleInvalidResolvedId (file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:20067:26)
+8:31:34 PM:     at file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:20025:26
+8:31:34 PM: ​
+8:31:34 PM: "build.command" failed                                        
+8:31:34 PM: ────────────────────────────────────────────────────────────────
+8:31:34 PM: ​
+8:31:34 PM:   Error message
+8:31:34 PM:   Command failed with exit code 1: npm install && cd client && npx vite build --outDir ../dist/public
+8:31:34 PM: ​
+8:31:34 PM:   Error location
+8:31:34 PM:   In build.command from netlify.toml:
+8:31:34 PM:   npm install && cd client && npx vite build --outDir ../dist/public
+8:31:34 PM: ​
+8:31:34 PM:   Resolved config
+8:31:34 PM:   build:
+8:31:34 PM:     command: npm install && cd client && npx vite build --outDir ../dist/public
+8:31:34 PM:     commandOrigin: config
+8:31:34 PM:     environment:
+8:31:34 PM:       - DATABASE_URL
+8:31:34 PM:       - NODE_VERSION
+8:31:34 PM:     publish: /opt/build/repo/dist/public
+8:31:34 PM:     publishOrigin: config
+8:31:34 PM:   functions:
+8:31:34 PM:     '*':
+8:31:34 PM:       node_bundler: esbuild
+8:31:34 PM:   functionsDirectory: /opt/build/repo/netlify/functions
+8:31:34 PM:   redirects:
+8:31:35 PM:     - from: /api/*
+      status: 200
+      to: /.netlify/functions/api/:splat
+    - from: /*
+      status: 200
+      to: /index.html
+  redirectsOrigin: config
+8:31:35 PM: Build failed due to a user error: Build script returned non-zero exit code: 2
+8:31:35 PM: Failing build: Failed to build site
+8:31:35 PM: Finished processing build request in 34.313s
