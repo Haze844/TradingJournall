@@ -12,7 +12,7 @@ import {
   appSettings, type AppSettings, type InsertAppSettings,
   tradingStreaks, type TradingStreak, type InsertTradingStreak,
   badgeTypes
-} from "@shared/schema";
+} from "../shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import connectPg from "connect-pg-simple";
