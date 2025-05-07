@@ -32,7 +32,7 @@ import {
   slTypes,
   rrValues,
   setupTypes
-} from "../../shared/schema";
+} from "../shared/schema";
 import { formatDate, formatTime, getTodayDates, getWeekDates, getLastMonthDates } from "@/lib/utils";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";

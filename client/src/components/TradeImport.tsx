@@ -7,7 +7,7 @@ import { queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, Link as LinkIcon, X } from "lucide-react";
 import Papa from "papaparse";
-import { Trade, insertTradeSchema } from "../../shared/schema";
+import { Trade, insertTradeSchema } from "../shared/schema";
 import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

@@ -15,7 +15,7 @@ import {
   Area
 } from "recharts";
 import { format } from "date-fns";
-import { PerformanceData, SetupWinRate } from "../../shared/schema";
+import { PerformanceData, SetupWinRate } from "../shared/schema";
 import { ChartTypeSelector, type ChartType } from "@/components/ui/chart-type-selector";
 
 // Gemeinsame Stilkonfiguration für elegantere Diagramme

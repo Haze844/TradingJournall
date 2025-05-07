@@ -35,7 +35,7 @@ import {
   rrValues,
   liquidationTypes,
   sessionTypes
-} from "../../../shared/schema";
+} from "../../shared/schema";
 
 // Erweitere das Schema für clientseitige Validierung
 const addTradeSchema = insertTradeSchema.extend({
