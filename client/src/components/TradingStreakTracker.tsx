@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Badge } from "./ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Progress } from "./ui/progress";
+import { queryClient } from "../lib/queryClient";
 import { Flame, Trophy, Award, Star, Zap, ArrowUp, Target } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "../hooks/use-toast";
 
 type TradingStreak = {
   id: number;
@@ -50,7 +50,11 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
   
   const updateStreakMutation = useMutation({
     mutationFn: async (streakUpdate: Partial<TradingStreak>) => {
-      const response = await apiRequest("PUT", `/api/trading-streak/${userId}`, streakUpdate);
+      const response = await fetch(`/api/trading-streak/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(streakUpdate)
+      });
       return await response.json();
     },
     onSuccess: () => {
@@ -71,7 +75,11 @@ export default function TradingStreakTracker({ userId }: { userId: number }) {
   
   const earnBadgeMutation = useMutation({
     mutationFn: async (badgeType: string) => {
-      const response = await apiRequest("POST", `/api/trading-streak/${userId}/badge`, { badgeType });
+      const response = await fetch(`/api/trading-streak/${userId}/badge`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ badgeType })
+      });
       return await response.json();
     },
     onSuccess: () => {

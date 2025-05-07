@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
