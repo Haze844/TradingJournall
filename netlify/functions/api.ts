@@ -51,7 +51,9 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 // Registriere die API-Routen
-registerRoutes(app);
+// Änderung: Wir rufen registerRoutes auf, ignorieren aber den Server-Rückgabewert, 
+// da Netlify Functions keinen HTTP-Server benötigen
+await registerRoutes(app);
 
 // Exportiere den serverless-Handler
 export const handler = serverless(app);
