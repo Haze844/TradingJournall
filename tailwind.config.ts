@@ -4,8 +4,9 @@ import path from "path";
 export default {
   darkMode: ["class"],
   content: [
-    path.join(__dirname, "client/index.html"), 
-    path.join(__dirname, "client/src/**/*.{js,jsx,ts,tsx}")
+    "./client/index.html", 
+    "./client/src/**/*.{js,jsx,ts,tsx}",
+    "./.netlify/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
     extend: {
