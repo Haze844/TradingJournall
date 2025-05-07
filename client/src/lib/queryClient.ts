@@ -7,6 +7,17 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Hilfsfunktion zur Bestimmung der Basis-URL für API-Anfragen
+function getApiBaseUrl() {
+  // Lokale Entwicklung in Replit
+  if (window.location.hostname.includes('replit.dev') || window.location.hostname.includes('replit.app')) {
+    return '';
+  }
+  
+  // Netlify Umgebung - Verwende /.netlify/functions für Serverless-Funktionen
+  return '';
+}
+
 export async function apiRequest(
   method: string,
   url: string,
