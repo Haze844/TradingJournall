@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
+import { queryClient, apiRequest } from '../lib/queryClient';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Skeleton } from '../components/ui/skeleton';
 import { ResponsiveContainer, LineChart, Line, BarChart, Bar, CartesianGrid, XAxis, YAxis, Cell, Tooltip as RechartsTooltip } from 'recharts';
-import { ChartTypeSelector, type ChartType } from '@/components/ui/chart-type-selector';
+import { ChartTypeSelector, type ChartType } from '../components/ui/chart-type-selector';
 import { format } from 'date-fns';
 import { AlertCircle, TrendingDown, BarChart2, DollarSign, PieChart, RefreshCcw, Wallet, PiggyBank, InfoIcon } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { accountTypeValues } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
-import AccountBalanceProgressNew from '@/components/AccountBalanceProgressNew';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Button } from '../components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+// Lokale Definition von accountTypeValues (aus shared/schema.ts)
+const accountTypeValues = ["PA", "EVA", "EK"] as const;
+import { useToast } from '../hooks/use-toast';
+import AccountBalanceProgressNew from '../components/AccountBalanceProgressNew';
 
 // Gemeinsame Stilkonfiguration für professionellere Diagramme
 const chartConfig = {
