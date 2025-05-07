@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, addMonths, subMonths } from "date-fns";
 import { CalendarIcon, ChevronLeft, ChevronRight, Clock, Edit, Plus, Trash } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Calendar } from "@/components/ui/calendar";
 

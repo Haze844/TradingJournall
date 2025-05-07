@@ -1,6 +1,6 @@
 import React, { useState, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface AnimierterTooltipProps {
   children: ReactNode;

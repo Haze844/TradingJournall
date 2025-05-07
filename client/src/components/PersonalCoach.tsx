@@ -19,7 +19,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon, CheckCircle2, Circle, Goal, LucideIcon, Megaphone, PlusCircle, Sparkles, Target, Trophy, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 // Formschema für Coaching-Ziele
