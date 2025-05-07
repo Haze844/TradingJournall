@@ -14,7 +14,11 @@ function getApiBaseUrl() {
     return '';
   }
   
-  // Netlify Umgebung - Verwende /.netlify/functions für Serverless-Funktionen
+  // Netlify Umgebung - Verwende /.netlify/functions/api für Serverless-Funktionen
+  if (window.location.hostname.includes('netlify.app')) {
+    return '/.netlify/functions/api';
+  }
+  
   return '';
 }
 
@@ -23,7 +27,11 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Füge die Basis-URL für API-Anfragen hinzu
+  const apiUrl = getApiBaseUrl() + url;
+  console.log(`API-Anfrage an: ${apiUrl}`);
+  
+  const res = await fetch(apiUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -40,7 +48,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    // Füge die Basis-URL für API-Anfragen hinzu
+    const apiUrl = getApiBaseUrl() + (queryKey[0] as string);
+    console.log(`Query-Anfrage an: ${apiUrl}`);
+    
+    const res = await fetch(apiUrl, {
       credentials: "include",
     });
 
