@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { getWeekDates } from "@/lib/utils";
-import { Trade } from "@shared/schema";
+import { Trade } from "../../shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   FileUp, Settings, Brain, BarChart2, Activity, Trophy, Calendar, 

@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { setupTypes, trendTypes } from "@shared/schema";
+import { setupTypes, trendTypes } from "../../shared/schema";
 
 interface FilterBarProps {
   userId?: number; // Optional userId für spätere Features

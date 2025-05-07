@@ -13,7 +13,7 @@ import {
   unmitZoneTypes,
   marketPhaseTypes,
   rrValues 
-} from "@shared/schema";
+} from "../../shared/schema";
 import { BadgeWinLoss } from "@/components/ui/badge-win-loss";
 import { BadgeTrend } from "@/components/ui/badge-trend";
 import { formatDate } from "@/lib/utils";
