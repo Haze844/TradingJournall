@@ -1,19 +1,19 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from "@/hooks/use-auth";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { Toaster } from "./components/ui/toaster";
+import { AuthProvider } from "./hooks/use-auth";
 
-import NotFound from "@/pages/not-found";
-// import Home from "@/pages/Home";
-import SimpleHome from "@/pages/SimpleHome";
-import AuthPage from "@/pages/auth-page";
-import { ProtectedRoute } from "@/lib/protected-route";
-import PersonalCoach from "@/components/PersonalCoach";
-import MacroEconomicCalendar from "@/components/MacroEconomicCalendar";
-import SocialTrading from "@/components/SocialTrading";
-import Booklet from "@/components/Booklet";
+import NotFound from "./pages/not-found";
+// import Home from "./pages/Home";
+import SimpleHome from "./pages/SimpleHome";
+import AuthPage from "./pages/auth-page";
+import { ProtectedRoute } from "./lib/protected-route";
+import PersonalCoach from "./components/PersonalCoach";
+import MacroEconomicCalendar from "./components/MacroEconomicCalendar";
+import SocialTrading from "./components/SocialTrading";
+import Booklet from "./components/Booklet";
 
 function Router() {
   return (
