@@ -1,0 +1,260 @@
+8:38:42 PM: build-image version: e9f1401945bcb1e3b1d95f34fade986bb55d03bd (noble)
+8:38:42 PM: buildbot version: f00f63bc86b0227bdd7223c38a003e085279854f
+8:38:42 PM: Fetching cached dependencies
+8:38:42 PM: Failed to fetch cache, continuing with build
+8:38:42 PM: Starting to prepare the repo for build
+8:38:43 PM: No cached dependencies found. Cloning fresh repo
+8:38:43 PM: git clone --filter=blob:none https://github.com/Haze844/TradingJournall
+8:38:43 PM: Preparing Git Reference refs/heads/main
+8:38:44 PM: Custom publish path detected. Proceeding with the specified path: 'dist/public'
+8:38:44 PM: Custom build command detected. Proceeding with the specified command: 'npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public'
+8:38:45 PM: Starting to install dependencies
+8:38:45 PM: Python version set to 3.13.3
+8:38:45 PM: Ruby version set to 2.7.2
+8:38:46 PM: mise go@1.19         install
+8:38:46 PM: mise go@1.19         download go1.19.linux-amd64.tar.gz
+8:38:49 PM: mise go@1.19         checksum go1.19.linux-amd64.tar.gz
+8:38:49 PM: mise go@1.19         extract go1.19.linux-amd64.tar.gz
+8:38:52 PM: mise go@1.19         go version
+8:38:52 PM: mise go@1.19         go version go1.19 linux/amd64
+8:38:52 PM: mise go@1.19       ✓ installed
+8:38:52 PM: Go version set to 1.19
+8:38:53 PM: Using PHP version 8.3
+8:38:54 PM: Downloading and installing node v20.19.1...
+8:38:54 PM: Downloading https://nodejs.org/dist/v20.19.1/node-v20.19.1-linux-x64.tar.xz...
+8:38:54 PM: Computing checksum with sha256sum
+8:38:54 PM: Checksums matched!
+8:38:58 PM: Now using node v20.19.1 (npm v10.8.2)
+8:38:58 PM: Enabling Node.js Corepack
+8:38:58 PM: Started restoring cached build plugins
+8:38:58 PM: Finished restoring cached build plugins
+8:38:58 PM: Started restoring cached corepack dependencies
+8:38:58 PM: Finished restoring cached corepack dependencies
+8:38:58 PM: No npm workspaces detected
+8:38:58 PM: Started restoring cached node modules
+8:38:58 PM: Finished restoring cached node modules
+8:38:58 PM: Installing npm packages using npm version 10.8.2
+8:39:03 PM: npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+8:39:04 PM: npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+8:39:19 PM: added 763 packages, and audited 764 packages in 20s
+8:39:19 PM: 74 packages are looking for funding
+8:39:19 PM:   run `npm fund` for details
+8:39:19 PM: 7 moderate severity vulnerabilities
+8:39:19 PM: To address issues that do not require attention, run:
+8:39:19 PM:   npm audit fix
+8:39:19 PM: To address all issues (including breaking changes), run:
+8:39:19 PM:   npm audit fix --force
+8:39:19 PM: Run `npm audit` for details.
+8:39:19 PM: npm packages installed
+8:39:19 PM: Successfully installed dependencies
+8:39:19 PM: Starting build script
+8:39:20 PM: Detected 1 framework(s)
+8:39:20 PM: "vite" at version "5.4.14"
+8:39:20 PM: Section completed: initializing
+8:39:21 PM: ​
+8:39:21 PM: Netlify Build                                                 
+8:39:21 PM: ────────────────────────────────────────────────────────────────
+8:39:21 PM: ​
+8:39:21 PM: ❯ Version
+8:39:21 PM:   @netlify/build 32.1.0
+8:39:21 PM: ​
+8:39:21 PM: ❯ Flags
+8:39:21 PM:   accountId: 681a6e637489e961cf78753d
+8:39:21 PM:   baseRelDir: true
+8:39:21 PM:   buildId: 681ba8b15a819b000854e752
+8:39:21 PM:   deployId: 681ba8b15a819b000854e754
+8:39:22 PM: ​
+8:39:22 PM: ❯ Current directory
+8:39:22 PM:   /opt/build/repo
+8:39:22 PM: ​
+8:39:22 PM: ❯ Config file
+8:39:22 PM:   /opt/build/repo/netlify.toml
+8:39:22 PM: ​
+8:39:22 PM: ❯ Context
+8:39:22 PM:   production
+8:39:22 PM: ​
+8:39:22 PM: build.command from netlify.toml                               
+8:39:22 PM: ────────────────────────────────────────────────────────────────
+8:39:22 PM: ​
+8:39:22 PM: $ npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public
+8:39:23 PM: up to date, audited 764 packages in 1s
+8:39:23 PM: 74 packages are looking for funding
+8:39:23 PM:   run `npm fund` for details
+8:39:23 PM: 7 moderate severity vulnerabilities
+8:39:23 PM: To address issues that do not require attention, run:
+8:39:23 PM:   npm audit fix
+8:39:23 PM: To address all issues (including breaking changes), run:
+8:39:23 PM:   npm audit fix --force
+8:39:23 PM: Run `npm audit` for details.
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/AccountBalanceProgress.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/AccountBalanceProgressNew.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/AddTradeForm.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/AdvancedTradeAnalysis.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/AdvancedTradeAnalysisWrapper.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/Booklet.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ChartImageUpload.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/Charts.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/FilterBar.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/FullScreenModal.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/Header.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/MacroEconomicCalendar.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/MarketPhaseAnalysis.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/PasswordChangeDialog.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/PerformanceHeatmap.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/PersonalCoach.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/RiskManagementDashboard.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/SocialTrading.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeDashboard.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeDetail.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeDetailNew.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeImport.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeTable.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradingPatterns.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradingStreakTracker.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/WeeklySummary.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/accordion.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/alert-dialog.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/alert.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/animated-tooltip.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/avatar.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/badge-trend.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/badge-win-loss.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/badge.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/breadcrumb.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/button.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/calendar.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/card.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/carousel.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/chart-type-selector.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/chart.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/checkbox.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/command.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/context-menu.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/data-table.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/dialog.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/drawer.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/dropdown-menu.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/form.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/fullscreen-dialog.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/hover-card.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/input-otp.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/input.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/label.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/menubar.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/navigation-menu.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/pagination.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/popover.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/progress.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/radio-group.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/resizable.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/scroll-area.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/select.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/separator.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/sheet.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/sidebar.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/skeleton.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/slider.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/switch.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/table.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/tabs.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/textarea.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/toast.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/toggle-group.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/toggle.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/hooks/use-auth.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/hooks/use-toast.ts
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/pages/Home.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/pages/SimpleHome.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/pages/auth-page.tsx
+8:39:23 PM: Replaced aliases in: /opt/build/repo/client/src/pages/not-found.tsx
+8:39:23 PM: Completed! Replaced aliases in 81 files.
+8:39:23 PM: vite v5.4.14 building for production...
+8:39:23 PM: 
+8:39:23 PM: (!) outDir /opt/build/repo/dist/public is not inside project root and will not be emptied.
+8:39:23 PM: Use --emptyOutDir to override.
+8:39:23 PM: 
+8:39:23 PM: transforming...
+8:39:24 PM: Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+8:39:24 PM:   npx update-browserslist-db@latest
+8:39:24 PM:   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+8:39:24 PM: warn - The `content` option in your Tailwind CSS configuration is missing or empty.
+8:39:24 PM: warn - Configure your content sources or your generated CSS will be missing styles.
+8:39:24 PM: warn - https://tailwindcss.com/docs/content-configuration
+8:39:24 PM: src/components/ui/tooltip.tsx (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/tooltip.tsx (1:0): Module level directives cause errors when bundled, "use client" in "src/components/ui/tooltip.tsx" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useQueries.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useQueries.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useQuery.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useMutationState.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useMutationState.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useIsFetching.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useIsFetching.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useMutation.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useMutation.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/isRestoring.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/isRestoring.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js" was ignored.
+8:39:24 PM: ../node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js" was ignored.
+8:39:24 PM: ../node_modules/@radix-ui/react-tooltip/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-tooltip/dist/index.mjs" was ignored.
+8:39:24 PM: ✓ 61 modules transformed.
+8:39:24 PM: x Build failed in 769ms
+8:39:24 PM: error during build:
+8:39:24 PM: [vite:esbuild] Transform failed with 1 error:
+8:39:24 PM: /opt/build/repo/client/src/components/AdvancedTradeAnalysisWrapper.tsx:3:44: ERROR: Unterminated string literal
+8:39:24 PM: file: /opt/build/repo/client/src/components/AdvancedTradeAnalysisWrapper.tsx:3:44
+8:39:24 PM: 
+8:39:24 PM: Unterminated string literal
+8:39:24 PM: 1  |  import { useState } from 'react';
+8:39:24 PM: 2  |  import { useQuery } from '@tanstack/react-query';
+8:39:24 PM: 3  |  import { Trade } from "../../shared/schema';
+   |                                              ^
+8:39:24 PM: 4  |  import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card';
+5  |  import { Skeleton } from "../components/ui/skeleton';
+
+8:39:24 PM:     at failureErrorWithLog (/opt/build/repo/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+8:39:24 PM:     at /opt/build/repo/node_modules/vite/node_modules/esbuild/lib/main.js:755:50
+8:39:24 PM:     at responseCallbacks.<computed> (/opt/build/repo/node_modules/vite/node_modules/esbuild/lib/main.js:622:9)
+8:39:24 PM:     at handleIncomingPacket (/opt/build/repo/node_modules/vite/node_modules/esbuild/lib/main.js:677:12)
+8:39:24 PM:     at Socket.readFromStdout (/opt/build/repo/node_modules/vite/node_modules/esbuild/lib/main.js:600:7)
+8:39:24 PM:     at Socket.emit (node:events:524:28)
+8:39:24 PM:     at addChunk (node:internal/streams/readable:561:12)
+8:39:24 PM:     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+8:39:24 PM:     at Readable.push (node:internal/streams/readable:392:5)
+8:39:24 PM:     at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)
+8:39:24 PM: ​
+8:39:24 PM: "build.command" failed                                        
+8:39:24 PM: ────────────────────────────────────────────────────────────────
+8:39:24 PM: ​
+8:39:24 PM:   Error message
+8:39:24 PM:   Command failed with exit code 1: npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public
+8:39:24 PM: ​
+8:39:24 PM:   Error location
+8:39:24 PM:   In build.command from netlify.toml:
+8:39:24 PM:   npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public
+8:39:24 PM: ​
+8:39:24 PM:   Resolved config
+8:39:24 PM:   build:
+8:39:24 PM:     command: npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public
+8:39:24 PM:     commandOrigin: config
+8:39:24 PM:     environment:
+8:39:24 PM:       - DATABASE_URL
+8:39:24 PM:       - NODE_VERSION
+8:39:24 PM:     publish: /opt/build/repo/dist/public
+8:39:24 PM:     publishOrigin: config
+8:39:24 PM:   functions:
+8:39:24 PM:     '*':
+8:39:24 PM:       node_bundler: esbuild
+8:39:24 PM:   functionsDirectory: /opt/build/repo/netlify/functions
+8:39:24 PM:   redirects:
+8:39:25 PM:     - from: /api/*
+      status: 200
+      to: /.netlify/functions/api/:splat
+    - from: /*
+      status: 200
+      to: /index.html
+  redirectsOrigin: config
+8:39:25 PM: Build failed due to a user error: Build script returned non-zero exit code: 2
+8:39:25 PM: Failing build: Failed to build site
+8:39:25 PM: Finished processing build request in 42.565s
+8:39:25 PM: Failed during stage 'building site': Build script returned non-zero exit code: 2

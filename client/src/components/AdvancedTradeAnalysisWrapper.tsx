@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Trade } from '@shared/schema';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Trade } from '../../shared/schema';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Skeleton } from '../components/ui/skeleton';
 import AdvancedTradeAnalysis from './AdvancedTradeAnalysis';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 
 // Diese Komponente dient als Wrapper für AdvancedTradeAnalysis
 // Sie lädt Trades des Benutzers und ermöglicht die Auswahl eines Trades für die Analyse
