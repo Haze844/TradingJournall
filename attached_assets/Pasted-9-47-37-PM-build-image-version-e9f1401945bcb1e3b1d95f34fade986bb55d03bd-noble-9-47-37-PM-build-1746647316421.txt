@@ -1,0 +1,231 @@
+9:47:37 PM: build-image version: e9f1401945bcb1e3b1d95f34fade986bb55d03bd (noble)
+9:47:37 PM: buildbot version: f00f63bc86b0227bdd7223c38a003e085279854f
+9:47:37 PM: Fetching cached dependencies
+9:47:37 PM: Failed to fetch cache, continuing with build
+9:47:37 PM: Starting to prepare the repo for build
+9:47:37 PM: No cached dependencies found. Cloning fresh repo
+9:47:37 PM: git clone --filter=blob:none https://github.com/Haze844/TradingJournall
+9:47:37 PM: Preparing Git Reference refs/heads/main
+9:47:39 PM: Custom publish path detected. Proceeding with the specified path: 'dist/public'
+9:47:39 PM: Custom build command detected. Proceeding with the specified command: 'npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public'
+9:47:39 PM: Starting to install dependencies
+9:47:39 PM: Python version set to 3.13.3
+9:47:39 PM: Ruby version set to 2.7.2
+9:47:40 PM: mise go@1.19         install
+9:47:40 PM: mise go@1.19         download go1.19.linux-amd64.tar.gz
+9:47:41 PM: mise go@1.19         checksum go1.19.linux-amd64.tar.gz
+9:47:41 PM: mise go@1.19         extract go1.19.linux-amd64.tar.gz
+9:47:43 PM: mise go@1.19         go version
+9:47:43 PM: mise go@1.19         go version go1.19 linux/amd64
+9:47:43 PM: mise go@1.19       ✓ installed
+9:47:43 PM: Go version set to 1.19
+9:47:43 PM: Using PHP version 8.3
+9:47:44 PM: Downloading and installing node v20.19.1...
+9:47:45 PM: Downloading https://nodejs.org/dist/v20.19.1/node-v20.19.1-linux-x64.tar.xz...
+9:47:45 PM: Computing checksum with sha256sum
+9:47:45 PM: Checksums matched!
+9:47:47 PM: Now using node v20.19.1 (npm v10.8.2)
+9:47:47 PM: Enabling Node.js Corepack
+9:47:47 PM: Started restoring cached build plugins
+9:47:47 PM: Finished restoring cached build plugins
+9:47:47 PM: Started restoring cached corepack dependencies
+9:47:47 PM: Finished restoring cached corepack dependencies
+9:47:47 PM: No npm workspaces detected
+9:47:47 PM: Started restoring cached node modules
+9:47:47 PM: Finished restoring cached node modules
+9:47:48 PM: Installing npm packages using npm version 10.8.2
+9:47:51 PM: npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+9:47:51 PM: npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+9:48:01 PM: added 763 packages, and audited 764 packages in 14s
+9:48:01 PM: 74 packages are looking for funding
+9:48:01 PM:   run `npm fund` for details
+9:48:01 PM: 7 moderate severity vulnerabilities
+9:48:01 PM: To address issues that do not require attention, run:
+9:48:01 PM:   npm audit fix
+9:48:01 PM: To address all issues (including breaking changes), run:
+9:48:01 PM:   npm audit fix --force
+9:48:01 PM: Run `npm audit` for details.
+9:48:02 PM: npm packages installed
+9:48:02 PM: Successfully installed dependencies
+9:48:02 PM: Starting build script
+9:48:03 PM: Detected 1 framework(s)
+9:48:03 PM: "vite" at version "5.4.14"
+9:48:03 PM: Section completed: initializing
+9:48:04 PM: ​
+9:48:04 PM: Netlify Build                                                 
+9:48:04 PM: ────────────────────────────────────────────────────────────────
+9:48:04 PM: ​
+9:48:04 PM: ❯ Version
+9:48:04 PM:   @netlify/build 32.1.0
+9:48:04 PM: ​
+9:48:04 PM: ❯ Flags
+9:48:04 PM:   accountId: 681a6e637489e961cf78753d
+9:48:04 PM:   baseRelDir: true
+9:48:04 PM:   buildId: 681bb8d8d6b11a00089dfc67
+9:48:04 PM:   deployId: 681bb8d8d6b11a00089dfc69
+9:48:04 PM: ​
+9:48:04 PM: ❯ Current directory
+9:48:04 PM:   /opt/build/repo
+9:48:04 PM: ​
+9:48:04 PM: ❯ Config file
+9:48:04 PM:   /opt/build/repo/netlify.toml
+9:48:04 PM: ​
+9:48:04 PM: ❯ Context
+9:48:04 PM:   production
+9:48:04 PM: ​
+9:48:04 PM: build.command from netlify.toml                               
+9:48:04 PM: ────────────────────────────────────────────────────────────────
+9:48:04 PM: ​
+9:48:04 PM: $ npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public
+9:48:05 PM: up to date, audited 764 packages in 1s
+9:48:05 PM: 74 packages are looking for funding
+9:48:05 PM:   run `npm fund` for details
+9:48:05 PM: 7 moderate severity vulnerabilities
+9:48:05 PM: To address issues that do not require attention, run:
+9:48:05 PM:   npm audit fix
+9:48:05 PM: To address all issues (including breaking changes), run:
+9:48:05 PM:   npm audit fix --force
+9:48:05 PM: Run `npm audit` for details.
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/AccountBalanceProgress.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/AccountBalanceProgressNew.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/AddTradeForm.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/Booklet.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/ChartImageUpload.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/Charts.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/FilterBar.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/FullScreenModal.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/Header.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/PasswordChangeDialog.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/PerformanceHeatmap.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/PersonalCoach.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/SocialTrading.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeDashboard.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeDetail.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeDetailNew.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeImport.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/TradeTable.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/WeeklySummary.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/data-table.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/pagination.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/components/ui/sidebar.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/pages/Home.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/pages/SimpleHome.tsx
+9:48:05 PM: Replaced aliases in: /opt/build/repo/client/src/pages/not-found.tsx
+9:48:05 PM: Completed! Replaced aliases in 25 files.
+9:48:06 PM: vite v5.4.14 building for production...
+9:48:06 PM: 
+9:48:06 PM: (!) outDir /opt/build/repo/dist/public is not inside project root and will not be emptied.
+9:48:06 PM: Use --emptyOutDir to override.
+9:48:06 PM: 
+9:48:06 PM: transforming...
+9:48:06 PM: Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+9:48:06 PM:   npx update-browserslist-db@latest
+9:48:06 PM:   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+9:48:06 PM: warn - The `content` option in your Tailwind CSS configuration is missing or empty.
+9:48:06 PM: warn - Configure your content sources or your generated CSS will be missing styles.
+9:48:06 PM: warn - https://tailwindcss.com/docs/content-configuration
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useQueries.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useQueries.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useQuery.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useIsFetching.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useIsFetching.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useMutationState.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useMutationState.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useMutation.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useMutation.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js" was ignored.
+9:48:06 PM: ../node_modules/@tanstack/react-query/build/modern/isRestoring.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/isRestoring.js" was ignored.
+9:48:06 PM: ../node_modules/@radix-ui/react-tooltip/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-tooltip/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js" was ignored.
+9:48:07 PM: src/components/ui/avatar.tsx (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/avatar.tsx (1:0): Module level directives cause errors when bundled, "use client" in "src/components/ui/avatar.tsx" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-portal/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-portal/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-popper/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-popper/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-presence/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-presence/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@tanstack/react-query/build/modern/useBaseQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@tanstack/react-query/build/modern/useBaseQuery.js" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-toast/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-toast/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-tabs/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-tabs/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-label/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-label/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-popover/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-popover/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-dialog/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-dialog/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-checkbox/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-checkbox/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-progress/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-progress/dist/index.mjs" was ignored.
+9:48:07 PM: ../node_modules/@radix-ui/react-select/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-select/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-avatar/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-avatar/dist/index.mjs" was ignored.
+9:48:08 PM: src/components/ui/safe-select-item.tsx (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/safe-select-item.tsx (1:0): Module level directives cause errors when bundled, "use client" in "src/components/ui/safe-select-item.tsx" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-collection/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-collection/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-alert-dialog/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-alert-dialog/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-scroll-area/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-scroll-area/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-roving-focus/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-roving-focus/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-focus-guards/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-focus-guards/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-focus-scope/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-focus-scope/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-dropdown-menu/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-dropdown-menu/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-toggle-group/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-toggle-group/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-menu/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-menu/dist/index.mjs" was ignored.
+9:48:08 PM: ../node_modules/@radix-ui/react-toggle/dist/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../node_modules/@radix-ui/react-toggle/dist/index.mjs" was ignored.
+9:48:11 PM: ✓ 3401 modules transformed.
+9:48:12 PM: rendering chunks...
+9:48:12 PM: computing gzip size...
+9:48:12 PM: ../dist/public/index.html                     0.69 kB │ gzip:   0.42 kB
+9:48:12 PM: ../dist/public/assets/index-R50smePX.css      6.25 kB │ gzip:   1.89 kB
+9:48:12 PM: ../dist/public/assets/index-SCt2nqn0.js   1,369.94 kB │ gzip: 362.83 kB
+9:48:12 PM: 
+9:48:12 PM: (!) Some chunks are larger than 500 kB after minification. Consider:
+9:48:12 PM: - Using dynamic import() to code-split the application
+9:48:12 PM: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+9:48:12 PM: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+9:48:12 PM: ✓ built in 5.76s
+9:48:12 PM: ​
+9:48:12 PM: (build.command completed in 7.5s)
+9:48:12 PM: ​
+9:48:12 PM: Functions bundling                                            
+9:48:12 PM: ────────────────────────────────────────────────────────────────
+9:48:12 PM: ​
+9:48:12 PM: Packaging Functions from netlify/functions directory:
+9:48:12 PM:  - api.ts
+9:48:12 PM: ​
+9:48:12 PM: ✘ [ERROR] Top-level await is currently not supported with the "cjs" output format
+9:48:12 PM:     netlify/functions/api.ts:56:0:
+9:48:12 PM:       56 │ await registerRoutes(app);
+9:48:12 PM:          ╵ ~~~~~
+9:48:13 PM: ​
+9:48:13 PM: Bundling of function "api" failed                             
+9:48:13 PM: ────────────────────────────────────────────────────────────────
+9:48:13 PM: ​
+9:48:13 PM:   Error message
+9:48:13 PM:   Build failed with 1 error:
+9:48:13 PM:   netlify/functions/api.ts:56:0: ERROR: Top-level await is currently not supported with the "cjs" output format
+9:48:13 PM: ​
+9:48:13 PM:   Error location
+9:48:13 PM:   While bundling function "api"
+9:48:13 PM: ​
+9:48:13 PM:   Resolved config
+9:48:13 PM:   build:
+9:48:13 PM:     command: npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public
+9:48:13 PM:     commandOrigin: config
+9:48:13 PM:     environment:
+9:48:13 PM:       - DATABASE_URL
+9:48:13 PM:       - NODE_VERSION
+9:48:13 PM:     publish: /opt/build/repo/dist/public
+9:48:13 PM:     publishOrigin: config
+9:48:13 PM:   functions:
+9:48:13 PM:     '*':
+9:48:13 PM:       node_bundler: esbuild
+9:48:13 PM:   functionsDirectory: /opt/build/repo/netlify/functions
+9:48:13 PM:   redirects:
+9:48:13 PM:     - from: /api/*
+      status: 200
+      to: /.netlify/functions/api/:splat
+    - from: /*
+      status: 200
+      to: /index.html
+  redirectsOrigin: config
+9:48:13 PM: Build failed due to a user error: Build script returned non-zero exit code: 2
+9:48:13 PM: Failing build: Failed to build site
+9:48:14 PM: Finished processing build request in 36.927s
+9:48:13 PM: Failed during stage 'building site': Build script returned non-zero exit code: 2
