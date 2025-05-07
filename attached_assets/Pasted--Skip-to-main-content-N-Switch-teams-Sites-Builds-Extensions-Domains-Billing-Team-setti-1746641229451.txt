@@ -1,0 +1,262 @@
+
+Skip to main content
+
+
+N
+Switch teams
+Sites
+Builds
+Extensions
+Domains
+Billing
+Team settings
+Upgrade
+
+
+Sites
+aquamarine-lolly-174f9a
+Switch sites
+
+News
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Support
+Site navigation
+Site overview
+Site configuration
+Deploys
+Preview Servers
+Logs
+Metrics
+Domain management
+Forms
+Blobs
+Deploy detailsYour deploy is in progress
+Deploy in progress for aquamarine-lolly-174f9a
+Netlify’s robots are busy building and deploying your site to our CDN.
+Today at 8:06 PM
+
+Production: main@HEAD
+
+Cancel deploy
+Deploy settings
+Fancy a game while you wait?
+We’re on a mission to find the cutest emojis.
+
+Play game
+Deploy log
+
+
+
+
+Maximize log
+Initializing
+Complete
+Building
+Failed
+8:06:47 PM: Failed during stage 'building site': Build script returned non-zero exit code: 2
+8:06:45 PM: Netlify Build                                                 
+8:06:45 PM: ────────────────────────────────────────────────────────────────
+8:06:45 PM: ​
+8:06:45 PM: ❯ Version
+8:06:45 PM:   @netlify/build 32.1.0
+8:06:45 PM: ​
+8:06:45 PM: ❯ Flags
+8:06:45 PM:   accountId: 681a6e637489e961cf78753d
+8:06:45 PM:   baseRelDir: true
+8:06:45 PM:   buildId: 681ba11b5d5700b778f71434
+8:06:45 PM:   deployId: 681ba11b5d5700b778f71436
+8:06:45 PM: ​
+8:06:45 PM: ❯ Current directory
+8:06:45 PM:   /opt/build/repo
+8:06:45 PM: ​
+8:06:45 PM: ❯ Config file
+8:06:45 PM:   /opt/build/repo/netlify.toml
+8:06:45 PM: ​
+8:06:45 PM: ❯ Context
+8:06:45 PM:   production
+8:06:45 PM: ​
+8:06:45 PM: build.command from netlify.toml                               
+8:06:45 PM: ────────────────────────────────────────────────────────────────
+8:06:45 PM: ​
+8:06:45 PM: $ cd client && npx vite build --outDir ../dist/client
+8:06:46 PM: vite v5.4.14 building for production...
+8:06:46 PM: 
+8:06:46 PM: (!) outDir /opt/build/repo/dist/client is not inside project root and will not be emptied.
+8:06:46 PM: Use --emptyOutDir to override.
+8:06:46 PM: 
+8:06:46 PM: transforming...
+8:06:46 PM: ✓ 3 modules transformed.
+8:06:46 PM: x Build failed in 195ms
+8:06:46 PM: error during build:
+8:06:46 PM: [vite]: Rollup failed to resolve import "@/components/ui/toaster" from "/opt/build/repo/client/src/main.tsx".
+8:06:46 PM: This is most likely unintended because it can break your application at runtime.
+8:06:46 PM: If you do want to externalize this module explicitly add it to
+8:06:46 PM: `build.rollupOptions.external`
+8:06:46 PM:     at viteWarn (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65747:17)
+8:06:46 PM:     at onRollupWarning (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65779:5)
+8:06:46 PM:     at onwarn (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65442:7)
+8:06:46 PM:     at file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:19452:13
+8:06:46 PM:     at Object.logger [as onLog] (file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:21178:9)
+8:06:46 PM:     at ModuleLoader.handleInvalidResolvedId (file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:20067:26)
+8:06:46 PM:     at file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:20025:26
+8:06:46 PM: ​
+8:06:46 PM: "build.command" failed                                        
+8:06:46 PM: ────────────────────────────────────────────────────────────────
+8:06:46 PM: ​
+8:06:46 PM:   Error message
+8:06:46 PM:   Command failed with exit code 1: cd client && npx vite build --outDir ../dist/client
+8:06:46 PM: ​
+8:06:46 PM:   Error location
+8:06:46 PM:   In build.command from netlify.toml:
+8:06:46 PM:   cd client && npx vite build --outDir ../dist/client
+8:06:46 PM: ​
+8:06:46 PM:   Resolved config
+8:06:46 PM:   build:
+8:06:46 PM:     command: cd client && npx vite build --outDir ../dist/client
+8:06:46 PM:     commandOrigin: config
+8:06:46 PM:     environment:
+8:06:46 PM:       - DATABASE_URL
+8:06:46 PM:     publish: /opt/build/repo/dist/client
+8:06:46 PM:     publishOrigin: config
+8:06:46 PM:   functions:
+8:06:46 PM:     '*':
+8:06:46 PM:       node_bundler: esbuild
+8:06:46 PM:   functionsDirectory: /opt/build/repo/netlify/functions
+8:06:46 PM:   redirects:
+8:06:47 PM:     - from: /api/*
+      status: 200
+      to: /.netlify/functions/api/:splat
+    - from: /*
+      status: 200
+      to: /index.html
+  redirectsOrigin: config
+8:06:47 PM: Build failed due to a user error: Build script returned non-zero exit code: 2
+8:06:47 PM: Failing build: Failed to build site
+8:06:47 PM: Finished processing build request in 27.058s
+Deploying
+Cleanup
+Post-processing
+Docs
+Pricing
+Support
+Blog
+Changelog
+Terms
+© 2025 Netlify
+

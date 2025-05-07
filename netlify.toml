@@ -1,7 +1,10 @@
 [build]
-  command = "cd client && npx vite build --outDir ../dist/client"
+  command = "npm install && cd client && npx vite build --outDir ../dist/client"
   publish = "dist/client"
   functions = "netlify/functions"
+  
+[build.environment]
+  NODE_VERSION = "20"
 
 [functions]
   directory = "netlify/functions"
