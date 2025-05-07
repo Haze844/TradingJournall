@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart, LineChart } from 'lucide-react';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { ToggleGroup, ToggleGroupItem } from './toggle-group';
 
 export type ChartType = 'line' | 'candle';
 
