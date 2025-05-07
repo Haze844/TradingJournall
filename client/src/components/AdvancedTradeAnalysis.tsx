@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Trade } from '../shared/schema';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { useToast } from '../hooks/use-toast';
+import { Skeleton } from '../components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Badge } from '../components/ui/badge';
+import { apiRequest, queryClient } from '../lib/queryClient';
 import { AlertCircle, Check, X, BarChart, Brain, TrendingUp, Target } from 'lucide-react';
 
 interface AdvancedAnalysisResponse {
