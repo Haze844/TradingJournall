@@ -50,10 +50,21 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// Registriere die API-Routen
-// Änderung: Wir rufen registerRoutes auf, ignorieren aber den Server-Rückgabewert, 
-// da Netlify Functions keinen HTTP-Server benötigen
-await registerRoutes(app);
+// Registriere die API-Routen und erstelle den serverless-Handler
+// Wir verwenden eine async IIFE statt eines Top-Level awaits
+let handler: any;
 
-// Exportiere den serverless-Handler
-export const handler = serverless(app);
+// Initialisieren der App und Routen
+(async () => {
+  try {
+    await registerRoutes(app);
+    // Serverless-Handler initialisieren, nachdem die Routen registriert wurden
+    handler = serverless(app);
+  } catch (error) {
+    console.error('Fehler beim Initialisieren der API:', error);
+  }
+})();
+
+// Exportiere den serverless-Handler mit Fallback für den Fall,
+// dass die Initialisierung noch nicht abgeschlossen ist
+export { handler };
