@@ -1,0 +1,97 @@
+8:14:29 PM: Failed during stage 'building site': Build script returned non-zero exit code: 2
+8:14:26 PM: Netlify Build                                                 
+8:14:26 PM: ────────────────────────────────────────────────────────────────
+8:14:26 PM: ​
+8:14:26 PM: ❯ Version
+8:14:26 PM:   @netlify/build 32.1.0
+8:14:26 PM: ​
+8:14:26 PM: ❯ Flags
+8:14:26 PM:   accountId: 681a6e637489e961cf78753d
+8:14:26 PM:   baseRelDir: true
+8:14:26 PM:   buildId: 681ba2bc743e0100087dfea3
+8:14:26 PM:   deployId: 681ba2bc743e0100087dfea5
+8:14:26 PM: ​
+8:14:26 PM: ❯ Current directory
+8:14:26 PM:   /opt/build/repo
+8:14:26 PM: ​
+8:14:26 PM: ❯ Config file
+8:14:26 PM:   /opt/build/repo/netlify.toml
+8:14:26 PM: ​
+8:14:26 PM: ❯ Context
+8:14:26 PM:   production
+8:14:26 PM: ​
+8:14:26 PM: build.command from netlify.toml                               
+8:14:26 PM: ────────────────────────────────────────────────────────────────
+8:14:26 PM: ​
+8:14:26 PM: $ npm install && cd client && npx vite build --outDir ../dist/client
+8:14:27 PM: up to date, audited 764 packages in 943ms
+8:14:27 PM: 74 packages are looking for funding
+8:14:27 PM:   run `npm fund` for details
+8:14:28 PM: 7 moderate severity vulnerabilities
+8:14:28 PM: To address issues that do not require attention, run:
+8:14:28 PM:   npm audit fix
+8:14:28 PM: To address all issues (including breaking changes), run:
+8:14:28 PM:   npm audit fix --force
+8:14:28 PM: Run `npm audit` for details.
+8:14:28 PM: vite v5.4.14 building for production...
+8:14:28 PM: 
+8:14:28 PM: (!) outDir /opt/build/repo/dist/client is not inside project root and will not be emptied.
+8:14:28 PM: Use --emptyOutDir to override.
+8:14:28 PM: 
+8:14:28 PM: transforming...
+8:14:28 PM: Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+8:14:28 PM:   npx update-browserslist-db@latest
+8:14:28 PM:   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+8:14:28 PM: warn - The `content` option in your Tailwind CSS configuration is missing or empty.
+8:14:28 PM: warn - Configure your content sources or your generated CSS will be missing styles.
+8:14:28 PM: warn - https://tailwindcss.com/docs/content-configuration
+8:14:28 PM: ✓ 6 modules transformed.
+8:14:28 PM: x Build failed in 361ms
+8:14:28 PM: error during build:
+8:14:28 PM: [vite:css] [postcss] /opt/build/repo/client/src/index.css:1:1: The `border-border` class does not exist. If `border-border` is a custom class, make sure it is defined within a `@layer` directive.
+8:14:28 PM: file: /opt/build/repo/client/src/index.css:1:0
+8:14:28 PM:     at Input.error (/opt/build/repo/node_modules/postcss/lib/input.js:106:16)
+8:14:28 PM:     at AtRule.error (/opt/build/repo/node_modules/postcss/lib/node.js:115:32)
+8:14:28 PM:     at processApply (/opt/build/repo/node_modules/tailwindcss/lib/lib/expandApplyAtRules.js:380:29)
+8:14:28 PM:     at /opt/build/repo/node_modules/tailwindcss/lib/lib/expandApplyAtRules.js:551:9
+8:14:28 PM:     at /opt/build/repo/node_modules/tailwindcss/lib/processTailwindFeatures.js:55:50
+8:14:28 PM:     at async plugins (/opt/build/repo/node_modules/tailwindcss/lib/plugin.js:38:17)
+8:14:28 PM:     at async LazyResult.runAsync (/opt/build/repo/node_modules/postcss/lib/lazy-result.js:261:11)
+8:14:28 PM:     at async compileCSS (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:36898:21)
+8:14:28 PM:     at async Object.transform (file:///opt/build/repo/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:36171:11)
+8:14:28 PM:     at async transform (file:///opt/build/repo/node_modules/rollup/dist/es/shared/node-entry.js:19640:16)
+8:14:28 PM: ​
+8:14:28 PM: "build.command" failed                                        
+8:14:28 PM: ────────────────────────────────────────────────────────────────
+8:14:28 PM: ​
+8:14:28 PM:   Error message
+8:14:28 PM:   Command failed with exit code 1: npm install && cd client && npx vite build --outDir ../dist/client
+8:14:28 PM: ​
+8:14:28 PM:   Error location
+8:14:28 PM:   In build.command from netlify.toml:
+8:14:28 PM:   npm install && cd client && npx vite build --outDir ../dist/client
+8:14:28 PM: ​
+8:14:28 PM:   Resolved config
+8:14:28 PM:   build:
+8:14:28 PM:     command: npm install && cd client && npx vite build --outDir ../dist/client
+8:14:28 PM:     commandOrigin: config
+8:14:28 PM:     environment:
+8:14:28 PM:       - DATABASE_URL
+8:14:28 PM:       - NODE_VERSION
+8:14:28 PM:     publish: /opt/build/repo/dist/client
+8:14:28 PM:     publishOrigin: config
+8:14:28 PM:   functions:
+8:14:28 PM:     '*':
+8:14:28 PM:       node_bundler: esbuild
+8:14:28 PM:   functionsDirectory: /opt/build/repo/netlify/functions
+8:14:28 PM:   redirects:
+8:14:29 PM:     - from: /api/*
+      status: 200
+      to: /.netlify/functions/api/:splat
+    - from: /*
+      status: 200
+      to: /index.html
+  redirectsOrigin: config
+8:14:29 PM: Build failed due to a user error: Build script returned non-zero exit code: 2
+8:14:29 PM: Failing build: Failed to build site
+8:14:29 PM: Finished processing build request in 32.651s
