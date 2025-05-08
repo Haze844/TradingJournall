@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "./components/ui/tooltip";
@@ -17,6 +17,24 @@ import Booklet from "./components/Booklet";
 import { useEffect } from "react";
 
 function Router() {
+  // Erkennen, ob wir in Netlify-Umgebung sind
+  const isNetlify = window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com');
+  console.log("Router geladen, Netlify-Umgebung erkannt:", isNetlify);
+  
+  // Direkt zur Auth-Seite umleiten in Netlify-Umgebung (temporär zum Testen)
+  if (isNetlify) {
+    return (
+      <Switch>
+        <Route path="/auth" component={AuthPage} />
+        <Route path="/booklet" component={Booklet} />
+        <Route path="*">
+          <Redirect to="/auth" />
+        </Route>
+      </Switch>
+    );
+  }
+  
+  // Standard-Router für normale Umgebung
   return (
     <Switch>
       <ProtectedRoute path="/" component={SimpleHome} />

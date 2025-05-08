@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import {
   useQuery,
   useMutation,
@@ -7,6 +7,7 @@ import {
 import { insertUserSchema, User as SelectUser, InsertUser } from "../shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "./use-toast";
+import { useLocation } from "wouter";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -23,6 +24,25 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
+  const [isDebugMode, setDebugMode] = useState(false);
+  
+  // Debug-Status für Netlify-Deployment aktivieren
+  useEffect(() => {
+    const isNetlify = window.location.hostname.includes('netlify');
+    if (isNetlify) {
+      setDebugMode(true);
+      console.log("Debug-Modus für Netlify aktiviert");
+      
+      // Ab hier können wir bei Bedarf für Netlify spezifischen Code ausführen
+      // Netlify-API-Health Check manuell durchführen
+      fetch('/.netlify/functions/api/debug')
+        .then(res => res.json())
+        .then(data => console.log("Netlify API Debug:", data))
+        .catch(err => console.error("Netlify API Debug Fehler:", err));
+    }
+  }, []);
+  
   const {
     data: user,
     error,

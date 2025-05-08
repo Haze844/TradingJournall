@@ -19,11 +19,22 @@ export default function AuthPage() {
 
   // Nutze einen useEffect Hook für Redirects
   useEffect(() => {
+    // Log zum Debuggen
+    console.log("Auth Page Status: User=", !!user, "isLoading=", isLoading);
+    
+    // Überprüfe ob wir in Netlify-Umgebung sind
+    const isNetlify = window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com');
+    
+    if (isNetlify) {
+      console.log("Netlify-Umgebung erkannt in Auth-Page");
+    }
+    
     // Redirect if already logged in
     if (user) {
+      console.log("Bereits eingeloggt, leite um zur Startseite");
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, navigate, isLoading]);
 
   return (
     <div className="min-h-screen flex items-center relative overflow-hidden">

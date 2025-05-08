@@ -5,6 +5,7 @@
   
 [build.environment]
   NODE_VERSION = "20"
+  DATABASE_URL = "postgresql://neondb_owner:npg_ti1JZUlyRjd7@ep-dry-voice-a2on7g63-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require"
 
 [functions]
   directory = "netlify/functions"
