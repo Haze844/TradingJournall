@@ -50,8 +50,9 @@ export async function apiRequest(
       credentials: "include",
     });
 
-    // In Netlify-Umgebung, füge wir zusätzliches Logging hinzu
+    // In speziellen Umgebungen wie Render oder Netlify zusätzliches Logging hinzufügen
     if (window.location.hostname.includes('netlify') || 
+        window.location.hostname.includes('onrender.com') || 
         window.location.hostname.includes('aquamarine-lolly-174f9a')) {
       console.log(`API-Antwort von ${apiUrl}:`, {
         status: res.status,
@@ -83,8 +84,9 @@ export const getQueryFn: <T>(options: {
         credentials: "include",
       });
       
-      // In Netlify-Umgebung, füge wir zusätzliches Logging hinzu
+      // In speziellen Umgebungen wie Render oder Netlify zusätzliches Logging hinzufügen
       if (window.location.hostname.includes('netlify') || 
+          window.location.hostname.includes('onrender.com') ||
           window.location.hostname.includes('aquamarine-lolly-174f9a')) {
         console.log(`Query-Antwort von ${apiUrl}:`, {
           status: res.status,

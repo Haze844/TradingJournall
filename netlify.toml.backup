@@ -1,9 +1,8 @@
-# HINWEIS: Diese Anwendung wird jetzt auf Render.com gehostet. 
-# Siehe RENDER-DEPLOYMENT.md für weitere Informationen.
-# Diese Datei bleibt nur aus Kompatibilitätsgründen erhalten.
+# Diese Konfiguration wird nicht mehr verwendet, da die Anwendung auf Render migriert wurde.
+# Siehe RENDER-DEPLOYMENT.md für Details zur aktuellen Deployment-Methode.
 
 [build]
-  command = "echo 'Deployment auf Netlify nicht mehr aktiv - bitte Render.com verwenden' && exit 1"
+  command = "npm install && node build-for-netlify.js && cd client && find ./src/components/ui -type f -name '*.tsx' -exec sed -i -e '1s/\"use client\"/\\/\\/\"use client\"/' {} \\; && npx vite build --outDir ../dist/public"
   publish = "dist/public"
   functions = "netlify/functions"
   
