@@ -9,15 +9,18 @@ async function throwIfResNotOk(res: Response) {
 
 // Hilfsfunktion zur Bestimmung der Basis-URL für API-Anfragen
 function getApiBaseUrl() {
-  // Lokale Entwicklung in Replit
-  if (window.location.hostname.includes('replit.dev') || window.location.hostname.includes('replit.app')) {
-    return '';
-  }
-  
-  // Netlify Umgebung - Verwende /.netlify/functions/api für Serverless-Funktionen
-  if (window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com')) {
+  // Auf Netlify-Umgebung prüfen (umfasst alle möglichen Netlify-Domains)
+  if (window.location.hostname.includes('netlify') || 
+      window.location.hostname.includes('aquamarine-lolly-174f9a')) {
     console.log('Netlify-Umgebung erkannt - verwende /.netlify/functions/api als Basis-URL');
     return '/.netlify/functions/api';
+  }
+  
+  // Lokale Entwicklung in Replit
+  if (window.location.hostname.includes('replit.dev') || 
+      window.location.hostname.includes('replit.app')) {
+    console.log('Replit-Umgebung erkannt - verwende leere Basis-URL');
+    return '';
   }
   
   console.log('Standard-Umgebung - verwende leere Basis-URL');

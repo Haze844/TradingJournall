@@ -5,12 +5,12 @@ import serverless from "serverless-http";
 
 const app = express();
 
-// CORS konfigurieren
+// CORS konfigurieren - akzeptiere alle Origins für Netlify-Umgebung
 app.use(cors({
-  origin: true,
+  origin: '*',  // Alle Domains erlauben
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 // Erhöhe die Größenbeschränkung für JSON-Anfragen
@@ -102,7 +102,7 @@ export const handler = async (event: any, context: any) => {
   });
   
   // Spezielle Debug-Route für den Zustand der Serverless-Funktion
-  if (event.path === '/.netlify/functions/api/debug') {
+  if (event.path === '/.netlify/functions/api/debug' || event.path === '/debug') {
     return {
       statusCode: 200,
       headers: {

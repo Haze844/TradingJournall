@@ -52,17 +52,21 @@ function Router() {
 function App() {
   useEffect(() => {
     // Log Umgebungsinformationen zur Fehlersuche
-    const isNetlify = window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com');
+    const isNetlify = window.location.hostname.includes('netlify') || 
+                      window.location.hostname.includes('aquamarine-lolly-174f9a');
+                      
+    const apiBaseUrl = isNetlify ? '/.netlify/functions/api' : '';
+    
     console.log("App Umgebung:", {
       host: window.location.hostname,
       href: window.location.href,
       isNetlify,
-      apiBaseUrl: isNetlify ? '/.netlify/functions/api' : '',
+      apiBaseUrl,
       userAgent: navigator.userAgent
     });
     
     // Prüfe API-Verfügbarkeit durch einfachen Aufruf
-    fetch(isNetlify ? '/.netlify/functions/api/api/health' : '/api/health')
+    fetch(`${apiBaseUrl}/api/health`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`API nicht verfügbar: ${response.status}`);
@@ -74,6 +78,15 @@ function App() {
       })
       .catch(error => {
         console.error("API Health Check fehlgeschlagen:", error);
+        
+        // Bei Fehler auf Netlify zusätzliche Debug-Anfrage versuchen
+        if (isNetlify) {
+          console.log("Versuche zusätzlichen Netlify-Debug-Endpunkt...");
+          fetch('/.netlify/functions/api/debug')
+            .then(res => res.ok ? res.json() : Promise.reject(new Error(`Debug-Endpunkt nicht verfügbar: ${res.status}`)))
+            .then(data => console.log("Netlify Debug-Endpunkt Antwort:", data))
+            .catch(err => console.error("Netlify Debug-Anfrage fehlgeschlagen:", err));
+        }
       });
   }, []);
 
