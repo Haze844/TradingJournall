@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect } from "wouter";
+import { Switch, Route, Link } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "./components/ui/tooltip";
@@ -29,11 +29,27 @@ function Router() {
         <Route path="/auth" component={AuthPage} />
         <Route path="/booklet" component={Booklet} />
         <Route path="*">
-          <Redirect to="/auth" />
+          {/* Manuelle Umleitung zur Auth-Seite */}
+          <NetlifyFallback />
         </Route>
       </Switch>
     );
   }
+  
+// Hilfsfunktion für Umleitung in Netlify-Umgebung
+function NetlifyFallback() {
+  useEffect(() => {
+    console.log("Leite um zur Auth-Seite...");
+    navigate("/auth");
+  }, []);
+  
+  return (
+    <div>
+      <p>Leite um zur Auth-Seite...</p>
+      <Link href="/auth">Falls keine automatische Umleitung erfolgt, hier klicken</Link>
+    </div>
+  );
+}
   
   // Standard-Router für normale Umgebung
   return (

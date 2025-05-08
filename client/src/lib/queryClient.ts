@@ -36,15 +36,30 @@ export async function apiRequest(
   const apiUrl = getApiBaseUrl() + url;
   console.log(`API-Anfrage an: ${apiUrl}`);
   
-  const res = await fetch(apiUrl, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  try {
+    const res = await fetch(apiUrl, {
+      method,
+      headers: data ? { "Content-Type": "application/json" } : {},
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
 
-  await throwIfResNotOk(res);
-  return res;
+    // In Netlify-Umgebung, füge wir zusätzliches Logging hinzu
+    if (window.location.hostname.includes('netlify') || 
+        window.location.hostname.includes('aquamarine-lolly-174f9a')) {
+      console.log(`API-Antwort von ${apiUrl}:`, {
+        status: res.status,
+        ok: res.ok,
+        statusText: res.statusText
+      });
+    }
+
+    await throwIfResNotOk(res);
+    return res;
+  } catch (error) {
+    console.error(`Fehler bei API-Anfrage an ${apiUrl}:`, error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -57,16 +72,41 @@ export const getQueryFn: <T>(options: {
     const apiUrl = getApiBaseUrl() + (queryKey[0] as string);
     console.log(`Query-Anfrage an: ${apiUrl}`);
     
-    const res = await fetch(apiUrl, {
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(apiUrl, {
+        credentials: "include",
+      });
+      
+      // In Netlify-Umgebung, füge wir zusätzliches Logging hinzu
+      if (window.location.hostname.includes('netlify') || 
+          window.location.hostname.includes('aquamarine-lolly-174f9a')) {
+        console.log(`Query-Antwort von ${apiUrl}:`, {
+          status: res.status,
+          ok: res.ok,
+          statusText: res.statusText
+        });
+      }
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      await throwIfResNotOk(res);
+      
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.error(`Fehler bei Query-Anfrage an ${apiUrl}:`, error);
+      
+      // Bei Netlify-Umgebung: Wenn es sich um eine Auth-Anfrage handelt,
+      // können wir für Debugging-Zwecke Default-Benutzer zurückgeben
+      if (window.location.hostname.includes('netlify') && queryKey[0] === '/api/user') {
+        console.warn('Verwende temporären Test-Benutzer für Netlify-Umgebung');
+        return null; // Kein Benutzer, damit die Login-Seite angezeigt wird
+      }
+      
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
