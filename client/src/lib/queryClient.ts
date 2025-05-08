@@ -15,10 +15,12 @@ function getApiBaseUrl() {
   }
   
   // Netlify Umgebung - Verwende /.netlify/functions/api für Serverless-Funktionen
-  if (window.location.hostname.includes('netlify.app')) {
+  if (window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com')) {
+    console.log('Netlify-Umgebung erkannt - verwende /.netlify/functions/api als Basis-URL');
     return '/.netlify/functions/api';
   }
   
+  console.log('Standard-Umgebung - verwende leere Basis-URL');
   return '';
 }
 
