@@ -13,7 +13,7 @@ import { NxtLvlLogo } from "../components/Header";
 import { saveLoginCredentials, getSavedLoginCredentials, clearSavedLoginCredentials } from "../lib/utils";
 
 export default function AuthPage() {
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, isLoading, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
 

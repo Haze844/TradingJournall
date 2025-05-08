@@ -18,7 +18,8 @@ import { useEffect } from "react";
 
 function Router() {
   // Erkennen, ob wir in Netlify-Umgebung sind
-  const isNetlify = window.location.hostname.includes('netlify.app') || window.location.hostname.includes('netlify.com');
+  const isNetlify = window.location.hostname.includes('netlify') || 
+                    window.location.hostname.includes('aquamarine-lolly-174f9a');
   console.log("Router geladen, Netlify-Umgebung erkannt:", isNetlify);
   
   // Direkt zur Auth-Seite umleiten in Netlify-Umgebung (temporär zum Testen)
