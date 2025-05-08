@@ -17,27 +17,33 @@ import Booklet from "./components/Booklet";
 import { useEffect } from "react";
 
 function Router() {
-  // Erkennen, ob wir in Netlify-Umgebung sind
+  // Erkennen, ob wir in einer bestimmten Umgebung sind
   const isNetlify = window.location.hostname.includes('netlify') || 
                     window.location.hostname.includes('aquamarine-lolly-174f9a');
-  console.log("Router geladen, Netlify-Umgebung erkannt:", isNetlify);
+  const isRender = window.location.hostname.includes('onrender.com');
   
-  // Direkt zur Auth-Seite umleiten in Netlify-Umgebung (temporär zum Testen)
-  if (isNetlify) {
+  console.log("Router geladen, Umgebung erkannt:", { 
+    isNetlify, 
+    isRender,
+    hostname: window.location.hostname 
+  });
+  
+  // Wenn wir auf Netlify oder Render sind, einfache Routing-Struktur benutzen
+  if (isNetlify || isRender) {
     return (
       <Switch>
         <Route path="/auth" component={AuthPage} />
         <Route path="/booklet" component={Booklet} />
         <Route path="*">
           {/* Manuelle Umleitung zur Auth-Seite */}
-          <NetlifyFallback />
+          <DeploymentFallback />
         </Route>
       </Switch>
     );
   }
   
-// Hilfsfunktion für Umleitung in Netlify-Umgebung
-function NetlifyFallback() {
+// Hilfsfunktion für Umleitung in Deployment-Umgebungen
+function DeploymentFallback() {
   const [, setLocation] = useLocation();
   
   useEffect(() => {
@@ -77,13 +83,21 @@ function App() {
     // Log Umgebungsinformationen zur Fehlersuche
     const isNetlify = window.location.hostname.includes('netlify') || 
                       window.location.hostname.includes('aquamarine-lolly-174f9a');
-                      
-    const apiBaseUrl = isNetlify ? '/.netlify/functions/api' : '';
+    const isRender = window.location.hostname.includes('onrender.com');
+    
+    // Bestimme die Basis-URL für API-Anfragen basierend auf der Umgebung
+    let apiBaseUrl = '';
+    if (isNetlify) {
+      apiBaseUrl = '/.netlify/functions/api';
+    } else if (isRender) {
+      apiBaseUrl = '/api';
+    }
     
     console.log("App Umgebung:", {
       host: window.location.hostname,
       href: window.location.href,
       isNetlify,
+      isRender,
       apiBaseUrl,
       userAgent: navigator.userAgent
     });
@@ -102,13 +116,19 @@ function App() {
       .catch(error => {
         console.error("API Health Check fehlgeschlagen:", error);
         
-        // Bei Fehler auf Netlify zusätzliche Debug-Anfrage versuchen
+        // Bei Fehler zusätzliche Debug-Anfragen versuchen, je nach Umgebung
         if (isNetlify) {
           console.log("Versuche zusätzlichen Netlify-Debug-Endpunkt...");
           fetch('/.netlify/functions/api/debug')
             .then(res => res.ok ? res.json() : Promise.reject(new Error(`Debug-Endpunkt nicht verfügbar: ${res.status}`)))
             .then(data => console.log("Netlify Debug-Endpunkt Antwort:", data))
             .catch(err => console.error("Netlify Debug-Anfrage fehlgeschlagen:", err));
+        } else if (isRender) {
+          console.log("Versuche zusätzlichen Render-Debug-Endpunkt...");
+          fetch('/api/debug')
+            .then(res => res.ok ? res.json() : Promise.reject(new Error(`Debug-Endpunkt nicht verfügbar: ${res.status}`)))
+            .then(data => console.log("Render Debug-Endpunkt Antwort:", data))
+            .catch(err => console.error("Render Debug-Anfrage fehlgeschlagen:", err));
         }
       });
   }, []);

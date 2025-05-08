@@ -9,7 +9,13 @@ async function throwIfResNotOk(res: Response) {
 
 // Hilfsfunktion zur Bestimmung der Basis-URL für API-Anfragen
 function getApiBaseUrl() {
-  // Auf Netlify-Umgebung prüfen (umfasst alle möglichen Netlify-Domains)
+  // Auf Render-Umgebung prüfen
+  if (window.location.hostname.includes('onrender.com')) {
+    console.log('Render-Umgebung erkannt - verwende /api als Basis-URL');
+    return '/api';
+  }
+  
+  // Auf Netlify-Umgebung prüfen (falls noch relevant)
   if (window.location.hostname.includes('netlify') || 
       window.location.hostname.includes('aquamarine-lolly-174f9a')) {
     console.log('Netlify-Umgebung erkannt - verwende /.netlify/functions/api als Basis-URL');
