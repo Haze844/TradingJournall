@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && node build-for-netlify.js && cd client && npx vite build --outDir ../dist/public"
+  command = "npm install && node build-for-netlify.js && cd client && find ./src/components/ui -type f -name '*.tsx' -exec sed -i -e '1s/\"use client\"/\\/\\/\"use client\"/' {} \\; && npx vite build --outDir ../dist/public"
   publish = "dist/public"
   functions = "netlify/functions"
   

@@ -1,4 +1,4 @@
-import { Switch, Route, Link } from "wouter";
+import { Switch, Route, Link, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "./components/ui/tooltip";
@@ -38,15 +38,22 @@ function Router() {
   
 // Hilfsfunktion für Umleitung in Netlify-Umgebung
 function NetlifyFallback() {
+  const [, setLocation] = useLocation();
+  
   useEffect(() => {
     console.log("Leite um zur Auth-Seite...");
-    navigate("/auth");
-  }, []);
+    setTimeout(() => {
+      setLocation("/auth");
+    }, 100);
+  }, [setLocation]);
   
   return (
-    <div>
-      <p>Leite um zur Auth-Seite...</p>
-      <Link href="/auth">Falls keine automatische Umleitung erfolgt, hier klicken</Link>
+    <div className="p-6 max-w-md mx-auto bg-black/30 backdrop-blur-md rounded-lg mt-10">
+      <h2 className="text-xl font-bold text-blue-300 mb-4">Weiterleitung...</h2>
+      <p className="text-white mb-4">Sie werden zur Login-Seite weitergeleitet.</p>
+      <Link href="/auth" className="text-blue-400 hover:text-blue-300 underline">
+        Falls keine automatische Umleitung erfolgt, hier klicken
+      </Link>
     </div>
   );
 }
