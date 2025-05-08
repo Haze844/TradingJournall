@@ -15,8 +15,16 @@
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
+  force = true
+
+[[redirects]]
+  from = "/debug"
+  to = "/.netlify/functions/api/debug"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = true
