@@ -7,11 +7,52 @@ import cors from "cors";
 const app = express();
 
 // CORS konfigurieren, um Cross-Origin-Anfragen zu erlauben
+const isRender = process.env.RENDER === "true";
+const isReplit = process.env.REPL_ID !== undefined;
+const isNetlify = process.env.NETLIFY === "true";
+
+console.log("Umgebung erkannt:", { isRender, isReplit, isNetlify });
+
+// Verbesserte dynamische CORS-Konfiguration basierend auf der Umgebung
 app.use(cors({
-  origin: true, // Erlaubt alle Herkunftsquellen im Entwicklungsmodus
+  origin: function(origin, callback) {
+    // Erlaubt alle Anfragen in der Entwicklungsumgebung
+    console.log("CORS Origin-Anfrage:", origin);
+    
+    // In Entwicklungsumgebung oder wenn kein Origin gesendet wurde
+    if (!origin || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+      return;
+    }
+    
+    // Erlaube Anfragen vom selben Server (für Render & Replit)
+    const allowedOrigins = [
+      // Dynamische Erkennung basierend auf Host-Header hinzufügen
+      /\.replit\.app$/,
+      /\.replit\.dev$/,
+      /\.janeway\.replit\.dev$/,
+      /\.onrender\.com$/,
+      /lvlup-trading-journal\.onrender\.com/,
+      /netlify\.app$/
+    ];
+    
+    const allowed = allowedOrigins.some(pattern => {
+      if (pattern instanceof RegExp) {
+        return pattern.test(origin);
+      }
+      return origin.includes(pattern);
+    });
+    
+    if (allowed) {
+      callback(null, true);
+    } else {
+      console.log("CORS Origin abgelehnt:", origin);
+      callback(null, false);
+    }
+  },
   credentials: true, // Wichtig für Cookies und Authentifizierung
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
 
 // Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder

@@ -1,9 +1,30 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Verbesserte Fehlerbehandlung für API-Anfragen
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    // Versuche, den Antworttext zu analysieren
+    let errorMessage = res.statusText || `Fehler (${res.status})`;
+    
+    try {
+      // Versuche, die Antwort als JSON zu parsen
+      const contentType = res.headers.get('content-type');
+      
+      if (contentType && contentType.includes('application/json')) {
+        const errorJson = await res.json();
+        errorMessage = errorJson.message || errorJson.error || JSON.stringify(errorJson);
+      } else {
+        // Andernfalls als Text lesen
+        const text = await res.text();
+        if (text) errorMessage = text;
+      }
+    } catch (parseError) {
+      console.error('Fehler beim Parsen der Fehlermeldung:', parseError);
+      // Behalte die ursprüngliche Fehlermeldung bei, wenn das Parsen fehlschlägt
+    }
+    
+    console.error(`API-Fehler (${res.status}):`, errorMessage);
+    throw new Error(`${res.status}: ${errorMessage}`);
   }
 }
 
@@ -40,31 +61,61 @@ export async function apiRequest(
 ): Promise<Response> {
   // Füge die Basis-URL für API-Anfragen hinzu
   const apiUrl = getApiBaseUrl() + url;
-  console.log(`API-Anfrage an: ${apiUrl}`);
+  
+  // Log-Informationen sammeln
+  const startTime = Date.now();
+  const headers: HeadersInit = {
+    // Benutzerdefinierte Header für Debug-Informationen
+    'X-Client-Info': `App:TradingJournal|${window.location.hostname}|${navigator.userAgent.substring(0, 50)}`,
+  };
+  
+  // Content-Type-Header nur hinzufügen, wenn Daten gesendet werden
+  if (data) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  console.log(`API-Anfrage an: ${apiUrl} [${method}]`);
   
   try {
-    const res = await fetch(apiUrl, {
+    const requestConfig: RequestInit = {
       method,
-      headers: data ? { "Content-Type": "application/json" } : {},
+      headers,
       body: data ? JSON.stringify(data) : undefined,
       credentials: "include",
+      // Sorgt dafür, dass Cookies immer über CORS-Anfragen gesendet werden
+      mode: 'cors',
+      cache: 'no-cache',
+    };
+    
+    // For debugging
+    console.log('Request Config:', {
+      url: apiUrl,
+      method: requestConfig.method,
+      headers: headers,
+      hasBody: !!requestConfig.body,
+      credentials: requestConfig.credentials,
+      mode: requestConfig.mode
     });
 
-    // In speziellen Umgebungen wie Render oder Netlify zusätzliches Logging hinzufügen
-    if (window.location.hostname.includes('netlify') || 
-        window.location.hostname.includes('onrender.com') || 
-        window.location.hostname.includes('aquamarine-lolly-174f9a')) {
-      console.log(`API-Antwort von ${apiUrl}:`, {
-        status: res.status,
-        ok: res.ok,
-        statusText: res.statusText
-      });
-    }
+    const res = await fetch(apiUrl, requestConfig);
+    
+    const responseTime = Date.now() - startTime;
+    
+    // Verbesserte Protokollierung für alle Umgebungen
+    console.log(`API-Antwort von ${apiUrl} [${method}] nach ${responseTime}ms:`, {
+      status: res.status,
+      ok: res.ok,
+      statusText: res.statusText,
+      headers: Object.fromEntries(
+        Array.from(res.headers.entries())
+          .filter(([key]) => !key.includes('set-cookie')) // Keine Cookies im Log
+      )
+    });
 
     await throwIfResNotOk(res);
     return res;
   } catch (error) {
-    console.error(`Fehler bei API-Anfrage an ${apiUrl}:`, error);
+    console.error(`Fehler bei API-Anfrage an ${apiUrl} [${method}]:`, error);
     throw error;
   }
 }
@@ -77,32 +128,65 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     // Füge die Basis-URL für API-Anfragen hinzu
     const apiUrl = getApiBaseUrl() + (queryKey[0] as string);
+    
+    // Log-Informationen sammeln
+    const startTime = Date.now();
+    const headers: HeadersInit = {
+      // Benutzerdefinierte Header für Debug-Informationen
+      'X-Client-Info': `App:TradingJournal|${window.location.hostname}|${navigator.userAgent.substring(0, 50)}`,
+    };
+    
     console.log(`Query-Anfrage an: ${apiUrl}`);
     
     try {
-      const res = await fetch(apiUrl, {
+      const requestConfig: RequestInit = {
+        headers,
         credentials: "include",
+        // Sorgt dafür, dass Cookies immer über CORS-Anfragen gesendet werden
+        mode: 'cors',
+        cache: 'no-cache',
+      };
+      
+      // For debugging
+      console.log('Query Config:', {
+        url: apiUrl,
+        headers: headers,
+        credentials: requestConfig.credentials,
+        mode: requestConfig.mode
       });
       
-      // In speziellen Umgebungen wie Render oder Netlify zusätzliches Logging hinzufügen
-      if (window.location.hostname.includes('netlify') || 
-          window.location.hostname.includes('onrender.com') ||
-          window.location.hostname.includes('aquamarine-lolly-174f9a')) {
-        console.log(`Query-Antwort von ${apiUrl}:`, {
-          status: res.status,
-          ok: res.ok,
-          statusText: res.statusText
-        });
-      }
+      const res = await fetch(apiUrl, requestConfig);
+      
+      const responseTime = Date.now() - startTime;
+      
+      // Verbesserte Protokollierung für alle Umgebungen
+      console.log(`Query-Antwort von ${apiUrl} nach ${responseTime}ms:`, {
+        status: res.status,
+        ok: res.ok,
+        statusText: res.statusText,
+        headers: Object.fromEntries(
+          Array.from(res.headers.entries())
+            .filter(([key]) => !key.includes('set-cookie')) // Keine Cookies im Log
+        )
+      });
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        console.log('Nicht authentifiziert (401), Verhalten: return null');
         return null;
       }
 
       await throwIfResNotOk(res);
       
-      const data = await res.json();
-      return data;
+      try {
+        const data = await res.json();
+        return data;
+      } catch (jsonError) {
+        console.error(`Fehler beim Parsen der JSON-Antwort von ${apiUrl}:`, jsonError);
+        // Wenn es ein JSON-Parsing-Fehler ist, versuchen wir, den Text zu lesen
+        const text = await res.text();
+        console.error(`Antworttext: ${text.substring(0, 500)}${text.length > 500 ? '...' : ''}`);
+        throw new Error(`JSON-Parsing-Fehler: ${jsonError.message}`);
+      }
     } catch (error) {
       console.error(`Fehler bei Query-Anfrage an ${apiUrl}:`, error);
       

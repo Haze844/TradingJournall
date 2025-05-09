@@ -129,15 +129,29 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
+    console.log("Login-Versuch für Benutzer:", req.body.username, "mit rememberMe:", req.body.rememberMe);
+    
     passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).json({ message: info?.message || "Anmeldung fehlgeschlagen" });
-
+      if (err) {
+        console.error("Login-Fehler:", err);
+        return next(err);
+      }
+      
+      if (!user) {
+        console.log("Login fehlgeschlagen:", info?.message || "Ungültige Anmeldedaten");
+        return res.status(401).json({ message: info?.message || "Anmeldung fehlgeschlagen" });
+      }
+      
+      console.log("Benutzer authentifiziert:", user.username, "- Session-ID vor Login:", req.session.id);
+      
       // Überprüfe, ob "Eingeloggt bleiben" Option aktiviert ist
       const rememberMe = req.body.rememberMe === true;
       
       req.login(user, (loginErr: any) => {
-        if (loginErr) return next(loginErr);
+        if (loginErr) {
+          console.error("Fehler bei req.login():", loginErr);
+          return next(loginErr);
+        }
         
         // Cookie-Lebensdauer ändern, wenn "Eingeloggt bleiben" aktiviert ist
         if (req.session.cookie) {
@@ -152,17 +166,49 @@ export function setupAuth(app: Express) {
           }
         }
         
-        // Don't send password to the client
-        const { password, ...userWithoutPassword } = user;
-        return res.status(200).json(userWithoutPassword);
+        // Session speichern um sicherzustellen, dass sie persistiert wird
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Fehler beim Speichern der Session:", saveErr);
+            return next(saveErr);
+          }
+          
+          console.log("Login erfolgreich, Session gespeichert. Session-ID:", req.session.id, "User-ID:", user.id);
+          
+          // Don't send password to the client
+          const { password, ...userWithoutPassword } = user;
+          return res.status(200).json(userWithoutPassword);
+        });
       });
     })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err: any) => {
-      if (err) return next(err);
-      res.sendStatus(200);
+    console.log("Logout-Anfrage erhalten. Session-ID:", req.session.id);
+    
+    // Session speichern um den aktuellen Status zu sichern
+    req.session.save((err) => {
+      if (err) {
+        console.error("Fehler beim Speichern der Session vor Logout:", err);
+      }
+      
+      req.logout((logoutErr: any) => {
+        if (logoutErr) {
+          console.error("Fehler beim Logout:", logoutErr);
+          return next(logoutErr);
+        }
+        
+        // Session regenerieren um CSRF-Schutz zu verbessern
+        req.session.regenerate((regenerateErr) => {
+          if (regenerateErr) {
+            console.error("Fehler beim Regenerieren der Session:", regenerateErr);
+            return next(regenerateErr);
+          }
+          
+          console.log("Logout erfolgreich. Neue Session-ID:", req.session.id);
+          res.sendStatus(200);
+        });
+      });
     });
   });
 
