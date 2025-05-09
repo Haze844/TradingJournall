@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: npm install --include=dev; npm run build
-    startCommand: node setup-db.js && node render-patch.js && node express-fix.js && node redirect-fix.js && node custom-deploy.js && node dist/index.js
+    startCommand: node setup-db.js && node render-patch.js && node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production

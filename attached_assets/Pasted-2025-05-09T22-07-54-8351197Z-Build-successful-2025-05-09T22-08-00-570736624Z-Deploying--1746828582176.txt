@@ -1,0 +1,51 @@
+2025-05-09T22:07:54.8351197Z ==> Build successful 🎉
+2025-05-09T22:08:00.570736624Z ==> Deploying...
+2025-05-09T22:08:27.40081642Z ==> Running 'node setup-db.js && node render-patch.js && node dist/index.js'
+2025-05-09T22:08:28.296865492Z Datenbank erfolgreich eingerichtet
+2025-05-09T22:08:38.630185275Z index.html gepatcht für Render-Deployment
+2025-05-09T22:08:38.632197106Z 404.html für Client-Routing erstellt
+2025-05-09T22:08:38.634548075Z Backup der ursprünglichen index.html erstellt
+2025-05-09T22:08:38.634558325Z Verwende Server-seitige Redirect-Lösung statt index.html zu ersetzen
+2025-05-09T22:08:38.634564516Z Notfall-Redirect-Seite erstellt, aber index.html bleibt unverändert
+2025-05-09T22:08:38.636039613Z Spezielle Redirect-Seite erstellt
+2025-05-09T22:08:38.636050183Z Render-Patches abgeschlossen
+2025-05-09T22:08:50.097048397Z Datenbankverbindung mit Neon Serverless wird hergestellt...
+2025-05-09T22:08:50.098961016Z Datenbankverbindung erfolgreich initialisiert.
+2025-05-09T22:08:50.100449223Z Storage-Auswahl: DatabaseStorage (DATABASE_URL vorhanden)
+2025-05-09T22:08:50.104327171Z Umgebung erkannt: { isRender: true, isReplit: false, isNetlify: false }
+2025-05-09T22:08:50.39473262Z Session-Konfiguration initialisiert mit: {
+2025-05-09T22:08:50.39475472Z   secret: 'VORHANDEN',
+2025-05-09T22:08:50.394758701Z   resave: true,
+2025-05-09T22:08:50.394762841Z   saveUninitialized: true,
+2025-05-09T22:08:50.394766391Z   sessionStoreType: 'PGStore',
+2025-05-09T22:08:50.394769741Z   cookieSettings: {
+2025-05-09T22:08:50.394772951Z     maxAge: 86400000,
+2025-05-09T22:08:50.394776271Z     httpOnly: true,
+2025-05-09T22:08:50.394779531Z     path: '/',
+2025-05-09T22:08:50.394782771Z     sameSite: 'none',
+2025-05-09T22:08:50.394786021Z     secure: true
+2025-05-09T22:08:50.394789301Z   }
+2025-05-09T22:08:50.394792881Z }
+2025-05-09T22:08:51.034491061Z 10:08:50 PM [express] serving on port 5000
+2025-05-09T22:08:51.098320348Z CORS Origin-Anfrage: undefined
+2025-05-09T22:08:51.719174685Z ==> Your service is live 🎉
+2025-05-09T22:09:16.63439556Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:16.713327516Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T22:09:16.733767171Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T22:09:17.087984116Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:17.091154035Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:17.096730986Z Auth-Check - Session: S6Iw0tS-RU-LXoRiSTSInDSF6yN7Q9Ob Auth-Status: true
+2025-05-09T22:09:17.096755237Z Authentifiziert als Benutzer: mo
+2025-05-09T22:09:17.103215449Z 10:09:17 PM [express] GET /api/user 304 in 14ms :: {"id":2,"username":"mo"}
+2025-05-09T22:09:17.106228795Z 10:09:17 PM [express] GET /api/health 200 in 14ms
+2025-05-09T22:09:17.524474672Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:17.539252413Z 10:09:17 PM [express] GET /api/debug 200 in 14ms
+2025-05-09T22:09:17.548840265Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:18.532266056Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:18.590123432Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:19.593443454Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:19.92307813Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:20.098993878Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:20.383751665Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:20.57271734Z CORS Origin-Anfrage: undefined
+2025-05-09T22:09:27.914581273Z CORS Origin-Anfrage: undefined

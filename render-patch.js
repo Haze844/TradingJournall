@@ -1,4 +1,4 @@
-// render-patch.js
+// render-patch.js - Kombinierte Version mit Express-Fix, Redirect-Fix und Custom-Deploy
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,6 +7,8 @@ import { dirname } from 'path';
 // __dirname-Äquivalent für ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+console.log('Starte umfassenden Render-Patch (inkl. Express-Fix, Redirect-Fix und Custom-Deploy)...');
 
 // API-URL-Patch für Frontend
 const indexHtmlPath = './dist/public/index.html';
@@ -81,16 +83,14 @@ if (fs.existsSync(indexHtmlPath)) {
           }
         };
         
-        // KEINE automatische Weiterleitung mehr für die Root-URL
-        // Wir zeigen nun eine statische Landingpage in App.tsx
-        console.log('Statische Landingpage-Strategie wird verwendet');
+        // SOFORTIGE WEITERLEITUNG zur Auth-Seite wenn wir auf der Hauptseite sind
+        // und keine Auth-Route geladen wurde
+        if (window.location.pathname === '/' || window.location.pathname === '') {
+          console.log('Automatische Weiterleitung zur Auth-Seite wird ausgeführt...');
+          window.location.href = '/auth';
+        }
         
-        // Keine aggressiven Redirects mehr, da wir nun für alle Pfade
-        // eine passende Komponente rendern
-        
-        // Für Debugging-Zwecke: Zeige an, welcher Router aktiv ist
-        console.log('React-Router mit StaticLoginPage für / und /* konfiguriert');
-        
+        console.log('Direkter Auth-Redirect für /-Pfad aktiviert');
         console.log("Umfassende Render-Patches angewendet");
       })();
     </script>
@@ -100,91 +100,110 @@ if (fs.existsSync(indexHtmlPath)) {
   // Fix für base-href - Sorgt dafür, dass relative Pfade korrekt aufgelöst werden
   indexHtml = indexHtml.replace(
     '<head>',
-    '<head>\n  <base href="/">'
+    '<head>\n  <base href="/">\n  <meta http-equiv="refresh" content="0;url=/auth">'
   );
   
   fs.writeFileSync(indexHtmlPath, indexHtml);
-  console.log('index.html gepatcht für Render-Deployment');
+  console.log('index.html gepatcht für Render-Deployment mit direktem Auth-Redirect');
   
   // Auch 404.html erstellen für Client-Routing
   fs.copyFileSync(indexHtmlPath, path.join(path.dirname(indexHtmlPath), '404.html'));
   console.log('404.html für Client-Routing erstellt');
-  
-  // Erstelle eine Kopie der index.html als index.html.bak für Rollback-Zwecke
-  fs.copyFileSync(indexHtmlPath, indexHtmlPath + '.bak');
-  console.log('Backup der ursprünglichen index.html erstellt');
-  
-  // Statt komplettes Ersetzen der index.html, erstellen wir eine direkte Server-seitige Lösung
-  console.log('Verwende Server-seitige Redirect-Lösung statt index.html zu ersetzen');
+}
 
-  // Erstelle eine separate Redirect-Seite für Notfälle
-  const redirectHtml = `<!DOCTYPE html>
+// Patch für Express-Server - Root-Route zur Auth-Seite umleiten
+// Analog zu express-fix.js
+const serverCodePath = './dist/index.js';
+if (fs.existsSync(serverCodePath)) {
+  let serverCode = fs.readFileSync(serverCodePath, 'utf8');
+  
+  if (!serverCode.includes('// Express-Fix für Render.com')) {
+    const additionalMiddleware = `
+  // Express-Fix für Render.com - Root-Handling und serverseitige Redirects
+  const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
+  
+  if (isRender) {
+    console.log('Render-spezifische Middlewares aktiviert');
+    
+    // Root-Pfad speziell behandeln - direkt zu /auth umleiten
+    app.get('/', (req, res) => {
+      console.log('Root-Pfad aufgerufen, leite weiter zu /auth');
+      return res.redirect('/auth');
+    });
+    
+    // Spezielle Middleware für fehlgeschlagene API-Anfragen die HTML zurückgeben
+    app.use((req, res, next) => {
+      const originalSend = res.send;
+      
+      res.send = function(body) {
+        // Prüfen, ob eine API-Anfrage versucht, HTML zurückzugeben (typisches 404-Symptom)
+        const isApiRequest = req.path.startsWith('/api/');
+        const isHtmlResponse = typeof body === 'string' && body.includes('<!DOCTYPE html>');
+        
+        if (isApiRequest && isHtmlResponse) {
+          console.warn(\`API-Route \${req.path} hat HTML zurückgegeben, sende 404 JSON\`);
+          return res.status(404).json({ error: 'API endpoint not found' });
+        }
+        
+        return originalSend.call(this, body);
+      };
+      
+      next();
+    });
+  }
+`;
+    
+    let position = serverCode.indexOf('app.use(express.static');
+    if (position === -1) {
+      position = serverCode.indexOf('app.listen');
+    }
+    
+    if (position !== -1) {
+      serverCode = serverCode.substring(0, position) + 
+                additionalMiddleware + 
+                serverCode.substring(position);
+                
+      fs.writeFileSync(serverCodePath, serverCode);
+      console.log('Express-Server erfolgreich mit Render-spezifischen Middlewares gepatcht');
+    } else {
+      console.error('Konnte keine geeignete Stelle im Express-Server finden, um Middleware einzufügen');
+    }
+  } else {
+    console.log('Express-Server wurde bereits gepatcht');
+  }
+}
+
+// Erstelle Redirect-Seiten für alle Verzeichnisse
+// Analog zu redirect-fix.js und custom-deploy.js
+const directAuthRedirect = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>LvlUp Tradingtagebuch - Login</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #0c1222;
-      color: white;
-    }
-    .container {
-      text-align: center;
-      padding: 2rem;
-      border-radius: 8px;
-      background-color: rgba(30, 41, 59, 0.8);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
-      max-width: 80%;
-    }
-    .logo {
-      margin-bottom: 1rem;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #3b82f6;
-    }
-    .button {
-      display: inline-block;
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-      margin-top: 1rem;
-    }
-    .button:hover {
-      background-color: #2563eb;
-    }
-  </style>
+  <meta http-equiv="refresh" content="0;url=/auth">
+  <title>LvlUp Trading Journal</title>
+  <script>
+    window.location.href = "/auth";
+  </script>
 </head>
 <body>
-  <div class="container">
-    <div class="logo">LvlUp Tradingtagebuch</div>
-    <h2>Willkommen zurück!</h2>
-    <p>Bitte melden Sie sich an, um Ihre Trading-Daten einzusehen und zu verwalten.</p>
-    <a href="/auth" class="button">Zum Login</a>
-  </div>
-  <script>
-    // Kein automatischer Redirect - wir bieten nur einen manuellen Button
-    console.log('Statische Login-Seite mit manuellem Button geladen');
-  </script>
+  <h3>Sie werden zur Anmeldeseite weitergeleitet...</h3>
 </body>
 </html>`;
 
-  fs.writeFileSync(path.join(path.dirname(indexHtmlPath), 'redirect.html'), redirectHtml);
-  
-  // NICHT index.html ersetzen, sondern nur die Notfall-Seite speichern
-  console.log('Notfall-Redirect-Seite erstellt, aber index.html bleibt unverändert');
-  console.log('Spezielle Redirect-Seite erstellt');
+// Speichere an allen möglichen Stellen
+const locations = [
+  path.join(__dirname, 'index.html'),
+  path.join(__dirname, 'public', 'index.html'),
+  path.join(__dirname, 'dist', 'index.html'),
+  path.join(__dirname, 'dist', 'public', 'index.html')
+];
+
+// Schreibe in alle verfügbaren Verzeichnisse
+for (const location of locations) {
+  if (fs.existsSync(path.dirname(location))) {
+    fs.writeFileSync(location, directAuthRedirect);
+    console.log(`Auth-Redirect nach ${location} geschrieben`);
+  }
 }
 
-console.log('Render-Patches abgeschlossen');
+console.log('Kombinierter Render-Patch (inkl. Express-Fix, Redirect-Fix und Custom-Deploy) abgeschlossen');
