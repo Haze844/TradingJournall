@@ -126,14 +126,15 @@ if (fs.existsSync(indexHtmlPath)) {
   fs.copyFileSync(indexHtmlPath, path.join(path.dirname(indexHtmlPath), '404.html'));
   console.log('404.html für Client-Routing erstellt');
   
-  // Spezielle Redirect-Seite für die Hauptseite erstellen
+  // Statt komplettes Ersetzen der index.html, erstellen wir eine direkte Server-seitige Lösung
+  console.log('Verwende Server-seitige Redirect-Lösung statt index.html zu ersetzen');
+
+  // Erstelle eine separate Redirect-Seite für Notfälle
   const redirectHtml = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=/auth">
-  <title>Weiterleitung...</title>
-  <script>window.location.replace('/auth');</script>
+  <title>LvlUp Tradingtagebuch - Login</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -152,43 +153,53 @@ if (fs.existsSync(indexHtmlPath)) {
       background-color: rgba(30, 41, 59, 0.8);
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
+      max-width: 80%;
     }
-    .spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #3b82f6;
-      animation: spin 1s ease-in-out infinite;
+    .logo {
       margin-bottom: 1rem;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    a {
+      font-size: 2rem;
+      font-weight: bold;
       color: #3b82f6;
-      text-decoration: none;
     }
-    a:hover {
-      text-decoration: underline;
+    .button {
+      display: inline-block;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      margin-top: 1rem;
+    }
+    .button:hover {
+      background-color: #2563eb;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="spinner"></div>
-    <h2>Weiterleitung...</h2>
-    <p>Sie werden zur Login-Seite weitergeleitet.</p>
-    <p>Falls keine automatische Umleitung erfolgt, <a href="/auth">hier klicken</a>.</p>
+    <div class="logo">LvlUp Tradingtagebuch</div>
+    <h2>Willkommen zurück!</h2>
+    <p>Bitte melden Sie sich an, um Ihre Trading-Daten einzusehen und zu verwalten.</p>
+    <a href="/auth" class="button">Zum Login</a>
   </div>
+  <script>
+    // Prüfen ob wir uns bereits auf der Auth-Seite befinden, um Schleifen zu vermeiden
+    if (window.location.pathname !== '/auth') {
+      setTimeout(function() {
+        window.location.href = '/auth';
+      }, 2000);
+    }
+  </script>
 </body>
 </html>`;
 
   fs.writeFileSync(path.join(path.dirname(indexHtmlPath), 'redirect.html'), redirectHtml);
   
-  // Ersetze index.html durch die Weiterleitungsseite
-  fs.writeFileSync(indexHtmlPath, redirectHtml);
+  // NICHT index.html ersetzen, sondern nur die Notfall-Seite speichern
+  console.log('Notfall-Redirect-Seite erstellt, aber index.html bleibt unverändert');
   console.log('Spezielle Redirect-Seite erstellt');
 }
 

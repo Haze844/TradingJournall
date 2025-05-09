@@ -71,6 +71,13 @@ app.use((req, res, next) => {
     const spaRoutingPatch = `
 // Direkter Redirect für Root-Pfad zu /auth
 app.get('/', (req, res) => {
+  console.log('Server-seitiger Redirect: / -> /auth');
+  return res.redirect('/auth');
+});
+
+// Direkter Redirect für ungültige/alte Pfade, die wir reparieren müssen
+app.get('/Weiterleitung', (req, res) => {
+  console.log('Server-seitiger Redirect: /Weiterleitung -> /auth');
   return res.redirect('/auth');
 });
 
