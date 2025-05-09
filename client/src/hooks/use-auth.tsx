@@ -89,8 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen zurück, ${userData.username}!`,
       });
       
-      // Nach Login zur Hauptseite navigieren
-      navigate("/");
+      // HIER KEINE NAVIGATION MEHR - stattdessen wird die ProtectedRoute automatisch weiterleiten
+      // Verzögerung hinzufügen, um Raceconditons zu vermeiden
+      setTimeout(() => {
+        // Manuell die Anfrage an /api/user erneut senden, um sicherzustellen, dass der Nutzer wirklich eingeloggt ist
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      }, 500);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -141,8 +145,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen bei TradingJournal, ${userData.username}!`,
       });
       
-      // Nach Registrierung zur Hauptseite navigieren
-      navigate("/");
+      // HIER KEINE NAVIGATION MEHR - stattdessen wird die ProtectedRoute automatisch weiterleiten
+      // Verzögerung hinzufügen, um Raceconditons zu vermeiden
+      setTimeout(() => {
+        // Manuell die Anfrage an /api/user erneut senden, um sicherzustellen, dass der Nutzer wirklich eingeloggt ist
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      }, 500);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -193,8 +201,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "Deine Sitzung wurde beendet."
       });
       
-      // Nach Abmeldung zur Auth-Seite navigieren
-      navigate("/auth");
+      // Verzögerung für Redirect
+      setTimeout(() => {
+        // Nach Abmeldung zur Auth-Seite navigieren
+        // Hier ist die Navigation in Ordnung, da wir zur Auth-Seite navigieren
+        // was einer öffentlichen Route entspricht
+        navigate("/auth");
+      }, 300);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -206,9 +219,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: "destructive",
       });
       
-      // Trotz Fehler zur Auth-Seite navigieren als Fallback
+      // Trotz Fehler zur Auth-Seite navigieren, aber mit Verzögerung
       console.log("Trotz Fehler zur Auth-Seite navigieren");
-      navigate("/auth");
+      setTimeout(() => navigate("/auth"), 300);
     },
   });
 
