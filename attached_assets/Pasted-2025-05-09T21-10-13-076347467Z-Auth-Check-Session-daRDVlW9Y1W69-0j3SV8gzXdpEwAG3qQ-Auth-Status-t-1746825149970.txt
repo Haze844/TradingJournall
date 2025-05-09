@@ -1,0 +1,335 @@
+2025-05-09T21:10:13.076347467Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:13.076375558Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:13.080661331Z 9:10:13 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:13.081887314Z 9:10:13 PM [express] GET /api/health 304 in 14ms
+2025-05-09T21:10:13.160816458Z 9:10:13 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:10:14.313956119Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:14.313974379Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:14.31854077Z 9:10:14 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:14.320337148Z 9:10:14 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:14.391316242Z 9:10:14 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:15.486131982Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:15.486176454Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:15.491014212Z 9:10:15 PM [express] GET /api/user 304 in 16ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:15.493017064Z 9:10:15 PM [express] GET /api/health 304 in 15ms
+2025-05-09T21:10:15.588178928Z 9:10:15 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:10:16.72204701Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:16.722401829Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:16.731097238Z 9:10:16 PM [express] GET /api/user 304 in 17ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:16.732455654Z 9:10:16 PM [express] GET /api/health 304 in 21ms
+2025-05-09T21:10:16.825051559Z 9:10:16 PM [express] GET /api/debug 304 in 16ms
+2025-05-09T21:10:18.438214838Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:18.438237779Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:18.442829Z 9:10:18 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:18.444079193Z 9:10:18 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:18.704263634Z 9:10:18 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:10:20.568990996Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:20.569017247Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:20.573585717Z 9:10:20 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:20.576616297Z 9:10:20 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:20.693982117Z 9:10:20 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:22.480603856Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:22.480627297Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:22.486563883Z 9:10:22 PM [express] GET /api/user 304 in 14ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:22.48717715Z 9:10:22 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:10:22.659668245Z 9:10:22 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:24.573588326Z 9:10:24 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:24.624576272Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:24.624599353Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:24.630727955Z 9:10:24 PM [express] GET /api/user 304 in 68ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:24.636155338Z 9:10:24 PM [express] GET /api/debug 304 in 10ms
+2025-05-09T21:10:26.39447803Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:26.3945009Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:26.398732132Z 9:10:26 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:26.399370969Z 9:10:26 PM [express] GET /api/health 304 in 17ms
+2025-05-09T21:10:26.570071087Z 9:10:26 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:27.593151004Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:27.593173514Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:27.597923019Z 9:10:27 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:27.600907308Z 9:10:27 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:10:27.672955491Z 9:10:27 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:28.824487099Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:28.82451377Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:28.825738952Z 9:10:28 PM [express] GET /api/health 304 in 16ms
+2025-05-09T21:10:28.829667676Z 9:10:28 PM [express] GET /api/user 304 in 19ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:28.884663218Z 9:10:28 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:30.402526781Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:30.402549021Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:30.408822717Z 9:10:30 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:30.411729944Z 9:10:30 PM [express] GET /api/health 304 in 15ms
+2025-05-09T21:10:30.651585108Z 9:10:30 PM [express] GET /api/debug 304 in 16ms
+2025-05-09T21:10:32.421053504Z 9:10:32 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:10:32.421380053Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:32.421393353Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:32.425784839Z 9:10:32 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:32.601270293Z 9:10:32 PM [express] GET /api/debug 304 in 24ms
+2025-05-09T21:10:34.405781565Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:34.431792872Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:34.431807482Z 9:10:34 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:34.431859393Z 9:10:34 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:34.573926195Z 9:10:34 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:36.356833516Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:36.386022777Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:36.386070558Z 9:10:36 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:36.386081468Z 9:10:36 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:36.425304234Z 9:10:36 PM [express] GET /api/debug 304 in 10ms
+2025-05-09T21:10:37.561172319Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:37.56119292Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:37.564916278Z 9:10:37 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:37.566052758Z 9:10:37 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:10:37.644037257Z 9:10:37 PM [express] GET /api/debug 304 in 11ms
+2025-05-09T21:10:38.84682566Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:38.84685069Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:38.851611126Z 9:10:38 PM [express] GET /api/user 304 in 15ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:38.854207364Z 9:10:38 PM [express] GET /api/health 304 in 18ms
+2025-05-09T21:10:38.922911919Z 9:10:38 PM [express] GET /api/debug 304 in 11ms
+2025-05-09T21:10:40.437081394Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:40.437108094Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:40.441663134Z 9:10:40 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:40.44906931Z 9:10:40 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:10:40.93759544Z 9:10:40 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:10:42.450195414Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:42.450217924Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:42.454080717Z 9:10:42 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:42.463905446Z 9:10:42 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:10:42.763685162Z 9:10:42 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:44.403663329Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:44.40368462Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:44.408845546Z 9:10:44 PM [express] GET /api/user 304 in 14ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:44.418968933Z 9:10:44 PM [express] GET /api/health 304 in 16ms
+2025-05-09T21:10:44.621014929Z 9:10:44 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:10:46.460890914Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:46.460911005Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:46.466584265Z 9:10:46 PM [express] GET /api/health 304 in 15ms
+2025-05-09T21:10:46.467208661Z 9:10:46 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:46.695389387Z 9:10:46 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:48.495521513Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:48.495559274Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:48.500360801Z 9:10:48 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:48.614739062Z 9:10:48 PM [express] GET /api/health 304 in 127ms
+2025-05-09T21:10:48.844075307Z 9:10:48 PM [express] GET /api/debug 304 in 81ms
+2025-05-09T21:10:50.456081056Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:50.456101146Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:50.4604011Z 9:10:50 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:50.46533043Z 9:10:50 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:10:50.746906335Z 9:10:50 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:10:52.505901955Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:52.505918686Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:52.509024718Z 9:10:52 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:52.510138847Z 9:10:52 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:52.939421643Z 9:10:52 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:10:54.607515273Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:54.607532243Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:54.610795639Z 9:10:54 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:54.611273272Z 9:10:54 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:54.915541507Z 9:10:54 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:10:56.478358456Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:56.478374176Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:56.482194267Z 9:10:56 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:10:56.483090351Z 9:10:56 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:56.720430698Z 9:10:56 PM [express] GET /api/debug 304 in 22ms
+2025-05-09T21:10:58.506855832Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:10:58.506873223Z Authentifiziert als Benutzer: mo
+2025-05-09T21:10:58.511889745Z 9:10:58 PM [express] GET /api/user 304 in 14ms :: {"id":2,"username":"mo"}
+2025-05-09T21:10:58.515245474Z 9:10:58 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:10:58.741149259Z 9:10:58 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:11:00.477389228Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:00.477417059Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:00.482937295Z 9:11:00 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:00.48578035Z 9:11:00 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:11:00.709552209Z 9:11:00 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:11:02.626762747Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:02.626779927Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:02.631834181Z 9:11:02 PM [express] GET /api/user 304 in 17ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:02.682320554Z 9:11:02 PM [express] GET /api/health 304 in 24ms
+2025-05-09T21:11:02.846674754Z 9:11:02 PM [express] GET /api/debug 304 in 15ms
+2025-05-09T21:11:04.394048986Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:04.394082856Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:04.397944869Z 9:11:04 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:04.399629453Z 9:11:04 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:11:04.591457299Z 9:11:04 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:06.479169857Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:06.479191028Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:06.480071021Z 9:11:06 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:06.483333127Z 9:11:06 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:06.717289225Z 9:11:06 PM [express] GET /api/debug 304 in 15ms
+2025-05-09T21:11:08.401356676Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:08.401376557Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:08.405203478Z 9:11:08 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:08.406760159Z 9:11:08 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:08.566891528Z 9:11:08 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:10.429119763Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:10.429141314Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:10.434241499Z 9:11:10 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:10.435465941Z 9:11:10 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:11:10.637226839Z 9:11:10 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:12.642148613Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:12.642172024Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:12.650147894Z 9:11:12 PM [express] GET /api/user 304 in 29ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:12.661552465Z 9:11:12 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:11:12.736653258Z 9:11:12 PM [express] GET /api/debug 304 in 17ms
+2025-05-09T21:11:14.402258192Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:14.402280473Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:14.404604024Z 9:11:14 PM [express] GET /api/health 304 in 10ms
+2025-05-09T21:11:14.406518235Z 9:11:14 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:14.584583947Z 9:11:14 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:11:16.398211379Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:16.39822874Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:16.399284288Z 9:11:16 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:16.402433531Z 9:11:16 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:16.573511548Z 9:11:16 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:11:18.39999777Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:18.400023901Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:18.400757321Z 9:11:18 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:11:18.403725849Z 9:11:18 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:18.640812089Z 9:11:18 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:20.408134419Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:20.408431707Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:20.409641849Z 9:11:20 PM [express] GET /api/health 304 in 15ms
+2025-05-09T21:11:20.414091847Z 9:11:20 PM [express] GET /api/user 304 in 21ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:20.57325712Z 9:11:20 PM [express] GET /api/debug 304 in 11ms
+2025-05-09T21:11:22.435871076Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:22.435906897Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:22.439995945Z 9:11:22 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:22.442968243Z 9:11:22 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:22.655807553Z 9:11:22 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:24.442946857Z 9:11:24 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:24.456550906Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:24.456567936Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:24.465363818Z 9:11:24 PM [express] GET /api/user 304 in 29ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:24.709094775Z 9:11:24 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:11:26.406342195Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:26.406366615Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:26.410634768Z 9:11:26 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:26.41146974Z 9:11:26 PM [express] GET /api/health 304 in 10ms
+2025-05-09T21:11:26.611105642Z 9:11:26 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:11:28.424446897Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:28.424467267Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:28.428681699Z 9:11:28 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:28.430970269Z 9:11:28 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:28.826569056Z 9:11:28 PM [express] GET /api/debug 304 in 220ms
+2025-05-09T21:11:30.532674989Z 9:11:30 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:11:30.546308749Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:30.54633341Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:30.558374237Z 9:11:30 PM [express] GET /api/user 304 in 41ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:30.630891402Z 9:11:30 PM [express] GET /api/debug 304 in 30ms
+2025-05-09T21:11:32.407398524Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:32.407423105Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:32.410594849Z 9:11:32 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:32.411218675Z 9:11:32 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:32.663725003Z 9:11:32 PM [express] GET /api/debug 304 in 30ms
+2025-05-09T21:11:34.393553243Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:34.393592434Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:34.397311402Z 9:11:34 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:34.398593426Z 9:11:34 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:11:34.588015718Z 9:11:34 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:11:36.610135366Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:36.610161537Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:36.612396046Z 9:11:36 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:36.614262045Z 9:11:36 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:36.670377217Z 9:11:36 PM [express] GET /api/debug 304 in 11ms
+2025-05-09T21:11:38.388416705Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:38.388453266Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:38.391509046Z 9:11:38 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:11:38.392065401Z 9:11:38 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:38.577365225Z 9:11:38 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:40.384647419Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:40.3846795Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:40.389491337Z 9:11:40 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:40.39831894Z 9:11:40 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:40.560282777Z 9:11:40 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:42.458764861Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:42.458805182Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:42.4598746Z 9:11:42 PM [express] GET /api/user 304 in 15ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:42.461504483Z 9:11:42 PM [express] GET /api/health 304 in 14ms
+2025-05-09T21:11:42.700777281Z 9:11:42 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:44.436166978Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:44.436189678Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:44.440460931Z 9:11:44 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:44.444468717Z 9:11:44 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:11:44.604346979Z 9:11:44 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:11:46.397765558Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:46.397787928Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:46.401931097Z 9:11:46 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:11:46.402613615Z 9:11:46 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:46.570095468Z 9:11:46 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:48.579003247Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:48.579025378Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:48.583226119Z 9:11:48 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:48.583935447Z 9:11:48 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:48.657200472Z 9:11:48 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:11:50.407637686Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:50.407660987Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:50.412306819Z 9:11:50 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:50.419126929Z 9:11:50 PM [express] GET /api/health 304 in 27ms
+2025-05-09T21:11:50.576782982Z 9:11:50 PM [express] GET /api/debug 304 in 15ms
+2025-05-09T21:11:52.400525882Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:52.400545002Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:52.403466299Z 9:11:52 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:52.407803514Z 9:11:52 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:11:52.586211805Z 9:11:52 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:11:54.403816493Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:54.403866524Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:54.407792218Z 9:11:54 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:54.408879856Z 9:11:54 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:11:54.701717959Z 9:11:54 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:11:56.397316425Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:56.397338825Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:56.40129222Z 9:11:56 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:56.404223357Z 9:11:56 PM [express] GET /api/health 304 in 11ms
+2025-05-09T21:11:56.670765576Z 9:11:56 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:11:58.413094975Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:11:58.413114856Z Authentifiziert als Benutzer: mo
+2025-05-09T21:11:58.417893732Z 9:11:58 PM [express] GET /api/user 304 in 16ms :: {"id":2,"username":"mo"}
+2025-05-09T21:11:58.430367502Z 9:11:58 PM [express] GET /api/health 304 in 28ms
+2025-05-09T21:11:58.623258825Z 9:11:58 PM [express] GET /api/debug 304 in 11ms
+2025-05-09T21:12:00.645800724Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:00.645832345Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:00.648797584Z 9:12:00 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:12:00.650654013Z 9:12:00 PM [express] GET /api/user 304 in 14ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:00.711561861Z 9:12:00 PM [express] GET /api/debug 304 in 10ms
+2025-05-09T21:12:02.481866409Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:02.48190044Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:02.486763019Z 9:12:02 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:02.487154949Z 9:12:02 PM [express] GET /api/health 304 in 13ms
+2025-05-09T21:12:02.650542004Z 9:12:02 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:12:04.400135245Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:04.400156916Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:04.401882761Z 9:12:04 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:12:04.411554037Z 9:12:04 PM [express] GET /api/user 304 in 23ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:04.614861165Z 9:12:04 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:12:05.525252956Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:05.525287537Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:05.52956695Z 9:12:05 PM [express] GET /api/user 304 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:05.577899466Z 9:12:05 PM [express] GET /api/health 304 in 60ms
+2025-05-09T21:12:05.77117576Z 9:12:05 PM [express] GET /api/debug 304 in 146ms
+2025-05-09T21:12:06.712124078Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:06.712142538Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:06.716046631Z 9:12:06 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:06.718733102Z 9:12:06 PM [express] GET /api/health 304 in 14ms
+2025-05-09T21:12:06.793365873Z 9:12:06 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:12:07.896609966Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:07.896631257Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:07.901721391Z 9:12:07 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:07.902034299Z 9:12:07 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:12:07.960619267Z 9:12:07 PM [express] GET /api/debug 304 in 14ms
+2025-05-09T21:12:15.746159348Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:15.746183799Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:15.748679485Z 9:12:15 PM [express] GET /api/health 304 in 10ms
+2025-05-09T21:12:15.750168384Z 9:12:15 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:15.894504016Z 9:12:15 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T21:12:16.655953023Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:16.655978344Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:16.660468552Z 9:12:16 PM [express] GET /api/user 304 in 11ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:16.664449757Z 9:12:16 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:12:16.719476541Z 9:12:16 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:12:17.9486895Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:17.948750182Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:17.954035942Z 9:12:17 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:17.95549779Z 9:12:17 PM [express] GET /api/health 304 in 15ms
+2025-05-09T21:12:18.039046836Z 9:12:18 PM [express] GET /api/debug 304 in 12ms
+2025-05-09T21:12:19.122265741Z Auth-Check - Session: daRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ Auth-Status: true
+2025-05-09T21:12:19.122292901Z Authentifiziert als Benutzer: mo
+2025-05-09T21:12:19.128488385Z 9:12:19 PM [express] GET /api/user 304 in 12ms :: {"id":2,"username":"mo"}
+2025-05-09T21:12:19.128972398Z 9:12:19 PM [express] GET /api/health 304 in 12ms
+2025-05-09T21:12:19.238530391Z 9:12:19 PM [express] GET /api/debug 304 in 12ms

@@ -1,4 +1,4 @@
-// redirect-fix.js - Spezieller Fix für Weiterleitungsschleife
+// redirect-fix.js - Statische Login-Seite ohne Weiterleitungen
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,89 +8,94 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-console.log('Starte Redirect-Fix für Weiterleitungsschleife...');
+console.log('Starte vereinfachten Static-Page-Fix ohne Weiterleitungslogik...');
 
-// Spezielle statische Weiterleitungsseite, die direkt an der Basis-URL platziert wird
-const staticRedirectHtml = `<!DOCTYPE html>
+// Extrem vereinfachte statische Seite ohne Weiterleitungen - nur direkter Link
+const staticLoginHtml = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>LvlUp Tradingtagebuch</title>
-  <script>
-    // Prüfen, ob wir bereits auf der Auth-Seite sind oder angemeldet
-    const isAuth = window.location.pathname.includes('/auth');
-    const isLoggedIn = document.cookie.includes('connect.sid');
-    
-    // Simple Zustandsverwaltung, um Schleifen zu vermeiden
-    try {
-      const redirectCount = parseInt(sessionStorage.getItem('redirectCount') || '0');
-      
-      if (redirectCount > 2) {
-        // Nach zu vielen Redirects einfach einen direkten Link anzeigen
-        document.write('<div style="font-family: Arial; text-align: center; margin-top: 100px;"><h1>LvlUp Tradingtagebuch</h1><p>Bitte klicken Sie hier, um zur Anmeldung zu gelangen:</p><a href="/auth" style="display: inline-block; background: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Zum Login</a></div>');
-      } else {
-        // Redirect-Zähler erhöhen
-        sessionStorage.setItem('redirectCount', (redirectCount + 1).toString());
-        
-        // Weiterleitung forcieren, aber nur wenn nötig
-        if (!isAuth && !isLoggedIn) {
-          window.location.replace('/auth');
-        }
-      }
-    } catch (e) {
-      // Fallback wenn sessionStorage nicht verfügbar ist
-      window.location.replace('/auth');
-    }
-  </script>
+  <title>LvlUp Tradingtagebuch - Login</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #0c1222;
+      color: white;
+      margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
-      background-color: #0c1222;
-      color: white;
     }
-    .container {
-      text-align: center;
-      padding: 2rem;
-      border-radius: 8px;
+    .login-container {
       background-color: rgba(30, 41, 59, 0.8);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 40px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
       backdrop-filter: blur(10px);
-      max-width: 80%;
+      max-width: 600px;
+      width: 100%;
     }
     .logo {
-      margin-bottom: 1rem;
-      font-size: 2rem;
-      font-weight: bold;
       color: #3b82f6;
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
-    .button {
-      display: inline-block;
+    h1 {
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+    .btn {
       background-color: #3b82f6;
       color: white;
       border: none;
-      border-radius: 4px;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 5px;
       cursor: pointer;
       text-decoration: none;
-      margin-top: 1rem;
+      display: inline-block;
+      transition: background-color 0.3s;
     }
-    .button:hover {
+    .btn:hover {
       background-color: #2563eb;
+    }
+    .info {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+    .credentials {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 20px;
+      text-align: left;
+    }
+    .credentials p {
+      margin: 5px 0;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="login-container">
     <div class="logo">LvlUp Tradingtagebuch</div>
-    <h2>Willkommen zurück!</h2>
-    <p>Sie werden automatisch weitergeleitet...</p>
-    <a href="/auth" class="button">Direkt zum Login</a>
+    <h1>Willkommen bei Ihrem Trading-Journal</h1>
+    <p>Klicken Sie auf den Button unten, um sich anzumelden und Ihr Trading-Journal zu verwalten.</p>
+    <a href="/auth" class="btn">Zum Login</a>
+    
+    <div class="credentials">
+      <p><strong>Demo-Zugangsdaten:</strong></p>
+      <p>Username: admin | Passwort: admin123</p>
+      <p>Username: mo | Passwort: mo123</p>
+    </div>
+    
+    <div class="info">
+      <p>Falls Sie Probleme bei der Anmeldung haben, stellen Sie sicher, dass Cookies aktiviert sind und versuchen Sie, die Seite neu zu laden.</p>
+    </div>
   </div>
 </body>
 </html>`;
@@ -102,24 +107,24 @@ try {
   const indexPath = path.join(basePath, 'index.html');
   
   // Schreibe die statische Seite
-  fs.writeFileSync(indexPath, staticRedirectHtml);
-  console.log(`Statische Weiterleitungsseite nach ${indexPath} geschrieben`);
+  fs.writeFileSync(indexPath, staticLoginHtml);
+  console.log(`Statische Login-Seite nach ${indexPath} geschrieben`);
   
   // Kopiere auch nach public/ falls dort gesucht wird
   const publicIndexPath = path.join(basePath, 'public', 'index.html');
   if (fs.existsSync(path.dirname(publicIndexPath))) {
-    fs.writeFileSync(publicIndexPath, staticRedirectHtml);
-    console.log(`Statische Weiterleitungsseite nach ${publicIndexPath} kopiert`);
+    fs.writeFileSync(publicIndexPath, staticLoginHtml);
+    console.log(`Statische Login-Seite nach ${publicIndexPath} kopiert`);
   }
   
   // Spezialfall für dist/
   const distIndexPath = path.join(basePath, 'dist', 'index.html');
   if (fs.existsSync(path.dirname(distIndexPath))) {
-    fs.writeFileSync(distIndexPath, staticRedirectHtml);
-    console.log(`Statische Weiterleitungsseite nach ${distIndexPath} kopiert`);
+    fs.writeFileSync(distIndexPath, staticLoginHtml);
+    console.log(`Statische Login-Seite nach ${distIndexPath} kopiert`);
   }
   
-  console.log('Redirect-Fix erfolgreich angewendet!');
+  console.log('Statische Login-Seite erfolgreich erstellt!');
 } catch (error) {
   console.error('Fehler beim Anwenden des Redirect-Fixes:', error);
 }
