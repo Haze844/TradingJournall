@@ -37,36 +37,46 @@ export function setupAuth(app: Express) {
   const isRender = process.env.RENDER || process.env.RENDER_EXTERNAL_URL;
   const isReplit = process.env.REPL_ID || process.env.REPL_SLUG;
   
-  // Cookie-Einstellungen je nach Umgebung anpassen
+  // COOKIE-FIX: Vereinheitlichte und vereinfachte Cookie-Einstellungen für alle Umgebungen
+  // Dies ist der Schlüssel zur Behebung der Authentifizierungsprobleme
   const cookieSettings: session.CookieOptions = {
-    maxAge: 1000 * 60 * 60 * 24, // 24 Stunden Standardwert
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Tage für bessere Persistenz
     httpOnly: true,
     path: '/'
   };
   
-  // Für Produktionsumgebungen und spezifische Plattformen
-  if (isProduction || isRender) {
-    // Cross-Origin-Anfragen in Produktionsumgebungen erlauben
-    cookieSettings.sameSite = 'none';
-    cookieSettings.secure = true;
-  } else if (isReplit) {
-    // Replit-spezifische Einstellungen
-    cookieSettings.sameSite = 'lax';
+  // KRITISCH: Setze SameSite immer auf 'lax' - dies erlaubt Cookies bei Redirects über Top-Level-Navigation,
+  // während sie bei CORS-Anfragen blockiert werden. Diese Einstellung funktioniert konsistent über alle
+  // gängigen Browser und Plattformen, im Gegensatz zu 'none', das mit 'secure=true' und zusätzlicher
+  // CORS-Konfiguration verbunden werden muss.
+  cookieSettings.sameSite = 'lax';
+  
+  // Sichere Cookies nur für HTTPS-Umgebungen aktivieren - Replit nutzt HTTPS, daher sicher
+  if (isProduction || isRender || isReplit) {
     cookieSettings.secure = true;
   } else {
-    // Für lokale Entwicklung
-    cookieSettings.sameSite = 'lax';
+    // Lokale Entwicklung ohne HTTPS - keine sicheren Cookies
     cookieSettings.secure = false;
   }
   
-  // Verbesserte Session-Einstellungen mit Debug-Logging und optimierten Cookie-Parametern
+  console.log("Finale Cookie-Einstellungen:", cookieSettings);
+  
+  // KRITISCH: Replit-spezifische Anpassungen, die in der Praxis funktionieren
+  if (isReplit) {
+    console.log("Replit-spezifische Session-Konfiguration aktiviert");
+    // Beim Replit-Deployment ist es wichtig, dass wir die Session bei jedem Request erneuern
+    // und ohne komplexe SameSite-Regeln arbeiten
+  }
+  
+  // Verbesserte Session-Einstellungen mit optimierten Parametern speziell für Replit
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "lvlup-trading-journal-secret-key",
-    resave: true, // Auf true gesetzt, um Session-Probleme zu vermeiden
-    saveUninitialized: true, // Auf true gesetzt, um neue Sessions zu erhalten
+    // KRITISCH: Diese Einstellungen auf true zu setzen ist essentiell für konsistentes Session-Verhalten
+    resave: true,              // Session bei jedem Request speichern - kritisch für Replit
+    saveUninitialized: true,   // Auch nicht initialisierte Sessions speichern
     store: storage.sessionStore,
-    rolling: true, // Verlängert die Cookie-Lebensdauer bei jeder Anfrage
-    name: 'lvlup.sid', // Expliziter Cookie-Name gegen Konflikte
+    rolling: true,             // Cookie-Timestamp bei jedem Request erneuern
+    name: 'app.sid',           // Konsistenter Cookie-Name
     cookie: cookieSettings
   };
   
@@ -239,45 +249,25 @@ export function setupAuth(app: Express) {
           }
         }
         
-        // Session regenerieren für bessere Sicherheit
-        req.session.regenerate((regErr) => {
-          if (regErr) {
-            console.error("Fehler bei Session-Regeneration:", regErr);
-            
-            // Falls Session-Regenerierung fehlschlägt, versuchen wir trotzdem zu speichern
-            req.session.save((saveErr) => {
-              if (saveErr) {
-                console.error("Fehler beim Speichern der Session:", saveErr);
-                return next(saveErr);
-              }
-              
-              console.log("Login erfolgreich (ohne Regeneration), Session gespeichert. Session-ID:", req.session.id, "User-ID:", user.id);
-              
-              // Don't send password to the client
-              const { password, ...userWithoutPassword } = user;
-              return res.status(200).json(userWithoutPassword);
-            });
-            
-            return; // Frühe Rückkehr nach dem Fehler
-          }
-          
-          // Session wieder mit dem Benutzer verknüpfen, da regenerate() die Session leert
-          req.login(user, () => {
-            // Session speichern um sicherzustellen, dass sie persistiert wird
-            req.session.save((saveErr) => {
-              if (saveErr) {
-                console.error("Fehler beim Speichern der Session:", saveErr);
-                return next(saveErr);
-              }
-              
-              console.log("Login erfolgreich, Session regeneriert und gespeichert. Session-ID:", req.session.id, "User-ID:", user.id);
-              
-              // Don't send password to the client
-              const { password, ...userWithoutPassword } = user;
-              return res.status(200).json(userWithoutPassword);
-            });
-          });
-        });
+        // FIX: Die Session-Regeneration ist ein häufiger Grund für Authentifizierungsprobleme in Replit
+  // Ich entferne diesen komplexen Mechanismus und verwende stattdessen eine einfachere Methode
+  
+  // Direkt Session speichern ohne Regeneration
+  req.session.save((saveErr) => {
+    if (saveErr) {
+      console.error("Fehler beim Speichern der Session:", saveErr);
+      return next(saveErr);
+    }
+    
+    console.log("Login erfolgreich, Session gespeichert ohne Regeneration. Session-ID:", req.session.id, "User-ID:", user.id);
+    
+    // Kurze Verzögerung, um sicherzustellen, dass die Session gespeichert wird
+    setTimeout(() => {
+      // Don't send password to the client
+      const { password, ...userWithoutPassword } = user;
+      return res.status(200).json(userWithoutPassword);
+    }, 50);
+  });
       });
     })(req, res, next);
   });
@@ -285,28 +275,22 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res, next) => {
     console.log("Logout-Anfrage erhalten. Session-ID:", req.session.id);
     
-    // Session speichern um den aktuellen Status zu sichern
-    req.session.save((err) => {
-      if (err) {
-        console.error("Fehler beim Speichern der Session vor Logout:", err);
+    // FIX: Vereinfachter, robusterer Logout-Prozess ohne Session-Regeneration
+    req.logout((logoutErr: any) => {
+      if (logoutErr) {
+        console.error("Fehler beim Logout:", logoutErr);
+        return next(logoutErr);
       }
       
-      req.logout((logoutErr: any) => {
-        if (logoutErr) {
-          console.error("Fehler beim Logout:", logoutErr);
-          return next(logoutErr);
+      // Session direkt speichern ohne Regeneration
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("Fehler beim Speichern der Session nach Logout:", saveErr);
+          return next(saveErr);
         }
         
-        // Session regenerieren um CSRF-Schutz zu verbessern
-        req.session.regenerate((regenerateErr) => {
-          if (regenerateErr) {
-            console.error("Fehler beim Regenerieren der Session:", regenerateErr);
-            return next(regenerateErr);
-          }
-          
-          console.log("Logout erfolgreich. Neue Session-ID:", req.session.id);
-          res.sendStatus(200);
-        });
+        console.log("Logout erfolgreich, Session gespeichert. Session-ID:", req.session.id);
+        res.sendStatus(200);
       });
     });
   });

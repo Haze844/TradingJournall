@@ -6,53 +6,27 @@ import cors from "cors";
 
 const app = express();
 
-// CORS konfigurieren, um Cross-Origin-Anfragen zu erlauben
-const isRender = process.env.RENDER === "true";
-const isReplit = process.env.REPL_ID !== undefined;
+// Umgebungsvariablen erkennen
+const isRender = process.env.RENDER === "true" || !!process.env.RENDER_EXTERNAL_URL;
+const isReplit = !!process.env.REPL_ID || !!process.env.REPL_SLUG;
 const isNetlify = process.env.NETLIFY === "true";
+const isProduction = process.env.NODE_ENV === 'production';
 
-console.log("Umgebung erkannt:", { isRender, isReplit, isNetlify });
+console.log("Umgebung erkannt:", { 
+  isRender, 
+  isReplit, 
+  isNetlify,
+  isProduction,
+  nodeEnv: process.env.NODE_ENV 
+});
 
-// Verbesserte dynamische CORS-Konfiguration basierend auf der Umgebung
+// GRUNDLEGENDER FIX: Stark vereinfachte CORS-Konfiguration für alle Umgebungen
+// Erlaubt alle Anfragen, unabhängig vom Ursprung - kritisch für Replit
 app.use(cors({
-  origin: function(origin, callback) {
-    // Erlaubt alle Anfragen in der Entwicklungsumgebung
-    console.log("CORS Origin-Anfrage:", origin);
-    
-    // In Entwicklungsumgebung oder wenn kein Origin gesendet wurde
-    if (!origin || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-      return;
-    }
-    
-    // Erlaube Anfragen vom selben Server (für Render & Replit)
-    const allowedOrigins = [
-      // Dynamische Erkennung basierend auf Host-Header hinzufügen
-      /\.replit\.app$/,
-      /\.replit\.dev$/,
-      /\.janeway\.replit\.dev$/,
-      /\.onrender\.com$/,
-      /lvlup-trading-journal\.onrender\.com/,
-      /netlify\.app$/
-    ];
-    
-    const allowed = allowedOrigins.some(pattern => {
-      if (pattern instanceof RegExp) {
-        return pattern.test(origin);
-      }
-      return origin.includes(pattern);
-    });
-    
-    if (allowed) {
-      callback(null, true);
-    } else {
-      console.log("CORS Origin abgelehnt:", origin);
-      callback(null, false);
-    }
-  },
-  credentials: true, // Wichtig für Cookies und Authentifizierung
+  origin: true, // Erlaubt alle Origins
+  credentials: true, // Erlaubt Cookies bei Cross-Origin-Anfragen, essentiell für den Auth-Fix
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Client-Info']
 }));
 
 // Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder
