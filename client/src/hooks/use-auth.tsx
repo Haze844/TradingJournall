@@ -90,12 +90,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen zurück, ${userData.username}!`,
       });
       
-      // HIER KEINE NAVIGATION MEHR - stattdessen wird die ProtectedRoute automatisch weiterleiten
-      // Verzögerung hinzufügen, um Raceconditons zu vermeiden
+      // DIREKTE NAVIGATION zur Hauptseite - WICHTIG FÜR KORREKTE WEITERLEITUNG
+      // Wir verwenden window.location für einen vollständigen Reload und Navigation
+      console.log("Login erfolgreich - navigiere zur Hauptseite über window.location");
+      
+      // Kurze Verzögerung, damit Toast angezeigt werden kann
       setTimeout(() => {
-        // Manuell die Anfrage an /api/user erneut senden, um sicherzustellen, dass der Nutzer wirklich eingeloggt ist
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      }, 500);
+        window.location.href = "/";
+      }, 800);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -146,12 +148,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen bei TradingJournal, ${userData.username}!`,
       });
       
-      // HIER KEINE NAVIGATION MEHR - stattdessen wird die ProtectedRoute automatisch weiterleiten
-      // Verzögerung hinzufügen, um Raceconditons zu vermeiden
+      // DIREKTE NAVIGATION zur Hauptseite - WICHTIG FÜR KORREKTE WEITERLEITUNG
+      // Gleicher Ansatz wie beim Login
+      console.log("Registrierung erfolgreich - navigiere zur Hauptseite über window.location");
+      
+      // Kurze Verzögerung, damit Toast angezeigt werden kann
       setTimeout(() => {
-        // Manuell die Anfrage an /api/user erneut senden, um sicherzustellen, dass der Nutzer wirklich eingeloggt ist
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      }, 500);
+        window.location.href = "/";
+      }, 800);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen

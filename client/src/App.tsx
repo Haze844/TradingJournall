@@ -124,18 +124,12 @@ function Router() {
   // Debug-Logging
   console.log("Aktuelle Router-Location:", location);
   
-  // FIX: Direkt zur Authentifizierungsseite umleiten, wenn wir auf der Root-Seite sind
-  // Entfernen der Landing Page - direkte Umleitung zur Auth-Seite
+  // KEIN Redirect mehr von der Root-Page - hauptseite wird durch ProtectedRoute geschützt
+  // Der Nutzer wird immer auf die entsprechende Seite geleitet
+  // WICHTIG: Entfernt um Weiterleitungsprobleme zu vermeiden
   if (location === "/") {
-    console.log("Root-Pfad erkannt, leite zur Authentifizierungsseite weiter");
-    
-    // Wir verwenden einen useEffect für die Weiterleitung, um einen Rendering-Zyklus zu vermeiden
-    useEffect(() => {
-      window.location.href = "/auth";
-    }, []);
-    
-    // Während der Weiterleitung zeigen wir nichts an, um Flackern zu vermeiden
-    return null;
+    console.log("Root-Pfad erkannt, zeige direkt die geschützte Route an");
+    // Keine Weiterleitung mehr an dieser Stelle - überlasse das dem ProtectedRoute
   }
   
   // Standard-Router für alle anderen Pfade
