@@ -117,7 +117,36 @@ function Router() {
     console.log("Netlify/Render Umgebung: Verwende Standard-Routing ohne Weiterleitungen");
   }
   
-  // Standard-Router für normale Umgebung
+  // WICHTIG: Direkter Hard-Fix für das Routing-Problem
+  // Wenn wir auf der Root-Seite sind, zeigen wir einen Login-Link ohne Weiterleitung
+  const [location] = useLocation();
+  
+  // Debug-Logging
+  console.log("Aktuelle Router-Location:", location);
+  
+  // Wenn wir auf der Root sind, zeigen wir eine einfache Seite mit Link zur Auth
+  if (location === "/") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-black flex flex-col">
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-slate-800/70 backdrop-blur-md rounded-xl p-8 max-w-3xl w-full">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-blue-400 mb-2">LvlUp Tradingtagebuch</h1>
+              <p className="text-slate-300">Bitte melden Sie sich an, um Ihre Handelsaktivitäten zu verfolgen</p>
+            </div>
+            
+            <div className="flex justify-center mt-8">
+              <Link href="/auth" className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-md text-center font-medium transition-colors">
+                Zur Anmeldeseite
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Standard-Router für alle anderen Pfade
   return (
     <Switch>
       <ProtectedRoute path="/" component={SimpleHome} />
