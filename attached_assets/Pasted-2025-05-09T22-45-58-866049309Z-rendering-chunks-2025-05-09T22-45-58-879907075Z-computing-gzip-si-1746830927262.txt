@@ -1,0 +1,78 @@
+2025-05-09T22:45:58.866049309Z rendering chunks...
+2025-05-09T22:45:58.879907075Z computing gzip size...
+2025-05-09T22:45:58.913548689Z ../dist/public/index.html                     1.91 kB │ gzip:   0.75 kB
+2025-05-09T22:45:58.913649891Z ../dist/public/assets/index-DksVZOiq.css    100.05 kB │ gzip:  16.49 kB
+2025-05-09T22:45:58.913701022Z ../dist/public/assets/index-C9VOsoin.js   1,361.36 kB │ gzip: 365.87 kB
+2025-05-09T22:45:58.913843856Z 
+2025-05-09T22:45:58.913851936Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-09T22:45:58.913855236Z - Using dynamic import() to code-split the application
+2025-05-09T22:45:58.913858536Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-09T22:45:58.913861126Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-09T22:45:58.914129163Z ✓ built in 7.81s
+2025-05-09T22:45:59.00699631Z 
+2025-05-09T22:45:59.00702254Z   dist/index.js  166.3kb
+2025-05-09T22:45:59.00702742Z 
+2025-05-09T22:45:59.007031771Z ⚡ Done in 14ms
+2025-05-09T22:46:00.043012866Z ==> Uploading build...
+2025-05-09T22:46:10.303095001Z ==> Uploaded in 6.4s. Compression took 3.8s
+2025-05-09T22:46:10.503202073Z ==> Build successful 🎉
+2025-05-09T22:46:19.962263977Z ==> Deploying...
+2025-05-09T22:46:43.479115852Z ==> Running 'node setup-db.js && node render-patch.js && node dist/index.js'
+2025-05-09T22:46:44.485723771Z Datenbank erfolgreich eingerichtet
+2025-05-09T22:46:54.679471393Z Starte vereinfachten Render-Patch...
+2025-05-09T22:46:54.767096135Z index.html gepatcht für Render-Deployment ohne Weiterleitungs-Loops
+2025-05-09T22:46:54.767319949Z 404.html für Client-Routing erstellt
+2025-05-09T22:46:54.768361366Z Konnte keine geeignete Stelle im Express-Server finden, um Middleware einzufügen
+2025-05-09T22:46:54.768731292Z Auth-Redirect nach /opt/render/project/src/index.html geschrieben
+2025-05-09T22:46:54.770065243Z Auth-Redirect nach /opt/render/project/src/public/index.html geschrieben
+2025-05-09T22:46:54.770264326Z Auth-Redirect nach /opt/render/project/src/dist/index.html geschrieben
+2025-05-09T22:46:54.770441029Z Auth-Redirect nach /opt/render/project/src/dist/public/index.html geschrieben
+2025-05-09T22:46:54.770531621Z Vereinfachter Render-Patch abgeschlossen
+2025-05-09T22:47:06.174981426Z Datenbankverbindung mit Neon Serverless wird hergestellt...
+2025-05-09T22:47:06.17708248Z Datenbankverbindung erfolgreich initialisiert.
+2025-05-09T22:47:06.177335254Z Storage-Auswahl: DatabaseStorage (DATABASE_URL vorhanden)
+2025-05-09T22:47:06.26637411Z Umgebung erkannt: { isRender: true, isReplit: false, isNetlify: false }
+2025-05-09T22:47:06.269992828Z Session-Konfiguration initialisiert mit: {
+2025-05-09T22:47:06.270011339Z   secret: 'VORHANDEN',
+2025-05-09T22:47:06.270016099Z   resave: true,
+2025-05-09T22:47:06.270020999Z   saveUninitialized: true,
+2025-05-09T22:47:06.270024999Z   sessionStoreType: 'PGStore',
+2025-05-09T22:47:06.270029069Z   cookieSettings: {
+2025-05-09T22:47:06.270033519Z     maxAge: 86400000,
+2025-05-09T22:47:06.270036379Z     httpOnly: true,
+2025-05-09T22:47:06.270038959Z     path: '/',
+2025-05-09T22:47:06.270041529Z     sameSite: 'none',
+2025-05-09T22:47:06.270044119Z     secure: true
+2025-05-09T22:47:06.270046689Z   }
+2025-05-09T22:47:06.270049699Z }
+2025-05-09T22:47:06.67451707Z 10:47:06 PM [express] serving on port 5000
+2025-05-09T22:47:07.186954752Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:10.565945242Z ==> Your service is live 🎉
+2025-05-09T22:47:53.023445256Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:53.314807854Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:53.596307333Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:53.849446695Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:54.074495294Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:54.212079522Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:54.347288802Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:54.485957948Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:54.611449132Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:54.744229303Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:54.873395555Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.02442722Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.144978074Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.26873776Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.401206196Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.539944133Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.676470665Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.809359357Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:55.944978154Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:56.083999906Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:56.20024579Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:56.338282986Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:56.493372697Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:56.642305858Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:56.777851064Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:56.95500185Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:57.099657383Z CORS Origin-Anfrage: undefined
+2025-05-09T22:47:57.255877012Z CORS Origin-Anfrage: undefined

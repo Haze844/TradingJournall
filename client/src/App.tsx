@@ -111,16 +111,10 @@ function Router() {
     console.log("Replit-Umgebung erkannt - verwende leere Basis-URL");
   }
   
-  // Angepasstes Routing für Netlify und Render - direkter Zugriff auf Auth-Seite
+  // Einheitliches Routing für alle Umgebungen ohne Weiterleitungen
+  // KEINE speziellen Weiterleitungen mehr für Netlify/Render
   if (isNetlify || isRender) {
-    return (
-      <Switch>
-        <Route path="/" component={AuthPage} />
-        <Route path="/auth" component={AuthPage} />
-        <Route path="/booklet" component={Booklet} />
-        <Route path="*" component={AuthPage} />
-      </Switch>
-    );
+    console.log("Netlify/Render Umgebung: Verwende Standard-Routing ohne Weiterleitungen");
   }
   
   // Standard-Router für normale Umgebung

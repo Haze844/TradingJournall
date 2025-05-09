@@ -25,7 +25,7 @@ if (fs.existsSync(indexHtmlPath)) {
   indexHtml = indexHtml.replace(
     '</head>',
     `<script>
-      // Erkennung der Render-Umgebung
+      // Erkennung der Render-Umgebung ohne Weiterleitungen
       (function() {
         const isRender = window.location.hostname.includes('render.com') || 
                          window.location.hostname.includes('onrender.com');
@@ -35,11 +35,12 @@ if (fs.existsSync(indexHtmlPath)) {
           hostname: window.location.hostname
         });
         
-        // Config-Objekt direkt im window-Objekt setzen
+        // Config-Objekt direkt im window-Objekt setzen (keinerlei Weiterleitungen)
         window.APP_CONFIG = {
           isRender: isRender,
           apiBaseUrl: '',
-          basename: ''
+          basename: '',
+          noRedirects: true
         };
         
         // API-Routen-Fixes
@@ -104,10 +105,28 @@ if (fs.existsSync(serverCodePath)) {
   if (isRender) {
     console.log('Render-spezifische Middlewares aktiviert');
     
-    // Root-Pfad speziell behandeln - direkt zu /auth umleiten
+    // Root-Pfad mit statischer HTML-Seite ohne Redirect bedienen
     app.get('/', (req, res) => {
-      console.log('Root-Pfad aufgerufen, leite weiter zu /auth');
-      return res.redirect('/auth');
+      console.log('Root-Pfad aufgerufen, sende statische HTML-Seite (keine Weiterleitung)');
+      res.send(`<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>LvlUp Trading Journal</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LvlUp Trading Journal</h1>
+    <p>Willkommen beim Trading Journal.</p>
+    <a class="link" href="/auth">Zur Anmeldeseite</a>
+  </div>
+</body>
+</html>`);
     });
   }
 `;
@@ -132,25 +151,30 @@ if (fs.existsSync(serverCodePath)) {
   }
 }
 
-// Erstelle eine direkte Weiterleitung zur Auth-Seite für alle kritischen Pfade
-const directAuthRedirect = `<!DOCTYPE html>
+// WICHTIG: KEINE Redirects oder Weiterleitungen mehr erstellen!
+// Stattdessen einfache statische HTML-Dateien ohne Redirects bereitstellen
+
+const simpleIndexHtml = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=/auth">
   <title>LvlUp Trading Journal</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+  </style>
 </head>
 <body>
-  <script>
-    window.location.href = "/auth";
-  </script>
-  <noscript>
-    <p>Bitte <a href="/auth">hier klicken</a> um zur Anmeldeseite zu gelangen.</p>
-  </noscript>
+  <div class="container">
+    <h1>LvlUp Trading Journal</h1>
+    <p>Willkommen beim Trading Journal.</p>
+    <a class="link" href="/auth">Zur Anmeldeseite</a>
+  </div>
 </body>
 </html>`;
 
-// Speichere an allen wichtigen Pfaden
+// Speichere statische HTML ohne Redirects
 const paths = [
   path.join(__dirname, 'index.html'),
   path.join(__dirname, 'public', 'index.html'),
@@ -158,11 +182,11 @@ const paths = [
   path.join(__dirname, 'dist', 'public', 'index.html')
 ];
 
-// Schreibe in alle verfügbaren Verzeichnisse
+// Schreibe statische Seiten ohne Redirects
 for (const filePath of paths) {
   if (fs.existsSync(path.dirname(filePath))) {
-    fs.writeFileSync(filePath, directAuthRedirect);
-    console.log(`Auth-Redirect nach ${filePath} geschrieben`);
+    fs.writeFileSync(filePath, simpleIndexHtml);
+    console.log(`Statische Seite (ohne Redirect) nach ${filePath} geschrieben`);
   }
 }
 
