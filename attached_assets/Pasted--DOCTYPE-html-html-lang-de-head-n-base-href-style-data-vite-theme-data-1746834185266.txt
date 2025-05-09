@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="de">
+  <head>\n  <base href="/">
+    <style data-vite-theme="" data-inject-first="">:root {
+      --background: 244 100% 1%;
+--foreground: 219 100% 96%;
+--muted: 221 73% 34%;
+--muted-foreground: 219 100% 96%;
+--popover: 223 91% 12%;
+--popover-foreground: 219 100% 96%;
+--card: 223 91% 12%;
+--card-foreground: 219 100% 96%;
+--border: 221 73% 34%;
+--input: 221 73% 34%;
+--primary: 221 91% 60%;
+--primary-foreground: 219 100% 99%;
+--secondary: 221 73% 34%;
+--secondary-foreground: 219 100% 96%;
+--accent: 221 73% 34%;
+--accent-foreground: 219 100% 96%;
+--destructive: 0 62.8% 30.6%;
+--destructive-foreground: 0 0% 98%;
+--ring: 221 91% 60%;
+--radius: 1.5rem;
+  }
+  .light {
+      --background: 219 99% 80%;
+--foreground: 242 100% 16%;
+--muted: 220 95% 70%;
+--muted-foreground: 242 100% 16%;
+--popover: 219 100% 99%;
+--popover-foreground: 242 100% 16%;
+--card: 219 100% 99%;
+--card-foreground: 242 100% 16%;
+--border: 220 95% 70%;
+--input: 220 95% 70%;
+--primary: 220 100% 71%;
+--primary-foreground: 219 100% 99%;
+--secondary: 219 100% 86%;
+--secondary-foreground: 242 100% 16%;
+--accent: 219 100% 86%;
+--accent-foreground: 242 100% 16%;
+--destructive: 0 84.2% 60.2%;
+--destructive-foreground: 60 9.1% 97.8%;
+--ring: 220 100% 71%;
+--radius: 1.5rem;
+  }</style>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>LvlUp Tradingtagebuch</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="module" crossorigin src="/assets/index-DrY8JpOk.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CdDPDy9v.css">
+  \n<script>\n  // Konfiguration für verschiedene Umgebungen\n  (function() {\n    const isRender = window.location.hostname.includes("render.com") || window.location.hostname.includes("onrender.com");\n    window.APP_CONFIG = {\n      isRender: isRender,\n      apiBaseUrl: "",\n      basename: "",\n      noRedirects: true\n    };\n    console.log("App konfiguriert für:", { isRender: isRender, hostname: window.location.hostname });\n  })();\n</script>\n</head>
+  <body class="min-h-screen bg-background text-foreground">
+    <div id="root"></div>
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+  </body>
+</html>

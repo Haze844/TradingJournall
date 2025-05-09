@@ -3,8 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <base href="/" />
     <title>LvlUp Tradingtagebuch</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+      // WICHTIG: Globale App-Konfiguration für konsistentes Routing
+      window.APP_CONFIG = {
+        isNetlify: window.location.hostname.includes('netlify.app'),
+        isRender: window.location.hostname.includes('render.com') || window.location.hostname.includes('onrender.com'),
+        isReplit: window.location.hostname.includes('replit.dev') || window.location.hostname.includes('repl.co'),
+        apiBaseUrl: "",
+        basename: "",
+        noRedirects: false // Aktiviere korrektes SPA-Routing
+      };
+      console.log("App konfiguriert:", window.APP_CONFIG);
+    </script>
   </head>
   <body class="min-h-screen bg-background text-foreground">
     <div id="root"></div>
