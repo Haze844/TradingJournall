@@ -1,0 +1,50 @@
+2025-05-08T21:20:42.137798273Z 
+2025-05-08T21:20:42.137805003Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-08T21:20:42.137809093Z - Using dynamic import() to code-split the application
+2025-05-08T21:20:42.137813133Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-08T21:20:42.137816573Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-08T21:20:42.13808499Z ✓ built in 7.65s
+2025-05-08T21:20:42.228690939Z 
+2025-05-08T21:20:42.22871818Z   dist/index.js  159.6kb
+2025-05-08T21:20:42.2287222Z 
+2025-05-08T21:20:42.22872584Z ⚡ Done in 13ms
+2025-05-08T21:20:52.079706738Z ==> Uploading build...
+2025-05-08T21:21:06.530823958Z ==> Uploaded in 10.5s. Compression took 4.0s
+2025-05-08T21:21:06.571939936Z ==> Build successful 🎉
+2025-05-08T21:21:12.255478999Z ==> Deploying...
+2025-05-08T21:21:36.968717819Z ==> Running 'node server-adapter.js'
+2025-05-08T21:21:37.255329635Z node:internal/modules/cjs/loader:1228
+2025-05-08T21:21:37.255365246Z   throw err;
+2025-05-08T21:21:37.255368476Z   ^
+2025-05-08T21:21:37.255371026Z 
+2025-05-08T21:21:37.255374366Z Error: Cannot find module '/opt/render/project/src/server-adapter.js'
+2025-05-08T21:21:37.255376886Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-08T21:21:37.255379896Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-08T21:21:37.255382826Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-08T21:21:37.255385436Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-08T21:21:37.255388546Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-08T21:21:37.255392536Z     at node:internal/main/run_main_module:36:49 {
+2025-05-08T21:21:37.255395856Z   code: 'MODULE_NOT_FOUND',
+2025-05-08T21:21:37.255399067Z   requireStack: []
+2025-05-08T21:21:37.255402136Z }
+2025-05-08T21:21:37.255404777Z 
+2025-05-08T21:21:37.255407477Z Node.js v22.14.0
+2025-05-08T21:21:38.566618899Z ==> Exited with status 1
+2025-05-08T21:21:38.710776294Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-08T21:21:43.081581369Z ==> Running 'node server-adapter.js'
+2025-05-08T21:21:43.283391339Z node:internal/modules/cjs/loader:1228
+2025-05-08T21:21:43.28342349Z   throw err;
+2025-05-08T21:21:43.2834258Z   ^
+2025-05-08T21:21:43.28342735Z 
+2025-05-08T21:21:43.283430011Z Error: Cannot find module '/opt/render/project/src/server-adapter.js'
+2025-05-08T21:21:43.283431731Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-08T21:21:43.283434491Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-08T21:21:43.283436091Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-08T21:21:43.283437591Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-08T21:21:43.283439811Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-08T21:21:43.283442871Z     at node:internal/main/run_main_module:36:49 {
+2025-05-08T21:21:43.283445521Z   code: 'MODULE_NOT_FOUND',
+2025-05-08T21:21:43.283449011Z   requireStack: []
+2025-05-08T21:21:43.283451781Z }
+2025-05-08T21:21:43.283454081Z 
+2025-05-08T21:21:43.283456601Z Node.js v22.14.0

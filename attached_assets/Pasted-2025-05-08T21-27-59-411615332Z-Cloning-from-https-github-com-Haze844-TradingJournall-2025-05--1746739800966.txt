@@ -1,0 +1,98 @@
+2025-05-08T21:27:59.411615332Z ==> Cloning from https://github.com/Haze844/TradingJournall
+2025-05-08T21:27:59.984152436Z ==> Checking out commit e63f9c8434ad48d74514c048e17e2db4bb64a883 in branch main
+2025-05-08T21:28:01.472539333Z ==> Using Node.js version 22.14.0 (default)
+2025-05-08T21:28:01.496993411Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-08T21:28:03.321408618Z ==> Using Bun version 1.1.0 (default)
+2025-05-08T21:28:03.321432819Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-08T21:28:03.367696309Z ==> Running build command 'npm install --include=dev; npm run build'...
+2025-05-08T21:28:22.384784278Z 
+2025-05-08T21:28:22.3848127Z added 763 packages, and audited 764 packages in 19s
+2025-05-08T21:28:22.384825331Z 
+2025-05-08T21:28:22.384841582Z 74 packages are looking for funding
+2025-05-08T21:28:22.384861363Z   run `npm fund` for details
+2025-05-08T21:28:22.408892516Z 
+2025-05-08T21:28:22.408910367Z 7 moderate severity vulnerabilities
+2025-05-08T21:28:22.408915427Z 
+2025-05-08T21:28:22.408921898Z To address issues that do not require attention, run:
+2025-05-08T21:28:22.408926508Z   npm audit fix
+2025-05-08T21:28:22.408930078Z 
+2025-05-08T21:28:22.408934109Z To address all issues (including breaking changes), run:
+2025-05-08T21:28:22.408938189Z   npm audit fix --force
+2025-05-08T21:28:22.408941959Z 
+2025-05-08T21:28:22.408947349Z Run `npm audit` for details.
+2025-05-08T21:28:22.575595298Z 
+2025-05-08T21:28:22.575614939Z > rest-express@1.0.0 build
+2025-05-08T21:28:22.575620959Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-08T21:28:22.57562662Z 
+2025-05-08T21:28:22.847144818Z vite v5.4.14 building for production...
+2025-05-08T21:28:22.904325764Z transforming...
+2025-05-08T21:28:23.131599793Z Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+2025-05-08T21:28:23.131620554Z   npx update-browserslist-db@latest
+2025-05-08T21:28:23.131625105Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-08T21:28:29.671282658Z ✓ 3401 modules transformed.
+2025-05-08T21:28:30.243999053Z rendering chunks...
+2025-05-08T21:28:30.258070497Z computing gzip size...
+2025-05-08T21:28:30.289809366Z ../dist/public/index.html                     1.91 kB │ gzip:   0.75 kB
+2025-05-08T21:28:30.289932333Z ../dist/public/assets/index-BCPvXEFI.css     99.44 kB │ gzip:  16.39 kB
+2025-05-08T21:28:30.289986857Z ../dist/public/assets/index-BVEnBOwi.js   1,356.02 kB │ gzip: 364.09 kB
+2025-05-08T21:28:30.290148796Z 
+2025-05-08T21:28:30.290157617Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-08T21:28:30.290161777Z - Using dynamic import() to code-split the application
+2025-05-08T21:28:30.290165667Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-08T21:28:30.290169018Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-08T21:28:30.290436743Z ✓ built in 7.42s
+2025-05-08T21:28:30.385688144Z 
+2025-05-08T21:28:30.385709055Z   dist/index.js  159.6kb
+2025-05-08T21:28:30.385713085Z 
+2025-05-08T21:28:30.385716916Z ⚡ Done in 13ms
+2025-05-08T21:28:34.626324336Z ==> Uploading build...
+2025-05-08T21:28:44.881397144Z ==> Uploaded in 6.5s. Compression took 3.7s
+2025-05-08T21:28:44.93352524Z ==> Build successful 🎉
+2025-05-08T21:28:47.713346158Z ==> Deploying...
+2025-05-08T21:29:07.956182289Z ==> Running 'node dist/index.js'
+2025-05-08T21:29:28.37491222Z ==> Your service is live 🎉
+2025-05-08T21:29:18.968176216Z 9:29:18 PM [express] serving on port 5000
+2025-05-08T21:29:19.059652574Z Failed to seed initial users: ErrorEvent {
+2025-05-08T21:29:19.059707045Z   [Symbol(kTarget)]: WebSocket {
+2025-05-08T21:29:19.059711955Z     _events: [Object: null prototype] {
+2025-05-08T21:29:19.059715955Z       error: [Function],
+2025-05-08T21:29:19.059720035Z       message: [Function],
+2025-05-08T21:29:19.059723235Z       close: [Function],
+2025-05-08T21:29:19.059726455Z       open: [Function]
+2025-05-08T21:29:19.059730125Z     },
+2025-05-08T21:29:19.059733505Z     _eventsCount: 4,
+2025-05-08T21:29:19.059736345Z     _maxListeners: undefined,
+2025-05-08T21:29:19.059738915Z     _binaryType: 'arraybuffer',
+2025-05-08T21:29:19.059741475Z     _closeCode: 1006,
+2025-05-08T21:29:19.059744155Z     _closeFrameReceived: false,
+2025-05-08T21:29:19.059746705Z     _closeFrameSent: false,
+2025-05-08T21:29:19.059749585Z     _closeMessage: <Buffer >,
+2025-05-08T21:29:19.059752296Z     _closeTimer: null,
+2025-05-08T21:29:19.059755125Z     _errorEmitted: true,
+2025-05-08T21:29:19.059782336Z     _extensions: {},
+2025-05-08T21:29:19.059785606Z     _paused: false,
+2025-05-08T21:29:19.059788196Z     _protocol: '',
+2025-05-08T21:29:19.059790746Z     _readyState: 3,
+2025-05-08T21:29:19.059793286Z     _receiver: null,
+2025-05-08T21:29:19.059795826Z     _sender: null,
+2025-05-08T21:29:19.059798446Z     _socket: null,
+2025-05-08T21:29:19.059801006Z     _bufferedAmount: 0,
+2025-05-08T21:29:19.059803737Z     _isServer: false,
+2025-05-08T21:29:19.059806326Z     _redirects: 0,
+2025-05-08T21:29:19.059808926Z     _autoPong: true,
+2025-05-08T21:29:19.059811577Z     _url: 'wss://dpg-d0ehkljuibrs73eqt9ug-a/v2',
+2025-05-08T21:29:19.059814197Z     _req: null,
+2025-05-08T21:29:19.059816787Z     [Symbol(shapeMode)]: false,
+2025-05-08T21:29:19.059819387Z     [Symbol(kCapture)]: false
+2025-05-08T21:29:19.059821987Z   },
+2025-05-08T21:29:19.059824687Z   [Symbol(kType)]: 'error',
+2025-05-08T21:29:19.059828197Z   [Symbol(kError)]: Error: connect ECONNREFUSED 10.202.169.19:443
+2025-05-08T21:29:19.059830867Z       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1634:16) {
+2025-05-08T21:29:19.059833577Z     errno: -111,
+2025-05-08T21:29:19.059836327Z     code: 'ECONNREFUSED',
+2025-05-08T21:29:19.059838907Z     syscall: 'connect',
+2025-05-08T21:29:19.059841497Z     address: '10.202.169.19',
+2025-05-08T21:29:19.059844087Z     port: 443
+2025-05-08T21:29:19.059846677Z   },
+2025-05-08T21:29:19.059850167Z   [Symbol(kMessage)]: 'connect ECONNREFUSED 10.202.169.19:443'
+2025-05-08T21:29:19.059852887Z }

@@ -1,0 +1,52 @@
+2025-05-08T21:12:12.302609721Z ==> Build successful 🎉
+2025-05-08T21:12:16.349498647Z ==> Deploying...
+2025-05-08T21:12:50.490249422Z Failed to seed initial users: ErrorEvent {
+2025-05-08T21:12:50.490426695Z   [Symbol(kTarget)]: WebSocket {
+2025-05-08T21:12:50.490433846Z     _events: [Object: null prototype] {
+2025-05-08T21:12:50.490469758Z       error: [Function],
+2025-05-08T21:12:50.490474269Z       message: [Function],
+2025-05-08T21:12:50.490478099Z       close: [Function],
+2025-05-08T21:12:50.490481799Z       open: [Function]
+2025-05-08T21:12:50.490485529Z     },
+2025-05-08T21:12:50.49048923Z     _eventsCount: 4,
+2025-05-08T21:12:50.49049309Z     _maxListeners: undefined,
+2025-05-08T21:12:50.49049691Z     _binaryType: 'arraybuffer',
+2025-05-08T21:12:50.490500711Z     _closeCode: 1006,
+2025-05-08T21:12:50.490504651Z     _closeFrameReceived: false,
+2025-05-08T21:12:50.490508531Z     _closeFrameSent: false,
+2025-05-08T21:12:50.490512131Z     _closeMessage: <Buffer >,
+2025-05-08T21:12:50.490515681Z     _closeTimer: null,
+2025-05-08T21:12:50.490519532Z     _errorEmitted: true,
+2025-05-08T21:12:50.490523302Z     _extensions: {},
+2025-05-08T21:12:50.490550974Z     _paused: false,
+2025-05-08T21:12:50.490555215Z     _protocol: '',
+2025-05-08T21:12:50.490558995Z     _readyState: 3,
+2025-05-08T21:12:50.490562655Z     _receiver: null,
+2025-05-08T21:12:50.490566865Z     _sender: null,
+2025-05-08T21:12:50.490570646Z     _socket: null,
+2025-05-08T21:12:50.490574246Z     _bufferedAmount: 0,
+2025-05-08T21:12:50.490578056Z     _isServer: false,
+2025-05-08T21:12:50.490581717Z     _redirects: 0,
+2025-05-08T21:12:50.490585577Z     _autoPong: true,
+2025-05-08T21:12:50.490589337Z     _url: 'wss://dpg-d0ehkljuibrs73eqt9ug-a/v2',
+2025-05-08T21:12:50.490592917Z     _req: null,
+2025-05-08T21:12:50.490596638Z     [Symbol(shapeMode)]: false,
+2025-05-08T21:12:50.490600128Z     [Symbol(kCapture)]: false
+2025-05-08T21:12:50.490603928Z   },
+2025-05-08T21:12:50.490607799Z   [Symbol(kType)]: 'error',
+2025-05-08T21:12:50.490612149Z   [Symbol(kError)]: Error: connect ECONNREFUSED 10.202.169.19:443
+2025-05-08T21:12:50.490639741Z       at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1634:16) {
+2025-05-08T21:12:50.490643521Z     errno: -111,
+2025-05-08T21:12:50.490647691Z     code: 'ECONNREFUSED',
+2025-05-08T21:12:50.490651442Z     syscall: 'connect',
+2025-05-08T21:12:50.490655332Z     address: '10.202.169.19',
+2025-05-08T21:12:50.490658742Z     port: 443
+2025-05-08T21:12:50.490662583Z   },
+2025-05-08T21:12:50.490667013Z   [Symbol(kMessage)]: 'connect ECONNREFUSED 10.202.169.19:443'
+2025-05-08T21:12:50.490670563Z }
+2025-05-08T21:13:22.152731271Z ==> Continuing to scan for open port 10000 (from PORT environment variable)...
+2025-05-08T21:14:26.109141607Z ==> Continuing to scan for open port 10000 (from PORT environment variable)...
+2025-05-08T21:15:28.844870196Z ==> Continuing to scan for open port 10000 (from PORT environment variable)...
+2025-05-08T21:16:31.4013734Z ==> Continuing to scan for open port 10000 (from PORT environment variable)...
+2025-05-08T21:17:33.868784987Z ==> Continuing to scan for open port 10000 (from PORT environment variable)...
+2025-05-08T21:18:00.089080625Z ==> Port scan timeout reached, failed to detect open port 10000 from PORT environment variable. Bind your service to port 10000 or update the PORT environment variable to the correct port.
