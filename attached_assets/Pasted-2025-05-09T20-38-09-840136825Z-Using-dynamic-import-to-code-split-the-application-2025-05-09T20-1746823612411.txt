@@ -1,0 +1,136 @@
+2025-05-09T20:38:09.840136825Z - Using dynamic import() to code-split the application
+2025-05-09T20:38:09.840140045Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-09T20:38:09.840142885Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-09T20:38:09.84041563Z ✓ built in 8.07s
+2025-05-09T20:38:09.933960816Z 
+2025-05-09T20:38:09.933984056Z   dist/index.js  159.6kb
+2025-05-09T20:38:09.933988126Z 
+2025-05-09T20:38:09.933991676Z ⚡ Done in 13ms
+2025-05-09T20:38:13.062512289Z ==> Uploading build...
+2025-05-09T20:38:24.126314763Z ==> Uploaded in 6.9s. Compression took 4.1s
+2025-05-09T20:38:24.1599737Z ==> Build successful 🎉
+2025-05-09T20:38:26.57359825Z ==> Deploying...
+2025-05-09T20:38:46.445553847Z ==> Running 'node setup-db.js && node render-patch.js && node dist/index.js'
+2025-05-09T20:38:47.799134234Z Datenbank erfolgreich eingerichtet
+2025-05-09T20:38:57.944988644Z index.html gepatcht für Render-Deployment
+2025-05-09T20:38:57.94522555Z Render-Patches abgeschlossen
+2025-05-09T20:39:09.342566379Z 8:39:09 PM [express] serving on port 5000
+2025-05-09T20:39:17.480098053Z ==> Your service is live 🎉
+2025-05-09T20:39:47.869373594Z Auth-Check - Session: aMaZv3GqcyKYa1NuX2B38xc62a3j9U5w Auth-Status: false
+2025-05-09T20:39:47.870641857Z Nicht authentifiziert - Headers: {
+2025-05-09T20:39:47.870668008Z   host: 'trading-journal-fhwv.onrender.com',
+2025-05-09T20:39:47.870674398Z   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+2025-05-09T20:39:47.870680498Z   accept: '*/*',
+2025-05-09T20:39:47.870683879Z   'accept-encoding': 'gzip, br',
+2025-05-09T20:39:47.870687209Z   'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+2025-05-09T20:39:47.870689839Z   'cdn-loop': 'cloudflare; loops=1',
+2025-05-09T20:39:47.87071243Z   'cf-connecting-ip': '84.171.244.253',
+2025-05-09T20:39:47.870717999Z   'cf-ipcountry': 'DE',
+2025-05-09T20:39:47.87072063Z   'cf-ray': '93d4021c1832daff-FRA',
+2025-05-09T20:39:47.87072326Z   'cf-visitor': '{"scheme":"https"}',
+2025-05-09T20:39:47.8707258Z   priority: 'u=1, i',
+2025-05-09T20:39:47.87072848Z   referer: 'https://trading-journal-fhwv.onrender.com/',
+2025-05-09T20:39:47.87073111Z   'render-proxy-ttl': '4',
+2025-05-09T20:39:47.87073372Z   'rndr-id': '44884869-ecec-4d72',
+2025-05-09T20:39:47.87073721Z   'sec-ch-ua': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"',
+2025-05-09T20:39:47.87073987Z   'sec-ch-ua-mobile': '?0',
+2025-05-09T20:39:47.87074244Z   'sec-ch-ua-platform': '"Windows"',
+2025-05-09T20:39:47.870745Z   'sec-fetch-dest': 'empty',
+2025-05-09T20:39:47.87074757Z   'sec-fetch-mode': 'cors',
+2025-05-09T20:39:47.870750151Z   'sec-fetch-site': 'same-origin',
+2025-05-09T20:39:47.870752791Z   'true-client-ip': '84.171.244.253',
+2025-05-09T20:39:47.8707558Z   'x-forwarded-for': '84.171.244.253, 172.71.148.21, 10.201.195.2',
+2025-05-09T20:39:47.870758381Z   'x-forwarded-proto': 'https',
+2025-05-09T20:39:47.870760991Z   'x-request-start': '1746823187861935'
+2025-05-09T20:39:47.870765541Z }
+2025-05-09T20:39:47.872154297Z 8:39:47 PM [express] GET /api/user 401 in 3ms
+2025-05-09T20:39:47.874812238Z 8:39:47 PM [express] GET /api/health 200 in 2ms
+2025-05-09T20:39:48.287246553Z 8:39:48 PM [express] GET /api/debug 200 in 1ms
+2025-05-09T20:39:53.40551292Z Standard-Cookie-Lebensdauer auf 24 Stunden gesetzt
+2025-05-09T20:39:53.41233395Z 8:39:53 PM [express] POST /api/login/ 200 in 223ms :: {"id":2,"username":"mo"}
+2025-05-09T20:41:21.110297197Z 8:41:21 PM [express] GET /api/health 200 in 1ms
+2025-05-09T20:41:21.111076807Z Auth-Check - Session: puG0gO6rTuscEk69BWDC5RYwXcAMB0YH Auth-Status: false
+2025-05-09T20:41:21.111229882Z Nicht authentifiziert - Headers: {
+2025-05-09T20:41:21.111237132Z   host: 'trading-journal-fhwv.onrender.com',
+2025-05-09T20:41:21.111242292Z   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0',
+2025-05-09T20:41:21.111246212Z   accept: '*/*',
+2025-05-09T20:41:21.111251132Z   'accept-encoding': 'gzip, br',
+2025-05-09T20:41:21.111254972Z   'accept-language': 'en-US,en;q=0.5',
+2025-05-09T20:41:21.111259102Z   'cdn-loop': 'cloudflare; loops=1',
+2025-05-09T20:41:21.111263052Z   'cf-connecting-ip': '95.90.240.150',
+2025-05-09T20:41:21.111267332Z   'cf-ipcountry': 'DE',
+2025-05-09T20:41:21.111271432Z   'cf-ray': '93d40462bb99450a-TXL',
+2025-05-09T20:41:21.111289813Z   'cf-visitor': '{"scheme":"https"}',
+2025-05-09T20:41:21.111292493Z   priority: 'u=4',
+2025-05-09T20:41:21.111295333Z   referer: 'https://trading-journal-fhwv.onrender.com/',
+2025-05-09T20:41:21.111297793Z   'render-proxy-ttl': '4',
+2025-05-09T20:41:21.111300433Z   'rndr-id': 'fb8a3681-2a40-4adc',
+2025-05-09T20:41:21.111302813Z   'sec-fetch-dest': 'empty',
+2025-05-09T20:41:21.111305053Z   'sec-fetch-mode': 'cors',
+2025-05-09T20:41:21.111307504Z   'sec-fetch-site': 'same-origin',
+2025-05-09T20:41:21.111310193Z   'true-client-ip': '95.90.240.150',
+2025-05-09T20:41:21.111313334Z   'x-forwarded-for': '95.90.240.150, 162.158.245.157, 10.201.35.131',
+2025-05-09T20:41:21.111315584Z   'x-forwarded-proto': 'https',
+2025-05-09T20:41:21.111318194Z   'x-request-start': '1746823281107103'
+2025-05-09T20:41:21.111320544Z }
+2025-05-09T20:41:21.111767816Z 8:41:21 PM [express] GET /api/user 401 in 1ms
+2025-05-09T20:41:21.24440794Z 8:41:21 PM [express] GET /api/debug 200 in 2ms
+2025-05-09T20:41:29.536382991Z Standard-Cookie-Lebensdauer auf 24 Stunden gesetzt
+2025-05-09T20:41:29.541481706Z 8:41:29 PM [express] POST /api/login/ 200 in 46ms :: {"id":1,"username":"admin"}
+2025-05-09T20:43:16.394960691Z Auth-Check - Session: 74ofYpcnA0xF_9_OzReGugzoRJiXj3ax Auth-Status: true
+2025-05-09T20:43:16.394994952Z Authentifiziert als Benutzer: mo
+2025-05-09T20:43:16.399796679Z 8:43:16 PM [express] GET /api/user 200 in 13ms :: {"id":2,"username":"mo"}
+2025-05-09T20:43:16.402007037Z 8:43:16 PM [express] GET /api/health 304 in 16ms
+2025-05-09T20:43:16.787597723Z 8:43:16 PM [express] GET /api/debug 304 in 16ms
+2025-05-09T20:44:15.627058082Z ==> Detected service running on port 5000
+2025-05-09T20:44:15.972909719Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-05-09T20:44:19.71230854Z 8:44:19 PM [express] GET /api/health 304 in 11ms
+2025-05-09T20:44:19.798661911Z Auth-Check - Session: 74ofYpcnA0xF_9_OzReGugzoRJiXj3ax Auth-Status: true
+2025-05-09T20:44:19.798686101Z Authentifiziert als Benutzer: mo
+2025-05-09T20:44:19.803377625Z 8:44:19 PM [express] GET /api/user 304 in 103ms :: {"id":2,"username":"mo"}
+2025-05-09T20:44:20.134270336Z 8:44:20 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T20:45:45.547314682Z Auth-Check - Session: 74ofYpcnA0xF_9_OzReGugzoRJiXj3ax Auth-Status: true
+2025-05-09T20:45:45.547363214Z Authentifiziert als Benutzer: mo
+2025-05-09T20:45:45.552834828Z 8:45:45 PM [express] GET /api/user 304 in 15ms :: {"id":2,"username":"mo"}
+2025-05-09T20:45:45.55404734Z 8:45:45 PM [express] GET /api/health 304 in 15ms
+2025-05-09T20:45:46.05677599Z 8:45:46 PM [express] GET /api/debug 304 in 20ms
+2025-05-09T20:46:00.061773354Z 8:46:00 PM [express] GET /api/health 304 in 11ms
+2025-05-09T20:46:00.062503554Z Auth-Check - Session: QIGyLs-zUwFgrF-vF93CENwgkCN_kU9v Auth-Status: true
+2025-05-09T20:46:00.062560155Z Authentifiziert als Benutzer: admin
+2025-05-09T20:46:00.068169813Z 8:46:00 PM [express] GET /api/user 200 in 13ms :: {"id":1,"username":"admin"}
+2025-05-09T20:46:00.154310969Z 8:46:00 PM [express] GET /api/debug 304 in 13ms
+2025-05-09T20:46:20.954673082Z Auth-Check - Session: 90GgfI2BHXega64R3RQvO63_4mFqjhK4 Auth-Status: false
+2025-05-09T20:46:20.955020731Z Nicht authentifiziert - Headers: {
+2025-05-09T20:46:20.955047852Z   host: 'trading-journal-fhwv.onrender.com',
+2025-05-09T20:46:20.955052872Z   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0',
+2025-05-09T20:46:20.955056963Z   accept: '*/*',
+2025-05-09T20:46:20.955061803Z   'accept-encoding': 'gzip, br',
+2025-05-09T20:46:20.955065833Z   'accept-language': 'en-US,en;q=0.5',
+2025-05-09T20:46:20.955069683Z   'cache-control': 'no-cache',
+2025-05-09T20:46:20.955073793Z   'cdn-loop': 'cloudflare; loops=1',
+2025-05-09T20:46:20.955078073Z   'cf-connecting-ip': '95.90.240.150',
+2025-05-09T20:46:20.955100253Z   'cf-ipcountry': 'DE',
+2025-05-09T20:46:20.955103354Z   'cf-ray': '93d40bb4b985e506-FRA',
+2025-05-09T20:46:20.955105814Z   'cf-visitor': '{"scheme":"https"}',
+2025-05-09T20:46:20.955108184Z   dnt: '1',
+2025-05-09T20:46:20.955110654Z   pragma: 'no-cache',
+2025-05-09T20:46:20.955113254Z   priority: 'u=4',
+2025-05-09T20:46:20.955116174Z   referer: 'https://trading-journal-fhwv.onrender.com/auth',
+2025-05-09T20:46:20.955118674Z   'render-proxy-ttl': '4',
+2025-05-09T20:46:20.955121224Z   'rndr-id': '6934cf86-4c08-4f23',
+2025-05-09T20:46:20.955123614Z   'sec-fetch-dest': 'empty',
+2025-05-09T20:46:20.955125904Z   'sec-fetch-mode': 'cors',
+2025-05-09T20:46:20.955128514Z   'sec-fetch-site': 'same-origin',
+2025-05-09T20:46:20.955130934Z   'true-client-ip': '95.90.240.150',
+2025-05-09T20:46:20.955133754Z   'x-forwarded-for': '95.90.240.150, 172.69.150.227, 10.201.195.2',
+2025-05-09T20:46:20.955136565Z   'x-forwarded-proto': 'https',
+2025-05-09T20:46:20.955139105Z   'x-request-start': '1746823580949326'
+2025-05-09T20:46:20.955141485Z }
+2025-05-09T20:46:20.955913485Z 8:46:20 PM [express] GET /api/user 401 in 1ms
+2025-05-09T20:46:20.957953579Z 8:46:20 PM [express] GET /api/health 200 in 1ms
+2025-05-09T20:46:21.017755329Z 8:46:21 PM [express] GET /api/debug 200 in 1ms
+2025-05-09T20:46:22.389780171Z Auth-Check - Session: 74ofYpcnA0xF_9_OzReGugzoRJiXj3ax Auth-Status: true
+2025-05-09T20:46:22.389815932Z Authentifiziert als Benutzer: mo
+2025-05-09T20:46:22.393511299Z 8:46:22 PM [express] GET /api/user 304 in 10ms :: {"id":2,"username":"mo"}
+2025-05-09T20:46:22.395262226Z 8:46:22 PM [express] GET /api/health 304 in 11ms
+2025-05-09T20:46:22.843128566Z 8:46:22 PM [express] GET /api/debug 304 in 13ms
