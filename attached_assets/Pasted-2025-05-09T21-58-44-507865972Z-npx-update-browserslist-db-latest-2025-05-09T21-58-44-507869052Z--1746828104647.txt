@@ -1,0 +1,50 @@
+2025-05-09T21:58:44.507865972Z   npx update-browserslist-db@latest
+2025-05-09T21:58:44.507869052Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-09T21:58:50.936044464Z ✓ 3401 modules transformed.
+2025-05-09T21:58:51.490955142Z rendering chunks...
+2025-05-09T21:58:51.504550271Z computing gzip size...
+2025-05-09T21:58:51.535487028Z ../dist/public/index.html                     1.91 kB │ gzip:   0.75 kB
+2025-05-09T21:58:51.53557879Z ../dist/public/assets/index-hRTqcd5Z.css    100.22 kB │ gzip:  16.52 kB
+2025-05-09T21:58:51.53559354Z ../dist/public/assets/index-DJqKidO2.js   1,364.33 kB │ gzip: 366.46 kB
+2025-05-09T21:58:51.535738004Z 
+2025-05-09T21:58:51.535746134Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-09T21:58:51.535750314Z - Using dynamic import() to code-split the application
+2025-05-09T21:58:51.535754184Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-09T21:58:51.535757574Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-09T21:58:51.53600115Z ✓ built in 7.28s
+2025-05-09T21:58:51.617845166Z 
+2025-05-09T21:58:51.617867467Z   dist/index.js  166.3kb
+2025-05-09T21:58:51.617871547Z 
+2025-05-09T21:58:51.617875117Z ⚡ Done in 14ms
+2025-05-09T21:58:52.869066666Z ==> Uploading build...
+2025-05-09T21:59:01.921590963Z ==> Uploaded in 5.7s. Compression took 3.4s
+2025-05-09T21:59:01.959497568Z ==> Build successful 🎉
+2025-05-09T21:59:05.08570861Z ==> Deploying...
+2025-05-09T21:59:56.288176647Z }
+2025-05-09T21:59:56.938155663Z 9:59:56 PM [express] serving on port 5000
+2025-05-09T21:59:57.575952454Z CORS Origin-Anfrage: undefined
+2025-05-09T22:00:06.123731344Z ==> Your service is live 🎉
+2025-05-09T22:01:19.038535345Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:19.135512959Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T22:01:19.145395699Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T22:01:19.70776969Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:19.713585964Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:19.716603174Z Auth-Check - Session: S6Iw0tS-RU-LXoRiSTSInDSF6yN7Q9Ob Auth-Status: true
+2025-05-09T22:01:19.716634456Z Authentifiziert als Benutzer: mo
+2025-05-09T22:01:19.72323693Z 10:01:19 PM [express] GET /api/user 304 in 14ms :: {"id":2,"username":"mo"}
+2025-05-09T22:01:19.729021243Z 10:01:19 PM [express] GET /api/health 200 in 15ms
+2025-05-09T22:01:20.016550351Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:20.017543573Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:20.031050431Z 10:01:20 PM [express] GET /api/debug 200 in 13ms
+2025-05-09T22:01:21.441062628Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:21.499939262Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:22.868588635Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:23.059744257Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:23.226015008Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:23.409687211Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:23.584630006Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:23.780815724Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:23.967787423Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:24.143162106Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:24.332892769Z CORS Origin-Anfrage: undefined
+2025-05-09T22:01:24.49788377Z CORS Origin-Anfrage: undefined

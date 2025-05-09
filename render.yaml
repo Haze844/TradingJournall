@@ -1,17 +1,23 @@
 services:
   - type: web
     name: trading-journal
-    runtime: node
+    env: node
+    plan: free
     buildCommand: npm install --include=dev; npm run build
-    startCommand: node setup-db.js && node custom-deploy.js && node express-fix.js && node dist/index.js
+    startCommand: node setup-db.js && node render-patch.js && node express-fix.js && node redirect-fix.js && node custom-deploy.js && node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 5000
       - key: SESSION_SECRET
-        sync: false
+        generateValue: true
       - key: DATABASE_URL
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
+        fromDatabase:
+          name: trading-journal-db
+          property: connectionString
+
+databases:
+  - name: trading-journal-db
+    plan: free
+    postgresMajorVersion: 17

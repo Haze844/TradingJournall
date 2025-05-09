@@ -1,4 +1,4 @@
-// express-fix.js
+// express-fix.js - Express-Server-Patches für Render.com
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,122 +8,77 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Suchen und Patchen der Index.js Datei im Dist-Verzeichnis
-const indexJsPath = path.join(__dirname, 'dist', 'index.js');
+console.log('Starte Express-Fix für Render.com...');
 
-if (fs.existsSync(indexJsPath)) {
-  console.log('Express-Server-Datei gefunden, starte Patching...');
-  let indexJs = fs.readFileSync(indexJsPath, 'utf8');
+function patchExpressServer() {
+  const serverCodePath = './dist/index.js';
   
-  // Patch 1: API-Pfade korrigieren
-  // Suche nach Zeilen, die API-Routes registrieren und stelle sicher, dass sie richtig formatiert sind
-  const apiRegExp = /app\.(\w+)\(['"]\/api\/([\w-\/]+)['"]/g;
-  let match;
-  let patched = false;
+  if (!fs.existsSync(serverCodePath)) {
+    console.error('Konnte Express-Server nicht finden:', serverCodePath);
+    return;
+  }
   
-  while ((match = apiRegExp.exec(indexJs)) !== null) {
-    const [fullMatch, method, path] = match;
-    // Überprüfe, ob der Pfad mit einem Slash endet
-    if (!path.endsWith('/')) {
-      const replacement = `app.${method}('/api/${path}/`;
-      indexJs = indexJs.replace(fullMatch, replacement);
-      console.log(`API-Pfad korrigiert: ${fullMatch} -> ${replacement}`);
-      patched = true;
+  let serverCode = fs.readFileSync(serverCodePath, 'utf8');
+  
+  // Spezielle Middleware für Render, um Redirects zu handhaben
+  if (!serverCode.includes('// Express-Fix für Render.com')) {
+    // Füge Render-spezifische Middlewares für Root-Verarbeitung und 404-Handling hinzu
+    const additionalMiddleware = `
+  // Express-Fix für Render.com - Root-Handling und serverseitige Redirects
+  const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
+  
+  if (isRender) {
+    console.log('Render-spezifische Middlewares aktiviert');
+    
+    // Root-Pfad speziell behandeln - direkt zu /auth umleiten
+    app.get('/', (req, res) => {
+      console.log('Root-Pfad aufgerufen, leite weiter zu /auth');
+      return res.redirect('/auth');
+    });
+    
+    // Spezielle Middleware für fehlgeschlagene API-Anfragen die HTML zurückgeben
+    app.use((req, res, next) => {
+      const originalSend = res.send;
+      
+      res.send = function(body) {
+        // Prüfen, ob eine API-Anfrage versucht, HTML zurückzugeben (typisches 404-Symptom)
+        const isApiRequest = req.path.startsWith('/api/');
+        const isHtmlResponse = typeof body === 'string' && body.includes('<!DOCTYPE html>');
+        
+        if (isApiRequest && isHtmlResponse) {
+          console.warn(\`API-Route \${req.path} hat HTML zurückgegeben, sende 404 JSON\`);
+          return res.status(404).json({ error: 'API endpoint not found' });
+        }
+        
+        return originalSend.call(this, body);
+      };
+      
+      next();
+    });
+  }
+`;
+    
+    // Füge die Middleware vor der Statische-Datei-Bedienung ein
+    let position = serverCode.indexOf('app.use(express.static');
+    if (position === -1) {
+      position = serverCode.indexOf('app.listen');
     }
-  }
-  
-  // Patch 2: CORS-Konfiguration hinzufügen
-  // Finde den Punkt, an dem Express konfiguriert wird
-  const expressConfigIndex = indexJs.indexOf('app.use(express.json());');
-  if (expressConfigIndex !== -1) {
-    const corsPatch = `
-// CORS-Konfiguration
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  // Antwortheader für API-Anfragen auf JSON setzen
-  if (req.path.startsWith('/api/')) {
-    res.header('Content-Type', 'application/json');
-  }
-  
-  // Handle OPTIONS Anfragen
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-`;
-    // Füge CORS-Konfiguration nach Express-JSON-Konfiguration ein
-    indexJs = indexJs.slice(0, expressConfigIndex + 'app.use(express.json());'.length) + 
-              corsPatch + 
-              indexJs.slice(expressConfigIndex + 'app.use(express.json());'.length);
-    console.log('CORS- und Content-Type-Konfiguration hinzugefügt');
-    patched = true;
-  }
-  
-  // Patch 3: Konfiguriere statische Dateien neu, um SPA-Routing zu unterstützen
-  const staticFilesIndex = indexJs.indexOf('app.use(express.static');
-  if (staticFilesIndex !== -1) {
-    const staticEndIndex = indexJs.indexOf(');', staticFilesIndex) + 2;
-    const spaRoutingPatch = `
-// SOFORTIGE STATISCHE HTML-ANTWORT für den Root-Pfad mit Dateiinhalt
-app.get('/', (req, res) => {
-  console.log('Direkte statische HTML-Antwort für /');
-  try {
-    const htmlContent = fs.readFileSync(path.join(__dirname, 'root_page.html'), 'utf8');
-    res.setHeader('Content-Type', 'text/html');
-    res.send(htmlContent);
-  } catch (err) {
-    console.error('Fehler beim Lesen der root_page.html:', err);
-    // Fallback zu einfacher Antwort
-    res.send('<html><body><h1>LvlUp Tradingtagebuch</h1><p><a href="/auth">Zum Login</a></p></body></html>');
-  }
-});
-
-// SOFORTIGE STATISCHE HTML-ANTWORT für die Weiterleitungsseite mit Dateiinhalt
-app.get('/Weiterleitung', (req, res) => {
-  console.log('Direkte statische HTML-Antwort für /Weiterleitung');
-  try {
-    const htmlContent = fs.readFileSync(path.join(__dirname, 'redirect_page.html'), 'utf8');
-    res.setHeader('Content-Type', 'text/html');
-    res.send(htmlContent);
-  } catch (err) {
-    console.error('Fehler beim Lesen der redirect_page.html:', err);
-    // Fallback zu einfacher Antwort
-    res.send('<html><body><h1>Weiterleitung fehlgeschlagen</h1><p><a href="/auth">Zum Login</a></p></body></html>');
-  }
-});
-
-// Unterstützung für SPA-Routing
-app.get('*', (req, res, next) => {
-  // Wenn es eine API-Anfrage ist, zum nächsten Handler weiterleiten
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  
-  // Sonst die index.html zurückgeben für Client-Routing
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-`;
-    // Füge SPA-Routing-Fix nach der statischen Dateikonfiguration ein
-    indexJs = indexJs.slice(0, staticEndIndex) + 
-              spaRoutingPatch + 
-              indexJs.slice(staticEndIndex);
-    console.log('SPA-Routing-Unterstützung hinzugefügt');
-    patched = true;
-  }
-  
-  if (patched) {
-    // Schreibe die geänderte Datei zurück
-    fs.writeFileSync(indexJsPath, indexJs);
-    console.log('Express-Server erfolgreich gepatcht!');
+    
+    if (position !== -1) {
+      serverCode = serverCode.substring(0, position) + 
+                  additionalMiddleware + 
+                  serverCode.substring(position);
+                  
+      fs.writeFileSync(serverCodePath, serverCode);
+      console.log('Express-Server erfolgreich mit Render-spezifischen Middlewares gepatcht');
+    } else {
+      console.error('Konnte keine geeignete Stelle im Express-Server finden, um Middleware einzufügen');
+    }
   } else {
-    console.log('Keine Änderungen am Express-Server notwendig.');
+    console.log('Express-Server wurde bereits gepatcht');
   }
-} else {
-  console.error('Express-Server-Datei nicht gefunden!');
 }
+
+patchExpressServer();
+
+console.log('Express-Fix abgeschlossen');
