@@ -1,16 +1,25 @@
 // render-patch.js
-import fs from 'fs';
+const fs = require('fs');
 
 // API-URL-Patch für Frontend
 const indexHtmlPath = './dist/public/index.html';
 if (fs.existsSync(indexHtmlPath)) {
   let indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
-  // Fügen Sie ein Script hinzu, das die API-Basis-URL definiert
+  // Fügen Sie ein Script hinzu, das die API-Basis-URL definiert und API-Pfade korrigiert
   indexHtml = indexHtml.replace(
     '</head>',
     `<script>
-      window.API_BASE_URL = window.location.origin;
-      console.log("API-Basis-URL gesetzt auf:", window.API_BASE_URL);
+      window.API_BASE_URL = '';  // Leerer String, um relative Pfade zu verwenden
+      // Fix für doppelte /api-Pfade
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        if (url.startsWith('/api/api/')) {
+          url = url.replace('/api/api/', '/api/');
+          console.log('Korrigierter API-Pfad:', url);
+        }
+        return originalFetch(url, options);
+      };
+      console.log("API-Routen-Patch angewendet");
     </script>
     </head>`
   );
