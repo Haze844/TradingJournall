@@ -232,9 +232,8 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
         });
         
         // Nach erfolgreicher Anmeldung zur Hauptseite weiterleiten
-        // Wir verwenden navigate von wouter statt window.location für nahtlose Navigation
         setTimeout(() => {
-          navigate("/");
+          window.location.href = "/";
         }, 500); // Kurze Verzögerung, damit der Toast sichtbar ist
       }
     });
@@ -392,7 +391,7 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
         
         // Nach erfolgreicher Registrierung zur Hauptseite weiterleiten
         setTimeout(() => {
-          navigate("/");
+          window.location.href = "/";
         }, 500); // Kurze Verzögerung, damit der Toast sichtbar ist
       }
     });

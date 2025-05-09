@@ -1,12 +1,6 @@
-// render-patch.js - Vereinfachte Version ohne Weiterleitungs-Loops
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-// __dirname-Äquivalent für ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// render-patch.js - Überarbeitete Version ohne Syntaxfehler
+const fs = require('fs');
+const path = require('path');
 
 console.log('Starte vereinfachten Render-Patch...');
 
@@ -108,25 +102,26 @@ if (fs.existsSync(serverCodePath)) {
     // Root-Pfad mit statischer HTML-Seite ohne Redirect bedienen
     app.get('/', (req, res) => {
       console.log('Root-Pfad aufgerufen, sende statische HTML-Seite (keine Weiterleitung)');
-      res.send(`<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>LvlUp Trading Journal</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-    .container { max-width: 600px; margin: 0 auto; }
-    .link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>LvlUp Trading Journal</h1>
-    <p>Willkommen beim Trading Journal.</p>
-    <a class="link" href="/auth">Zur Anmeldeseite</a>
-  </div>
-</body>
-</html>`);
+      // HTML als normalen String senden
+      res.send('<!DOCTYPE html>' +
+'<html lang="de">' +
+'<head>' +
+'  <meta charset="UTF-8">' +
+'  <title>LvlUp Trading Journal</title>' +
+'  <style>' +
+'    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }' +
+'    .container { max-width: 600px; margin: 0 auto; }' +
+'    .link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }' +
+'  </style>' +
+'</head>' +
+'<body>' +
+'  <div class="container">' +
+'    <h1>LvlUp Trading Journal</h1>' +
+'    <p>Willkommen beim Trading Journal.</p>' +
+'    <a class="link" href="/auth">Zur Anmeldeseite</a>' +
+'  </div>' +
+'</body>' +
+'</html>');
     });
   }
 `;
@@ -154,25 +149,26 @@ if (fs.existsSync(serverCodePath)) {
 // WICHTIG: KEINE Redirects oder Weiterleitungen mehr erstellen!
 // Stattdessen einfache statische HTML-Dateien ohne Redirects bereitstellen
 
-const simpleIndexHtml = `<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>LvlUp Trading Journal</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-    .container { max-width: 600px; margin: 0 auto; }
-    .link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>LvlUp Trading Journal</h1>
-    <p>Willkommen beim Trading Journal.</p>
-    <a class="link" href="/auth">Zur Anmeldeseite</a>
-  </div>
-</body>
-</html>`;
+// HTML als normalen String definieren
+const simpleIndexHtml = '<!DOCTYPE html>' +
+'<html lang="de">' +
+'<head>' +
+'  <meta charset="UTF-8">' +
+'  <title>LvlUp Trading Journal</title>' +
+'  <style>' +
+'    body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }' +
+'    .container { max-width: 600px; margin: 0 auto; }' +
+'    .link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }' +
+'  </style>' +
+'</head>' +
+'<body>' +
+'  <div class="container">' +
+'    <h1>LvlUp Trading Journal</h1>' +
+'    <p>Willkommen beim Trading Journal.</p>' +
+'    <a class="link" href="/auth">Zur Anmeldeseite</a>' +
+'  </div>' +
+'</body>' +
+'</html>';
 
 // Speichere statische HTML ohne Redirects
 const paths = [
