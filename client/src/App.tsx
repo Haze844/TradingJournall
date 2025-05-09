@@ -131,14 +131,14 @@ function Router() {
     console.log("Replit-Umgebung erkannt - verwende leere Basis-URL");
   }
   
-  // Angepasstes Routing für Netlify und Render - mit statischer Landing Page
+  // Angepasstes Routing für Netlify und Render - direkter Redirect zu Auth
   if (isNetlify || isRender) {
     return (
       <Switch>
-        <Route path="/" component={StaticLoginPage} />
+        <Route path="/" component={DeploymentFallback} />
         <Route path="/auth" component={AuthPage} />
         <Route path="/booklet" component={Booklet} />
-        <Route path="*" component={StaticLoginPage} />
+        <Route path="*" component={AuthPage} />
       </Switch>
     );
   }

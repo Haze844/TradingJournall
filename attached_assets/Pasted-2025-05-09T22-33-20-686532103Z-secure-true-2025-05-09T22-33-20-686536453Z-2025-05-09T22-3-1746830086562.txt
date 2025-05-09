@@ -1,0 +1,50 @@
+2025-05-09T22:33:20.686532103Z     secure: true
+2025-05-09T22:33:20.686536453Z   }
+2025-05-09T22:33:20.686540713Z }
+2025-05-09T22:33:21.399740798Z 10:33:21 PM [express] serving on port 5000
+2025-05-09T22:33:22.162196314Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:31.4967409Z ==> Your service is live 🎉
+2025-05-09T22:33:33.162859079Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:34.788226281Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:35.786639992Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:41.656720028Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:41.731044749Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T22:33:41.732345483Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T22:33:42.140922658Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:42.15386868Z 10:33:42 PM [express] GET /api/health 200 in 12ms
+2025-05-09T22:33:42.611164997Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:42.625917322Z 10:33:42 PM [express] GET /api/debug 200 in 14ms
+2025-05-09T22:33:44.517545347Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:49.590041188Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T22:33:49.60563383Z Login-Versuch für Benutzer: mo mit rememberMe: false
+2025-05-09T22:33:49.605842703Z Login-Anfrage-Headers: {
+2025-05-09T22:33:49.605854214Z   origin: 'https://trading-journal-fhwv.onrender.com',
+2025-05-09T22:33:49.605858414Z   referer: 'https://trading-journal-fhwv.onrender.com/auth',
+2025-05-09T22:33:49.605862734Z   host: 'trading-journal-fhwv.onrender.com',
+2025-05-09T22:33:49.605866834Z   cookie: 'Vorhanden',
+2025-05-09T22:33:49.605871124Z   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+2025-05-09T22:33:49.605876314Z   'x-forwarded-for': '84.171.244.253, 162.158.87.179, 10.201.35.131',
+2025-05-09T22:33:49.605880944Z   'x-forwarded-proto': 'https',
+2025-05-09T22:33:49.605884744Z   'sec-fetch-site': 'same-origin',
+2025-05-09T22:33:49.605888344Z   'sec-fetch-mode': 'cors'
+2025-05-09T22:33:49.605903725Z }
+2025-05-09T22:33:49.605929085Z Umgebungsinformationen: {
+2025-05-09T22:33:49.605933845Z   environment: 'production',
+2025-05-09T22:33:49.605936605Z   isProduction: true,
+2025-05-09T22:33:49.605938645Z   isRender: 'true',
+2025-05-09T22:33:49.605940615Z   isReplit: 'false',
+2025-05-09T22:33:49.605942635Z   sessionSecret: 'vorhanden'
+2025-05-09T22:33:49.605944656Z }
+2025-05-09T22:33:49.609796708Z Benutzer authentifiziert: mo - Session-ID vor Login: S6Iw0tS-RU-LXoRiSTSInDSF6yN7Q9Ob
+2025-05-09T22:33:49.60992615Z Cookie-Einstellungen für Login: {
+2025-05-09T22:33:49.60993118Z   sameSite: 'none',
+2025-05-09T22:33:49.60993376Z   secure: true,
+2025-05-09T22:33:49.6099366Z   domain: '.onrender.com',
+2025-05-09T22:33:49.60993914Z   maxAge: 86394916,
+2025-05-09T22:33:49.60994171Z   path: '/'
+2025-05-09T22:33:49.60994404Z }
+2025-05-09T22:33:49.621918504Z Standard-Cookie-Lebensdauer auf 24 Stunden gesetzt
+2025-05-09T22:33:49.693725598Z Login erfolgreich, Session regeneriert und gespeichert. Session-ID: Msz5s3Bzu6pbhjeEYUgpFhrhU593bUFK User-ID: 2
+2025-05-09T22:33:49.699345913Z 10:33:49 PM [express] POST /api/login 200 in 101ms :: {"id":2,"username":"mo"}
+2025-05-09T22:33:49.762023556Z CORS Origin-Anfrage: undefined
+2025-05-09T22:33:53.223572625Z CORS Origin-Anfrage: undefined
