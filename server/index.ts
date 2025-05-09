@@ -7,10 +7,19 @@ import cors from "cors";
 // Statischen HTML-Fix integrieren - macht nichts in Development
 // In Production sorgt dieser Fix dafür, dass die Weiterleitung nach Login funktioniert
 try {
-  require('./vite-static-fix');
-  console.log("Statischer HTML-Fix integriert");
+  // Versuche zuerst die CommonJS-Version
+  require('./vite-static-fix.cjs');
+  console.log("Statischer HTML-Fix (CommonJS-Version) integriert");
 } catch (err) {
-  console.log("Statischer HTML-Fix nicht verfügbar - überspringen");
+  console.log("CommonJS-Version des Fixes nicht verfügbar, versuche ES-Modul-Version");
+  try {
+    // Fallback auf ES Module-Version
+    import('./vite-static-fix.js')
+      .then(() => console.log("Statischer HTML-Fix (ES Module-Version) integriert"))
+      .catch((err) => console.log("Beide Versionen des HTML-Fixes nicht verfügbar:", err.message));
+  } catch (importErr) {
+    console.log("Statischer HTML-Fix nicht verfügbar - überspringen");
+  }
 }
 
 const app = express();

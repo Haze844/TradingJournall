@@ -61,6 +61,29 @@ app.get('*', (req, res) => {
 });
 
 // Server starten
+
+// Render-Fix: Dynamisches Routing für SPA
+app.use((req, res, next) => {
+  // Nur für HTML-Anfragen, nicht für API oder Statische Dateien
+  if (!req.path.startsWith('/api/') && 
+      !req.path.includes('.') && 
+      req.headers.accept && 
+      req.headers.accept.includes('text/html')) {
+    
+    console.log("SPA-Route erkannt:", req.path);
+    
+    // Authentifizierungsstatus prüfen
+    const isAuthenticated = req.isAuthenticated && req.isAuthenticated();
+    if (isAuthenticated) {
+      console.log("Authentifizierter Nutzer, leite weiter zu SPA");
+    }
+    
+    // Für alle HTML-Anfragen die index.html servieren
+    return res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+  }
+  
+  next();
+});
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });
