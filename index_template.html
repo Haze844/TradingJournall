@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>LvlUp Tradingtagebuch - Willkommen</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0c1222;
+      color: white;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      background-color: rgba(30, 41, 59, 0.9);
+      padding: 15px 0;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    .logo {
+      color: #3b82f6;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      max-width: 1200px;
+      width: 100%;
+      gap: 30px;
+    }
+    .login-section {
+      flex: 1;
+      background-color: rgba(30, 41, 59, 0.8);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    .demo-section {
+      flex: 1;
+      background-color: rgba(30, 41, 59, 0.8);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #e5e7eb;
+    }
+    h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #e5e7eb;
+    }
+    p {
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #d1d5db;
+    }
+    .features {
+      margin-top: 20px;
+    }
+    .feature {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .feature-icon {
+      background-color: rgba(59, 130, 246, 0.2);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      color: #3b82f6;
+      font-weight: bold;
+    }
+    .cta {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 20px;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+    .cta:hover {
+      background-color: #2563eb;
+    }
+    .credentials {
+      background-color: rgba(59, 130, 246, 0.1);
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .credentials p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    .footer {
+      background-color: rgba(15, 23, 42, 0.9);
+      padding: 15px 0;
+      text-align: center;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">LvlUp Tradingtagebuch</div>
+  </div>
+  
+  <div class="main">
+    <div class="container">
+      <div class="login-section">
+        <h1>Willkommen in Ihrem Trading-Journal</h1>
+        <p>Verfolgen Sie Ihre Trading-Performance mit unserem leistungsstarken Journal. Analysieren Sie Ihre Trades, identifizieren Sie Muster und verbessern Sie Ihre Strategie.</p>
+        
+        <div class="credentials">
+          <p><strong>Demo-Zugangsdaten:</strong></p>
+          <p>Username: admin | Passwort: admin123</p>
+          <p>Username: mo | Passwort: mo123</p>
+        </div>
+        
+        <a href="/auth" class="cta">Zum Login</a>
+      </div>
+      
+      <div class="demo-section">
+        <h2>Hauptfunktionen</h2>
+        
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div>Umfassendes Trade-Tracking mit detaillierten Parametern</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div>Statistische Analyse Ihrer Trading-Performance</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div>Setup-Typen und Sitzungszeitanalyse</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div>Trendanalyse über mehrere Zeitrahmen</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div>Präzise Drawdown-Berechnungen</div>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">✓</div>
+            <div>Anpassbare Zielbeträge und Kontostände</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    &copy; 2025 LvlUp Tradingtagebuch | Alle Rechte vorbehalten
+  </div>
+</body>
+</html>

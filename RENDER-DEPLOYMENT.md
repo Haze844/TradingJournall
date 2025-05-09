@@ -30,7 +30,7 @@ npm install --include=dev && npm run build
 
 **Start-Befehl:**
 ```
-node setup-db.js && node render-patch.js && node express-fix.js && node redirect-fix.js && node dist/index.js
+node setup-db.js && node custom-deploy.js && node express-fix.js && node dist/index.js
 ```
 
 ## Patch-Dateien
