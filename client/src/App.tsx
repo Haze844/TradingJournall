@@ -177,7 +177,7 @@ function App() {
     });
     
     // Prüfe API-Verfügbarkeit durch einfachen Aufruf
-    fetch(`${apiBaseUrl}/api/health`)
+    fetch(`/api/health`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`API nicht verfügbar: ${response.status}`);
@@ -197,12 +197,12 @@ function App() {
             .then(res => res.ok ? res.json() : Promise.reject(new Error(`Debug-Endpunkt nicht verfügbar: ${res.status}`)))
             .then(data => console.log("Netlify Debug-Endpunkt Antwort:", data))
             .catch(err => console.error("Netlify Debug-Anfrage fehlgeschlagen:", err));
-        } else if (isRender) {
-          console.log("Versuche zusätzlichen Render-Debug-Endpunkt...");
+        } else {
+          console.log("Versuche zusätzlichen Debug-Endpunkt...");
           fetch('/api/debug')
             .then(res => res.ok ? res.json() : Promise.reject(new Error(`Debug-Endpunkt nicht verfügbar: ${res.status}`)))
-            .then(data => console.log("Render Debug-Endpunkt Antwort:", data))
-            .catch(err => console.error("Render Debug-Anfrage fehlgeschlagen:", err));
+            .then(data => console.log("Debug-Endpunkt Antwort:", data))
+            .catch(err => console.error("Debug-Anfrage fehlgeschlagen:", err));
         }
       });
   }, []);
