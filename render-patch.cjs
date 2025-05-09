@@ -1,17 +1,13 @@
-// render-patch.js - Komplett überarbeitete Version ohne Syntaxfehler
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// render-patch.cjs - Komplett überarbeitete Version für CommonJS
+const fs = require('fs');
+const path = require('path');
 
 // Einfache Logging-Funktion
 function log(message) {
   console.log('[RENDER-PATCH] ' + message);
 }
 
-log('Starte vereinfachten Render-Patch...');
+log('Starte CommonJS Render-Patch...');
 
 // Einfache HTML-Seite als String (keine Template-Literals, keine JSX)
 const simpleHtml = '<!DOCTYPE html>' +
@@ -48,18 +44,18 @@ if (fs.existsSync(indexHtmlPath)) {
   log('index.html gefunden. Patche für Render-Deployment...');
   
   // Frontend-Konfiguration
-  const scriptContent = '\\n<script>\\n' +
-    '  // Konfiguration für verschiedene Umgebungen\\n' +
-    '  (function() {\\n' +
-    '    const isRender = window.location.hostname.includes("render.com") || window.location.hostname.includes("onrender.com");\\n' +
-    '    window.APP_CONFIG = {\\n' +
-    '      isRender: isRender,\\n' +
-    '      apiBaseUrl: "",\\n' +
-    '      basename: "",\\n' +
-    '      noRedirects: true\\n' +
-    '    };\\n' +
-    '    console.log("App konfiguriert für:", { isRender: isRender, hostname: window.location.hostname });\\n' +
-    '  })();\\n' +
+  const scriptContent = '\n<script>\n' +
+    '  // Konfiguration für verschiedene Umgebungen\n' +
+    '  (function() {\n' +
+    '    const isRender = window.location.hostname.includes("render.com") || window.location.hostname.includes("onrender.com");\n' +
+    '    window.APP_CONFIG = {\n' +
+    '      isRender: isRender,\n' +
+    '      apiBaseUrl: "",\n' +
+    '      basename: "",\n' +
+    '      noRedirects: true\n' +
+    '    };\n' +
+    '    console.log("App konfiguriert für:", { isRender: isRender, hostname: window.location.hostname });\n' +
+    '  })();\n' +
     '</script>';
 
   try {
@@ -67,13 +63,13 @@ if (fs.existsSync(indexHtmlPath)) {
 
     // Base-Href einfügen
     if (!indexHtml.includes('<base href="/"')) {
-      indexHtml = indexHtml.replace('<head>', '<head>\\n  <base href="/">');
+      indexHtml = indexHtml.replace('<head>', '<head>\n  <base href="/">');
       log('base href-Tag hinzugefügt');
     }
 
     // App-Konfiguration einfügen
     if (!indexHtml.includes('window.APP_CONFIG')) {
-      indexHtml = indexHtml.replace('</head>', scriptContent + '\\n</head>');
+      indexHtml = indexHtml.replace('</head>', scriptContent + '\n</head>');
       log('App-Konfiguration hinzugefügt');
     }
 
@@ -154,4 +150,4 @@ for (const filePath of directPaths) {
   }
 }
 
-log('Render-Patch abgeschlossen. Alle Weiterleitungsprobleme sollten behoben sein.');
+log('Render-Patch (CommonJS) abgeschlossen. Alle Weiterleitungsprobleme sollten behoben sein.');
