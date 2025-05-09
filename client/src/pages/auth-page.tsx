@@ -232,9 +232,13 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
         });
         
         // Nach erfolgreicher Anmeldung zur Hauptseite weiterleiten
+        // Verwende absoluten URL mit Origin für zuverlässiges Routing
+        const cleanUrl = window.location.origin + "/";
+        console.log("Login erfolgreich - navigiere zu:", cleanUrl);
+        
         setTimeout(() => {
-          window.location.href = "/";
-        }, 500); // Kurze Verzögerung, damit der Toast sichtbar ist
+          window.location.href = cleanUrl;
+        }, 1000); // Längere Verzögerung für zuverlässige Navigation
       }
     });
   };

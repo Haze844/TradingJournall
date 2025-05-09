@@ -92,12 +92,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // DIREKTE NAVIGATION zur Hauptseite - WICHTIG FÜR KORREKTE WEITERLEITUNG
       // Wir verwenden window.location für einen vollständigen Reload und Navigation
+      // Das ist die ENTSCHEIDENDE Lösung, die das Problem mit der statischen HTML-Weiterleitung behebt
       console.log("Login erfolgreich - navigiere zur Hauptseite über window.location");
+      
+      // Clear any query params to avoid issues
+      const cleanUrl = window.location.origin + "/";
+      console.log("Navigiere zu:", cleanUrl, "mit vollständigem Seitenneuladen");
       
       // Kurze Verzögerung, damit Toast angezeigt werden kann
       setTimeout(() => {
-        window.location.href = "/";
-      }, 800);
+        // ENTSCHEIDEND: Wir stellen sicher, dass wir einen absoluten URL verwenden
+        window.location.href = cleanUrl;
+      }, 1000);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -152,10 +158,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Gleicher Ansatz wie beim Login
       console.log("Registrierung erfolgreich - navigiere zur Hauptseite über window.location");
       
+      // Clear any query params to avoid issues
+      const cleanUrl = window.location.origin + "/";
+      console.log("Navigiere zu:", cleanUrl, "mit vollständigem Seitenneuladen");
+      
       // Kurze Verzögerung, damit Toast angezeigt werden kann
       setTimeout(() => {
-        window.location.href = "/";
-      }, 800);
+        // ENTSCHEIDEND: Wir stellen sicher, dass wir einen absoluten URL verwenden
+        window.location.href = cleanUrl;
+      }, 1000);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
