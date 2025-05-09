@@ -1,0 +1,50 @@
+2025-05-09T20:13:21.803747786Z Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+2025-05-09T20:13:21.803766877Z   npx update-browserslist-db@latest
+2025-05-09T20:13:21.803771787Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-09T20:13:28.148843332Z ✓ 3401 modules transformed.
+2025-05-09T20:13:28.703185615Z rendering chunks...
+2025-05-09T20:13:28.71718504Z computing gzip size...
+2025-05-09T20:13:28.748447815Z ../dist/public/index.html                     1.91 kB │ gzip:   0.75 kB
+2025-05-09T20:13:28.748541307Z ../dist/public/assets/index-BCPvXEFI.css     99.44 kB │ gzip:  16.39 kB
+2025-05-09T20:13:28.748564838Z ../dist/public/assets/index-BVEnBOwi.js   1,356.02 kB │ gzip: 364.09 kB
+2025-05-09T20:13:28.748709071Z 
+2025-05-09T20:13:28.748718831Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-09T20:13:28.748724631Z - Using dynamic import() to code-split the application
+2025-05-09T20:13:28.748730242Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-09T20:13:28.748735482Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-09T20:13:28.748943017Z ✓ built in 7.19s
+2025-05-09T20:13:28.843211032Z 
+2025-05-09T20:13:28.843225322Z   dist/index.js  159.6kb
+2025-05-09T20:13:28.843228352Z 
+2025-05-09T20:13:28.843231132Z ⚡ Done in 12ms
+2025-05-09T20:13:29.809700054Z ==> Uploading build...
+2025-05-09T20:13:39.197625358Z ==> Uploaded in 6.0s. Compression took 3.4s
+2025-05-09T20:13:39.234671359Z ==> Build successful 🎉
+2025-05-09T20:13:41.944358335Z ==> Deploying...
+2025-05-09T20:14:01.72053451Z ==> Running 'node dist/index.js'
+2025-05-09T20:14:12.724088106Z 8:14:12 PM [express] serving on port 5000
+2025-05-09T20:14:13.543093703Z Failed to seed initial users: error: relation "users" does not exist
+2025-05-09T20:14:13.543114585Z     at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-05-09T20:14:13.543122325Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-09T20:14:13.543127476Z     at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-05-09T20:14:13.543132486Z     at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:1235:20)
+2025-05-09T20:14:13.543136477Z     at async file:///opt/render/project/src/dist/index.js:1905:29 {
+2025-05-09T20:14:13.543140597Z   length: 104,
+2025-05-09T20:14:13.543145137Z   severity: 'ERROR',
+2025-05-09T20:14:13.543148998Z   code: '42P01',
+2025-05-09T20:14:13.543152818Z   detail: undefined,
+2025-05-09T20:14:13.543156568Z   hint: undefined,
+2025-05-09T20:14:13.543160488Z   position: '42',
+2025-05-09T20:14:13.543167399Z   internalPosition: undefined,
+2025-05-09T20:14:13.543171629Z   internalQuery: undefined,
+2025-05-09T20:14:13.543175629Z   where: undefined,
+2025-05-09T20:14:13.54317948Z   schema: undefined,
+2025-05-09T20:14:13.54318349Z   table: undefined,
+2025-05-09T20:14:13.54318757Z   column: undefined,
+2025-05-09T20:14:13.543191911Z   dataType: undefined,
+2025-05-09T20:14:13.543211182Z   constraint: undefined,
+2025-05-09T20:14:13.543215503Z   file: 'parse_relation.c',
+2025-05-09T20:14:13.543219303Z   line: '1449',
+2025-05-09T20:14:13.543223263Z   routine: 'parserOpenTable'
+2025-05-09T20:14:13.543229433Z }
+2025-05-09T20:14:22.651242438Z ==> Your service is live 🎉
