@@ -1,5 +1,5 @@
 // render-patch.js
-const fs = require('fs');
+import fs from 'fs';
 
 // API-URL-Patch für Frontend
 const indexHtmlPath = './dist/public/index.html';
