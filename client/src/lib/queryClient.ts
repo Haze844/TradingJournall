@@ -1,18 +1,31 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 // Verbesserte Fehlerbehandlung für API-Anfragen
+/**
+ * Prüft, ob die API-Antwort erfolgreich war und wirft einen Fehler, wenn nicht
+ * @param res Die Antwort vom Server
+ */
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     // Versuche, den Antworttext zu analysieren
     let errorMessage = res.statusText || `Fehler (${res.status})`;
+    let errorDetails: any = null;
     
     try {
       // Versuche, die Antwort als JSON zu parsen
       const contentType = res.headers.get('content-type');
+      const clonedRes = res.clone(); // Klonen für mehrfaches Lesen
       
       if (contentType && contentType.includes('application/json')) {
-        const errorJson = await res.json();
-        errorMessage = errorJson.message || errorJson.error || JSON.stringify(errorJson);
+        try {
+          const errorJson = await clonedRes.json();
+          errorMessage = errorJson.message || errorJson.error || JSON.stringify(errorJson);
+          errorDetails = errorJson;
+        } catch (jsonError) {
+          // Wenn JSON-Parsing fehlschlägt, als Text lesen
+          const text = await res.text();
+          if (text) errorMessage = text;
+        }
       } else {
         // Andernfalls als Text lesen
         const text = await res.text();
@@ -23,7 +36,19 @@ async function throwIfResNotOk(res: Response) {
       // Behalte die ursprüngliche Fehlermeldung bei, wenn das Parsen fehlschlägt
     }
     
-    console.error(`API-Fehler (${res.status}):`, errorMessage);
+    // Spezielles Logging für Authentifizierungsfehler
+    if (res.status === 401) {
+      console.warn(`Authentifizierungsfehler (401): ${errorMessage}`, {
+        url: res.url,
+        statusText: res.statusText,
+        headers: Array.from(res.headers.entries())
+          .filter(([key]) => !key.includes('cookie') && !key.includes('set-cookie'))
+          .reduce((obj, [key, val]) => ({ ...obj, [key]: val }), {})
+      });
+    } else {
+      console.error(`API-Fehler (${res.status}):`, errorMessage, errorDetails);
+    }
+    
     throw new Error(`${res.status}: ${errorMessage}`);
   }
 }

@@ -178,6 +178,17 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Debug-Informationen für Authentifizierungsprobleme
+    console.log("Login-Versuch für:", formData.username, "mit rememberMe:", formData.rememberMe);
+    console.log("Browser-Info:", {
+      userAgent: navigator.userAgent,
+      cookiesEnabled: navigator.cookieEnabled,
+      language: navigator.language,
+      platform: navigator.platform,
+      host: window.location.host,
+      protocol: window.location.protocol
+    });
+    
     // Anmeldedaten speichern, wenn "Eingeloggt bleiben" aktiviert ist
     if (formData.rememberMe) {
       saveLoginCredentials(formData.username, formData.password);
@@ -186,7 +197,35 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
       clearSavedLoginCredentials();
     }
     
-    loginMutation.mutate(formData);
+    // Toast-Benachrichtigung vor dem Login
+    toast({
+      title: "Login wird verarbeitet",
+      description: "Verbindung zum Server wird hergestellt...",
+      variant: "default",
+    });
+    
+    // Erweiterte Fehlerbehandlung für Login-Mutation
+    loginMutation.mutate(formData, {
+      onError: (error: any) => {
+        console.error("Login-Fehler:", error);
+        
+        // Detaillierte Fehlermeldung für Benutzer
+        toast({
+          title: "Login fehlgeschlagen",
+          description: error.message || "Verbindungsproblem mit dem Server. Bitte versuche es erneut.",
+          variant: "destructive",
+        });
+      },
+      onSuccess: (data: any) => {
+        console.log("Login erfolgreich:", data);
+        
+        toast({
+          title: "Login erfolgreich",
+          description: `Willkommen zurück, ${data.username}!`,
+          variant: "default",
+        });
+      }
+    });
   };
 
   return (

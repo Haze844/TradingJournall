@@ -131,6 +131,17 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     console.log("Login-Versuch für Benutzer:", req.body.username, "mit rememberMe:", req.body.rememberMe);
     
+    // Debug-Informationen für Render-Deployment
+    console.log("Login-Anfrage-Headers:", {
+      origin: req.headers.origin,
+      referer: req.headers.referer,
+      host: req.headers.host,
+      cookie: req.headers.cookie ? "Vorhanden" : "Nicht vorhanden",
+      userAgent: req.headers['user-agent'],
+      'x-forwarded-for': req.headers['x-forwarded-for'],
+      'x-forwarded-proto': req.headers['x-forwarded-proto']
+    });
+    
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
         console.error("Login-Fehler:", err);
@@ -146,6 +157,33 @@ export function setupAuth(app: Express) {
       
       // Überprüfe, ob "Eingeloggt bleiben" Option aktiviert ist
       const rememberMe = req.body.rememberMe === true;
+      
+      // Stellen wir sicher, dass die Session und der Cookie korrekt konfiguriert sind
+      try {
+        // Für sichere Cookie-Einstellungen, insbesondere für Cross-Origin-Anfragen
+        if (req.session.cookie) {
+          // Setze SameSite auf 'None' für cross-origin Anfragen
+          req.session.cookie.sameSite = 'none';
+          
+          // Setze Secure auf true, wenn HTTPS verwendet wird (was bei Render und Replit der Fall ist)
+          const isSecure = req.headers['x-forwarded-proto'] === 'https' || process.env.NODE_ENV === 'production';
+          req.session.cookie.secure = isSecure;
+          
+          // Domain-Einstellung für Cross-Origin-Cookies (optional)
+          const host = req.headers.host || '';
+          if (host.includes('onrender.com')) {
+            req.session.cookie.domain = '.onrender.com';
+          }
+          
+          console.log("Cookie-Einstellungen angepasst:", {
+            sameSite: req.session.cookie.sameSite,
+            secure: req.session.cookie.secure,
+            domain: req.session.cookie.domain || 'Nicht gesetzt'
+          });
+        }
+      } catch (cookieErr) {
+        console.error("Fehler bei Cookie-Konfiguration:", cookieErr);
+      }
       
       req.login(user, (loginErr: any) => {
         if (loginErr) {
@@ -166,18 +204,44 @@ export function setupAuth(app: Express) {
           }
         }
         
-        // Session speichern um sicherzustellen, dass sie persistiert wird
-        req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error("Fehler beim Speichern der Session:", saveErr);
-            return next(saveErr);
+        // Session regenerieren für bessere Sicherheit
+        req.session.regenerate((regErr) => {
+          if (regErr) {
+            console.error("Fehler bei Session-Regeneration:", regErr);
+            
+            // Falls Session-Regenerierung fehlschlägt, versuchen wir trotzdem zu speichern
+            req.session.save((saveErr) => {
+              if (saveErr) {
+                console.error("Fehler beim Speichern der Session:", saveErr);
+                return next(saveErr);
+              }
+              
+              console.log("Login erfolgreich (ohne Regeneration), Session gespeichert. Session-ID:", req.session.id, "User-ID:", user.id);
+              
+              // Don't send password to the client
+              const { password, ...userWithoutPassword } = user;
+              return res.status(200).json(userWithoutPassword);
+            });
+            
+            return; // Frühe Rückkehr nach dem Fehler
           }
           
-          console.log("Login erfolgreich, Session gespeichert. Session-ID:", req.session.id, "User-ID:", user.id);
-          
-          // Don't send password to the client
-          const { password, ...userWithoutPassword } = user;
-          return res.status(200).json(userWithoutPassword);
+          // Session wieder mit dem Benutzer verknüpfen, da regenerate() die Session leert
+          req.login(user, () => {
+            // Session speichern um sicherzustellen, dass sie persistiert wird
+            req.session.save((saveErr) => {
+              if (saveErr) {
+                console.error("Fehler beim Speichern der Session:", saveErr);
+                return next(saveErr);
+              }
+              
+              console.log("Login erfolgreich, Session regeneriert und gespeichert. Session-ID:", req.session.id, "User-ID:", user.id);
+              
+              // Don't send password to the client
+              const { password, ...userWithoutPassword } = user;
+              return res.status(200).json(userWithoutPassword);
+            });
+          });
         });
       });
     })(req, res, next);
