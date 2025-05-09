@@ -1996,6 +1996,10 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Wähle die Storage-Implementation basierend auf der Umgebung
-export const storage = process.env.DATABASE_URL 
+const useDatabase = !!process.env.DATABASE_URL;
+
+console.log(`Storage-Auswahl: ${useDatabase ? 'DatabaseStorage' : 'MemStorage'} (DATABASE_URL ${process.env.DATABASE_URL ? 'vorhanden' : 'fehlt'})`);
+
+export const storage = useDatabase
   ? new DatabaseStorage() 
   : new MemStorage();

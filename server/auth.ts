@@ -49,14 +49,18 @@ export function setupAuth(app: Express) {
     }
   };
   
-  // Debug-Logging
+  // Debug-Logging mit verbesserter Erkennung des Session-Store-Typs
+  const storeType = storage.sessionStore ? 
+    (storage.sessionStore.constructor.name.includes('Postgres') ? 'PostgreSQL' : 
+     storage.sessionStore.constructor.name.includes('Memory') ? 'Memory' : 
+     storage.sessionStore.constructor.name) : 
+    'KEINE';
+  
   console.log('Session-Konfiguration initialisiert mit:', {
     secret: sessionSettings.secret ? 'VORHANDEN' : 'FEHLT',
     resave: sessionSettings.resave,
     saveUninitialized: sessionSettings.saveUninitialized,
-    sessionStoreType: storage.sessionStore ? 
-      (storage.sessionStore instanceof PostgresSessionStore ? 'PostgreSQL' : 'Memory') : 
-      'KEINE',
+    sessionStoreType: storeType,
     cookieSettings: sessionSettings.cookie
   });
 
