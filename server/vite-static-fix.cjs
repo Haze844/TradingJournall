@@ -55,7 +55,7 @@ if (!reactIndexContent.includes('window.APP_CONFIG')) {
 }
 
 /**
- * Ersetzt den Inhalt von index.html durch ein JavaScript-Redirect-Skript
+ * Ersetzt den Inhalt von index.html durch ein minimales JavaScript-Redirect-Skript
  * Das stellt sicher, dass nach einem Login der Nutzer zur React-App weitergeleitet wird
  */
 function createIndexWithRedirect() {
@@ -67,90 +67,23 @@ function createIndexWithRedirect() {
       console.log(`Bestehende index.html gesichert als ${backupPath}`);
     }
     
-    // Erstelle eine redirect-index.html
+    // Erstelle eine minimale redirect-index.html (ohne unnötige HTML-Elemente)
     const redirectHTML = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LvlUp Tradingtagebuch - Weiterleitung</title>
+  <title>Weiterleitung...</title>
   <script>
-    // Weiterleitungslogik für bessere SPA-Navigation
+    // Minimale Weiterleitungslogik
     (function() {
-      // Setup für SPA-Routing
-      // Stabile Weiterleitungsstrategie nach dem Login
-      const isAuth = document.cookie.includes('connect.sid');
-      
-      // Protokollierung für Debugging
-      console.log("Statische Weiterleitungsseite geladen");
-      console.log("Cookie-Status:", document.cookie ? "Cookies vorhanden" : "Keine Cookies");
-      console.log("Auth-Status:", isAuth ? "Authentifiziert" : "Nicht authentifiziert");
-      console.log("Aktuelle URL:", window.location.href);
-      
-      // Direkte Weiterleitung zur React-App mit vollständigem Pfad
-      const basePath = window.location.origin;
-      const pathToKeep = window.location.pathname;
-      const validPaths = ['/auth', '/api', '/booklet'];
-      
-      // Für API-Pfade keine Weiterleitung
-      if (pathToKeep.startsWith('/api/')) {
-        console.log("API-Pfad erkannt - keine Weiterleitung");
-        return;
-      }
-      
-      // Für Auth-Pfad Weiterleitung zur entsprechenden SPA-Route
-      if (pathToKeep === '/auth') {
-        console.log("Auth-Pfad erkannt - direkter Link zur SPA-Auth-Route");
-        window.location.replace(basePath + '/auth#spa');
-        return;
-      }
-      
-      // Für Root-Pfad ('/')
-      if (pathToKeep === '/' || pathToKeep === '') {
-        console.log("Root-Pfad erkannt - weiterleiten zu SPA-Hauptseite");
-        window.location.replace(basePath + '/#spa');
-        return;
-      }
-      
-      // Standard-Weiterleitung für alle anderen Pfade
-      console.log("Standard-Weiterleitung zur SPA mit aktueller Route");
-      window.location.replace(basePath + pathToKeep + '#spa');
+      console.log("Weiterleitungsseite geladen");
+      window.location.replace(window.location.origin + '/#spaLoaded');
     })();
   </script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #0c1222;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .loader {
-      border: 5px solid rgba(59, 130, 246, 0.2);
-      border-radius: 50%;
-      border-top: 5px solid #3b82f6;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .container {
-      text-align: center;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="loader"></div>
-    <p>Einen Moment bitte, du wirst weitergeleitet...</p>
-  </div>
+  <noscript>JavaScript wird benötigt, um diese Anwendung zu nutzen.</noscript>
 </body>
 </html>`;
     

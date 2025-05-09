@@ -1,0 +1,50 @@
+2025-05-09T23:53:30.920986906Z ==> Uploaded in 6.1s. Compression took 3.5s
+2025-05-09T23:53:30.992510391Z ==> Build successful 🎉
+2025-05-09T23:53:35.508450503Z ==> Deploying...
+2025-05-09T23:53:57.693714375Z ==> Running 'node setup-db.js && node render-patch.js && node dist/index.js'
+2025-05-09T23:53:58.512432942Z Datenbank erfolgreich eingerichtet
+2025-05-09T23:54:08.68561107Z [RENDER-PATCH] Starte vereinfachten Render-Patch...
+2025-05-09T23:54:08.685859926Z [RENDER-PATCH] index.html gefunden. Patche für Render-Deployment...
+2025-05-09T23:54:08.69134693Z [RENDER-PATCH] index.html erfolgreich aktualisiert
+2025-05-09T23:54:08.691488043Z [RENDER-PATCH] 404.html für Client-Routing erstellt
+2025-05-09T23:54:08.691540734Z [RENDER-PATCH] Server-Code gefunden. Patche Express-Server...
+2025-05-09T23:54:08.692415584Z [RENDER-PATCH] Keine geeignete Stelle im Server-Code gefunden
+2025-05-09T23:54:08.692513756Z [RENDER-PATCH] Erstelle statische HTML-Seiten...
+2025-05-09T23:54:08.693454847Z [RENDER-PATCH] Statische Seite geschrieben: /opt/render/project/src/index.html
+2025-05-09T23:54:08.695273968Z [RENDER-PATCH] Statische Seite geschrieben: /opt/render/project/src/public/index.html
+2025-05-09T23:54:08.695608066Z [RENDER-PATCH] Statische Seite geschrieben: /opt/render/project/src/dist/index.html
+2025-05-09T23:54:08.695621386Z [RENDER-PATCH] Render-Patch abgeschlossen. Alle Weiterleitungsprobleme sollten behoben sein.
+2025-05-09T23:54:19.586119099Z Datenbankverbindung mit Neon Serverless wird hergestellt...
+2025-05-09T23:54:19.587601963Z Datenbankverbindung erfolgreich initialisiert.
+2025-05-09T23:54:19.587813198Z Storage-Auswahl: DatabaseStorage (DATABASE_URL vorhanden)
+2025-05-09T23:54:19.588687137Z CommonJS-Version des Fixes nicht verfügbar, versuche ES-Modul-Version
+2025-05-09T23:54:19.592052563Z Umgebung erkannt: {
+2025-05-09T23:54:19.592090314Z   isRender: true,
+2025-05-09T23:54:19.592094974Z   isReplit: false,
+2025-05-09T23:54:19.592097475Z   isNetlify: false,
+2025-05-09T23:54:19.592100275Z   isProduction: true,
+2025-05-09T23:54:19.592102764Z   nodeEnv: 'production'
+2025-05-09T23:54:19.592105125Z }
+2025-05-09T23:54:19.786604439Z Finale Cookie-Einstellungen: {
+2025-05-09T23:54:19.78662211Z   maxAge: 604800000,
+2025-05-09T23:54:19.78662487Z   httpOnly: true,
+2025-05-09T23:54:19.786627239Z   path: '/',
+2025-05-09T23:54:19.78662935Z   sameSite: 'lax',
+2025-05-09T23:54:19.78663149Z   secure: true
+2025-05-09T23:54:19.78663395Z }
+2025-05-09T23:54:19.786752352Z Session-Konfiguration initialisiert mit: {
+2025-05-09T23:54:19.786761013Z   secret: 'VORHANDEN',
+2025-05-09T23:54:19.786764823Z   resave: true,
+2025-05-09T23:54:19.786768903Z   saveUninitialized: true,
+2025-05-09T23:54:19.786772203Z   sessionStoreType: 'PGStore',
+2025-05-09T23:54:19.786775163Z   cookieSettings: {
+2025-05-09T23:54:19.786778333Z     maxAge: 604800000,
+2025-05-09T23:54:19.786781633Z     httpOnly: true,
+2025-05-09T23:54:19.786785023Z     path: '/',
+2025-05-09T23:54:19.786788573Z     sameSite: 'lax',
+2025-05-09T23:54:19.786792163Z     secure: true
+2025-05-09T23:54:19.786794543Z   }
+2025-05-09T23:54:19.786796723Z }
+2025-05-09T23:54:20.098551467Z Beide Versionen des HTML-Fixes nicht verfügbar: Dynamic require of "fs" is not supported
+2025-05-09T23:54:20.286035642Z 11:54:20 PM [express] serving on port 5000
+2025-05-09T23:54:26.279332553Z ==> Your service is live 🎉
