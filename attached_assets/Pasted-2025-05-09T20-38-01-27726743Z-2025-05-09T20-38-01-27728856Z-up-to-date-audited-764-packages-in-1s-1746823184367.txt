@@ -1,0 +1,50 @@
+2025-05-09T20:38:01.27726743Z 
+2025-05-09T20:38:01.27728856Z up to date, audited 764 packages in 1s
+2025-05-09T20:38:01.27729329Z 
+2025-05-09T20:38:01.27729686Z 74 packages are looking for funding
+2025-05-09T20:38:01.277307081Z   run `npm fund` for details
+2025-05-09T20:38:01.30603965Z 
+2025-05-09T20:38:01.306071121Z 7 moderate severity vulnerabilities
+2025-05-09T20:38:01.306077601Z 
+2025-05-09T20:38:01.306083761Z To address issues that do not require attention, run:
+2025-05-09T20:38:01.306089221Z   npm audit fix
+2025-05-09T20:38:01.306094412Z 
+2025-05-09T20:38:01.306099332Z To address all issues (including breaking changes), run:
+2025-05-09T20:38:01.306105102Z   npm audit fix --force
+2025-05-09T20:38:01.306110162Z 
+2025-05-09T20:38:01.306115872Z Run `npm audit` for details.
+2025-05-09T20:38:01.452408173Z 
+2025-05-09T20:38:01.452440204Z > rest-express@1.0.0 build
+2025-05-09T20:38:01.452448374Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-09T20:38:01.452455404Z 
+2025-05-09T20:38:01.748650268Z vite v5.4.14 building for production...
+2025-05-09T20:38:01.811163948Z transforming...
+2025-05-09T20:38:02.034700401Z Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+2025-05-09T20:38:02.034734402Z   npx update-browserslist-db@latest
+2025-05-09T20:38:02.034741071Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-09T20:38:09.178541544Z ✓ 3401 modules transformed.
+2025-05-09T20:38:09.791632973Z rendering chunks...
+2025-05-09T20:38:09.807545769Z computing gzip size...
+2025-05-09T20:38:09.83988207Z ../dist/public/index.html                     1.91 kB │ gzip:   0.75 kB
+2025-05-09T20:38:09.839942711Z ../dist/public/assets/index-BCPvXEFI.css     99.44 kB │ gzip:  16.39 kB
+2025-05-09T20:38:09.839990712Z ../dist/public/assets/index-BVEnBOwi.js   1,356.02 kB │ gzip: 364.09 kB
+2025-05-09T20:38:09.840128655Z 
+2025-05-09T20:38:09.840133415Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-09T20:38:09.840136825Z - Using dynamic import() to code-split the application
+2025-05-09T20:38:09.840140045Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-09T20:38:09.840142885Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-09T20:38:09.84041563Z ✓ built in 8.07s
+2025-05-09T20:38:09.933960816Z 
+2025-05-09T20:38:09.933984056Z   dist/index.js  159.6kb
+2025-05-09T20:38:09.933988126Z 
+2025-05-09T20:38:09.933991676Z ⚡ Done in 13ms
+2025-05-09T20:38:13.062512289Z ==> Uploading build...
+2025-05-09T20:38:24.126314763Z ==> Uploaded in 6.9s. Compression took 4.1s
+2025-05-09T20:38:24.1599737Z ==> Build successful 🎉
+2025-05-09T20:38:26.57359825Z ==> Deploying...
+2025-05-09T20:38:46.445553847Z ==> Running 'node setup-db.js && node render-patch.js && node dist/index.js'
+2025-05-09T20:38:47.799134234Z Datenbank erfolgreich eingerichtet
+2025-05-09T20:38:57.944988644Z index.html gepatcht für Render-Deployment
+2025-05-09T20:38:57.94522555Z Render-Patches abgeschlossen
+2025-05-09T20:39:09.342566379Z 8:39:09 PM [express] serving on port 5000
+2025-05-09T20:39:17.480098053Z ==> Your service is live 🎉
