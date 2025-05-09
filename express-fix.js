@@ -69,6 +69,11 @@ app.use((req, res, next) => {
   if (staticFilesIndex !== -1) {
     const staticEndIndex = indexJs.indexOf(');', staticFilesIndex) + 2;
     const spaRoutingPatch = `
+// Direkter Redirect für Root-Pfad zu /auth
+app.get('/', (req, res) => {
+  return res.redirect('/auth');
+});
+
 // Unterstützung für SPA-Routing
 app.get('*', (req, res, next) => {
   // Wenn es eine API-Anfrage ist, zum nächsten Handler weiterleiten

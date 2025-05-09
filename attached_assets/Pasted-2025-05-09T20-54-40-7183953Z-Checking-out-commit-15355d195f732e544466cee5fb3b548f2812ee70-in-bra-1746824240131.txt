@@ -1,0 +1,63 @@
+2025-05-09T20:54:40.7183953Z ==> Checking out commit 15355d195f732e544466cee5fb3b548f2812ee70 in branch main
+2025-05-09T20:54:42.527946149Z ==> Downloading cache...
+2025-05-09T20:55:01.931433476Z ==> Transferred 505MB in 9s. Extraction took 10s.
+2025-05-09T20:55:10.578600888Z ==> Using Node.js version 22.14.0 (default)
+2025-05-09T20:55:10.603667749Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-09T20:55:10.734484762Z ==> Using Bun version 1.1.0 (default)
+2025-05-09T20:55:10.734496972Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-09T20:55:10.781889255Z ==> Running build command 'npm install --include=dev ws @neondatabase/serverless; npm run build'...
+2025-05-09T20:55:12.461567859Z 
+2025-05-09T20:55:12.461591569Z up to date, audited 764 packages in 2s
+2025-05-09T20:55:12.4616005Z 
+2025-05-09T20:55:12.46161121Z 74 packages are looking for funding
+2025-05-09T20:55:12.46162524Z   run `npm fund` for details
+2025-05-09T20:55:12.490714062Z 
+2025-05-09T20:55:12.490730962Z 7 moderate severity vulnerabilities
+2025-05-09T20:55:12.490733953Z 
+2025-05-09T20:55:12.490737373Z To address issues that do not require attention, run:
+2025-05-09T20:55:12.490740153Z   npm audit fix
+2025-05-09T20:55:12.490742683Z 
+2025-05-09T20:55:12.490745393Z To address all issues (including breaking changes), run:
+2025-05-09T20:55:12.490748703Z   npm audit fix --force
+2025-05-09T20:55:12.490751213Z 
+2025-05-09T20:55:12.490754383Z Run `npm audit` for details.
+2025-05-09T20:55:12.653093119Z 
+2025-05-09T20:55:12.65311802Z > rest-express@1.0.0 build
+2025-05-09T20:55:12.65312338Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-09T20:55:12.65313019Z 
+2025-05-09T20:55:12.945719704Z vite v5.4.14 building for production...
+2025-05-09T20:55:13.007637142Z transforming...
+2025-05-09T20:55:13.229319641Z Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+2025-05-09T20:55:13.229340132Z   npx update-browserslist-db@latest
+2025-05-09T20:55:13.229345012Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-09T20:55:20.072889343Z ✓ 3401 modules transformed.
+2025-05-09T20:55:20.675730965Z rendering chunks...
+2025-05-09T20:55:20.689992814Z computing gzip size...
+2025-05-09T20:55:20.721306752Z ../dist/public/index.html                     1.91 kB │ gzip:   0.75 kB
+2025-05-09T20:55:20.721398565Z ../dist/public/assets/index-BCPvXEFI.css     99.44 kB │ gzip:  16.39 kB
+2025-05-09T20:55:20.721434245Z ../dist/public/assets/index-BVEnBOwi.js   1,356.02 kB │ gzip: 364.09 kB
+2025-05-09T20:55:20.721587109Z 
+2025-05-09T20:55:20.721595759Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-09T20:55:20.72159941Z - Using dynamic import() to code-split the application
+2025-05-09T20:55:20.721602859Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-09T20:55:20.72160567Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-09T20:55:20.721863546Z ✓ built in 7.75s
+2025-05-09T20:55:20.820741085Z 
+2025-05-09T20:55:20.820759275Z   dist/index.js  159.6kb
+2025-05-09T20:55:20.820762385Z 
+2025-05-09T20:55:20.820765145Z ⚡ Done in 13ms
+2025-05-09T20:55:21.543506266Z ==> Uploading build...
+2025-05-09T20:55:34.69461944Z ==> Deploying...
+2025-05-09T20:55:32.064048618Z ==> Uploaded in 7.2s. Compression took 3.3s
+2025-05-09T20:55:32.101315346Z ==> Build successful 🎉
+2025-05-09T20:56:00.552460921Z ==> Running 'node setup-db.js && node render-patch.js && node dist/index.js'
+2025-05-09T20:56:01.557078743Z Datenbank erfolgreich eingerichtet
+2025-05-09T20:56:11.860910014Z index.html gepatcht für Render-Deployment
+2025-05-09T20:56:11.861345747Z 404.html für Client-Routing erstellt
+2025-05-09T20:56:11.861355198Z Render-Patches abgeschlossen
+2025-05-09T20:56:25.298177798Z ==> Your service is live 🎉
+2025-05-09T20:56:24.35773249Z 8:56:24 PM [express] serving on port 5000
+2025-05-09T20:56:37.161198618Z Auth-Check - Session: 74ofYpcnA0xF_9_OzReGugzoRJiXj3ax Auth-Status: true
+2025-05-09T20:56:37.161240561Z Authentifiziert als Benutzer: mo
+2025-05-09T20:56:37.166729245Z 8:56:37 PM [express] GET /api/user 200 in 15ms :: {"id":2,"username":"mo"}
+2025-05-09T20:56:37.461289676Z 8:56:37 PM [express] GET /api/debug 200 in 13ms
