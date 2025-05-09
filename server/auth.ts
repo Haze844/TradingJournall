@@ -32,21 +32,42 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Umgebungsabhängige Konfiguration für optimale Kompatibilität
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isRender = process.env.RENDER || process.env.RENDER_EXTERNAL_URL;
+  const isReplit = process.env.REPL_ID || process.env.REPL_SLUG;
+  
+  // Cookie-Einstellungen je nach Umgebung anpassen
+  const cookieSettings: session.CookieOptions = {
+    maxAge: 1000 * 60 * 60 * 24, // 24 Stunden Standardwert
+    httpOnly: true,
+    path: '/'
+  };
+  
+  // Für Produktionsumgebungen und spezifische Plattformen
+  if (isProduction || isRender) {
+    // Cross-Origin-Anfragen in Produktionsumgebungen erlauben
+    cookieSettings.sameSite = 'none';
+    cookieSettings.secure = true;
+  } else if (isReplit) {
+    // Replit-spezifische Einstellungen
+    cookieSettings.sameSite = 'lax';
+    cookieSettings.secure = true;
+  } else {
+    // Für lokale Entwicklung
+    cookieSettings.sameSite = 'lax';
+    cookieSettings.secure = false;
+  }
+  
   // Verbesserte Session-Einstellungen mit Debug-Logging und optimierten Cookie-Parametern
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "lvlup-trading-journal-secret-key",
-    resave: true, // Änderung: Auf true gesetzt, um Session-Probleme zu vermeiden
-    saveUninitialized: true, // Änderung: Auf true gesetzt, um neue Sessions zu erhalten
+    resave: true, // Auf true gesetzt, um Session-Probleme zu vermeiden
+    saveUninitialized: true, // Auf true gesetzt, um neue Sessions zu erhalten
     store: storage.sessionStore,
     rolling: true, // Verlängert die Cookie-Lebensdauer bei jeder Anfrage
     name: 'lvlup.sid', // Expliziter Cookie-Name gegen Konflikte
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 24 Stunden Standardwert
-      httpOnly: true,
-      sameSite: "none", // Änderung: 'none' für Cross-Origin-Anfragen
-      secure: true, // Immer 'secure' auf Render
-      path: '/'
-    }
+    cookie: cookieSettings
   };
   
   // Debug-Logging mit verbesserter Erkennung des Session-Store-Typs
@@ -131,7 +152,7 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     console.log("Login-Versuch für Benutzer:", req.body.username, "mit rememberMe:", req.body.rememberMe);
     
-    // Debug-Informationen für Render-Deployment
+    // Debug-Informationen für Deployment-Umgebungen
     console.log("Login-Anfrage-Headers:", {
       origin: req.headers.origin,
       referer: req.headers.referer,
@@ -139,7 +160,22 @@ export function setupAuth(app: Express) {
       cookie: req.headers.cookie ? "Vorhanden" : "Nicht vorhanden",
       userAgent: req.headers['user-agent'],
       'x-forwarded-for': req.headers['x-forwarded-for'],
-      'x-forwarded-proto': req.headers['x-forwarded-proto']
+      'x-forwarded-proto': req.headers['x-forwarded-proto'],
+      'sec-fetch-site': req.headers['sec-fetch-site'],
+      'sec-fetch-mode': req.headers['sec-fetch-mode']
+    });
+    
+    // Umgebungsinformationen für besseres Debugging
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isRender = process.env.RENDER || process.env.RENDER_EXTERNAL_URL;
+    const isReplit = process.env.REPL_ID || process.env.REPL_SLUG;
+    
+    console.log("Umgebungsinformationen:", {
+      environment: process.env.NODE_ENV || 'development',
+      isProduction,
+      isRender: isRender ? 'true' : 'false',
+      isReplit: isReplit ? 'true' : 'false',
+      sessionSecret: process.env.SESSION_SECRET ? 'vorhanden' : 'fehlt'
     });
     
     passport.authenticate("local", (err: any, user: any, info: any) => {
@@ -162,12 +198,9 @@ export function setupAuth(app: Express) {
       try {
         // Für sichere Cookie-Einstellungen, insbesondere für Cross-Origin-Anfragen
         if (req.session.cookie) {
-          // Setze SameSite auf 'None' für cross-origin Anfragen
-          req.session.cookie.sameSite = 'none';
-          
-          // Setze Secure auf true, wenn HTTPS verwendet wird (was bei Render und Replit der Fall ist)
-          const isSecure = req.headers['x-forwarded-proto'] === 'https' || process.env.NODE_ENV === 'production';
-          req.session.cookie.secure = isSecure;
+          // Umgebungsabhängige Cookie-Einstellungen
+          // Die ursprünglichen Cookie-Einstellungen werden jetzt von der anfänglichen 
+          // Session-Konfiguration übernommen, aber wir können sie hier überschreiben
           
           // Domain-Einstellung für Cross-Origin-Cookies (optional)
           const host = req.headers.host || '';
@@ -175,10 +208,12 @@ export function setupAuth(app: Express) {
             req.session.cookie.domain = '.onrender.com';
           }
           
-          console.log("Cookie-Einstellungen angepasst:", {
+          console.log("Cookie-Einstellungen für Login:", {
             sameSite: req.session.cookie.sameSite,
             secure: req.session.cookie.secure,
-            domain: req.session.cookie.domain || 'Nicht gesetzt'
+            domain: req.session.cookie.domain || 'Nicht gesetzt',
+            maxAge: req.session.cookie.maxAge,
+            path: req.session.cookie.path
           });
         }
       } catch (cookieErr) {

@@ -83,22 +83,42 @@ async function throwIfResNotOk(res: Response) {
 
 // Hilfsfunktion zur Bestimmung der Basis-URL für API-Anfragen
 function getApiBaseUrl() {
+  const isSecure = window.location.protocol === 'https:';
+  const host = window.location.host;
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  
+  // Debug-Informationen zur Umgebungserkennung
+  const environment = {
+    host,
+    hostname,
+    protocol: window.location.protocol,
+    isSecure,
+    href: window.location.href,
+    pathname: window.location.pathname,
+    isLocalhost,
+    isNetlify: hostname.includes("netlify") || hostname.includes("aquamarine-lolly-174f9a"),
+    isRender: hostname.includes("onrender.com"),
+    isReplit: hostname.includes("replit.dev") || hostname.includes("replit.app"),
+    userAgent: navigator.userAgent
+  };
+  
+  console.log("App Umgebung:", environment);
+  
   // Auf Render-Umgebung prüfen
-  if (window.location.hostname.includes('onrender.com')) {
+  if (environment.isRender) {
     console.log('Render-Umgebung erkannt - verwende /api als Basis-URL');
     return '/api';
   }
   
   // Auf Netlify-Umgebung prüfen (falls noch relevant)
-  if (window.location.hostname.includes('netlify') || 
-      window.location.hostname.includes('aquamarine-lolly-174f9a')) {
+  if (environment.isNetlify) {
     console.log('Netlify-Umgebung erkannt - verwende /.netlify/functions/api als Basis-URL');
     return '/.netlify/functions/api';
   }
   
   // Lokale Entwicklung in Replit
-  if (window.location.hostname.includes('replit.dev') || 
-      window.location.hostname.includes('replit.app')) {
+  if (environment.isReplit) {
     console.log('Replit-Umgebung erkannt - verwende leere Basis-URL');
     return '';
   }
