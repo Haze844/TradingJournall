@@ -107,8 +107,8 @@ function getApiBaseUrl() {
   
   // Auf Render-Umgebung prüfen
   if (environment.isRender) {
-    console.log('Render-Umgebung erkannt - verwende /api als Basis-URL');
-    return '/api';
+    console.log('Render-Umgebung erkannt - verwende leere Basis-URL (keine /api Präfix)');
+    return '';
   }
   
   // Auf Netlify-Umgebung prüfen (falls noch relevant)

@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Login-Anfrage wird gesendet für:", credentials.username);
       
       try {
+        // Stelle sicher, dass keine doppelten /api/api Pfade verwendet werden
         const res = await apiRequest("POST", "/api/login", credentials);
         const data = await res.json();
         console.log("Login-Antwort erhalten:", {
