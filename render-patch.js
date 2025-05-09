@@ -81,31 +81,15 @@ if (fs.existsSync(indexHtmlPath)) {
           }
         };
         
-        // Fix für Router-Probleme - mehr aggressive Weiterleitung
-        function redirectToAuth() {
-          console.log('Automatische Weiterleitung zur Auth-Seite');
-          window.location.replace('/auth');
-        }
+        // KEINE automatische Weiterleitung mehr für die Root-URL
+        // Wir zeigen nun eine statische Landingpage in App.tsx
+        console.log('Statische Landingpage-Strategie wird verwendet');
         
-        // Sofortige Ausführung, wenn wir auf der Hauptseite sind
-        if (window.location.pathname === '/' || window.location.pathname === '') {
-          console.log('Sofortige Weiterleitung');
-          redirectToAuth();
-        }
+        // Keine aggressiven Redirects mehr, da wir nun für alle Pfade
+        // eine passende Komponente rendern
         
-        // Falls das nicht funktioniert hat, nochmal beim DOMContentLoaded versuchen
-        window.addEventListener('DOMContentLoaded', function() {
-          if (window.location.pathname === '/' || window.location.pathname === '') {
-            redirectToAuth();
-          }
-        });
-        
-        // Und als letzten Ausweg nach einer kurzen Verzögerung
-        setTimeout(function() {
-          if (window.location.pathname === '/' || window.location.pathname === '') {
-            redirectToAuth();
-          }
-        }, 1000);
+        // Für Debugging-Zwecke: Zeige an, welcher Router aktiv ist
+        console.log('React-Router mit StaticLoginPage für / und /* konfiguriert');
         
         console.log("Umfassende Render-Patches angewendet");
       })();
@@ -186,12 +170,8 @@ if (fs.existsSync(indexHtmlPath)) {
     <a href="/auth" class="button">Zum Login</a>
   </div>
   <script>
-    // Prüfen ob wir uns bereits auf der Auth-Seite befinden, um Schleifen zu vermeiden
-    if (window.location.pathname !== '/auth') {
-      setTimeout(function() {
-        window.location.href = '/auth';
-      }, 2000);
-    }
+    // Kein automatischer Redirect - wir bieten nur einen manuellen Button
+    console.log('Statische Login-Seite mit manuellem Button geladen');
   </script>
 </body>
 </html>`;
