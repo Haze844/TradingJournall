@@ -6,6 +6,9 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import connectPg from "connect-pg-simple";
+
+const PostgresSessionStore = connectPg(session);
 
 declare global {
   namespace Express {
@@ -29,19 +32,33 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Verbesserte Session-Einstellungen mit Debug-Logging und optimierten Cookie-Parametern
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "lvlup-trading-journal-secret-key",
-    resave: false, // Nur bei Änderungen speichern
-    saveUninitialized: false, // Keine leeren Sessions speichern
+    resave: true, // Änderung: Auf true gesetzt, um Session-Probleme zu vermeiden
+    saveUninitialized: true, // Änderung: Auf true gesetzt, um neue Sessions zu erhalten
     store: storage.sessionStore,
+    rolling: true, // Verlängert die Cookie-Lebensdauer bei jeder Anfrage
+    name: 'lvlup.sid', // Expliziter Cookie-Name gegen Konflikte
     cookie: {
       maxAge: 1000 * 60 * 60 * 24, // 24 Stunden Standardwert
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: "none", // Änderung: 'none' für Cross-Origin-Anfragen
+      secure: true, // Immer 'secure' auf Render
       path: '/'
     }
   };
+  
+  // Debug-Logging
+  console.log('Session-Konfiguration initialisiert mit:', {
+    secret: sessionSettings.secret ? 'VORHANDEN' : 'FEHLT',
+    resave: sessionSettings.resave,
+    saveUninitialized: sessionSettings.saveUninitialized,
+    sessionStoreType: storage.sessionStore ? 
+      (storage.sessionStore instanceof PostgresSessionStore ? 'PostgreSQL' : 'Memory') : 
+      'KEINE',
+    cookieSettings: sessionSettings.cookie
+  });
 
   app.set("trust proxy", 1);
   app.use(session(sessionSettings));
