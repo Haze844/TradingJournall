@@ -4,6 +4,15 @@ import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import cors from "cors";
 
+// Statischen HTML-Fix integrieren - macht nichts in Development
+// In Production sorgt dieser Fix dafür, dass die Weiterleitung nach Login funktioniert
+try {
+  require('./vite-static-fix');
+  console.log("Statischer HTML-Fix integriert");
+} catch (err) {
+  console.log("Statischer HTML-Fix nicht verfügbar - überspringen");
+}
+
 const app = express();
 
 // Umgebungsvariablen erkennen

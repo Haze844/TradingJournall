@@ -16,6 +16,40 @@ function errorMessage(error: unknown): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Spezielle Debug-Endpunkte für Routing/Auth-Diagnose
+  app.get("/api/debug", (req: Request, res: Response) => {
+    const isAuthenticated = req.isAuthenticated();
+    const sessionState = req.session ? {
+      id: req.session.id,
+      cookie: req.session.cookie,
+      userPresent: !!req.user,
+      expires: req.session.cookie.expires
+    } : null;
+    
+    console.log("Debug-Anfrage erhalten - Auth-Status:", isAuthenticated);
+    
+    res.json({
+      authStatus: isAuthenticated,
+      timestamp: new Date().toISOString(),
+      session: sessionState,
+      user: req.user ? { id: req.user.id, username: req.user.username } : null,
+      headers: {
+        cookie: req.headers.cookie,
+        referer: req.headers.referer,
+        'user-agent': req.headers['user-agent']
+      }
+    });
+  });
+  
+  // API Health Check Endpunkt
+  app.get("/api/health", (req: Request, res: Response) => {
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development"
+    });
+  });
+  
   // Set up authentication routes
   setupAuth(app);
   

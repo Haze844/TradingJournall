@@ -20,6 +20,8 @@ type AuthContextType = {
 
 type LoginData = Pick<InsertUser, "username" | "password"> & { rememberMe?: boolean };
 
+// HINWEIS: Beim Ändern dieses Exports unbedingt Datenstruktur identisch halten
+// sonst bekommt man Vite "Fast Refresh is not working" Fehler
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
