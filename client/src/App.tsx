@@ -16,29 +16,9 @@ import SocialTrading from "./components/SocialTrading";
 import Booklet from "./components/Booklet";
 import { useEffect } from "react";
 
-// Hilfsfunktion für Umleitung in Deployment-Umgebungen
-function DeploymentFallback() {
-  const [, setLocation] = useLocation();
-  
-  useEffect(() => {
-    console.log("Leite um zur Auth-Seite...");
-    setTimeout(() => {
-      setLocation("/auth");
-    }, 100);
-  }, [setLocation]);
-  
-  return (
-    <div className="p-6 max-w-md mx-auto bg-black/30 backdrop-blur-md rounded-lg mt-10">
-      <h2 className="text-xl font-bold text-blue-300 mb-4">Weiterleitung...</h2>
-      <p className="text-white mb-4">Sie werden zur Login-Seite weitergeleitet.</p>
-      <Link href="/auth" className="text-blue-400 hover:text-blue-300 underline">
-        Falls keine automatische Umleitung erfolgt, hier klicken
-      </Link>
-    </div>
-  );
-}
+// Komponenten für direkte Weiterleitungen wurden entfernt
 
-// Statische Login-Seite für Render & Netlify Umgebungen
+// Statische Login-Seite - nicht mehr in Verwendung
 function StaticLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-black flex flex-col">
@@ -131,11 +111,11 @@ function Router() {
     console.log("Replit-Umgebung erkannt - verwende leere Basis-URL");
   }
   
-  // Angepasstes Routing für Netlify und Render - direkter Redirect zu Auth
+  // Angepasstes Routing für Netlify und Render - direkter Zugriff auf Auth-Seite
   if (isNetlify || isRender) {
     return (
       <Switch>
-        <Route path="/" component={DeploymentFallback} />
+        <Route path="/" component={AuthPage} />
         <Route path="/auth" component={AuthPage} />
         <Route path="/booklet" component={Booklet} />
         <Route path="*" component={AuthPage} />

@@ -132,11 +132,12 @@ if (fs.existsSync(serverCodePath)) {
   }
 }
 
-// Erstelle eine einfache index.html im Root-Verzeichnis
-const rootIndexHtml = `<!DOCTYPE html>
+// Erstelle eine direkte Weiterleitung zur Auth-Seite für alle kritischen Pfade
+const directAuthRedirect = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0;url=/auth">
   <title>LvlUp Trading Journal</title>
 </head>
 <body>
@@ -149,10 +150,20 @@ const rootIndexHtml = `<!DOCTYPE html>
 </body>
 </html>`;
 
-const rootIndexPath = path.join(__dirname, 'index.html');
-if (fs.existsSync(path.dirname(rootIndexPath))) {
-  fs.writeFileSync(rootIndexPath, rootIndexHtml);
-  console.log(`Einfacher Auth-Redirect nach ${rootIndexPath} geschrieben`);
+// Speichere an allen wichtigen Pfaden
+const paths = [
+  path.join(__dirname, 'index.html'),
+  path.join(__dirname, 'public', 'index.html'),
+  path.join(__dirname, 'dist', 'index.html'),
+  path.join(__dirname, 'dist', 'public', 'index.html')
+];
+
+// Schreibe in alle verfügbaren Verzeichnisse
+for (const filePath of paths) {
+  if (fs.existsSync(path.dirname(filePath))) {
+    fs.writeFileSync(filePath, directAuthRedirect);
+    console.log(`Auth-Redirect nach ${filePath} geschrieben`);
+  }
 }
 
 console.log('Vereinfachter Render-Patch abgeschlossen');
