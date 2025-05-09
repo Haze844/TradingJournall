@@ -1,4 +1,4 @@
-// render-patch.js - Kombinierte Version mit Express-Fix, Redirect-Fix und Custom-Deploy
+// render-patch.js - Vereinfachte Version ohne Weiterleitungs-Loops
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,14 +8,20 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-console.log('Starte umfassenden Render-Patch (inkl. Express-Fix, Redirect-Fix und Custom-Deploy)...');
+console.log('Starte vereinfachten Render-Patch...');
 
 // API-URL-Patch für Frontend
 const indexHtmlPath = './dist/public/index.html';
 if (fs.existsSync(indexHtmlPath)) {
   let indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
   
-  // Umfassender API-Fix für Frontend
+  // Fix für base-href - Sorgt dafür, dass relative Pfade korrekt aufgelöst werden
+  indexHtml = indexHtml.replace(
+    '<head>',
+    '<head>\n  <base href="/">'
+  );
+  
+  // Frontend-Fix für API-Aufrufe und Routing
   indexHtml = indexHtml.replace(
     '</head>',
     `<script>
@@ -39,20 +45,11 @@ if (fs.existsSync(indexHtmlPath)) {
         // API-Routen-Fixes
         const originalFetch = window.fetch;
         window.fetch = async function(url, options) {
-          console.log('Fetch-Anfrage an:', url);
-          
           // Fix für doppelte /api-Pfade
           if (url.startsWith('/api/api/')) {
             url = url.replace('/api/api/', '/api/');
-            console.log('Korrigierter API-Pfad:', url);
           }
           
-          // Füge trailing slash für Login/Register hinzu
-          if (url === '/api/login' || url === '/api/register') {
-            url = url + '/';
-            console.log('Slash hinzugefügt:', url);
-          }
-
           try {
             const response = await originalFetch(url, options);
             
@@ -61,10 +58,9 @@ if (fs.existsSync(indexHtmlPath)) {
             if (contentType && contentType.includes('text/html') && url.includes('/api/')) {
               console.warn('HTML-Antwort für API-Anfrage erkannt:', url);
               
-              // Für Login/Auth-Endpunkte lieber einen leeren Erfolg zurückgeben
+              // Für Login/Auth-Endpunkte leeren Erfolg zurückgeben
               if (url.includes('/login') || url.includes('/register')) {
                 console.log('Login/Register: Leeren Erfolg zurückgeben');
-                // Mock-Response-Objekt für erfolgreichen Login
                 return {
                   ok: true,
                   status: 200,
@@ -82,29 +78,13 @@ if (fs.existsSync(indexHtmlPath)) {
             throw error;
           }
         };
-        
-        // SOFORTIGE WEITERLEITUNG zur Auth-Seite wenn wir auf der Hauptseite sind
-        // und keine Auth-Route geladen wurde
-        if (window.location.pathname === '/' || window.location.pathname === '') {
-          console.log('Automatische Weiterleitung zur Auth-Seite wird ausgeführt...');
-          window.location.href = '/auth';
-        }
-        
-        console.log('Direkter Auth-Redirect für /-Pfad aktiviert');
-        console.log("Umfassende Render-Patches angewendet");
       })();
     </script>
     </head>`
   );
   
-  // Fix für base-href - Sorgt dafür, dass relative Pfade korrekt aufgelöst werden
-  indexHtml = indexHtml.replace(
-    '<head>',
-    '<head>\n  <base href="/">\n  <meta http-equiv="refresh" content="0;url=/auth">'
-  );
-  
   fs.writeFileSync(indexHtmlPath, indexHtml);
-  console.log('index.html gepatcht für Render-Deployment mit direktem Auth-Redirect');
+  console.log('index.html gepatcht für Render-Deployment ohne Weiterleitungs-Loops');
   
   // Auch 404.html erstellen für Client-Routing
   fs.copyFileSync(indexHtmlPath, path.join(path.dirname(indexHtmlPath), '404.html'));
@@ -112,7 +92,6 @@ if (fs.existsSync(indexHtmlPath)) {
 }
 
 // Patch für Express-Server - Root-Route zur Auth-Seite umleiten
-// Analog zu express-fix.js
 const serverCodePath = './dist/index.js';
 if (fs.existsSync(serverCodePath)) {
   let serverCode = fs.readFileSync(serverCodePath, 'utf8');
@@ -130,26 +109,6 @@ if (fs.existsSync(serverCodePath)) {
       console.log('Root-Pfad aufgerufen, leite weiter zu /auth');
       return res.redirect('/auth');
     });
-    
-    // Spezielle Middleware für fehlgeschlagene API-Anfragen die HTML zurückgeben
-    app.use((req, res, next) => {
-      const originalSend = res.send;
-      
-      res.send = function(body) {
-        // Prüfen, ob eine API-Anfrage versucht, HTML zurückzugeben (typisches 404-Symptom)
-        const isApiRequest = req.path.startsWith('/api/');
-        const isHtmlResponse = typeof body === 'string' && body.includes('<!DOCTYPE html>');
-        
-        if (isApiRequest && isHtmlResponse) {
-          console.warn(\`API-Route \${req.path} hat HTML zurückgegeben, sende 404 JSON\`);
-          return res.status(404).json({ error: 'API endpoint not found' });
-        }
-        
-        return originalSend.call(this, body);
-      };
-      
-      next();
-    });
   }
 `;
     
@@ -164,7 +123,7 @@ if (fs.existsSync(serverCodePath)) {
                 serverCode.substring(position);
                 
       fs.writeFileSync(serverCodePath, serverCode);
-      console.log('Express-Server erfolgreich mit Render-spezifischen Middlewares gepatcht');
+      console.log('Express-Server erfolgreich mit einfachem Root-Redirect gepatcht');
     } else {
       console.error('Konnte keine geeignete Stelle im Express-Server finden, um Middleware einzufügen');
     }
@@ -173,37 +132,27 @@ if (fs.existsSync(serverCodePath)) {
   }
 }
 
-// Erstelle Redirect-Seiten für alle Verzeichnisse
-// Analog zu redirect-fix.js und custom-deploy.js
-const directAuthRedirect = `<!DOCTYPE html>
+// Erstelle eine einfache index.html im Root-Verzeichnis
+const rootIndexHtml = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=/auth">
   <title>LvlUp Trading Journal</title>
+</head>
+<body>
   <script>
     window.location.href = "/auth";
   </script>
-</head>
-<body>
-  <h3>Sie werden zur Anmeldeseite weitergeleitet...</h3>
+  <noscript>
+    <p>Bitte <a href="/auth">hier klicken</a> um zur Anmeldeseite zu gelangen.</p>
+  </noscript>
 </body>
 </html>`;
 
-// Speichere an allen möglichen Stellen
-const locations = [
-  path.join(__dirname, 'index.html'),
-  path.join(__dirname, 'public', 'index.html'),
-  path.join(__dirname, 'dist', 'index.html'),
-  path.join(__dirname, 'dist', 'public', 'index.html')
-];
-
-// Schreibe in alle verfügbaren Verzeichnisse
-for (const location of locations) {
-  if (fs.existsSync(path.dirname(location))) {
-    fs.writeFileSync(location, directAuthRedirect);
-    console.log(`Auth-Redirect nach ${location} geschrieben`);
-  }
+const rootIndexPath = path.join(__dirname, 'index.html');
+if (fs.existsSync(path.dirname(rootIndexPath))) {
+  fs.writeFileSync(rootIndexPath, rootIndexHtml);
+  console.log(`Einfacher Auth-Redirect nach ${rootIndexPath} geschrieben`);
 }
 
-console.log('Kombinierter Render-Patch (inkl. Express-Fix, Redirect-Fix und Custom-Deploy) abgeschlossen');
+console.log('Vereinfachter Render-Patch abgeschlossen');

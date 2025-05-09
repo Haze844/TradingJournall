@@ -13,11 +13,4 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: trading-journal-db
-          property: connectionString
-
-databases:
-  - name: trading-journal-db
-    plan: free
-    postgresMajorVersion: 17
+        sync: false
