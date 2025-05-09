@@ -230,6 +230,12 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
           description: `Willkommen zurück, ${data.username}!`,
           variant: "default",
         });
+        
+        // Nach erfolgreicher Anmeldung zur Hauptseite weiterleiten
+        // Wir verwenden navigate von wouter statt window.location für nahtlose Navigation
+        setTimeout(() => {
+          navigate("/");
+        }, 500); // Kurze Verzögerung, damit der Toast sichtbar ist
       }
     });
   };
@@ -383,6 +389,11 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
           description: `Willkommen bei TradingJournal, ${data.username}!`,
           variant: "default",
         });
+        
+        // Nach erfolgreicher Registrierung zur Hauptseite weiterleiten
+        setTimeout(() => {
+          navigate("/");
+        }, 500); // Kurze Verzögerung, damit der Toast sichtbar ist
       }
     });
   };
