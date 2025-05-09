@@ -30,12 +30,12 @@ npm install --include=dev && npm run build
 
 **Start-Befehl:**
 ```
-node setup-db.js && node render-patch.js && node express-fix.js && node dist/index.js
+node setup-db.js && node render-patch.js && node express-fix.js && node redirect-fix.js && node dist/index.js
 ```
 
 ## Patch-Dateien
 
-Die Anwendung verwendet drei spezielle Patch-Dateien für das Render-Deployment:
+Die Anwendung verwendet vier spezielle Patch-Dateien für das Render-Deployment:
 
 ### 1. setup-db.js
 
@@ -66,6 +66,16 @@ Hauptfunktionen:
 - Setzt Content-Type-Header für API-Antworten auf 'application/json'
 - Fügt CORS-Header für Cross-Origin-Anfragen hinzu
 - Konfiguriert SPA-Routing mit Client-seitiger Weiterleitung
+
+### 4. redirect-fix.js
+
+Diese Datei erstellt eine statische Weiterleitungsseite, um das Problem mit Weiterleitungsschleifen zu beheben.
+
+Hauptfunktionen:
+- Platziert eine spezielle statische HTML-Datei direkt im Hauptverzeichnis
+- Implementiert Schleifenerkennung mit sessionStorage
+- Zählt Weiterleitungen, um Endlosschleifen zu verhindern
+- Bietet Fallback mit direktem Login-Button, falls Weiterleitungen fehlschlagen
 
 ## Authentifizierung
 
