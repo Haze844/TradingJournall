@@ -327,6 +327,17 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Debug-Informationen für Registrierungsprobleme
+    console.log("Registrierungsversuch für:", formData.username);
+    console.log("Browser-Info:", {
+      userAgent: navigator.userAgent,
+      cookiesEnabled: navigator.cookieEnabled,
+      language: navigator.language,
+      platform: navigator.platform,
+      host: window.location.host,
+      protocol: window.location.protocol
+    });
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Passwörter stimmen nicht überein",
@@ -336,9 +347,37 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
       return;
     }
 
+    // Toast-Benachrichtigung vor der Registrierung
+    toast({
+      title: "Registrierung wird verarbeitet",
+      description: "Dein Konto wird erstellt...",
+      variant: "default",
+    });
+    
+    // Erweiterte Fehlerbehandlung für Registrierungs-Mutation
     registerMutation.mutate({
       username: formData.username,
       password: formData.password,
+    }, {
+      onError: (error: any) => {
+        console.error("Registrierungsfehler:", error);
+        
+        // Detaillierte Fehlermeldung für Benutzer
+        toast({
+          title: "Registrierung fehlgeschlagen",
+          description: error.message || "Fehler bei der Kontoerstellung. Bitte versuche es erneut.",
+          variant: "destructive",
+        });
+      },
+      onSuccess: (data: any) => {
+        console.log("Registrierung erfolgreich:", data);
+        
+        toast({
+          title: "Konto erstellt",
+          description: `Willkommen bei TradingJournal, ${data.username}!`,
+          variant: "default",
+        });
+      }
     });
   };
 

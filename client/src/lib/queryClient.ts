@@ -11,6 +11,20 @@ async function throwIfResNotOk(res: Response) {
     let errorMessage = res.statusText || `Fehler (${res.status})`;
     let errorDetails: any = null;
     
+    // Erweiterte Debug-Informationen für die aktuelle Session
+    console.log("API-Fehlerantwort Details:", {
+      url: res.url,
+      method: res.type,
+      status: res.status,
+      statusText: res.statusText,
+      type: res.type,
+      redirected: res.redirected,
+      hasBody: !!res.body,
+      contentType: res.headers.get('content-type'),
+      cookies: document.cookie ? "vorhanden" : "keine",
+      timestamp: new Date().toISOString()
+    });
+    
     try {
       // Versuche, die Antwort als JSON zu parsen
       const contentType = res.headers.get('content-type');
@@ -19,16 +33,20 @@ async function throwIfResNotOk(res: Response) {
       if (contentType && contentType.includes('application/json')) {
         try {
           const errorJson = await clonedRes.json();
+          console.log("Fehler-JSON:", errorJson);
           errorMessage = errorJson.message || errorJson.error || JSON.stringify(errorJson);
           errorDetails = errorJson;
         } catch (jsonError) {
+          console.error("JSON-Parsing fehlgeschlagen:", jsonError);
           // Wenn JSON-Parsing fehlschlägt, als Text lesen
           const text = await res.text();
+          console.log("Fehler-Text (nach JSON-Fehler):", text);
           if (text) errorMessage = text;
         }
       } else {
         // Andernfalls als Text lesen
         const text = await res.text();
+        console.log("Fehler-Text (nicht-JSON):", text);
         if (text) errorMessage = text;
       }
     } catch (parseError) {
@@ -36,7 +54,7 @@ async function throwIfResNotOk(res: Response) {
       // Behalte die ursprüngliche Fehlermeldung bei, wenn das Parsen fehlschlägt
     }
     
-    // Spezielles Logging für Authentifizierungsfehler
+    // Benutzerfreundliche Fehlermeldungen basierend auf Statuscode
     if (res.status === 401) {
       console.warn(`Authentifizierungsfehler (401): ${errorMessage}`, {
         url: res.url,
@@ -45,11 +63,21 @@ async function throwIfResNotOk(res: Response) {
           .filter(([key]) => !key.includes('cookie') && !key.includes('set-cookie'))
           .reduce((obj, [key, val]) => ({ ...obj, [key]: val }), {})
       });
+      errorMessage = "Du bist nicht angemeldet oder deine Sitzung ist abgelaufen. Bitte melde dich erneut an.";
+    } else if (res.status === 403) {
+      console.error(`Berechtigungsfehler (403): ${errorMessage}`, errorDetails);
+      errorMessage = "Du hast keine Berechtigung für diese Aktion.";
+    } else if (res.status === 404) {
+      console.error(`Ressource nicht gefunden (404): ${errorMessage}`, errorDetails);
+      errorMessage = "Die angeforderte Ressource wurde nicht gefunden.";
+    } else if (res.status >= 500) {
+      console.error(`Serverfehler (${res.status}): ${errorMessage}`, errorDetails);
+      errorMessage = "Ein Serverfehler ist aufgetreten. Bitte versuche es später erneut.";
     } else {
-      console.error(`API-Fehler (${res.status}):`, errorMessage, errorDetails);
+      console.error(`API-Fehler (${res.status}): ${errorMessage}`, errorDetails);
     }
     
-    throw new Error(`${res.status}: ${errorMessage}`);
+    throw new Error(errorMessage);
   }
 }
 

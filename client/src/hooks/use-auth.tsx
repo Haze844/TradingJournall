@@ -54,22 +54,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
+      // Debug-Informationen für Authentifizierung loggen
+      console.log("Login-Anfrage wird gesendet für:", credentials.username);
+      
+      try {
+        const res = await apiRequest("POST", "/api/login", credentials);
+        const data = await res.json();
+        console.log("Login-Antwort erhalten:", {
+          status: res.status,
+          hasUser: !!data,
+          username: data?.username
+        });
+        return data;
+      } catch (error) {
+        console.error("Login-Fehler:", error);
+        throw error; // Fehler durchreichen für onError-Handler
+      }
     },
     onSuccess: (data: any) => {
       // Handle user object inside wrapper if needed
       const userData = data.user || data;
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // Detaillierte Logs für erfolgreiche Anmeldung
+      console.log("Login erfolgreich, User-Daten aktualisiert:", {
+        id: userData.id,
+        username: userData.username,
+        hasUser: !!userData
+      });
+      
+      // Nutzer-Feedback 
       toast({
         title: "Erfolgreich angemeldet",
         description: `Willkommen zurück, ${userData.username}!`,
       });
+      
+      // Nach Login zur Hauptseite navigieren
+      navigate("/");
     },
     onError: (error: Error) => {
+      // Detaillierte Fehlerinformationen
+      console.error("Login-Mutation fehlgeschlagen:", error);
+      
       toast({
         title: "Anmeldung fehlgeschlagen",
-        description: error.message,
+        description: error.message || "Verbindungsproblem mit dem Server. Bitte versuche es erneut.",
         variant: "destructive",
       });
     },
@@ -77,43 +106,109 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const registerMutation = useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
+      // Debug-Informationen für Registrierung loggen
+      console.log("Registrierungs-Anfrage wird gesendet für:", credentials.username);
+      
+      try {
+        const res = await apiRequest("POST", "/api/register", credentials);
+        const data = await res.json();
+        console.log("Registrierungs-Antwort erhalten:", {
+          status: res.status,
+          hasUser: !!data,
+          username: data?.username
+        });
+        return data;
+      } catch (error) {
+        console.error("Registrierungs-Fehler:", error);
+        throw error; // Fehler durchreichen für onError-Handler
+      }
     },
     onSuccess: (data: any) => {
       // Handle user object inside wrapper if needed
       const userData = data.user || data;
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // Detaillierte Logs für erfolgreiche Registrierung
+      console.log("Registrierung erfolgreich, User-Daten aktualisiert:", {
+        id: userData.id,
+        username: userData.username,
+        hasUser: !!userData
+      });
+      
+      // Nutzer-Feedback
       toast({
         title: "Registrierung erfolgreich",
-        description: `Willkommen, ${userData.username}!`,
+        description: `Willkommen bei TradingJournal, ${userData.username}!`,
       });
+      
+      // Nach Registrierung zur Hauptseite navigieren
+      navigate("/");
     },
     onError: (error: Error) => {
+      // Detaillierte Fehlerinformationen
+      console.error("Registrierungs-Mutation fehlgeschlagen:", error);
+      
+      let errorMessage = error.message;
+      
+      // Verbesserte Fehlermeldungen für häufige Registrierungsprobleme
+      if (errorMessage.includes("already exists") || errorMessage.includes("existiert bereits")) {
+        errorMessage = "Ein Benutzer mit diesem Namen existiert bereits. Bitte wähle einen anderen Namen.";
+      }
+      
       toast({
         title: "Registrierung fehlgeschlagen",
-        description: error.message,
+        description: errorMessage || "Fehler bei der Kontoerstellung. Bitte versuche es erneut.",
         variant: "destructive",
       });
     },
   });
 
-  const logoutMutation = useMutation({
+  const logoutMutation = useMutation<void, Error, void>({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      // Debug-Informationen für Abmeldung
+      console.log("Logout-Anfrage wird gesendet");
+      
+      try {
+        const response = await apiRequest("POST", "/api/logout");
+        console.log("Logout-Antwort erhalten:", {
+          status: response.status,
+          ok: response.ok
+        });
+        return;
+      } catch (error) {
+        console.error("Logout-Fehler:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
+      // Benutzer-Session entfernen
       queryClient.setQueryData(["/api/user"], null);
+      
+      // Detaillierte Logs für erfolgreiche Abmeldung
+      console.log("Logout erfolgreich, User-Daten zurückgesetzt");
+      
+      // Nutzer-Feedback
       toast({
         title: "Erfolgreich abgemeldet",
+        description: "Deine Sitzung wurde beendet."
       });
+      
+      // Nach Abmeldung zur Auth-Seite navigieren
+      navigate("/auth");
     },
     onError: (error: Error) => {
+      // Detaillierte Fehlerinformationen
+      console.error("Logout-Mutation fehlgeschlagen:", error);
+      
       toast({
         title: "Abmeldung fehlgeschlagen",
-        description: error.message,
+        description: error.message || "Die Abmeldung konnte nicht durchgeführt werden. Bitte versuche es erneut.",
         variant: "destructive",
       });
+      
+      // Trotz Fehler zur Auth-Seite navigieren als Fallback
+      console.log("Trotz Fehler zur Auth-Seite navigieren");
+      navigate("/auth");
     },
   });
 
