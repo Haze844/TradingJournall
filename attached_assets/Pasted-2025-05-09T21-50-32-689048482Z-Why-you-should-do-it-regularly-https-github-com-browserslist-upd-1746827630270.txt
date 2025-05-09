@@ -1,0 +1,126 @@
+2025-05-09T21:50:32.689048482Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-09T21:50:39.341033011Z ✓ 3401 modules transformed.
+2025-05-09T21:50:39.945350588Z rendering chunks...
+2025-05-09T21:50:39.959501459Z computing gzip size...
+2025-05-09T21:50:39.992932806Z ../dist/public/index.html                     1.91 kB │ gzip:   0.75 kB
+2025-05-09T21:50:39.993061789Z ../dist/public/assets/index-hRTqcd5Z.css    100.22 kB │ gzip:  16.52 kB
+2025-05-09T21:50:39.993121821Z ../dist/public/assets/index-DJqKidO2.js   1,364.33 kB │ gzip: 366.46 kB
+2025-05-09T21:50:39.993313596Z 
+2025-05-09T21:50:39.993325866Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-09T21:50:39.993331886Z - Using dynamic import() to code-split the application
+2025-05-09T21:50:39.993337746Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-09T21:50:39.993342946Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-09T21:50:39.993611123Z ✓ built in 7.56s
+2025-05-09T21:50:40.082872707Z 
+2025-05-09T21:50:40.082895738Z   dist/index.js  166.3kb
+2025-05-09T21:50:40.082901808Z 
+2025-05-09T21:50:40.082907108Z ⚡ Done in 13ms
+2025-05-09T21:50:46.752557235Z ==> Uploading build...
+2025-05-09T21:50:56.102162629Z ==> Uploaded in 6.1s. Compression took 3.3s
+2025-05-09T21:50:56.15480468Z ==> Build successful 🎉
+2025-05-09T21:50:59.949984314Z ==> Deploying...
+2025-05-09T21:51:20.042343365Z ==> Running 'node setup-db.js && node render-patch.js && node dist/index.js'
+2025-05-09T21:51:21.259624747Z Datenbank erfolgreich eingerichtet
+2025-05-09T21:51:31.464488799Z index.html gepatcht für Render-Deployment
+2025-05-09T21:51:31.464905409Z 404.html für Client-Routing erstellt
+2025-05-09T21:51:31.46492706Z Verwende Server-seitige Redirect-Lösung statt index.html zu ersetzen
+2025-05-09T21:51:31.465061993Z Notfall-Redirect-Seite erstellt, aber index.html bleibt unverändert
+2025-05-09T21:51:31.465155996Z Spezielle Redirect-Seite erstellt
+2025-05-09T21:51:31.465171536Z Render-Patches abgeschlossen
+2025-05-09T21:51:43.75088832Z Datenbankverbindung mit Neon Serverless wird hergestellt...
+2025-05-09T21:51:43.752982643Z Datenbankverbindung erfolgreich initialisiert.
+2025-05-09T21:51:43.753218349Z Storage-Auswahl: DatabaseStorage (DATABASE_URL vorhanden)
+2025-05-09T21:51:43.842575458Z Umgebung erkannt: { isRender: true, isReplit: false, isNetlify: false }
+2025-05-09T21:51:43.846268881Z Session-Konfiguration initialisiert mit: {
+2025-05-09T21:51:43.846282281Z   secret: 'VORHANDEN',
+2025-05-09T21:51:43.846285501Z   resave: true,
+2025-05-09T21:51:43.846289171Z   saveUninitialized: true,
+2025-05-09T21:51:43.846292181Z   sessionStoreType: 'PGStore',
+2025-05-09T21:51:43.846295091Z   cookieSettings: {
+2025-05-09T21:51:43.846297751Z     maxAge: 86400000,
+2025-05-09T21:51:43.846300801Z     httpOnly: true,
+2025-05-09T21:51:43.846304632Z     path: '/',
+2025-05-09T21:51:43.846309002Z     sameSite: 'none',
+2025-05-09T21:51:43.846313222Z     secure: true
+2025-05-09T21:51:43.846317412Z   }
+2025-05-09T21:51:43.846321842Z }
+2025-05-09T21:51:44.25871351Z 9:51:44 PM [express] serving on port 5000
+2025-05-09T21:51:44.442779822Z CORS Origin-Anfrage: undefined
+2025-05-09T21:51:50.649290845Z ==> Your service is live 🎉
+2025-05-09T21:51:52.654800423Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:07.405076012Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:07.48524238Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T21:53:07.492462162Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T21:53:08.127232095Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:08.129045741Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:08.134135189Z Auth-Check - Session: 8P_v4pSi_SWyvAY3BxP5JdGemthWEFZP Auth-Status: false
+2025-05-09T21:53:08.134464497Z Nicht authentifiziert - Headers: {
+2025-05-09T21:53:08.134480407Z   host: 'trading-journal-fhwv.onrender.com',
+2025-05-09T21:53:08.134485547Z   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+2025-05-09T21:53:08.134491318Z   accept: '*/*',
+2025-05-09T21:53:08.134495668Z   'accept-encoding': 'gzip, br',
+2025-05-09T21:53:08.134498758Z   'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+2025-05-09T21:53:08.134501388Z   'cache-control': 'max-age=0',
+2025-05-09T21:53:08.134504038Z   'cdn-loop': 'cloudflare; loops=1',
+2025-05-09T21:53:08.134506618Z   'cf-connecting-ip': '84.171.244.253',
+2025-05-09T21:53:08.134511148Z   'cf-ipcountry': 'DE',
+2025-05-09T21:53:08.134515178Z   'cf-ray': '93d46d89baa7dbc8-FRA',
+2025-05-09T21:53:08.134519019Z   'cf-visitor': '{"scheme":"https"}',
+2025-05-09T21:53:08.134524208Z   cookie: 'connect.sid=s%3AdaRDVlW9Y1W69-0j3SV8gzXdpEwAG3qQ.m20e9bY9PE4H%2BM5HsJB5dOYm8SxcslDV6AWtfSHPe%2Fo; lvlup.sid=s%3A8P_v4pSi_SWyvAY3BxP5JdGemthWEFZP.P6oqpiNU5nGAylcFgJ%2FAL81kcILDJDXH2VfJAaNNSX8',
+2025-05-09T21:53:08.134528419Z   'if-none-match': 'W/"18-1VK2cDn690JnlmiIk76buQFE+KA"',
+2025-05-09T21:53:08.134532349Z   priority: 'u=1, i',
+2025-05-09T21:53:08.134535339Z   referer: 'https://trading-journal-fhwv.onrender.com/',
+2025-05-09T21:53:08.134547629Z   'render-proxy-ttl': '4',
+2025-05-09T21:53:08.134549369Z   'rndr-id': 'b3259174-dcc6-4e7b',
+2025-05-09T21:53:08.134551529Z   'sec-ch-ua': '"Google Chrome";v="135", "Not-A.Brand";v="8", "Chromium";v="135"',
+2025-05-09T21:53:08.134553049Z   'sec-ch-ua-mobile': '?0',
+2025-05-09T21:53:08.134554619Z   'sec-ch-ua-platform': '"Windows"',
+2025-05-09T21:53:08.134556189Z   'sec-fetch-dest': 'empty',
+2025-05-09T21:53:08.134557729Z   'sec-fetch-mode': 'cors',
+2025-05-09T21:53:08.1345593Z   'sec-fetch-site': 'same-origin',
+2025-05-09T21:53:08.13456084Z   'true-client-ip': '84.171.244.253',
+2025-05-09T21:53:08.134562929Z   'x-client-info': 'App:TradingJournal|trading-journal-fhwv.onrender.com|Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWeb',
+2025-05-09T21:53:08.1345649Z   'x-forwarded-for': '84.171.244.253, 172.71.144.121, 10.201.35.131',
+2025-05-09T21:53:08.13456644Z   'x-forwarded-proto': 'https',
+2025-05-09T21:53:08.13456798Z   'x-request-start': '1746827588125833'
+2025-05-09T21:53:08.13456958Z }
+2025-05-09T21:53:08.141499314Z 9:53:08 PM [express] GET /api/user 401 in 12ms
+2025-05-09T21:53:08.142019197Z 9:53:08 PM [express] GET /api/health 200 in 14ms
+2025-05-09T21:53:08.326424048Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:08.327013912Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:08.33885479Z 9:53:08 PM [express] GET /api/debug 200 in 11ms
+2025-05-09T21:53:09.717672657Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:15.571663439Z CORS Origin-Anfrage: https://trading-journal-fhwv.onrender.com
+2025-05-09T21:53:15.640699117Z Login-Versuch für Benutzer: mo mit rememberMe: false
+2025-05-09T21:53:15.640856241Z Login-Anfrage-Headers: {
+2025-05-09T21:53:15.640865791Z   origin: 'https://trading-journal-fhwv.onrender.com',
+2025-05-09T21:53:15.640869811Z   referer: 'https://trading-journal-fhwv.onrender.com/auth',
+2025-05-09T21:53:15.640873791Z   host: 'trading-journal-fhwv.onrender.com',
+2025-05-09T21:53:15.640877631Z   cookie: 'Vorhanden',
+2025-05-09T21:53:15.640882271Z   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
+2025-05-09T21:53:15.640887241Z   'x-forwarded-for': '84.171.244.253, 172.71.144.121, 10.201.35.131',
+2025-05-09T21:53:15.640891201Z   'x-forwarded-proto': 'https',
+2025-05-09T21:53:15.640894852Z   'sec-fetch-site': 'same-origin',
+2025-05-09T21:53:15.640898362Z   'sec-fetch-mode': 'cors'
+2025-05-09T21:53:15.640902102Z }
+2025-05-09T21:53:15.640909062Z Umgebungsinformationen: {
+2025-05-09T21:53:15.640912762Z   environment: 'production',
+2025-05-09T21:53:15.640916372Z   isProduction: true,
+2025-05-09T21:53:15.640920162Z   isRender: 'true',
+2025-05-09T21:53:15.640923722Z   isReplit: 'false',
+2025-05-09T21:53:15.640927402Z   sessionSecret: 'vorhanden'
+2025-05-09T21:53:15.640930913Z }
+2025-05-09T21:53:15.648489923Z Benutzer authentifiziert: mo - Session-ID vor Login: 8P_v4pSi_SWyvAY3BxP5JdGemthWEFZP
+2025-05-09T21:53:15.648757879Z Cookie-Einstellungen für Login: {
+2025-05-09T21:53:15.64876545Z   sameSite: 'none',
+2025-05-09T21:53:15.64876946Z   secure: true,
+2025-05-09T21:53:15.64877355Z   domain: '.onrender.com',
+2025-05-09T21:53:15.64877705Z   maxAge: 86394076,
+2025-05-09T21:53:15.64878045Z   path: '/'
+2025-05-09T21:53:15.64878403Z }
+2025-05-09T21:53:15.65991638Z Standard-Cookie-Lebensdauer auf 24 Stunden gesetzt
+2025-05-09T21:53:15.677961124Z Login erfolgreich, Session regeneriert und gespeichert. Session-ID: S6Iw0tS-RU-LXoRiSTSInDSF6yN7Q9Ob User-ID: 2
+2025-05-09T21:53:15.682528789Z 9:53:15 PM [express] POST /api/login/ 200 in 49ms :: {"id":2,"username":"mo"}
+2025-05-09T21:53:15.738005075Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:19.581241798Z CORS Origin-Anfrage: undefined
+2025-05-09T21:53:26.345957567Z CORS Origin-Anfrage: undefined

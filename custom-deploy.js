@@ -164,7 +164,7 @@ const directHtmlContent = `<!DOCTYPE html>
             </div>
           </div>
           <!-- Direkter HTML Link ohne JavaScript -->
-          <a href="https://trading-journal-fhwv.onrender.com/auth" class="btn">Zum Login</a>
+          <a href="/auth" class="btn">Zum Login</a>
         </div>
         
         <div class="card">
@@ -210,6 +210,10 @@ try {
   // Erstelle eine spezielle index.html im Projektroot
   fs.writeFileSync(path.join(__dirname, 'index.html'), directHtmlContent);
   console.log('Statische HTML-Datei nach index.html geschrieben');
+  
+  // Erstelle eine Kopie als root_page.html für einfachen Zugriff zum Debuggen
+  fs.writeFileSync(path.join(__dirname, 'root_page.html'), directHtmlContent);
+  console.log('Kopie der statischen HTML-Datei als root_page.html gespeichert');
   
   // Erstelle zusätzlich eine index.html im public-Ordner
   const publicPath = path.join(__dirname, 'public');

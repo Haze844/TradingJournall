@@ -110,6 +110,10 @@ if (fs.existsSync(indexHtmlPath)) {
   fs.copyFileSync(indexHtmlPath, path.join(path.dirname(indexHtmlPath), '404.html'));
   console.log('404.html für Client-Routing erstellt');
   
+  // Erstelle eine Kopie der index.html als index.html.bak für Rollback-Zwecke
+  fs.copyFileSync(indexHtmlPath, indexHtmlPath + '.bak');
+  console.log('Backup der ursprünglichen index.html erstellt');
+  
   // Statt komplettes Ersetzen der index.html, erstellen wir eine direkte Server-seitige Lösung
   console.log('Verwende Server-seitige Redirect-Lösung statt index.html zu ersetzen');
 
