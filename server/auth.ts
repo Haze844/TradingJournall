@@ -120,33 +120,12 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    console.log("Login-Versuch für Benutzer:", req.body.username, "mit rememberMe:", req.body.rememberMe);
+    // Einfache Sicherheitsüberprüfung
+    if (!req.body || !req.body.username) {
+      return res.status(400).json({ message: "Username und Passwort erforderlich" });
+    }
     
-    // Debug-Informationen für Deployment-Umgebungen
-    console.log("Login-Anfrage-Headers:", {
-      origin: req.headers.origin,
-      referer: req.headers.referer,
-      host: req.headers.host,
-      cookie: req.headers.cookie ? "Vorhanden" : "Nicht vorhanden",
-      userAgent: req.headers['user-agent'],
-      'x-forwarded-for': req.headers['x-forwarded-for'],
-      'x-forwarded-proto': req.headers['x-forwarded-proto'],
-      'sec-fetch-site': req.headers['sec-fetch-site'],
-      'sec-fetch-mode': req.headers['sec-fetch-mode']
-    });
-    
-    // Umgebungsinformationen für besseres Debugging
-    const isProduction = process.env.NODE_ENV === 'production';
-    const isRender = process.env.RENDER || process.env.RENDER_EXTERNAL_URL;
-    const isReplit = process.env.REPL_ID || process.env.REPL_SLUG;
-    
-    console.log("Umgebungsinformationen:", {
-      environment: process.env.NODE_ENV || 'development',
-      isProduction,
-      isRender: isRender ? 'true' : 'false',
-      isReplit: isReplit ? 'true' : 'false',
-      sessionSecret: process.env.SESSION_SECRET ? 'vorhanden' : 'fehlt'
-    });
+    console.log("Login-Versuch für Benutzer:", req.body.username);
     
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
@@ -159,36 +138,7 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Anmeldung fehlgeschlagen" });
       }
       
-      console.log("Benutzer authentifiziert:", user.username, "- Session-ID vor Login:", req.session.id);
-      
-      // Überprüfe, ob "Eingeloggt bleiben" Option aktiviert ist
-      const rememberMe = req.body.rememberMe === true;
-      
-      // Stellen wir sicher, dass die Session und der Cookie korrekt konfiguriert sind
-      try {
-        // Für sichere Cookie-Einstellungen, insbesondere für Cross-Origin-Anfragen
-        if (req.session.cookie) {
-          // Umgebungsabhängige Cookie-Einstellungen
-          // Die ursprünglichen Cookie-Einstellungen werden jetzt von der anfänglichen 
-          // Session-Konfiguration übernommen, aber wir können sie hier überschreiben
-          
-          // Domain-Einstellung für Cross-Origin-Cookies (optional)
-          const host = req.headers.host || '';
-          if (host.includes('onrender.com')) {
-            req.session.cookie.domain = '.onrender.com';
-          }
-          
-          console.log("Cookie-Einstellungen für Login:", {
-            sameSite: req.session.cookie.sameSite,
-            secure: req.session.cookie.secure,
-            domain: req.session.cookie.domain || 'Nicht gesetzt',
-            maxAge: req.session.cookie.maxAge,
-            path: req.session.cookie.path
-          });
-        }
-      } catch (cookieErr) {
-        console.error("Fehler bei Cookie-Konfiguration:", cookieErr);
-      }
+      console.log("Benutzer authentifiziert:", user.username);
       
       req.login(user, (loginErr: any) => {
         if (loginErr) {
@@ -196,38 +146,11 @@ export function setupAuth(app: Express) {
           return next(loginErr);
         }
         
-        // Cookie-Lebensdauer ändern, wenn "Eingeloggt bleiben" aktiviert ist
-        if (req.session.cookie) {
-          if (rememberMe) {
-            // 30 Tage für "Eingeloggt bleiben"
-            req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
-            console.log("'Eingeloggt bleiben' aktiviert - Cookie-Lebensdauer auf 30 Tage gesetzt");
-          } else {
-            // 24 Stunden Standard-Lebensdauer
-            req.session.cookie.maxAge = 1000 * 60 * 60 * 24;
-            console.log("Standard-Cookie-Lebensdauer auf 24 Stunden gesetzt");
-          }
-        }
+        console.log("Login erfolgreich, User-ID:", user.id);
         
-        // FIX: Die Session-Regeneration ist ein häufiger Grund für Authentifizierungsprobleme in Replit
-  // Ich entferne diesen komplexen Mechanismus und verwende stattdessen eine einfachere Methode
-  
-  // Direkt Session speichern ohne Regeneration
-  req.session.save((saveErr) => {
-    if (saveErr) {
-      console.error("Fehler beim Speichern der Session:", saveErr);
-      return next(saveErr);
-    }
-    
-    console.log("Login erfolgreich, Session gespeichert ohne Regeneration. Session-ID:", req.session.id, "User-ID:", user.id);
-    
-    // Kurze Verzögerung, um sicherzustellen, dass die Session gespeichert wird
-    setTimeout(() => {
-      // Don't send password to the client
-      const { password, ...userWithoutPassword } = user;
-      return res.status(200).json(userWithoutPassword);
-    }, 50);
-  });
+        // Passwort nicht zurücksenden
+        const { password, ...userWithoutPassword } = user;
+        return res.status(200).json(userWithoutPassword);
       });
     })(req, res, next);
   });
