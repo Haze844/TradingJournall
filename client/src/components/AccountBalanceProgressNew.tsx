@@ -20,7 +20,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
-import { queryClient } from "../lib/queryClient";
+import { queryClient, apiRequest } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
@@ -71,14 +71,41 @@ export default function AccountBalanceProgressNew({
   const [calculatedEvaBalance, setCalculatedEvaBalance] = useState<number | null>(null);
   const [calculatedEkBalance, setCalculatedEkBalance] = useState<number | null>(null);
 
-  // Benutzereinstellungen abrufen
+  // Funktion zum Abrufen der aktiven Benutzer-ID (lokal oder aus Session)
+  const getEffectiveUserId = () => {
+    // Versuche zuerst die übergebene userId zu verwenden
+    if (userId) return userId;
+    
+    // Dann versuche die User-ID aus dem Auth-Kontext
+    if (user?.id) return user.id;
+    
+    // Fallback: Versuche den lokalen Benutzer aus localStorage
+    const localStorageUser = localStorage.getItem('tradingjournal_user');
+    if (localStorageUser) {
+      try {
+        const localUser = JSON.parse(localStorageUser);
+        return localUser.id || 2; // Default zu 'mo' (ID=2) wenn keine ID im Objekt
+      } catch {
+        // Bei JSON-Parse-Fehler
+        return 2; // Default zu 'mo' (ID=2)
+      }
+    }
+    
+    // Absoluter Fallback: Default-Benutzer 'mo' (ID=2)
+    return 2;
+  };
+  
+  // Benutzereinstellungen abrufen - mit verbesserter ID-Strategie
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['/api/settings', user?.id],
+    queryKey: ['/api/settings', getEffectiveUserId()],
     queryFn: async () => {
       try {
-        console.log("Rufe Einstellungen für userId:", user?.id);
-        // Wichtig: userId als Parameter hinzufügen
-        const response = await apiRequest("GET", `/api/settings?userId=${user?.id}`);
+        const effectiveUserId = getEffectiveUserId();
+        console.log("Rufe Einstellungen für userId:", effectiveUserId);
+        
+        // Verwende die apiRequest-Funktion, die jetzt automatisch userId hinzufügt
+        const response = await apiRequest("GET", "/api/settings");
+        
         if (response.ok) {
           const data = await response.json();
           console.log("Einstellungen erfolgreich abgerufen:", data);
@@ -106,7 +133,7 @@ export default function AccountBalanceProgressNew({
         };
       }
     },
-    enabled: !!user?.id, // Nur aktivieren, wenn user.id existiert
+    enabled: true, // Immer aktivieren, da wir eine Fallback-ID haben
   });
 
   // Hilfsfunktion zum Erstellen von URL-Parametern für Filter
@@ -152,14 +179,15 @@ export default function AccountBalanceProgressNew({
   
   // Trades basierend auf userId und activeFilters laden
   const { data: loadedTrades = [] } = useQuery({
-    queryKey: ['/api/trades', userId, activeFilters],
+    queryKey: ['/api/trades', getEffectiveUserId(), activeFilters],
     queryFn: async () => {
       try {
-        const effectiveUserId = userId || user?.id;
-        if (!effectiveUserId) return [];
-        
         const filterParams = buildFilterParams();
-        const response = await fetch(`/api/trades?userId=${effectiveUserId}${filterParams}`);
+        
+        // Verwende direkt die apiRequest-Funktion statt fetch
+        // Diese fügt automatisch den userId-Parameter hinzu
+        const response = await apiRequest('GET', `/api/trades${filterParams ? filterParams : ''}`);
+        
         if (!response.ok) {
           throw new Error('Failed to fetch trades');
         }
@@ -169,7 +197,7 @@ export default function AccountBalanceProgressNew({
         return [];
       }
     },
-    enabled: !!(userId || user?.id), // Nur aktivieren, wenn userId oder user.id existiert
+    enabled: true, // Immer aktivieren, da wir jetzt eine Fallback-ID haben
   });
   
   // Verwende entweder die übergebenen filteredTrades oder die geladenen Trades
