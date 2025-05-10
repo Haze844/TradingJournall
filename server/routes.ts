@@ -11,10 +11,24 @@ import { Readable } from "stream";
 import { z } from "zod";
 import { renderDiagnostic } from "./render-diagnostic";
 import { handleDebugLogs, getDebugLogs, serverDebugLog, serverErrorLog } from "./render-debug-logs";
+import { logger, LogLevel } from "./logger";
 
 // Helper function to handle error messages safely
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
+}
+
+// Helper function to parse cookies
+function parseCookies(cookieHeader: string): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  cookieHeader.split(';').forEach(cookie => {
+    const parts = cookie.split('=');
+    const name = parts.shift()?.trim();
+    if (name) {
+      cookies[name] = decodeURIComponent(parts.join('='));
+    }
+  });
+  return cookies;
 }
 
 // Globaler Log-Typ für Render-Logs
@@ -498,26 +512,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
     const isReplit = !!process.env.REPL_SLUG || !!process.env.REPL_ID;
     
+    // Strukturiertes Logging-Metadaten für alle Authentifizierungsprüfungen
+    const logMetadata = {
+      sessionId: req.session?.id || 'keine',
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      isAuthenticated: req.isAuthenticated(),
+      userInSession: !!req.user,
+      userId: req.user ? (req.user as any).id : null,
+      username: req.user ? (req.user as any).username : null,
+      userIdParam: req.query.userId || req.body?.userId,
+      hasCookies: !!req.headers.cookie,
+      cookieNames: req.headers.cookie ? Object.keys(parseCookies(req.headers.cookie)) : []
+    };
+    
+    // Debug-Log für alle Authentifizierungsprüfungen
+    logger.debug("🔐 Authentifizierungsprüfung", logMetadata);
+    
+    // Legacy Console-Log für Kompatibilität
     console.log("isAuthenticated-Check - Session:", req.session?.id, "Auth-Status:", req.isAuthenticated(), "Path:", req.path);
     
     // Detaillierte Debugging-Informationen für Render
     if (isRender && global.renderLogs) {
-      const authDebugInfo = {
+      global.renderLogs.push(`[AUTH-DEBUG] ${JSON.stringify({
         timestamp: new Date().toISOString(),
-        path: req.path,
-        session: req.session ? { id: req.session.id, cookie: req.session.cookie } : null,
-        isAuthenticated: req.isAuthenticated(),
-        userInSession: !!req.user,
-        userIdParam: req.query.userId || req.body?.userId,
-        hasCookies: !!req.headers.cookie,
-        cookieNames: req.headers.cookie ? Object.keys(parseCookies(req.headers.cookie)) : []
-      };
-      global.renderLogs.push(`[AUTH-DEBUG] ${JSON.stringify(authDebugInfo)}`);
+        ...logMetadata
+      })}`);
     }
     
     // Standard-Authentifizierungsprüfung über Passport/Session
     if (req.isAuthenticated()) {
+      // Strukturiertes Logging für erfolgreiche Session-Authentifizierung
+      logger.info("✅ Authentifizierter Zugriff via Session", {
+        userId: (req.user as any).id,
+        username: (req.user as any).username,
+        path: req.path,
+        ip: req.ip,
+        method: req.method
+      });
+      
       console.log("Authentifizierter Zugriff via Session - User ID:", req.user.id);
+      
       // Setzt den req.effectiveUserId für nachfolgende Datenbank-Operationen
       (req as any).effectiveUserId = req.user.id;
       
@@ -540,11 +577,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                            allowedUserIds.includes(Number(userId)));
     
     if (isValidUserId) {
+      const effectiveUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+      
+      // Strukturiertes Logging für alternativen Auth-Mechanismus
+      logger.info("✅ Authentifizierter Zugriff via Request-Parameter", {
+        userId: effectiveUserId,
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        parameterSource: req.query.userId ? 'query' : 'body'
+      });
+      
       console.log("Alternativer Auth-Mechanismus via userId in Request-Parameter:", userId);
       
       // Für Datenbank-Operationen: speichere effektive Benutzer-ID im Request-Objekt
       // Dies erlaubt einheitlichen Zugriff in Route-Handlern
-      (req as any).effectiveUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+      (req as any).effectiveUserId = effectiveUserId;
       
       // Debug-Log für Fallback-Auth
       const logEntry = `[${new Date().toISOString()}] [AUTH-FALLBACK] Successful userId-based auth. Path: ${req.path}, UserID: ${userId}`;
@@ -557,6 +605,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       return next();
     }
+    
+    // Strukturiertes Logging für abgelehnte Authentifizierung
+    logger.warn("❌ Nicht autorisierter Zugriff verweigert", {
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+      sessionId: req.session?.id || 'keine',
+      hasCookies: !!req.headers.cookie,
+      cookieNames: req.headers.cookie ? Object.keys(parseCookies(req.headers.cookie)) : []
+    });
     
     // Spezifische Meldung für Render-Umgebung
     if (isRender && global.renderLogs) {
