@@ -25,10 +25,6 @@ console.log("Umgebung erkannt:", {
   nodeEnv: process.env.NODE_ENV 
 });
 
-// Setupauth wird alle Session-Einstellungen direkt vornehmen
-import { setupAuth } from "./auth";
-setupAuth(app);
-
 // GRUNDLEGENDER FIX: Stark vereinfachte CORS-Konfiguration für alle Umgebungen
 // Erlaubt alle Anfragen, unabhängig vom Ursprung - kritisch für Replit
 app.use(cors({
@@ -38,9 +34,15 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Client-Info']
 }));
 
-// Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder
+// WICHTIG: Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder
+// Diese Middleware MUSS vor setupAuth sein, damit req.body in den Auth-Routes verfügbar ist
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Setupauth wird alle Session-Einstellungen direkt vornehmen
+// MUSS nach den JSON-Parsern kommen, damit req.body verfügbar ist
+import { setupAuth } from "./auth";
+setupAuth(app);
 
 // Serve static files from the public directory
 app.use(express.static(path.join(process.cwd(), "public")));
