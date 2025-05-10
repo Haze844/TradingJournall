@@ -109,15 +109,15 @@ try {
     if (fs.existsSync(appConfigFile)) {
       let htmlContent = fs.readFileSync(appConfigFile, 'utf8');
       
-      // APP_CONFIG anpassen: noRedirects auf false setzen
+      // APP_CONFIG anpassen: Render-spezifische Konfiguration setzen
       if (htmlContent.includes('window.APP_CONFIG')) {
         htmlContent = htmlContent.replace(
           /window\.APP_CONFIG\s*=\s*\{[^}]*\}/,
-          'window.APP_CONFIG = { isRender: true, noRedirects: false, directAuth: true, sessionCookieName: "trading.sid" }'
+          'window.APP_CONFIG = { isRender: true, noRedirects: false, directAuth: true, useLocalUser: true, sessionCookieName: "trading.sid" }'
         );
         
         fs.writeFileSync(appConfigFile, htmlContent);
-        log('APP_CONFIG in client/index.html wurde für Render optimiert');
+        log('APP_CONFIG in client/index.html wurde für Render optimiert mit lokalem Benutzer-Fallback');
       } else {
         error('APP_CONFIG nicht gefunden in client/index.html');
       }
