@@ -33,21 +33,28 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Verbesserte Session-Konfiguration für maximale Kompatibilität in Replit-Umgebung
-  // Standard Cookie-Einstellungen gemäß Neon/Render Dokumentation
+  // ÜBERARBEITETE Session-Konfiguration speziell für Replit-Umgebung
+  // Besonders wichtig: Same-Site-Einstellung auf 'lax' für bessere Browser-Kompatibilität
   let cookieConfig: session.CookieOptions = {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
     httpOnly: true,
-    path: '/'
+    path: '/',
+    sameSite: 'lax' // Erlaubt Cookies bei direkter Navigation (Standard in modernen Browsern)
   };
   
-  // Prüfen, ob wir in Produktion oder auf Replit sind
-  const isSecure = process.env.NODE_ENV === "production" || !!process.env.REPL_SLUG;
-  if (isSecure) {
-    console.log("Produktions-/Replit-Umgebung erkannt - sichere Cookies aktiviert");
+  // Umgebungserkennung
+  const isReplit = !!process.env.REPL_SLUG || !!process.env.REPL_ID;
+  const isProduction = process.env.NODE_ENV === "production";
+  
+  console.log("Cookie-Konfiguration für Umgebung:", { isReplit, isProduction });
+  
+  // In Replit: KEINE 'secure'-Einstellung verwenden, da dies in dev problematisch ist
+  // In anderen Produktionsumgebungen: 'secure' aktivieren
+  if (isProduction && !isReplit) {
+    console.log("Sichere Cookies aktiviert für Produktionsumgebung");
     cookieConfig.secure = true;
   } else {
-    console.log("Lokale Entwicklungsumgebung erkannt - standard Cookies");
+    console.log("Entwicklungsmodus - Standard-Cookies ohne 'secure'-Flag");
   }
   
   // Session-Store mit Neon Postgres aufsetzen
@@ -59,11 +66,16 @@ export function setupAuth(app: Express) {
   });
 
   // Standard-Session-Konfiguration gemäß Neon/Render Dokumentation
+  // OPTIMIERTE Sitzungskonfiguration für Replit
   const sessionOptions: session.SessionOptions = {
     name: "tj_sid", // Kürzerer Name ohne Sonderzeichen
     secret: process.env.SESSION_SECRET || "development-secret",
-    resave: false, // Standard-Wert laut Express-Session Docs
-    saveUninitialized: false, // Standard-Wert laut Express-Session Docs
+    // Diese Werte auf true für bessere Replit-Kompatibilität setzen
+    // Hilft bei Neuladen der Seite und HMR
+    resave: true, 
+    saveUninitialized: true,
+    // Rolling-Session für bessere Persistenz
+    rolling: true,
     store: sessionStore,
     cookie: cookieConfig
   };

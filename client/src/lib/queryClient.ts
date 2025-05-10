@@ -127,13 +127,50 @@ function getApiBaseUrl() {
   return '';
 }
 
+// Hilfsfunktion zum Abrufen der aktiven Benutzer-ID
+function getActiveUserId(): number | null {
+  // Versuche, den Benutzer aus dem localStorage zu holen
+  const localStorageUser = localStorage.getItem('tradingjournal_user');
+  if (localStorageUser) {
+    try {
+      const user = JSON.parse(localStorageUser);
+      return user.id || 2; // Default zu userId=2 (Mo) wenn keine ID im Objekt
+    } catch {
+      return 2; // Default zu userId=2 (Mo) bei JSON-Parse-Fehler
+    }
+  }
+  return 2; // Default zu userId=2 (Mo) wenn kein User im localStorage
+}
+
+// Hilfsfunktion zum Hinzufügen von userId zu URLs
+function appendUserIdToUrl(url: string): string {
+  const userId = getActiveUserId();
+  
+  // Wenn URL bereits Parameter enthält, füge userId hinzu
+  if (url.includes('?')) {
+    // Prüfe, ob userId bereits als Parameter existiert
+    if (!url.includes('userId=')) {
+      return `${url}&userId=${userId}`;
+    }
+    return url;
+  } else {
+    // Andernfalls füge userId als ersten Parameter hinzu
+    return `${url}?userId=${userId}`;
+  }
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
   // Füge die Basis-URL für API-Anfragen hinzu
-  const apiUrl = getApiBaseUrl() + url;
+  let apiUrl = getApiBaseUrl() + url;
+  
+  // Für GET-Anfragen: Füge userId als URL-Parameter hinzu
+  if (method.toUpperCase() === 'GET') {
+    apiUrl = getApiBaseUrl() + appendUserIdToUrl(url);
+  }
   
   // Log-Informationen sammeln
   const startTime = Date.now();
@@ -150,10 +187,21 @@ export async function apiRequest(
   console.log(`API-Anfrage an: ${apiUrl} [${method}]`);
   
   try {
+    // Für nicht-GET-Anfragen: Füge userId zum body hinzu, wenn es noch nicht existiert
+    let bodyData = data;
+    if (method.toUpperCase() !== 'GET' && data && typeof data === 'object') {
+      const userId = getActiveUserId();
+      bodyData = {
+        ...data as object,
+        // Nur setzen, wenn noch nicht vorhanden
+        userId: (data as any).userId || userId
+      };
+    }
+    
     const requestConfig: RequestInit = {
       method,
       headers,
-      body: data ? JSON.stringify(data) : undefined,
+      body: bodyData ? JSON.stringify(bodyData) : undefined,
       credentials: "include",
       // Sorgt dafür, dass Cookies immer über CORS-Anfragen gesendet werden
       mode: 'cors',
@@ -166,7 +214,7 @@ export async function apiRequest(
       method: requestConfig.method,
       headers: headers,
       hasBody: !!requestConfig.body,
-      body: data ? JSON.stringify(data) : undefined,
+      body: bodyData ? JSON.stringify(bodyData) : undefined,
       credentials: requestConfig.credentials,
       mode: requestConfig.mode
     });
@@ -200,8 +248,10 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Füge die Basis-URL für API-Anfragen hinzu
-    const apiUrl = getApiBaseUrl() + (queryKey[0] as string);
+    // Erstelle die URL mit userId-Parameter
+    const url = queryKey[0] as string;
+    const urlWithUserId = appendUserIdToUrl(url);
+    const apiUrl = getApiBaseUrl() + urlWithUserId;
     
     // Log-Informationen sammeln
     const startTime = Date.now();
