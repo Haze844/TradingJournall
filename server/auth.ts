@@ -200,9 +200,14 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        logger.debug("🔑 Authentifizierungsversuch", { username, timestamp: new Date().toISOString() });
         const user = await storage.getUserByUsername(username);
         
         if (!user) {
+          logger.warn("❌ Login fehlgeschlagen: Benutzer nicht gefunden", { 
+            username,
+            timestamp: new Date().toISOString()
+          });
           return done(null, false, { message: "Falscher Benutzername oder Passwort" });
         }
         
@@ -210,30 +215,73 @@ export function setupAuth(app: Express) {
         // In production, use the comparePasswords function to securely check passwords
         // if (!(await comparePasswords(password, user.password))) {
         if (password !== user.password) {
+          logger.warn("❌ Login fehlgeschlagen: Falsches Passwort", { 
+            username, 
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
           return done(null, false, { message: "Falscher Benutzername oder Passwort" });
         }
         
+        logger.info("✅ Login erfolgreich", { 
+          username, 
+          userId: user.id,
+          timestamp: new Date().toISOString()
+        });
         return done(null, user);
       } catch (error) {
+        logger.error("❌ Fehler bei der Authentifizierung", { 
+          username,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: new Date().toISOString()
+        });
         return done(error);
       }
     }),
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    logger.debug("👤 Benutzer wird in Session serialisiert", { userId: user.id });
+    done(null, user.id);
+  });
+  
   passport.deserializeUser(async (id: number, done) => {
     try {
+      logger.debug("👤 Benutzer wird aus Session wiederhergestellt", { userId: id });
       const user = await storage.getUser(id);
-      done(null, user);
+      
+      if (user) {
+        logger.debug("✅ Benutzer aus Datenbank geladen", { userId: id });
+        done(null, user);
+      } else {
+        logger.warn("❌ Benutzer nicht in Datenbank gefunden", { userId: id });
+        done(null, null);
+      }
     } catch (error) {
+      logger.error("❌ Fehler beim Wiederherstellen des Benutzers", { 
+        userId: id,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       done(error, null);
     }
   });
 
   app.post("/api/register", async (req, res, next) => {
     try {
+      logger.info("📝 Registrierungsversuch", { 
+        username: req.body.username, 
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
+        logger.warn("❌ Registrierung fehlgeschlagen: Benutzername existiert bereits", { 
+          username: req.body.username,
+          ip: req.ip 
+        });
         return res.status(400).json({ message: "Benutzername existiert bereits" });
       }
 
@@ -245,13 +293,36 @@ export function setupAuth(app: Express) {
         // password: hashedPassword,
       });
 
+      logger.info("✅ Benutzer erfolgreich erstellt", { 
+        userId: user.id, 
+        username: user.username 
+      });
+
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          logger.error("❌ Fehler beim automatischen Login nach Registrierung", {
+            userId: user.id,
+            username: user.username,
+            error: err instanceof Error ? err.message : String(err)
+          });
+          return next(err);
+        }
+        
+        logger.info("✅ Automatischer Login nach Registrierung erfolgreich", { 
+          userId: user.id, 
+          username: user.username
+        });
+        
         // Don't send password to the client
         const { password, ...userWithoutPassword } = user;
         res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
+      logger.error("❌ Fehler bei der Registrierung", {
+        username: req.body.username,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       next(error);
     }
   });
@@ -259,31 +330,63 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     // Einfache Sicherheitsüberprüfung
     if (!req.body || !req.body.username) {
+      logger.warn("❌ Ungültige Login-Anfrage: Fehlende Daten", { 
+        body: req.body,
+        ip: req.ip 
+      });
       return res.status(400).json({ message: "Username und Passwort erforderlich" });
     }
     
-    console.log("Login-Versuch für Benutzer:", req.body.username);
+    logger.info("🔑 Login-Versuch", { 
+      username: req.body.username,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      sessionId: req.sessionID
+    });
     
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
-        console.error("Login-Fehler:", err);
+        logger.error("❌ Login-Fehler", {
+          username: req.body.username,
+          error: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined
+        });
         return next(err);
       }
       
       if (!user) {
-        console.log("Login fehlgeschlagen:", info?.message || "Ungültige Anmeldedaten");
+        logger.warn("❌ Login fehlgeschlagen", { 
+          username: req.body.username,
+          reason: info?.message || "Ungültige Anmeldedaten",
+          ip: req.ip,
+          sessionId: req.sessionID
+        });
         return res.status(401).json({ message: info?.message || "Anmeldung fehlgeschlagen" });
       }
       
-      console.log("Benutzer authentifiziert:", user.username);
+      logger.debug("👤 Benutzer authentifiziert", { 
+        username: user.username,
+        userId: user.id
+      });
       
       req.login(user, (loginErr: any) => {
         if (loginErr) {
-          console.error("Fehler bei req.login():", loginErr);
+          logger.error("❌ Fehler bei Session-Erstellung", {
+            username: user.username,
+            userId: user.id,
+            error: loginErr instanceof Error ? loginErr.message : String(loginErr),
+            stack: loginErr instanceof Error ? loginErr.stack : undefined
+          });
           return next(loginErr);
         }
         
-        console.log("Login erfolgreich, User-ID:", user.id);
+        logger.info("✅ Login erfolgreich", { 
+          username: user.username,
+          userId: user.id,
+          ip: req.ip,
+          sessionId: req.sessionID,
+          timestamp: new Date().toISOString()
+        });
         
         // Passwort nicht zurücksenden
         const { password, ...userWithoutPassword } = user;
