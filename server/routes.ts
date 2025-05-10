@@ -16,7 +16,77 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
 }
 
+// Globaler Log-Typ für Render-Logs
+declare global {
+  var renderLogs: string[];
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // API-Route für Render-Logs hinzufügen
+  app.get('/api/render-logs', (req, res) => {
+    // Wenn renderLogs noch nicht existiert, erstellen wir ein leeres Array
+    if (!global.renderLogs) {
+      global.renderLogs = [];
+    }
+    
+    // Aktuellen Status erfassen und in Logs speichern
+    const statusInfo = `Auth-Status: ${req.isAuthenticated() ? 'Ja' : 'Nein'}, Session-ID: ${req.sessionID || 'keine'}, Cookies: ${req.headers.cookie ? 'vorhanden' : 'keine'}`;
+    if (global.renderLogs) {
+      global.renderLogs.push(`[${new Date().toISOString()}] [RENDER-DEBUG] ${statusInfo}`);
+    }
+    
+    // Logs senden mit erweitertem Session-Status
+    res.status(200).json({
+      logs: global.renderLogs || [],
+      timestamp: new Date().toISOString(),
+      environment: {
+        isRender: process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL,
+        isReplit: process.env.REPL_ID !== undefined,
+        isProduction: process.env.NODE_ENV === 'production',
+        hostname: req.hostname
+      },
+      session: {
+        authenticated: req.isAuthenticated(),
+        sessionID: req.sessionID || null,
+        hasCookies: !!req.headers.cookie,
+        cookieHeader: req.headers.cookie || null
+      }
+    });
+  });
+  
+  // Spezielle Debug-Route für Auth-Status
+  app.get('/api/auth-debug', (req, res) => {
+    // Ausführliche Informationen über den aktuellen Auth-Status
+    const authStatus = {
+      authenticated: req.isAuthenticated(),
+      sessionID: req.sessionID || null,
+      hasCookies: !!req.headers.cookie,
+      cookieHeader: req.headers.cookie || null,
+      user: req.user || null,
+      sessionInfo: req.session || null,
+      method: req.method,
+      headers: req.headers,
+      timestamp: new Date().toISOString(),
+      environment: {
+        isRender: process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL,
+        isReplit: process.env.REPL_ID !== undefined,
+        isProduction: process.env.NODE_ENV === 'production',
+        hostname: req.hostname
+      }
+    };
+    
+    // Speichere diese Information auch in den Logs
+    if (global.renderLogs) {
+      global.renderLogs.push(`[${new Date().toISOString()}] [AUTH-DEBUG] Status: ${JSON.stringify({
+        authenticated: authStatus.authenticated,
+        sessionID: authStatus.sessionID,
+        hasCookies: authStatus.hasCookies
+      })}`);
+    }
+    
+    res.status(200).json(authStatus);
+  });
+  
   // Root-Zugriff erlauben ohne Weiterleitung
   app.get("/", (req: Request, res: Response, next: NextFunction) => {
     console.log("Root-Route aufgerufen - isAuthenticated:", req.isAuthenticated());

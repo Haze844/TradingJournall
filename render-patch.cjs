@@ -9,12 +9,30 @@
 const fs = require('fs');
 const path = require('path');
 
+// Globales Logging-Array für Render-spezifische Logs
+global.renderLogs = [];
+
+// Verbesserte Logging-Funktionen mit Zeitstempel und Log-Speicherung
 function log(message) {
-  console.log(`[RENDER-PATCH] ${message}`);
+  const timestamp = new Date().toISOString();
+  const logEntry = `[${timestamp}] [RENDER-PATCH] ${message}`;
+  
+  // In globales Log-Array speichern für späteren Zugriff
+  global.renderLogs.push(logEntry);
+  if (global.renderLogs.length > 500) global.renderLogs.shift(); // Limit einhalten
+  
+  console.log(logEntry);
 }
 
 function error(message) {
-  console.error(`[RENDER-PATCH ERROR] ${message}`);
+  const timestamp = new Date().toISOString();
+  const logEntry = `[${timestamp}] [RENDER-PATCH ERROR] ${message}`;
+  
+  // In globales Log-Array speichern für späteren Zugriff
+  global.renderLogs.push(logEntry);
+  if (global.renderLogs.length > 500) global.renderLogs.shift(); // Limit einhalten
+  
+  console.error(logEntry);
 }
 
 // Überprüfen, ob wir uns in der Render-Umgebung befinden
@@ -327,6 +345,30 @@ try {
   } catch (e) {
     error(`Fehler beim Anpassen der Session-Konfiguration: ${e.message}`);
   }
+  
+  // Auth-Debug-Log generieren
+  log('Erstelle initiale Debug-Logs für Authentication-Tracking');
+  
+  if (!global.renderLogs) {
+    global.renderLogs = [];
+  }
+  
+  // Detaillierte Umgebungsinformationen loggen
+  const envInfo = {
+    isRender: process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL,
+    renderUrl: process.env.RENDER_EXTERNAL_URL || 'nicht verfügbar',
+    isProduction: process.env.NODE_ENV === 'production',
+    nodeEnv: process.env.NODE_ENV,
+    sessionSecret: process.env.SESSION_SECRET ? 'vorhanden' : 'nicht vorhanden',
+    databaseUrl: process.env.DATABASE_URL ? 'vorhanden' : 'nicht vorhanden',
+    port: process.env.PORT || '3000 (Standard)'
+  };
+  
+  global.renderLogs.push(`[${new Date().toISOString()}] [RENDER-INIT] Umgebung: ${JSON.stringify(envInfo)}`);
+  global.renderLogs.push(`[${new Date().toISOString()}] [RENDER-INIT] Cookie-Config: secure=true, httpOnly=true, sameSite=none, maxAge=30d`);
+  
+  // Speichere initiales Log für die Auth-Konfiguration
+  global.renderLogs.push(`[${new Date().toISOString()}] [AUTH-CONFIG] Trust Proxy=1, Secure Cookies aktiv, HTTP-Only aktiv`);
   
   // Erfolg!
   log('Render-Patch abgeschlossen');
