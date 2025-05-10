@@ -7,10 +7,12 @@ import cookieParser from "cookie-parser";
 import { setupUnifiedSession } from "./session-fix";
 import { setupAuth } from "./auth";
 import { fixRenderDirectories } from "./render-dir-fix";
+import { logger, requestLogger, errorLogger } from "./logger";
 
 // Render-Fix: Direktes Routing zur Auth-Seite ohne Umwege
 // KEIN statisches HTML notwendig - wir implementieren direktes Routing
-console.log("Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite");
+logger.info("🚀 Trading Journal Server startet...");
+logger.info("Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite notwendig");
 
 // Stellen sicher, dass alle notwendigen Verzeichnisse existieren
 // Dies behebt den häufigen Fehler "ENOENT: no such file or directory" in Render
@@ -47,10 +49,15 @@ app.use(cookieParser());
 // WICHTIG: Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder
 // Session Cookie Debugging Middleware
 app.use((req, res, next) => {
-  console.log('Request an:', req.url);
-  console.log('Cookies:', req.headers.cookie ? 'vorhanden' : 'keine');
+  // Diese einfache Middleware bleibt für Kompatibilität
   next();
 });
+
+// Erweiterte Request-Logging-Middleware
+app.use(requestLogger);
+
+// Fehler-Logging-Middleware
+app.use(errorLogger);
 
 // Diese Middleware MUSS vor setupAuth sein, damit req.body in den Auth-Routes verfügbar ist
 app.use(express.json({ limit: '10mb' }));

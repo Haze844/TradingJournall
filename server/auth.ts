@@ -8,6 +8,7 @@ import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db-selector";
+import { logger } from "./logger";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -39,7 +40,14 @@ export function setupAuth(app: Express) {
   const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
   const isProduction = process.env.NODE_ENV === "production";
   
-  console.log("Umgebung erkannt:", { isRender, isReplit, isProduction, nodeEnv: process.env.NODE_ENV });
+  logger.info("🔐 Auth-System wird eingerichtet", { 
+    environment: { 
+      isRender, 
+      isReplit, 
+      isProduction, 
+      nodeEnv: process.env.NODE_ENV 
+    } 
+  });
   
   // Cookie-Konfiguration je nach Umgebung optimieren
   let cookieConfig: session.CookieOptions = {
@@ -137,7 +145,7 @@ export function setupAuth(app: Express) {
       saveUninitialized: false,
       rolling: true
     };
-    console.log("Render-optimierte Session-Konfiguration aktiviert");
+    logger.info("🔧 Render-optimierte Session-Konfiguration aktiviert", { sessionOptions });
   }
   // Für Replit-Umgebung
   else if (isReplit) {
@@ -147,7 +155,7 @@ export function setupAuth(app: Express) {
       saveUninitialized: true,
       rolling: true
     };
-    console.log("Replit-optimierte Session-Konfiguration aktiviert");
+    logger.info("🔧 Replit-optimierte Session-Konfiguration aktiviert", { sessionOptions });
   }
   // Standard-Produktionsumgebung
   else if (isProduction) {
@@ -157,7 +165,7 @@ export function setupAuth(app: Express) {
       saveUninitialized: false,
       rolling: true
     };
-    console.log("Produktions-Session-Konfiguration aktiviert");
+    logger.info("🔧 Produktions-Session-Konfiguration aktiviert", { sessionOptions });
   }
   // Lokale Entwicklung
   else {
@@ -167,7 +175,7 @@ export function setupAuth(app: Express) {
       saveUninitialized: true,
       rolling: true
     };
-    console.log("Entwicklungs-Session-Konfiguration aktiviert");
+    logger.info("🔧 Entwicklungs-Session-Konfiguration aktiviert", { sessionOptions });
   }
 
   // Trust Proxy Einstellung
@@ -175,10 +183,10 @@ export function setupAuth(app: Express) {
   // Der Wert 1 bedeutet, dass wir dem ersten Proxy vertrauen
   if (isRender) {
     app.set("trust proxy", 1);
-    console.log("Trust Proxy für Render Umgebung aktiviert");
+    logger.info("🔐 Trust Proxy für Render Umgebung aktiviert");
   } else if (isReplit) {
     app.set("trust proxy", 1);
-    console.log("Trust Proxy für Replit Umgebung aktiviert");
+    logger.info("🔐 Trust Proxy für Replit Umgebung aktiviert");
   } else if (isProduction) {
     app.set("trust proxy", 1);
     console.log("Trust Proxy für Produktionsumgebung aktiviert");
