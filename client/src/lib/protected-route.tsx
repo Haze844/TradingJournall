@@ -110,24 +110,18 @@ export function ProtectedRoute({
       );
     }
     
-    // KRITISCHE ÄNDERUNG: Verwende window.location.href für harte Navigation 
-    // statt wouter's Redirect, um Sitzungs-/Cookie-Probleme zu umgehen
-    console.log("Verwende direkte window.location-Navigation zur Auth-Seite");
-    
-    // Bei Root-Route nicht mehr direkt zur Auth-Seite weiterleiten
-    // ABSOLUT DIREKTE Navigation - keine Umwege beim Weiterleiten
-    
-    // Zähler erhöhen und zur Auth-Seite weiterleiten
+    // OPTIMIERTE WEITERLEITUNG: Nur einmal zählen und aktuellen Pfad für Rückkehr speichern
     redirectCounter++;
     
-    // Für die SimpleHome-Route eine spezielle Behandlung
-    if (path === "/SimpleHome") {
-      console.log("Spezielle Weiterleitung für /SimpleHome zur Auth-Seite");
-      
-      // Speichern, dass der Benutzer zu SimpleHome will, für spätere direkte Weiterleitung
-      localStorage.setItem("redirectAfterLogin", "/SimpleHome");
+    // Ziel-Pfad für spätere Weiterleitung nach Login speichern
+    // aber nur wenn es kein Auth-Pfad ist (würde sonst Endlosschleife verursachen)
+    if (path !== "/auth" && path !== "/") {
+      console.log(`Speichere ursprüngliches Ziel für Weiterleitung nach Login: ${path}`);
+      localStorage.setItem("redirectAfterLogin", path);
     }
     
+    // Statt direkter window.location.href-Navigation verwende Wouter's Redirect
+    // Funktioniert besser mit der React-Architektur und verhindert harte Seiten-Reloads
     return (
       <Route path={path}>
         <Redirect to="/auth" />

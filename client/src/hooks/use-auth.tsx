@@ -133,12 +133,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen zurück, ${userData.username}!`,
       });
       
-      // Einfache Navigation zur Hauptseite
-      console.log("Login erfolgreich:", userData);
+      // WICHTIG: Keine automatische Navigation hier!
+      // Die Navigation wird in auth-page.tsx behandelt, um Konflikte zu vermeiden
+      console.log("Login erfolgreich - überlasse Navigation dem Login-Formular");
       
-      // Standard-Navigation mit wouter nutzen
-      console.log("Login erfolgreich - navigiere zur Hauptseite");
-      navigate("/");
+      // Hier KEINE navigate()-Aufrufe, um Konflikte mit auth-page.tsx zu vermeiden!
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -176,6 +175,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = data.user || data;
       queryClient.setQueryData(["/api/user"], userData);
       
+      // In localStorage speichern für Persistenz (wie beim Login)
+      localStorage.setItem('tradingjournal_user', JSON.stringify(userData));
+      setLocalUser(userData);
+      
       // Detaillierte Logs für erfolgreiche Registrierung
       console.log("Registrierung erfolgreich, User-Daten aktualisiert:", {
         id: userData.id,
@@ -189,11 +192,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen bei TradingJournal, ${userData.username}!`,
       });
       
-      // Einfache Navigation zur Hauptseite
-      console.log("Registrierung erfolgreich - navigiere zur Hauptseite");
+      // WICHTIG: Keine automatische Navigation hier!
+      // Die Navigation wird in auth-page.tsx behandelt, um Konflikte zu vermeiden
+      console.log("Registrierung erfolgreich - überlasse Navigation dem Registrierungs-Formular");
       
-      // Standard-Navigation mit wouter nutzen
-      navigate("/");
+      // Hier KEINE navigate()-Aufrufe, um Konflikte mit auth-page.tsx zu vermeiden!
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen

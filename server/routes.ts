@@ -87,11 +87,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(200).json(authStatus);
   });
   
-  // Root-Zugriff erlauben ohne Weiterleitung
+  // Verbesserte Root-Route mit direkter Weiterleitung
   app.get("/", (req: Request, res: Response, next: NextFunction) => {
-    console.log("Root-Route aufgerufen - isAuthenticated:", req.isAuthenticated());
-    // Leite an Vite/Static-Middleware weiter, so dass index.html direkt ausgeliefert wird
-    next();
+    console.log("Root-Route aufgerufen - isAuthenticated:", req.isAuthenticated(), "Session:", req.sessionID || 'keine');
+    
+    // Aktuellen Status erfassen und in Logs speichern
+    if (global.renderLogs) {
+      global.renderLogs.push(`[${new Date().toISOString()}] [ROOT-ROUTE] Auth: ${req.isAuthenticated() ? 'Ja' : 'Nein'}, Session: ${req.sessionID || 'keine'}, Cookies: ${req.headers.cookie ? 'vorhanden' : 'keine'}`);
+    }
+    
+    // Wenn der Benutzer authentifiziert ist, zu SimpleHome weiterleiten
+    if (req.isAuthenticated()) {
+      console.log("Auth Benutzer an Root-Route erkannt, leite zu /SimpleHome weiter");
+      return res.redirect(302, "/SimpleHome");
+    }
+    
+    // Wenn nicht authentifiziert, zu /auth weiterleiten
+    console.log("Nicht authentifiziert an Root-Route, leite zu /auth weiter");
+    return res.redirect(302, "/auth");
   });
 
   // Spezielle Debug-Endpunkte für Routing/Auth-Diagnose

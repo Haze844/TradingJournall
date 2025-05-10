@@ -17,7 +17,7 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  // Nutze einen useEffect Hook für Logging, ABER KEINE REDIRECTS!
+  // Kombinierter useEffect für Logging und vereinfachte Weiterleitung
   useEffect(() => {
     // Log zum Debuggen
     console.log("Auth Page Status: User=", !!user, "isLoading=", isLoading);
@@ -30,17 +30,28 @@ export default function AuthPage() {
       console.log("Deployment-Umgebung erkannt in Auth-Page:", { isNetlify, isRender });
       console.log("WICHTIG: Keine automatischen Weiterleitungen in dieser Umgebung!");
     }
-    
-    // KEINE WEITERLEITUNGEN HIER - Verursacht Endlosschleifen in Produktionsumgebungen!
-    // Stattdessen: Lass den Benutzer explizit einloggen
 
     // Debug-Log für Authentifizierungsstatus
-    if (user) {
+    if (user && !isLoading) {
       console.log("Benutzer bereits eingeloggt:", user.username);
+      
+      // Wenn es ein gespeichertes Weiterleitungsziel gibt, dorthin navigieren
+      const savedRedirect = localStorage.getItem("redirectAfterLogin");
+      const redirectTarget = savedRedirect || "/SimpleHome";
+      
+      console.log("Bereits eingeloggt - navigiere zu:", redirectTarget);
+      
+      // Weiterleitungsinfo aus dem LocalStorage entfernen
+      localStorage.removeItem("redirectAfterLogin");
+      
+      // Kurze Verzögerung für stabilere Navigation
+      setTimeout(() => {
+        navigate(redirectTarget);
+      }, 100);
     } else if (!isLoading) {
       console.log("Nicht eingeloggt - zeige Login-Formular");
     }
-  }, [user, isLoading]);
+  }, [user, isLoading, navigate]);
 
   return (
     <div className="min-h-screen flex items-center relative overflow-hidden">
