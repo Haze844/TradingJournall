@@ -52,6 +52,14 @@ app.use((req, res, next) => {
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
+  // Log incoming cookies for debugging
+  if (path.startsWith("/api")) {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    console.log(`Cookies: ${JSON.stringify(req.headers.cookie || 'none')}`);
+    console.log(`Session ID: ${req.session?.id || 'keine Session'}`);
+    console.log(`Authenticated: ${req.isAuthenticated()}`);
+  }
+
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;

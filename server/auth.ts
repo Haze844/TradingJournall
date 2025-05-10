@@ -33,22 +33,24 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Einfache, direkte Session-Konfiguration (keine komplexen Workarounds)
+  // Verbesserte Session-Konfiguration für maximale Kompatibilität in Replit-Umgebung
   const sessionOptions: session.SessionOptions = {
     name: "trading.sid",
     secret: process.env.SESSION_SECRET || "development-secret",
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Erzwinge Session-Speicherung bei jeder Anfrage
+    saveUninitialized: true, // Speichere auch nicht initialisierte Sessions
     store: new PostgresSessionStore({
       pool,
       tableName: "sessions",
-      createTableIfMissing: true
+      createTableIfMissing: true,
+      pruneSessionInterval: 60, // Prüfe häufiger auf abgelaufene Sessions
     }),
     cookie: {
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Tage
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
       httpOnly: true,
       sameSite: "none", // Wichtig für Cross-Site-Requests in Replit-Umgebungen
-      secure: process.env.NODE_ENV === "production" || process.env.REPL_ID ? true : false, // Secure in Production und auf Replit
+      secure: true, // Immer auf secure setzen für HTTPS
+      path: '/', // Stelle sicher, dass der Cookie für alle Pfade gilt
     }
   };
 
