@@ -1,4 +1,5 @@
-import { useAuth, isRenderEnvironment } from "../hooks/use-auth";
+import { useAuth } from "../hooks/use-auth";
+import { isRenderEnvironment } from "@/lib/env-detection";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
 import { useEffect, useState } from "react";

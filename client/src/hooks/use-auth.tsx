@@ -9,10 +9,8 @@ import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "./use-toast";
 import { useLocation } from "wouter";
 
-// Neue Hilfsfunktion, um festzustellen, ob wir uns in der Render-Umgebung befinden
-export const isRenderEnvironment = () => {
-  return window.location.hostname.includes('onrender.com');
-};
+// Import der zentralen Umgebungserkennung
+import { isRenderEnvironment } from '@/lib/env-detection';
 
 type AuthContextType = {
   user: SelectUser | null;

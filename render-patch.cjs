@@ -18,10 +18,25 @@ function log(message) {
   const logEntry = `[${timestamp}] [RENDER-PATCH] ${message}`;
   
   // In globales Log-Array speichern für späteren Zugriff
+  global.renderLogs = global.renderLogs || [];
   global.renderLogs.push(logEntry);
   if (global.renderLogs.length > 500) global.renderLogs.shift(); // Limit einhalten
   
+  // In Standard-Out loggen
   console.log(logEntry);
+  
+  // Wenn Datei-Logging aktiviert ist, auch in Datei schreiben
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const logDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    fs.appendFileSync(path.join(logDir, 'render-patch.log'), logEntry + '\n');
+  } catch (e) {
+    console.error(`[${timestamp}] [RENDER-PATCH-ERROR] Fehler beim Speichern des Logs: ${e.message}`);
+  }
 }
 
 function error(message) {

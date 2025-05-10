@@ -10,6 +10,7 @@ import puppeteer from "puppeteer";
 import { Readable } from "stream";
 import { z } from "zod";
 import { renderDiagnostic } from "./render-diagnostic";
+import { handleDebugLogs, getDebugLogs, serverDebugLog, serverErrorLog } from "./render-debug-logs";
 
 // Helper function to handle error messages safely
 function errorMessage(error: unknown): string {
@@ -22,7 +23,15 @@ declare global {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API-Route für Render-Logs hinzufügen
+  // ERWEITERTE RENDER-DEBUGGING-ROUTEN
+  
+  // API-Route für Clientseitige Debug-Logs
+  app.post('/api/debug-logs', handleDebugLogs);
+  
+  // API-Route für Abrufen aller Debug-Logs
+  app.get('/api/debug-logs', getDebugLogs);
+  
+  // Bestehende API-Route für einfache Render-Logs
   app.get('/api/render-logs', (req, res) => {
     // Wenn renderLogs noch nicht existiert, erstellen wir ein leeres Array
     if (!global.renderLogs) {
@@ -31,6 +40,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Aktuellen Status erfassen und in Logs speichern
     const statusInfo = `Auth-Status: ${req.isAuthenticated() ? 'Ja' : 'Nein'}, Session-ID: ${req.sessionID || 'keine'}, Cookies: ${req.headers.cookie ? 'vorhanden' : 'keine'}`;
+    
+    // Detaillierte Debug-Ausgabe für Render-Spezifische Probleme
+    serverDebugLog('RENDER-API-CALL', {
+      route: '/api/render-logs',
+      isAuthenticated: req.isAuthenticated(),
+      sessionID: req.sessionID,
+      cookies: req.headers.cookie ? 'vorhanden' : 'keine',
+      headers: Object.keys(req.headers),
+      hostname: req.hostname,
+      path: req.path,
+      method: req.method,
+      query: req.query,
+      ip: req.ip,
+      originalUrl: req.originalUrl,
+    });
+    
     if (global.renderLogs) {
       global.renderLogs.push(`[${new Date().toISOString()}] [RENDER-DEBUG] ${statusInfo}`);
     }
