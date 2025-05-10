@@ -123,7 +123,7 @@ export function setupAuth(app: Express) {
 
   // Optimierte Session-Konfiguration basierend auf dem Deployment-Typ
   let sessionOptions: session.SessionOptions = {
-    name: "tj_sid", // Kürzerer Name ohne Sonderzeichen
+    name: "tj_sid", // Kürzerer Name ohne Sonderzeichen - MUSS KONSISTENT BLEIBEN!
     secret: process.env.SESSION_SECRET || "development-secret",
     store: sessionStore,
     cookie: cookieConfig

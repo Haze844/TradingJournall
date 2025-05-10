@@ -162,10 +162,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const cookieHeader = req.headers.cookie;
     console.log('Health-Check - Cookies:', cookieHeader ? 'vorhanden' : 'keine');
     
+    // Standardantwort vorbereiten
+    const responseData = {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      authenticated: req.isAuthenticated(),
+      sessionId: req.session?.id?.substring(0, 10) || 'none',
+      hasCookies: !!cookieHeader,
+      replit: !!process.env.REPL_SLUG,
+      userAgent: req.headers['user-agent']?.substring(0, 50) || 'none'
+    };
+    
     if (cookieHeader) {
       // Detaillierte Cookie-Analyse
       const cookies = parseCookies(cookieHeader);
       console.log('Cookie-Namen:', Object.keys(cookies));
+      
+      // Alte Legacy-Cookies zum Löschen erkennen
+      const legacyCookies = Object.keys(cookies).filter(name => 
+        name === 'trading.sid' || name === 'trading_sid');
+      
+      if (legacyCookies.length > 0) {
+        console.log("Alte Legacy-Cookies gefunden:", legacyCookies);
+        
+        // Alte Cookies löschen - setze Expiration in die Vergangenheit
+        legacyCookies.forEach(cookieName => {
+          res.cookie(cookieName, '', { 
+            expires: new Date(0), 
+            httpOnly: true,
+            path: '/',
+            secure: process.env.NODE_ENV === 'production'
+          });
+        });
+        
+        responseData.cookiesCleared = legacyCookies;
+      }
       
       // Session-Cookie prüfen
       const sessionCookieName = 'tj_sid'; // Muss mit dem Namen in auth.ts übereinstimmen
@@ -176,16 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('Health-Check - Session Cookie:', req.session?.cookie ? 'vorhanden' : 'keine');
     console.log('Health-Check - Authenticated:', req.isAuthenticated());
     
-    res.json({
-      status: "ok",
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || "development",
-      authenticated: req.isAuthenticated(),
-      sessionId: req.session?.id?.substring(0, 10) || 'none',
-      hasCookies: !!cookieHeader,
-      replit: !!process.env.REPL_SLUG,
-      userAgent: req.headers['user-agent']?.substring(0, 50) || 'none'
-    });
+    res.json(responseData);
   });
   
   // Helper-Funktion zum Parsen von Cookies

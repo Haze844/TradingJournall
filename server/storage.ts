@@ -115,6 +115,21 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
   }
+  
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    try {
+      const [updatedUser] = await executeSafely(db => 
+        db.update(users)
+          .set(userData)
+          .where(eq(users.id, id))
+          .returning()
+      );
+      return updatedUser;
+    } catch (error) {
+      console.error(`Fehler beim Aktualisieren des Benutzers ${id}:`, error);
+      return undefined;
+    }
+  }
 
   // Trade-Operationen
   async getTrades(userId: number): Promise<Trade[]> {
