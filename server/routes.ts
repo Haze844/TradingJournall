@@ -9,6 +9,7 @@ import fs from "fs";
 import puppeteer from "puppeteer";
 import { Readable } from "stream";
 import { z } from "zod";
+import { renderDiagnostic } from "./render-diagnostic";
 
 // Helper function to handle error messages safely
 function errorMessage(error: unknown): string {
@@ -115,6 +116,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Als JSON und mit CORS-Header für einfache externe Diagnose
     res.header("Access-Control-Allow-Origin", "*");
     res.json(debug);
+  });
+  
+  // NEU: Umfassende Diagnose mit dem verbesserten Tool
+  app.get("/render-diagnostic", (req: Request, res: Response) => {
+    renderDiagnostic(req, res);
   });
   
   // NOTFALL-AUTH-SEITE - nur für Render-Probleme
