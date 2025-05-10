@@ -432,14 +432,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Standard-Authentifizierungsprüfung über Passport/Session
     if (req.isAuthenticated()) {
       console.log("Authentifizierter Zugriff via Session - User ID:", req.user.id);
+      // Setzt den req.effectiveUserId für nachfolgende Datenbank-Operationen
+      (req as any).effectiveUserId = req.user.id;
       return next();
     }
     
     // Alternative: Prüfe userId in der Anfrage
     // Dies erlaubt Frontend-Anfragen mit lokalem Benutzer, wenn Session-Persistenz problematisch ist
     const userId = req.query.userId || req.body?.userId;
-    if (userId && (userId === '1' || userId === '2' || userId === 1 || userId === 2)) {
+    
+    // Strenge Validierung der erlaubten Benutzer-IDs
+    const allowedUserIds = ['1', '2', 1, 2]; // Admin=1, Mo=2
+    const isValidUserId = userId !== undefined && 
+                          (allowedUserIds.includes(userId) || 
+                           allowedUserIds.includes(Number(userId)));
+    
+    if (isValidUserId) {
       console.log("Alternativer Auth-Mechanismus via userId in Request-Parameter:", userId);
+      
+      // Für Datenbank-Operationen: speichere effektive Benutzer-ID im Request-Objekt
+      // Dies erlaubt einheitlichen Zugriff in Route-Handlern
+      (req as any).effectiveUserId = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+      
+      // Debug-Log für Fallback-Auth
+      const logEntry = `[${new Date().toISOString()}] [AUTH-FALLBACK] Successful userId-based auth. Path: ${req.path}, UserID: ${userId}`;
+      if (global.renderLogs) global.renderLogs.push(logEntry);
+      
       return next();
     }
     

@@ -33,28 +33,52 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // ÜBERARBEITETE Session-Konfiguration speziell für Replit-Umgebung
-  // Besonders wichtig: Same-Site-Einstellung auf 'lax' für bessere Browser-Kompatibilität
+  // VERBESSERTE Session-Konfiguration für verschiedene Deployment-Umgebungen
+  // Umgebungserkennung
+  const isReplit = !!process.env.REPL_SLUG || !!process.env.REPL_ID;
+  const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
+  const isProduction = process.env.NODE_ENV === "production";
+  
+  console.log("Umgebung erkannt:", { isRender, isReplit, isProduction, nodeEnv: process.env.NODE_ENV });
+  
+  // Cookie-Konfiguration je nach Umgebung optimieren
   let cookieConfig: session.CookieOptions = {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
     httpOnly: true,
-    path: '/',
-    sameSite: 'lax' // Erlaubt Cookies bei direkter Navigation (Standard in modernen Browsern)
+    path: '/'
   };
   
-  // Umgebungserkennung
-  const isReplit = !!process.env.REPL_SLUG || !!process.env.REPL_ID;
-  const isProduction = process.env.NODE_ENV === "production";
-  
-  console.log("Cookie-Konfiguration für Umgebung:", { isReplit, isProduction });
-  
-  // In Replit: KEINE 'secure'-Einstellung verwenden, da dies in dev problematisch ist
-  // In anderen Produktionsumgebungen: 'secure' aktivieren
-  if (isProduction && !isReplit) {
+  // Render-spezifische Konfiguration nach Neon Dokumentation
+  if (isRender) {
+    console.log("Verwende optimierte Passport-Auth mit Render-spezifischen Cookie-Einstellungen");
+    cookieConfig = {
+      ...cookieConfig,
+      secure: true,        // Muss true sein in Render-Umgebung
+      sameSite: 'none',    // Muss 'none' sein für Cross-Site in Render
+    };
+  } 
+  // Replit-spezifische Konfiguration
+  else if (isReplit) {
+    console.log("Verwende optimierte Passport-Auth mit angepassten Cookie-Einstellungen");
+    cookieConfig = {
+      ...cookieConfig,
+      sameSite: 'lax',     // 'lax' für bessere Browser-Kompatibilität in Replit
+      // In Replit keine 'secure'-Flag, problematisch in der Entwicklungsumgebung
+    };
+  } 
+  // Standard-Produktion
+  else if (isProduction) {
     console.log("Sichere Cookies aktiviert für Produktionsumgebung");
-    cookieConfig.secure = true;
-  } else {
+    cookieConfig = {
+      ...cookieConfig,
+      secure: true,
+      sameSite: 'lax'
+    };
+  } 
+  // Lokale Entwicklung
+  else {
     console.log("Entwicklungsmodus - Standard-Cookies ohne 'secure'-Flag");
+    cookieConfig.sameSite = 'lax';
   }
   
   // Session-Store mit Neon Postgres aufsetzen
@@ -65,23 +89,68 @@ export function setupAuth(app: Express) {
     pruneSessionInterval: 60, // Prüfe alle 60s auf abgelaufene Sessions
   });
 
-  // Standard-Session-Konfiguration gemäß Neon/Render Dokumentation
-  // OPTIMIERTE Sitzungskonfiguration für Replit
-  const sessionOptions: session.SessionOptions = {
+  // Optimierte Session-Konfiguration basierend auf dem Deployment-Typ
+  let sessionOptions: session.SessionOptions = {
     name: "tj_sid", // Kürzerer Name ohne Sonderzeichen
     secret: process.env.SESSION_SECRET || "development-secret",
-    // Diese Werte auf true für bessere Replit-Kompatibilität setzen
-    // Hilft bei Neuladen der Seite und HMR
-    resave: true, 
-    saveUninitialized: true,
-    // Rolling-Session für bessere Persistenz
-    rolling: true,
     store: sessionStore,
     cookie: cookieConfig
   };
 
-  // Trust Proxy für Replit
-  app.set("trust proxy", 1);
+  // Für Render-Umgebung empfohlene Einstellungen nach Neon-Dokumentation
+  if (isRender) {
+    sessionOptions = {
+      ...sessionOptions,
+      resave: false,
+      saveUninitialized: false,
+      rolling: true
+    };
+    console.log("Render-optimierte Session-Konfiguration aktiviert");
+  }
+  // Für Replit-Umgebung
+  else if (isReplit) {
+    sessionOptions = {
+      ...sessionOptions,
+      resave: true,
+      saveUninitialized: true,
+      rolling: true
+    };
+    console.log("Replit-optimierte Session-Konfiguration aktiviert");
+  }
+  // Standard-Produktionsumgebung
+  else if (isProduction) {
+    sessionOptions = {
+      ...sessionOptions,
+      resave: false,
+      saveUninitialized: false,
+      rolling: true
+    };
+    console.log("Produktions-Session-Konfiguration aktiviert");
+  }
+  // Lokale Entwicklung
+  else {
+    sessionOptions = {
+      ...sessionOptions,
+      resave: true,
+      saveUninitialized: true,
+      rolling: true
+    };
+    console.log("Entwicklungs-Session-Konfiguration aktiviert");
+  }
+
+  // Trust Proxy Einstellung
+  // Für Render und Replit wichtig, da Anfragen über Proxies geleitet werden
+  // Der Wert 1 bedeutet, dass wir dem ersten Proxy vertrauen
+  if (isRender) {
+    app.set("trust proxy", 1);
+    console.log("Trust Proxy für Render Umgebung aktiviert");
+  } else if (isReplit) {
+    app.set("trust proxy", 1);
+    console.log("Trust Proxy für Replit Umgebung aktiviert");
+  } else if (isProduction) {
+    app.set("trust proxy", 1);
+    console.log("Trust Proxy für Produktionsumgebung aktiviert");
+  }
   
   // Session-Middleware anwenden
   app.use(session(sessionOptions));
