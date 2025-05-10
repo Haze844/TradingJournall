@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import cors from "cors";
+import { setupUnifiedSession } from "./session-fix";
 
 // Wir verzichten komplett auf den statischen HTML-Fix
 // Stattdessen werden wir direkte Weiterleitungen auf Serverseite implementieren
