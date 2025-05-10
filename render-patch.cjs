@@ -1,287 +1,209 @@
 /**
- * Render-Patch als CommonJS-Modul (für Verträglichkeit mit älteren Node-Versionen)
- * Diese Version behebt das Problem mit dem falschen APP_CONFIG-Setting und
- * implementiert direkte Weiterleitung zur Auth-Seite ohne Zwischenschritte
+ * RENDER DEPLOYMENT PATCH SCRIPT
+ * 
+ * Dieses Skript wird bei jedem Render-Deployment ausgeführt und
+ * führt verschiedene Optimierungen und Fixes durch, die speziell
+ * für die Render-Umgebung relevant sind.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Einfache Logging-Funktion
 function log(message) {
-  console.log('[RENDER-PATCH] ' + message);
+  console.log(`[RENDER-PATCH] ${message}`);
 }
 
-log('Starte Render-Patch (CommonJS-Version)...');
+function error(message) {
+  console.error(`[RENDER-PATCH ERROR] ${message}`);
+}
 
-// Einfache HTML-Seite als String (keine Template-Literals, keine JSX)
-const simpleHtml = '<!DOCTYPE html>' +
-'<html lang="de">' +
-'<head>' +
-'  <meta charset="UTF-8">' +
-'  <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-'  <title>Weiterleitung...</title>' +
-'  <script>' +
-'    // Direkte Weiterleitung zur Auth-Seite' +
-'    (function() {' +
-'      console.log("Direkte Weiterleitung zur Auth-Seite");' +
-'      window.location.replace(window.location.origin + "/auth");' +
-'    })();' +
-'  </script>' +
-'</head>' +
-'<body>' +
-'  <noscript>JavaScript wird benötigt, um diese Anwendung zu nutzen.</noscript>' +
-'</body>' +
-'</html>';
+// Überprüfen, ob wir uns in der Render-Umgebung befinden
+const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
+log(`Render-Umgebung erkannt: ${isRender ? 'JA' : 'NEIN'}`);
 
-// 1. Frontend-Patch: index.html aktualisieren
-function patchIndexHtml() {
-  const indexHtmlPaths = [
-    './dist/public/index.html',
-    './dist/index.html',
-    './public/index.html',
-    './index.html',
-  ];
+// Wir führen den Patch nur in der Render-Umgebung aus
+if (!isRender) {
+  log('Nicht in Render-Umgebung, Patch wird übersprungen.');
+  process.exit(0);
+}
 
-  for (const indexHtmlPath of indexHtmlPaths) {
-    if (fs.existsSync(indexHtmlPath)) {
-      log(`index.html gefunden: ${indexHtmlPath}. Patche für Render-Deployment...`);
-      
-      // Frontend-Konfiguration - KRITISCHE ÄNDERUNG: noRedirects: false statt true!
-      const scriptContent = '\n<script>\n' +
-        '  // Konfiguration für verschiedene Umgebungen\n' +
-        '  (function() {\n' +
-        '    const isRender = window.location.hostname.includes("render.com") || window.location.hostname.includes("onrender.com");\n' +
-        '    window.APP_CONFIG = {\n' +
-        '      isRender: isRender,\n' +
-        '      apiBaseUrl: "",\n' +
-        '      basename: "",\n' +
-        '      noRedirects: false\n' + // WICHTIG: Hier auf false gesetzt, damit die Redirects funktionieren
-        '    };\n' +
-        '    console.log("App konfiguriert für:", { isRender: isRender, hostname: window.location.hostname });\n' +
-        '  })();\n' +
-        '</script>';
+log('Starte Render-spezifische Anpassungen...');
 
-      try {
-        let indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
-
-        // Base-Href einfügen
-        if (!indexHtml.includes('<base href="/"')) {
-          indexHtml = indexHtml.replace('<head>', '<head>\n  <base href="/">');
-          log('base href-Tag hinzugefügt');
-        }
-
-        // App-Konfiguration aktualisieren falls vorhanden, sonst einfügen
-        if (indexHtml.includes('window.APP_CONFIG')) {
-          // Aktualisiere die bestehende Konfiguration
-          indexHtml = indexHtml.replace(
-            /noRedirects:[\s]*true/g, 
-            'noRedirects: false'
-          );
-          log('Bestehende App-Konfiguration aktualisiert (noRedirects: false)');
-        } else {
-          // Füge neue Konfiguration hinzu
-          indexHtml = indexHtml.replace('</head>', scriptContent + '\n</head>');
-          log('App-Konfiguration hinzugefügt');
-        }
-
-        fs.writeFileSync(indexHtmlPath, indexHtml);
-        log(`${indexHtmlPath} erfolgreich aktualisiert`);
-
-        // 404.html für Client-Routing kopieren
-        const dirPath = path.dirname(indexHtmlPath);
-        const notFoundPath = path.join(dirPath, '404.html');
-        fs.writeFileSync(notFoundPath, indexHtml);
-        log(`404.html für Client-Routing erstellt in ${dirPath}`);
-      } catch (err) {
-        log(`Fehler beim Aktualisieren von ${indexHtmlPath}: ${err.message}`);
-      }
-    }
+try {
+  // Hauptpfade definieren
+  const rootDir = process.cwd();
+  const distDir = path.join(rootDir, 'dist');
+  const publicDir = path.join(rootDir, 'public');
+  
+  // Sicherstellen, dass dist/client existiert
+  const clientDistDir = path.join(distDir, 'client');
+  
+  if (!fs.existsSync(clientDistDir)) {
+    fs.mkdirSync(clientDistDir, { recursive: true });
+    log(`Client-Dist-Verzeichnis erstellt: ${clientDistDir}`);
   }
-}
-
-// 2. Integrieren der statischen HTML-Fix-Datei
-function integrateStaticHtmlFix() {
+  
+  // Überprüfen und erstellen des PUBLIC-Verzeichnisses im DIST-Ordner
+  const publicDistDir = path.join(distDir, 'public');
+  if (!fs.existsSync(publicDistDir)) {
+    fs.mkdirSync(publicDistDir, { recursive: true });
+    log(`Public-Dist-Verzeichnis erstellt: ${publicDistDir}`);
+  }
+  
+  // Kopieren der statischen HTML-Fallback-Seite aus public nach dist/public
   try {
-    // Versuche, den statischen HTML-Fix zu importieren
-    if (fs.existsSync('./server/vite-static-fix.js')) {
-      log('Statischer HTML-Fix gefunden, wende ihn an...');
+    const sourceIndexHtml = path.join(publicDir, 'index.html');
+    const destIndexHtml = path.join(publicDistDir, 'index.html');
+    
+    if (fs.existsSync(sourceIndexHtml)) {
+      const content = fs.readFileSync(sourceIndexHtml, 'utf8');
+      fs.writeFileSync(destIndexHtml, content);
+      log('Static index.html wurde nach dist/public kopiert');
+    } else {
+      error('Source index.html nicht gefunden in ' + sourceIndexHtml);
+    }
+  } catch (e) {
+    error(`Fehler beim Kopieren der index.html: ${e.message}`);
+  }
+  
+  // Erstellen/Aktualisieren einer speziellen htaccess-Datei für Sonderfälle
+  const htaccessContent = `
+# Custom Config für Render-Deployment
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  
+  # Umleitung von /auth direkt zur Vue-Route, ohne 404
+  RewriteRule ^auth$ /auth/ [R=302,L]
+  
+  # Alle Anfragen an den Express-Server weiterleiten
+  RewriteRule ^(.*)$ /$1 [QSA,L]
+</IfModule>
+`;
+
+  try {
+    fs.writeFileSync(path.join(publicDistDir, '.htaccess'), htaccessContent);
+    log('Custom .htaccess für Render erstellt');
+  } catch (e) {
+    error(`Fehler beim Erstellen der .htaccess: ${e.message}`);
+  }
+  
+  // Fix für APP_CONFIG
+  try {
+    const appConfigFile = path.join(distDir, 'client', 'index.html');
+    if (fs.existsSync(appConfigFile)) {
+      let htmlContent = fs.readFileSync(appConfigFile, 'utf8');
       
-      try {
-        // In einer CommonJS-Umgebung funktioniert require
-        require('./server/vite-static-fix');
-        log('Statischer HTML-Fix erfolgreich angewendet');
-      } catch (err) {
-        log(`Fehler beim Anwenden des statischen HTML-Fixes: ${err.message}`);
+      // APP_CONFIG anpassen: noRedirects auf false setzen
+      if (htmlContent.includes('window.APP_CONFIG')) {
+        htmlContent = htmlContent.replace(
+          /window\.APP_CONFIG\s*=\s*\{[^}]*\}/,
+          'window.APP_CONFIG = { isRender: true, noRedirects: false, directAuth: true }'
+        );
+        
+        fs.writeFileSync(appConfigFile, htmlContent);
+        log('APP_CONFIG in client/index.html wurde für Render optimiert');
+      } else {
+        error('APP_CONFIG nicht gefunden in client/index.html');
       }
     } else {
-      log('Erstelle minimalen statischen HTML-Fix...');
-      
-      // Erstelle eine minimale Version des Fixes
-      const fixContent = `
-/**
- * Minimale Version des statischen HTML-Fixes
- */
-const fs = require('fs');
-const path = require('path');
-
-function createIndexWithRedirect() {
-  const indexPath = path.join(process.cwd(), 'index.html');
-  const redirectHTML = \`<!DOCTYPE html>
+      error('client/index.html nicht gefunden');
+    }
+  } catch (e) {
+    error(`Fehler beim Anpassen der APP_CONFIG: ${e.message}`);
+  }
+  
+  // Umleitung für alle wichtigen HTML-Seiten erstellen
+  const redirectHtmlContent = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weiterleitung...</title>
-  <script>
-    // Weiterleitungscode für SPA-Navigation
-    (function() {
-      console.log("Statische Weiterleitungsseite geladen");
-      const basePath = window.location.origin;
-      window.location.replace(basePath + '/#spa');
-    })();
-  </script>
+  <title>LvlUp Trading Journal - Weiterleitung</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #0c1222;
-      color: white;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-    }
-    .loader {
-      border: 5px solid rgba(59, 130, 246, 0.2);
-      border-radius: 50%;
-      border-top: 5px solid #3b82f6;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      background: linear-gradient(135deg, #121212 0%, #1e1e30 100%);
+      color: white;
     }
     .container {
       text-align: center;
+      max-width: 500px;
+      padding: 40px;
+      border-radius: 16px;
+      background: rgba(30, 30, 48, 0.7);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    h1 { color: #4f9eff; }
+    .loader {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(79, 158, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #4f9eff;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        const targetRoute = window.location.pathname;
+        window.location.href = targetRoute;
+      }, 1000);
+    };
+  </script>
 </head>
 <body>
   <div class="container">
     <div class="loader"></div>
-    <p>Einen Moment bitte, du wirst weitergeleitet...</p>
+    <h1>LvlUp Trading Journal</h1>
+    <p>Weiterleitung läuft...</p>
   </div>
 </body>
-</html>\`;
+</html>`;
 
-  fs.writeFileSync(indexPath, redirectHTML);
-  console.log("Minimaler statischer HTML-Fix: index.html mit Weiterleitungslogik erstellt");
-  return true;
-}
-
-// Führe die Funktion aus
-createIndexWithRedirect();
-      `;
-      
-      fs.writeFileSync('./server/vite-static-fix.js', fixContent);
-      log('Minimaler statischer HTML-Fix erstellt und angewendet');
-    }
-  } catch (err) {
-    log(`Fehler bei der Integration des statischen HTML-Fixes: ${err.message}`);
-  }
-}
-
-// 3. Server-Patch aktualisieren, wenn notwendig
-function patchServerCode() {
-  const serverCodePaths = [
-    './dist/index.js',
-    './index.js',
-    './server.js'
+  // Liste der Seiten, für die wir Redirects erstellen wollen
+  const routesToRedirect = [
+    '/auth',
+    '/login', 
+    '/dashboard', 
+    '/trades', 
+    '/analysis',
+    '/settings',
+    '/coaching'
   ];
   
-  for (const serverCodePath of serverCodePaths) {
-    if (fs.existsSync(serverCodePath)) {
-      log(`Server-Code gefunden: ${serverCodePath}. Prüfe Patches...`);
+  try {
+    routesToRedirect.forEach(route => {
+      const routeDir = path.join(publicDistDir, route);
+      if (!fs.existsSync(routeDir)) {
+        fs.mkdirSync(routeDir, { recursive: true });
+      }
       
-      try {
-        let serverCode = fs.readFileSync(serverCodePath, 'utf8');
-        let modified = false;
-        
-        // Nur patchen, wenn noch nicht gepatcht oder wenn noRedirects: true vorhanden ist
-        if (serverCode.includes('noRedirects: true')) {
-          serverCode = serverCode.replace(/noRedirects:[\s]*true/g, 'noRedirects: false');
-          modified = true;
-          log('noRedirects-Konfiguration im Server-Code aktualisiert');
-        }
-        
-        // Bei Bedarf Middleware für zusätzliche Weiterleitungslogik hinzufügen
-        if (!serverCode.includes('// Render-Fix: Dynamisches Routing') && !serverCode.includes('Dynamic SPA routing fix')) {
-          const middlewareCode = `
-// Render-Fix: Dynamisches Routing für SPA
-app.use((req, res, next) => {
-  // Nur für HTML-Anfragen, nicht für API oder Statische Dateien
-  if (!req.path.startsWith('/api/') && 
-      !req.path.includes('.') && 
-      req.headers.accept && 
-      req.headers.accept.includes('text/html')) {
+      fs.writeFileSync(path.join(routeDir, 'index.html'), redirectHtmlContent);
+    });
     
-    console.log("SPA-Route erkannt:", req.path);
-    
-    // Authentifizierungsstatus prüfen
-    const isAuthenticated = req.isAuthenticated && req.isAuthenticated();
-    if (isAuthenticated) {
-      console.log("Authentifizierter Nutzer, leite weiter zu SPA");
-    }
-    
-    // Für alle HTML-Anfragen die index.html servieren
-    return res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+    log(`Redirect-Seiten für ${routesToRedirect.length} Routen erstellt`);
+  } catch (e) {
+    error(`Fehler beim Erstellen der Redirect-Seiten: ${e.message}`);
   }
   
-  next();
-});
-`;
-          
-          // Finde eine geeignete Stelle zum Einfügen
-          let position = serverCode.indexOf('app.listen');
-          if (position === -1) {
-            position = serverCode.indexOf('server.listen');
-          }
-          
-          if (position !== -1) {
-            serverCode = serverCode.slice(0, position) + middlewareCode + serverCode.slice(position);
-            modified = true;
-            log('Dynamisches Routing für SPA hinzugefügt');
-          } else {
-            log('Keine geeignete Stelle im Server-Code gefunden');
-          }
-        }
-        
-        if (modified) {
-          fs.writeFileSync(serverCodePath, serverCode);
-          log(`${serverCodePath} erfolgreich gepatcht`);
-        } else {
-          log(`${serverCodePath} benötigt keine Anpassungen`);
-        }
-      } catch (err) {
-        log(`Fehler beim Patchen von ${serverCodePath}: ${err.message}`);
-      }
-    }
-  }
+  // Erfolg!
+  log('Render-Patch abgeschlossen');
+  process.exit(0);
+  
+} catch (err) {
+  error(`Unerwarteter Fehler: ${err.message}`);
+  error(err.stack);
+  process.exit(1);
 }
-
-// Führe alle Patches aus
-patchIndexHtml();
-integrateStaticHtmlFix();
-patchServerCode();
-
-log('Render-Patch (CommonJS) abgeschlossen. Das Problem mit der statischen HTML-Weiterleitung sollte behoben sein.');
-
-module.exports = {
-  patchIndexHtml,
-  integrateStaticHtmlFix,
-  patchServerCode
-};
