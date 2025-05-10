@@ -6,10 +6,15 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { setupUnifiedSession } from "./session-fix";
 import { setupAuth } from "./auth";
+import { fixRenderDirectories } from "./render-dir-fix";
 
 // Render-Fix: Direktes Routing zur Auth-Seite ohne Umwege
 // KEIN statisches HTML notwendig - wir implementieren direktes Routing
 console.log("Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite");
+
+// Stellen sicher, dass alle notwendigen Verzeichnisse existieren
+// Dies behebt den häufigen Fehler "ENOENT: no such file or directory" in Render
+fixRenderDirectories();
 
 const app = express();
 

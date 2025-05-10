@@ -1,389 +1,110 @@
 /**
- * RENDER DEPLOYMENT PATCH SCRIPT
+ * RENDER-PATCH für TradingJournal
  * 
- * Dieses Skript wird bei jedem Render-Deployment ausgeführt und
- * führt verschiedene Optimierungen und Fixes durch, die speziell
- * für die Render-Umgebung relevant sind.
+ * Dieses Skript wird im Render-Deployment ausgeführt, um Probleme zu beheben,
+ * die speziell in der Render-Umgebung auftreten können.
+ * 
+ * Hauptfunktionen:
+ * 1. Debugging für Render aktivieren
+ * 2. Verzeichnisse überprüfen und erstellen
+ * 3. Datei- und Verzeichnisberechtigungen korrigieren
  */
 
 const fs = require('fs');
 const path = require('path');
 
-// Globales Logging-Array für Render-spezifische Logs
-global.renderLogs = [];
-
-// Verbesserte Logging-Funktionen mit Zeitstempel und Log-Speicherung
 function log(message) {
   const timestamp = new Date().toISOString();
-  const logEntry = `[${timestamp}] [RENDER-PATCH] ${message}`;
+  const logMessage = `${timestamp} - ${message}`;
+  console.log(logMessage);
   
-  // In globales Log-Array speichern für späteren Zugriff
-  global.renderLogs = global.renderLogs || [];
-  global.renderLogs.push(logEntry);
-  if (global.renderLogs.length > 500) global.renderLogs.shift(); // Limit einhalten
-  
-  // In Standard-Out loggen
-  console.log(logEntry);
-  
-  // Wenn Datei-Logging aktiviert ist, auch in Datei schreiben
+  // Auch in Logdatei schreiben
   try {
-    const fs = require('fs');
-    const path = require('path');
     const logDir = path.join(process.cwd(), 'logs');
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir, { recursive: true });
     }
-    fs.appendFileSync(path.join(logDir, 'render-patch.log'), logEntry + '\n');
-  } catch (e) {
-    console.error(`[${timestamp}] [RENDER-PATCH-ERROR] Fehler beim Speichern des Logs: ${e.message}`);
+    fs.appendFileSync(path.join(logDir, 'render-patch.log'), logMessage + '\n');
+  } catch (error) {
+    console.error(`Fehler beim Schreiben in die Logdatei: ${error.message}`);
   }
 }
 
-function error(message) {
-  const timestamp = new Date().toISOString();
-  const logEntry = `[${timestamp}] [RENDER-PATCH ERROR] ${message}`;
-  
-  // In globales Log-Array speichern für späteren Zugriff
-  global.renderLogs.push(logEntry);
-  if (global.renderLogs.length > 500) global.renderLogs.shift(); // Limit einhalten
-  
-  console.error(logEntry);
-}
-
-// Überprüfen, ob wir uns in der Render-Umgebung befinden
-const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
-log(`Render-Umgebung erkannt: ${isRender ? 'JA' : 'NEIN'}`);
-
-// Wir führen den Patch nur in der Render-Umgebung aus
-if (!isRender) {
-  log('Nicht in Render-Umgebung, Patch wird übersprungen.');
-  process.exit(0);
-}
-
-log('Starte Render-spezifische Anpassungen...');
-
-try {
-  // Hauptpfade definieren
-  const rootDir = process.cwd();
-  const distDir = path.join(rootDir, 'dist');
-  const publicDir = path.join(rootDir, 'public');
-  
-  // Sicherstellen, dass dist/client existiert
-  const clientDistDir = path.join(distDir, 'client');
-  
-  if (!fs.existsSync(clientDistDir)) {
-    fs.mkdirSync(clientDistDir, { recursive: true });
-    log(`Client-Dist-Verzeichnis erstellt: ${clientDistDir}`);
-  }
-  
-  // Überprüfen und erstellen des PUBLIC-Verzeichnisses im DIST-Ordner
-  const publicDistDir = path.join(distDir, 'public');
-  if (!fs.existsSync(publicDistDir)) {
-    fs.mkdirSync(publicDistDir, { recursive: true });
-    log(`Public-Dist-Verzeichnis erstellt: ${publicDistDir}`);
-  }
-  
-  // KEINE statische HTML-Fallback-Seite kopieren, da wir direkte Weiterleitungen verwenden
-  log('Keine statische HTML-Seite wird kopiert - verwende stattdessen direktes Routing zu /auth');
-  
-  // Überprüfen und ggf. löschen vorhandener index.html-Dateien, um Weiterleitungsprobleme zu vermeiden
+function ensureDirectoryExists(dirPath) {
   try {
-    const destIndexHtml = path.join(publicDistDir, 'index.html');
-    if (fs.existsSync(destIndexHtml)) {
-      fs.unlinkSync(destIndexHtml);
-      log('Existierende index.html in dist/public wurde entfernt, um Routing-Probleme zu vermeiden');
-    }
-  } catch (e) {
-    error(`Fehler beim Entfernen der index.html: ${e.message}`);
-  }
-  
-  // Erstellen/Aktualisieren einer speziellen htaccess-Datei für Sonderfälle
-  const htaccessContent = `
-# Custom Config für Render-Deployment
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  
-  # Umleitung von /auth direkt zur Vue-Route, ohne 404
-  RewriteRule ^auth$ /auth/ [R=302,L]
-  
-  # Alle Anfragen an den Express-Server weiterleiten
-  RewriteRule ^(.*)$ /$1 [QSA,L]
-</IfModule>
-`;
-
-  try {
-    fs.writeFileSync(path.join(publicDistDir, '.htaccess'), htaccessContent);
-    log('Custom .htaccess für Render erstellt');
-  } catch (e) {
-    error(`Fehler beim Erstellen der .htaccess: ${e.message}`);
-  }
-  
-  // Fix für APP_CONFIG
-  try {
-    const appConfigFile = path.join(distDir, 'client', 'index.html');
-    if (fs.existsSync(appConfigFile)) {
-      let htmlContent = fs.readFileSync(appConfigFile, 'utf8');
-      
-      // APP_CONFIG anpassen: Render-spezifische Konfiguration setzen
-      if (htmlContent.includes('window.APP_CONFIG')) {
-        htmlContent = htmlContent.replace(
-          /window\.APP_CONFIG\s*=\s*\{[^}]*\}/,
-          'window.APP_CONFIG = { isRender: true, noRedirects: false, directAuth: true, useLocalUser: true, sessionCookieName: "trading.sid" }'
-        );
-        
-        fs.writeFileSync(appConfigFile, htmlContent);
-        log('APP_CONFIG in client/index.html wurde für Render optimiert mit lokalem Benutzer-Fallback');
-      } else {
-        error('APP_CONFIG nicht gefunden in client/index.html');
-      }
+    if (!fs.existsSync(dirPath)) {
+      log(`Verzeichnis nicht gefunden: ${dirPath}, wird erstellt...`);
+      fs.mkdirSync(dirPath, { recursive: true });
+      log(`Verzeichnis erfolgreich erstellt: ${dirPath}`);
     } else {
-      error('client/index.html nicht gefunden');
+      log(`Verzeichnis gefunden: ${dirPath}`);
     }
-  } catch (e) {
-    error(`Fehler beim Anpassen der APP_CONFIG: ${e.message}`);
+    return true;
+  } catch (error) {
+    log(`Fehler beim Überprüfen/Erstellen von Verzeichnis ${dirPath}: ${error.message}`);
+    return false;
   }
-  
-  // Umleitung für alle wichtigen HTML-Seiten erstellen
-  // Keine Weiterleitungsseiten mehr
+}
 
-  // Keine spezialisierten HTML-Dateien für den Client erstellen - stattdessen Redirect
-  log('Verwende Redirect-Strategie statt spezialisierter HTML-Dateien');
-  
-  // Versuche, existierende index-client.html zu entfernen, um Probleme zu vermeiden
-  const indexClientPath = path.join(distDir, 'public', 'index-client.html');
-  if (fs.existsSync(indexClientPath)) {
-    try {
-      fs.unlinkSync(indexClientPath);
-      log('Alte index-client.html entfernt - verwende Redirect-Strategie');
-    } catch (err) {
-      error(`Fehler beim Entfernen von index-client.html: ${err.message}`);
-    }
-  }
-  
-  // Überprüfe, ob index.html existiert
-  const indexHtmlPath = path.join(distDir, 'public', 'index.html');
-  if (!fs.existsSync(indexHtmlPath)) {
-    log('index.html nicht gefunden, keine spezialisierten HTML-Dateien erforderlich mit Redirect-Strategie');
-  } else {
-    log('index.html gefunden, aber keine spezialisierten Versionen nötig mit Redirect-Strategie');
-  }
-  
-  // 404.html entfernen falls vorhanden
-  const notFoundPath = path.join(distDir, 'public', '404.html');
-  if (fs.existsSync(notFoundPath)) {
-    try {
-      fs.unlinkSync(notFoundPath);
-      log('404.html wurde entfernt');
-    } catch (err) {
-      error(`Fehler beim Entfernen von 404.html: ${err.message}`);
-    }
-  }
+function isRenderEnvironment() {
+  return process.env.RENDER === "true" || !!process.env.RENDER_EXTERNAL_URL;
+}
 
-  // Auth-Routen-Handler optimieren für direkte SimpleHome-Verbindung
-  log('Optimiere Auth-Routen für direkte SimpleHome-Verbindung');
+// Hauptfunktion
+function applyRenderPatches() {
+  log('Render-Patch-Skript gestartet');
   
-  // Neon-Datenbank-Konfiguration und Session-Konfiguration für Render anpassen
+  // Prüfen, ob wir in einer Render-Umgebung sind
+  if (!isRenderEnvironment()) {
+    log('Keine Render-Umgebung erkannt, Patching wird übersprungen.');
+    return;
+  }
+  
+  log('Render-Umgebung erkannt, Patches werden angewendet...');
+  
+  // Umgebungsvariablen protokollieren (ohne sensible Daten)
+  log(`NODE_ENV: ${process.env.NODE_ENV}`);
+  log(`RENDER_EXTERNAL_URL: ${process.env.RENDER_EXTERNAL_URL || 'nicht gesetzt'}`);
+  
+  // 1. Verzeichnisse prüfen und erstellen
+  const baseDirs = [
+    path.join(process.cwd(), 'public'),
+    path.join(process.cwd(), 'dist'),
+    path.join(process.cwd(), 'dist', 'public'),
+    path.join(process.cwd(), 'logs')
+  ];
+  
+  for (const dir of baseDirs) {
+    ensureDirectoryExists(dir);
+  }
+  
+  // 2. Routing-Workaround für direkten Auth-Zugriff
+  log('Routing-Workaround für direkten Auth-Zugriff wird installiert...');
   try {
-    // Zunächst Datenbankverbindung für Neon optimieren
-    const dbFilePath = path.join(distDir, 'db.js');
-    if (fs.existsSync(dbFilePath)) {
-      let dbCode = fs.readFileSync(dbFilePath, 'utf8');
-      
-      // Prüfen, ob wir Neon WebSocket-Konfiguration hinzufügen müssen
-      if (!dbCode.includes('neonConfig.webSocketConstructor') && dbCode.includes('neonConfig')) {
-        const poolImportPattern = /import\s*{\s*Pool\s*}/;
-        const neonConfigImport = 'import { Pool, neonConfig } from \'@neondatabase/serverless\';';
-        const wsImport = 'import ws from \'ws\';';
-        
-        // Wenn Pool-Import gefunden, ersetzen wir ihn durch die erweiterte Version
-        if (dbCode.match(poolImportPattern)) {
-          dbCode = dbCode.replace(poolImportPattern, neonConfigImport);
-          
-          // ws-Import hinzufügen, falls nicht vorhanden
-          if (!dbCode.includes('import ws from')) {
-            const firstImportEnd = dbCode.indexOf(';', dbCode.indexOf('import')) + 1;
-            dbCode = dbCode.slice(0, firstImportEnd) + '\n' + wsImport + dbCode.slice(firstImportEnd);
-          }
-          
-          // WebSocket-Konfiguration hinzufügen
-          const poolConfigStart = dbCode.indexOf('export const pool');
-          if (poolConfigStart !== -1) {
-            const wsConfigCode = '\n// Für Neon in der Render-Umgebung wird WebSocket benötigt\nneonConfig.webSocketConstructor = ws;\n\n';
-            dbCode = dbCode.slice(0, poolConfigStart) + wsConfigCode + dbCode.slice(poolConfigStart);
-          }
-          
-          fs.writeFileSync(dbFilePath, dbCode);
-          log('Neon-Datenbank-Konfiguration für Render optimiert mit WebSocket-Unterstützung');
-        }
-      } else {
-        log('Neon WebSocket-Konfiguration bereits vorhanden oder nicht notwendig');
-      }
-    } else {
-      log('db.js nicht gefunden - keine Neon-Optimierung möglich');
-    }
-    
-    // Session-Konfiguration anpassen
-    const serverFile = path.join(distDir, 'index.js');
-    if (fs.existsSync(serverFile)) {
-      let serverCode = fs.readFileSync(serverFile, 'utf8');
-      
-      // Direkte Navigation zu Auth ohne Umwege einrichten
-      log('Konfiguriere Express für direkte Navigation zu Auth und SimpleHome');
-      
-      // Express App-Konfiguration finden
-      const expressSetupPattern = /app\s*=\s*express\(\);/;
-      const rootRoutePattern = /app\.get\(['"]\/['"]\s*,\s*.*\s*=>.*/gs;
-      
-      if (serverCode.match(rootRoutePattern)) {
-        // Bereits existierende Route ersetzen
-        serverCode = serverCode.replace(rootRoutePattern, 
-          'app.get("/", (req, res) => {\n' +
-          '  // Wenn der Benutzer authentifiziert ist, zu SimpleHome weiterleiten\n' +
-          '  if (req.isAuthenticated()) {\n' +
-          '    console.log("Auth Benutzer an Root-Route erkannt, leite zu /SimpleHome weiter");\n' +
-          '    return res.redirect(302, "/SimpleHome");\n' +
-          '  }\n' +
-          '  // Nicht authentifiziert, weiterleiten zu /auth mit 303 Status (See Other)\n' +
-          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth mit 303");\n' +
-          '  res.redirect(303, "/auth");\n' +
-          '});');
-        log('Existierende Root-Route durch intelligente Auth/SimpleHome-Weiterleitung ersetzt');
-      } else if (serverCode.match(expressSetupPattern)) {
-        // Neue Route hinzufügen
-        serverCode = serverCode.replace(
-          expressSetupPattern,
-          'app = express();\n\n// Intelligente Weiterleitung basierend auf Auth-Status\n' +
-          'app.get("/", (req, res) => {\n' +
-          '  // Wenn der Benutzer authentifiziert ist, direkt zu SimpleHome weiterleiten\n' +
-          '  if (req.isAuthenticated()) {\n' +
-          '    console.log("Auth Benutzer an Root-Route erkannt, leite zu /SimpleHome weiter");\n' +
-          '    return res.redirect(302, "/SimpleHome");\n' +
-          '  }\n' +
-          '  // Nicht authentifiziert, weiterleiten zu /auth mit 303 Status (See Other)\n' +
-          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth mit 303");\n' +
-          '  res.redirect(303, "/auth");\n' +
-          '});'
-        );
-        log('Intelligente Auth/SimpleHome-Weiterleitung für Root-Route hinzugefügt');
-      } else {
-        log('Konnte Express-Setup nicht finden, keine Auth-Weiterleitung hinzugefügt');
-      }
-      
-      // Log-Nachricht hinzufügen, dass wir direkt mit Auth verbunden sind
-      serverCode = serverCode.replace(
-        /console\.log\(['"]Server gestartet/,
-        'console.log("Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite");\n  console.log("Server gestartet'
+    // In Render erst im dist/public, falls das existiert
+    if (fs.existsSync(path.join(process.cwd(), 'dist', 'public'))) {
+      log('dist/public Verzeichnis gefunden, erstelle ein leeres index.html als Fallback...');
+      fs.writeFileSync(
+        path.join(process.cwd(), 'dist', 'public', 'index.html'),
+        `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/auth"></head><body>Redirecting...</body></html>`
       );
-      
-      // Cookie-Konfiguration anpassen
-      log('Optimiere Cookie-Einstellungen für Render-Umgebung gemäß Neon Dokumentation');
-      
-      // Session-Optionen-Patch
-      const cookieConfigPattern = /cookie:\s*{[^}]*}/gs;
-      // Neon-Dokumentation empfiehlt diese Konfiguration für Render
-      const newCookieConfig = `cookie: {
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
-        httpOnly: true,
-        path: '/',
-        secure: true, // Immer 'secure' in Render-Umgebung
-        sameSite: 'none' // Wichtig für Cross-Site in Render
-      }`;
-      
-      // Cookie-Konfiguration ersetzen, wenn gefunden
-      if (serverCode.match(cookieConfigPattern)) {
-        serverCode = serverCode.replace(cookieConfigPattern, newCookieConfig);
-        log('Cookie-Konfiguration für Render optimiert');
-      } else {
-        log('Cookie-Konfiguration nicht gefunden');
-      }
-      
-      // Session resave und saveUninitialized anpassen
-      const sessionOptionsPattern = /resave:\s*true/g;
-      const saveUninitializedPattern = /saveUninitialized:\s*true/g;
-      
-      if (serverCode.match(sessionOptionsPattern)) {
-        serverCode = serverCode.replace(sessionOptionsPattern, 'resave: false');
-        log('Session resave auf false gesetzt');
-      }
-      
-      if (serverCode.match(saveUninitializedPattern)) {
-        serverCode = serverCode.replace(saveUninitializedPattern, 'saveUninitialized: false');
-        log('Session saveUninitialized auf false gesetzt');
-      }
-      
-      // Trust Proxy sicherstellen
-      if (!serverCode.includes('app.set("trust proxy"')) {
-        const expressSetupPattern = /app\s*=\s*express\(\);/;
-        if (serverCode.match(expressSetupPattern)) {
-          serverCode = serverCode.replace(
-            expressSetupPattern, 
-            'app = express();\napp.set("trust proxy", 1); // Wichtig für Render mit Secure Cookies'
-          );
-          log('Trust Proxy für Render hinzugefügt');
-        }
-      }
-      
-      // Änderungen speichern
-      fs.writeFileSync(serverFile, serverCode);
-      log('Session-Konfiguration für Render optimiert');
-    } else {
-      error('Server-Datei nicht gefunden: ' + serverFile);
     }
-  } catch (e) {
-    error(`Fehler beim Anpassen der Session-Konfiguration: ${e.message}`);
+    // Dann auch in public, falls das existiert
+    if (fs.existsSync(path.join(process.cwd(), 'public'))) {
+      log('public Verzeichnis gefunden, erstelle ein leeres index.html als Fallback...');
+      fs.writeFileSync(
+        path.join(process.cwd(), 'public', 'index.html'),
+        `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/auth"></head><body>Redirecting...</body></html>`
+      );
+    }
+    
+    log('Routing-Workaround erfolgreich installiert');
+  } catch (error) {
+    log(`Fehler beim Installieren des Routing-Workarounds: ${error.message}`);
   }
   
-  // Auth-Debug-Log generieren
-  log('Erstelle initiale Debug-Logs für Authentication-Tracking');
-  
-  if (!global.renderLogs) {
-    global.renderLogs = [];
-  }
-  
-  // Überprüfen und sicherstellen, dass SESSION_SECRET gesetzt ist
-  // Diese Variable ist entscheidend für die sichere Cookie-Verschlüsselung
-  if (!process.env.SESSION_SECRET) {
-    log('WARNUNG: SESSION_SECRET nicht gesetzt. Generiere einen sicheren Zufallswert...');
-    
-    // Sichere, lange Zeichenkette für SESSION_SECRET generieren
-    const crypto = require('crypto');
-    const randomSecret = crypto.randomBytes(32).toString('hex');
-    process.env.SESSION_SECRET = randomSecret;
-    
-    log('SESSION_SECRET wurde für diese Sitzung generiert');
-    
-    // WARNUNG: Bei jedem Neustart des Servers wird ein neuer Schlüssel generiert,
-    // was alle bestehenden Sessions ungültig macht. In der Produktion sollte
-    // diese Variable in den Render Environment Variables gesetzt sein!
-    log('WICHTIG: Bitte setze SESSION_SECRET als Render Environment Variable!');
-  } else {
-    log('SESSION_SECRET ist korrekt konfiguriert');
-  }
-  
-  // Detaillierte Umgebungsinformationen loggen
-  const envInfo = {
-    isRender: process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL,
-    renderUrl: process.env.RENDER_EXTERNAL_URL || 'nicht verfügbar',
-    isProduction: process.env.NODE_ENV === 'production',
-    nodeEnv: process.env.NODE_ENV,
-    sessionSecret: process.env.SESSION_SECRET ? 'vorhanden' : 'nicht vorhanden',
-    sessionSecretLength: process.env.SESSION_SECRET ? process.env.SESSION_SECRET.length : 0,
-    databaseUrl: process.env.DATABASE_URL ? 'vorhanden' : 'nicht vorhanden',
-    port: process.env.PORT || '3000 (Standard)'
-  };
-  
-  global.renderLogs.push(`[${new Date().toISOString()}] [RENDER-INIT] Umgebung: ${JSON.stringify(envInfo)}`);
-  global.renderLogs.push(`[${new Date().toISOString()}] [RENDER-INIT] Cookie-Config: secure=true, httpOnly=true, sameSite=none, maxAge=30d`);
-  
-  // Speichere initiales Log für die Auth-Konfiguration
-  global.renderLogs.push(`[${new Date().toISOString()}] [AUTH-CONFIG] Trust Proxy=1, Secure Cookies aktiv, HTTP-Only aktiv`);
-  
-  // Erfolg!
-  log('Render-Patch abgeschlossen');
-  process.exit(0);
-  
-} catch (err) {
-  error(`Unerwarteter Fehler: ${err.message}`);
-  error(err.stack);
-  process.exit(1);
+  log('Render-Patch-Skript abgeschlossen');
 }
+
+// Skript ausführen
+applyRenderPatches();
