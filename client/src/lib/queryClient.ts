@@ -166,6 +166,7 @@ export async function apiRequest(
       method: requestConfig.method,
       headers: headers,
       hasBody: !!requestConfig.body,
+      body: data ? JSON.stringify(data) : undefined,
       credentials: requestConfig.credentials,
       mode: requestConfig.mode
     });
