@@ -100,7 +100,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Login erfolgreich - navigiere zu:", cleanUrl);
       
       // Statt wouter-Navigation verwenden wir direkte URL-Navigation
-      window.location.href = cleanUrl;
+      // Mit erzwungenem Reload, um die Session zu nutzen
+      console.log("RELOADING PAGE mit absolutem URL für korrekte Session");
+      window.location.replace(cleanUrl);
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -162,7 +164,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Kurze Verzögerung, damit Toast angezeigt werden kann
       setTimeout(() => {
         // ENTSCHEIDEND: Wir stellen sicher, dass wir einen absoluten URL verwenden
-        window.location.href = cleanUrl;
+        // Mit erzwungenem Reload, um die Session zu nutzen
+        console.log("RELOADING PAGE mit absolutem URL für korrekte Session");
+        window.location.replace(cleanUrl);
       }, 1000);
     },
     onError: (error: Error) => {

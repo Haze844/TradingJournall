@@ -3,7 +3,9 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { setupUnifiedSession } from "./session-fix";
+import { setupAuth } from "./auth";
 
 // Wir verzichten komplett auf den statischen HTML-Fix
 // Stattdessen werden wir direkte Weiterleitungen auf Serverseite implementieren
@@ -34,14 +36,16 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Client-Info']
 }));
 
+// Cookie-Parser für JWT-Token hinzufügen
+app.use(cookieParser());
+
 // WICHTIG: Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder
 // Diese Middleware MUSS vor setupAuth sein, damit req.body in den Auth-Routes verfügbar ist
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Setupauth wird alle Session-Einstellungen direkt vornehmen
-// MUSS nach den JSON-Parsern kommen, damit req.body verfügbar ist
-import { setupAuth } from "./auth";
+// Verwende Standard-Passport-Auth für alle Umgebungen
+console.log("Verwende optimierte Passport-Auth mit sameSite=none");
 setupAuth(app);
 
 // Serve static files from the public directory
