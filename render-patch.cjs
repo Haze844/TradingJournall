@@ -115,25 +115,60 @@ try {
   // Umleitung für alle wichtigen HTML-Seiten erstellen
   // Keine Weiterleitungsseiten mehr
 
-  // Keine Weiterleitungsseiten erstellen, index.html entfernen
-  log('Keine Weiterleitungsseiten oder index.html - direkte Navigation zu /auth über Express');
+  // Spezialisierte HTML-Dateien für den Client erstellen
+  log('Erstelle spezialisierte HTML-Dateien für Auth und SimpleHome');
   
-  // index.html und 404.html entfernen, falls sie existieren
+  // index.html in index-client.html umbenennen (falls sie existiert)
   const indexHtmlPath = path.join(distDir, 'public', 'index.html');
+  const indexClientPath = path.join(distDir, 'public', 'index-client.html');
+  
   if (fs.existsSync(indexHtmlPath)) {
     try {
+      // Index-Inhalt lesen
+      const indexContent = fs.readFileSync(indexHtmlPath, 'utf8');
+      
+      // Für Client optimierte Version erstellen (für SimpleHome)
+      const clientContent = indexContent.replace(
+        /<title>.*?<\/title>/,
+        '<title>LvlUp Trading Journal - SimpleHome</title>'
+      );
+      
+      // Als index-client.html speichern für SimpleHome
+      fs.writeFileSync(indexClientPath, clientContent);
+      log('index-client.html für SimpleHome erstellt');
+      
+      // Original index.html entfernen
       fs.unlinkSync(indexHtmlPath);
-      log('index.html wurde komplett entfernt');
+      log('Original index.html entfernt - Express steuert jetzt die Weiterleitung');
     } catch (err) {
-      error(`Fehler beim Entfernen von index.html: ${err.message}`);
+      error(`Fehler bei der HTML-Optimierung: ${err.message}`);
     }
+  } else {
+    log('index.html nicht gefunden, erstelle Standard-Version für Client');
+    const standardClientHtml = `<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LvlUp Trading Journal - SimpleHome</title>
+  <base href="/">
+  <script type="module" src="/src/main.tsx"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <noscript>Sie benötigen JavaScript, um diese Anwendung zu nutzen.</noscript>
+</body>
+</html>`;
+    fs.writeFileSync(indexClientPath, standardClientHtml);
+    log('Standard index-client.html erstellt');
   }
   
-  const notFoundPath = path.join(path.dirname(indexHtmlPath), '404.html');
+  // 404.html entfernen falls vorhanden
+  const notFoundPath = path.join(distDir, 'public', '404.html');
   if (fs.existsSync(notFoundPath)) {
     try {
       fs.unlinkSync(notFoundPath);
-      log('404.html wurde komplett entfernt');
+      log('404.html wurde entfernt');
     } catch (err) {
       error(`Fehler beim Entfernen von 404.html: ${err.message}`);
     }
@@ -184,8 +219,8 @@ try {
     if (fs.existsSync(serverFile)) {
       let serverCode = fs.readFileSync(serverFile, 'utf8');
       
-      // Root-Redirect-Route hinzufügen (gerade weil index.html nicht existiert)
-      log('Füge strikte serverseitige Auth-Weiterleitung ein');
+      // Direkte Navigation zu Auth ohne Umwege einrichten
+      log('Konfiguriere Express für direkte Navigation zu Auth und SimpleHome');
       
       // Express App-Konfiguration finden
       const expressSetupPattern = /app\s*=\s*express\(\);/;
@@ -194,18 +229,43 @@ try {
       if (serverCode.match(rootRoutePattern)) {
         // Bereits existierende Route ersetzen
         serverCode = serverCode.replace(rootRoutePattern, 
-          'app.get("/", (req, res) => { res.redirect("/auth"); });');
-        log('Existierende Root-Route durch strikte Auth-Weiterleitung ersetzt');
+          'app.get("/", (req, res) => {\n' +
+          '  // Wenn der Benutzer authentifiziert ist, zeige direktes SimpleHome ohne Umwege\n' +
+          '  if (req.isAuthenticated()) {\n' +
+          '    console.log("Auth Benutzer an Root-Route erkannt, zeige direkt SimpleHome");\n' +
+          '    return res.sendFile(path.join(__dirname, "public", "index-client.html"));\n' +
+          '  }\n' +
+          '  // Nicht authentifiziert, weiterleiten zu /auth\n' +
+          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth");\n' +
+          '  res.redirect("/auth");\n' +
+          '});');
+        log('Existierende Root-Route durch intelligente Auth/SimpleHome-Weiterleitung ersetzt');
       } else if (serverCode.match(expressSetupPattern)) {
         // Neue Route hinzufügen
         serverCode = serverCode.replace(
           expressSetupPattern,
-          'app = express();\n\n// Strikte Weiterleitung von / zu /auth ohne Umwege\napp.get("/", (req, res) => { res.redirect("/auth"); });'
+          'app = express();\n\n// Intelligente Weiterleitung basierend auf Auth-Status\n' +
+          'app.get("/", (req, res) => {\n' +
+          '  // Wenn der Benutzer authentifiziert ist, zeige direktes SimpleHome ohne Umwege\n' +
+          '  if (req.isAuthenticated()) {\n' +
+          '    console.log("Auth Benutzer an Root-Route erkannt, zeige direkt SimpleHome");\n' +
+          '    return res.sendFile(path.join(__dirname, "public", "index-client.html"));\n' +
+          '  }\n' +
+          '  // Nicht authentifiziert, weiterleiten zu /auth\n' +
+          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth");\n' +
+          '  res.redirect("/auth");\n' +
+          '});'
         );
-        log('Strikte Auth-Weiterleitung für Root-Route hinzugefügt');
+        log('Intelligente Auth/SimpleHome-Weiterleitung für Root-Route hinzugefügt');
       } else {
         log('Konnte Express-Setup nicht finden, keine Auth-Weiterleitung hinzugefügt');
       }
+      
+      // Log-Nachricht hinzufügen, dass wir direkt mit Auth verbunden sind
+      serverCode = serverCode.replace(
+        /console\.log\(['"]Server gestartet/,
+        'console.log("Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite");\n  console.log("Server gestartet'
+      );
       
       // Cookie-Konfiguration anpassen
       log('Optimiere Cookie-Einstellungen für Render-Umgebung gemäß Neon Dokumentation');
