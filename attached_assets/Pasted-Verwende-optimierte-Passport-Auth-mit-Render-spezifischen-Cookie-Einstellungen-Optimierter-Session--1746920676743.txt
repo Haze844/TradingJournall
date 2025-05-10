@@ -1,0 +1,339 @@
+Verwende optimierte Passport-Auth mit Render-spezifischen Cookie-Einstellungen
+Optimierter Session-Store für Render-Umgebung wird initialisiert
+2025-05-10T23:42:09.277Z [INFO] 🔧 Render-optimierte Session-Konfiguration aktiviert
+{
+  "sessionOptions": {
+    "name": "tj_sid",
+    "secret": "trading-journal-secure-session-key-9271",
+    "store": {
+      "_events": {},
+      "_eventsCount": 0
+    },
+    "cookie": {
+      "maxAge": 2592000000,
+      "httpOnly": true,
+      "path": "/",
+      "secure": true,
+      "sameSite": "none"
+    },
+    "resave": false,
+    "saveUninitialized": false,
+    "rolling": true
+  }
+}
+2025-05-10T23:42:09.277Z [INFO] 🔐 Trust Proxy für Render Umgebung aktiviert
+2025-05-10T23:42:09.277Z [INFO] 🌱 Überprüfung auf benötigte Standard-Benutzer
+11:42:09 PM [express] serving on port 5000
+2025-05-10T23:42:10.211Z [DEBUG] 👤 Administrator-Benutzer existiert bereits
+{
+  "userId": 1
+}
+2025-05-10T23:42:10.213Z [DEBUG] 👤 Administrator-Benutzer existiert bereits
+{
+  "userId": 1
+}
+2025-05-10T23:42:10.216Z [DEBUG] 👤 Benutzer 'mo' existiert bereits
+{
+  "userId": 2
+}
+2025-05-10T23:42:10.216Z [INFO] ✅ Benutzer-Initialisierung abgeschlossen
+2025-05-10T23:42:10.218Z [DEBUG] 👤 Benutzer 'mo' existiert bereits
+{
+  "userId": 2
+}
+2025-05-10T23:42:10.218Z [INFO] ✅ Benutzer-Initialisierung abgeschlossen
+2025-05-10T23:42:10.676Z [INFO] ➡️ HEAD /
+{
+  "method": "HEAD",
+  "path": "/",
+  "query": {},
+  "ip": "127.0.0.1",
+  "userAgent": "Go-http-client/1.1",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:10.680Z [INFO] ⬅️ HEAD / 200 in 4ms
+{
+  "statusCode": 200,
+  "responseTime": 4,
+  "userAuth": false
+}
+==> Your service is live 🎉
+2025-05-10T23:42:50.718Z [INFO] ➡️ GET /
+{
+  "method": "GET",
+  "path": "/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [
+    "app.sid",
+    "trading.sid"
+  ],
+  "authenticated": false
+}
+2025-05-10T23:42:50.719Z [DEBUG] 🍪 Legacy-Cookies gefunden, bereinige...
+{
+  "cookieNames": [
+    "app.sid",
+    "trading.sid"
+  ]
+}
+2025-05-10T23:42:50.719Z [DEBUG] 🗑️ Legacy-Cookie gelöscht: app.sid
+2025-05-10T23:42:50.720Z [DEBUG] 🗑️ Legacy-Cookie gelöscht: trading.sid
+2025-05-10T23:42:50.723Z [INFO] ⬅️ GET / 200 in 5ms
+{
+  "statusCode": 200,
+  "responseTime": 5,
+  "userAuth": false
+}
+2025-05-10T23:42:50.936Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:50.941Z [INFO] ⬅️ GET / 200 in 5ms
+{
+  "statusCode": 200,
+  "responseTime": 5,
+  "userAuth": false
+}
+2025-05-10T23:42:51.065Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.068Z [INFO] ⬅️ GET / 304 in 3ms
+{
+  "statusCode": 304,
+  "responseTime": 3,
+  "userAuth": false
+}
+2025-05-10T23:42:51.153Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.155Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:42:51.235Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.237Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:42:51.325Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.327Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:42:51.416Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.418Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:42:51.500Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.501Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:42:51.589Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.591Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:42:51.675Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.677Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:42:51.760Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.761Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:42:51.835Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.837Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:42:51.919Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:51.920Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:42:52.011Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:52.012Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:42:52.088Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:52.089Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:42:52.172Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:42:52.173Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:42:52.251Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}

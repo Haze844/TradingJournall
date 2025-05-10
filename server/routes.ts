@@ -185,7 +185,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       sessionId: req.session?.id?.substring(0, 10) || 'none',
       hasCookies: !!cookieHeader,
       replit: !!process.env.REPL_SLUG || !!process.env.REPL_ID,
-      userAgent: req.headers['user-agent']?.substring(0, 50) || 'none'
+      renderEnv: !!process.env.RENDER || !!process.env.RENDER_EXTERNAL_URL,
+      userAgent: req.headers['user-agent']?.substring(0, 50) || 'none',
+      cookieStatus: {
+        format: 'standardized',
+        standardName: 'tj_sid',
+        cookiesPresent: cookieHeader ? true : false,
+        sessionValid: !!req.session?.id
+      }
     };
     
     if (cookieHeader) {
@@ -194,15 +201,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cookieKeys = Object.keys(cookies);
       console.log('Cookie-Namen:', cookieKeys);
       
+      // Ergänze die Cookie-Informationen in der Antwort
+      responseData.cookieStatus.cookieDetails = {
+        names: cookieKeys,
+        count: cookieKeys.length
+      };
+      
       // Erweiterte Suche nach Legacy-Cookies
       const legacyCookies = cookieKeys.filter(name => 
         name === 'trading.sid' || 
         name === 'trading_sid' || 
         name === 'connect.sid' ||
-        name.includes('_sid') && name !== 'tj_sid');
+        name === 'app.sid' ||
+        name === 'sid' ||
+        name === 'sessionId' ||
+        (name.includes('_sid') && name !== 'tj_sid') ||
+        (name.includes('.sid') && name !== 'tj_sid'));
       
       if (legacyCookies.length > 0) {
         console.log("Alte Legacy-Cookies gefunden:", legacyCookies);
+        
+        // Ergänze Legacy-Cookie-Info in der Antwort
+        responseData.cookieStatus.legacyCookies = {
+          present: true,
+          count: legacyCookies.length,
+          names: legacyCookies
+        };
         
         // Alte Cookies löschen - mit mehreren Methoden für maximale Kompatibilität
         legacyCookies.forEach(cookieName => {
@@ -221,12 +245,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         responseData.cookiesCleared = legacyCookies;
+      } else {
+        // Keine Legacy-Cookies gefunden
+        responseData.cookieStatus.legacyCookies = {
+          present: false,
+          count: 0
+        };
       }
       
       // Session-Cookie prüfen
       const sessionCookieName = 'tj_sid'; // Muss mit dem Namen in auth.ts übereinstimmen
-      console.log('Session-Cookie vorhanden:', !!cookies[sessionCookieName]);
-      responseData.hasSessionCookie = !!cookies[sessionCookieName];
+      const hasSessionCookie = !!cookies[sessionCookieName];
+      console.log('Session-Cookie vorhanden:', hasSessionCookie);
+      responseData.cookieStatus.sessionCookie = {
+        present: hasSessionCookie,
+        name: sessionCookieName,
+        value: hasSessionCookie ? 'vorhanden' : 'fehlt'
+      };
+      responseData.hasSessionCookie = hasSessionCookie;
+    } else {
+      // Keine Cookies vorhanden
+      responseData.cookieStatus.cookieDetails = {
+        names: [],
+        count: 0
+      };
+      responseData.cookieStatus.legacyCookies = {
+        present: false,
+        count: 0
+      };
+      responseData.cookieStatus.sessionCookie = {
+        present: false,
+        name: 'tj_sid',
+        value: 'fehlt'
+      };
     }
     
     console.log('Health-Check - Session ID:', req.session?.id || 'keine');
