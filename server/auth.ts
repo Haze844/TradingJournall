@@ -7,7 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
-import { pool } from "./db";
+import { pool } from "./db-selector";
 
 const PostgresSessionStore = connectPg(session);
 
