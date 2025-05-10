@@ -7,8 +7,8 @@ import cookieParser from "cookie-parser";
 import { setupUnifiedSession } from "./session-fix";
 import { setupAuth } from "./auth";
 
-// Wir verzichten komplett auf den statischen HTML-Fix
-// Stattdessen werden wir direkte Weiterleitungen auf Serverseite implementieren
+// Render-Fix: Direktes Routing zur Auth-Seite ohne Umwege
+// KEIN statisches HTML notwendig - wir implementieren direktes Routing
 console.log("Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite");
 
 const app = express();
@@ -55,8 +55,14 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 console.log("Verwende optimierte Passport-Auth mit angepassten Cookie-Einstellungen");
 setupAuth(app);
 
-// Serve static files from the public directory
+// Dient Assets aus dem public Verzeichnis, aber ohne index.html als Fallback
 app.use(express.static(path.join(process.cwd(), "public")));
+
+// Direktes Routing zur Auth-Seite für Root-Pfad
+app.get("/", (req, res) => {
+  console.log("Root-Pfad-Anfrage erkannt - Weiterleitung zu /auth");
+  return res.redirect("/auth");
+});
 
 app.use((req, res, next) => {
   const start = Date.now();
