@@ -34,13 +34,18 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   // Verbesserte Session-Konfiguration für maximale Kompatibilität in Replit-Umgebung
-  // Speziell angepasste Cookie-Einstellungen für Replit
+  // Speziell angepasste Cookie-Einstellungen für Replit - entscheidend für die Persistenz
   let cookieConfig: session.CookieOptions = {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
     httpOnly: true,
     path: '/',  // Wichtig für alle Pfade
   };
   
+  // Experimentell: Nur Basis-Cookie-Einstellungen ohne secure/sameSite für maximale Kompatibilität
+  console.log("Basis-Cookie-Konfiguration (reduziert) für Replit-Umgebung aktiviert");
+  
+  // Weitere Optionen für Tests auskommentiert
+  /*
   // Prüfe auf HTTPS/Replit-Umgebung für sichere Cookies
   const isSecure = process.env.NODE_ENV === "production" || !!process.env.REPL_SLUG;
   if (isSecure) {
@@ -60,6 +65,7 @@ export function setupAuth(app: Express) {
       sameSite: "lax",
     };
   }
+  */
   
   const sessionOptions: session.SessionOptions = {
     name: "tj_sid", // Kürzerer Name ohne Sonderzeichen

@@ -49,10 +49,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // API Health Check Endpunkt mit Session-Diagnose
+  // API Health Check Endpunkt mit erweiterter Session-Diagnose
   app.get("/api/health", (req: Request, res: Response) => {
-    console.log('Health-Check - Cookies:', req.headers.cookie ? 'vorhanden' : 'keine');
-    console.log('Health-Check - Session ID:', req.session.id || 'keine');
+    const cookieHeader = req.headers.cookie;
+    console.log('Health-Check - Cookies:', cookieHeader ? 'vorhanden' : 'keine');
+    
+    if (cookieHeader) {
+      // Detaillierte Cookie-Analyse
+      const cookies = parseCookies(cookieHeader);
+      console.log('Cookie-Namen:', Object.keys(cookies));
+      
+      // Session-Cookie prüfen
+      const sessionCookieName = 'tj_sid'; // Muss mit dem Namen in auth.ts übereinstimmen
+      console.log('Session-Cookie vorhanden:', !!cookies[sessionCookieName]);
+    }
+    
+    console.log('Health-Check - Session ID:', req.session?.id || 'keine');
+    console.log('Health-Check - Session Cookie:', req.session?.cookie ? 'vorhanden' : 'keine');
     console.log('Health-Check - Authenticated:', req.isAuthenticated());
     
     res.json({
@@ -60,9 +73,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || "development",
       authenticated: req.isAuthenticated(),
-      sessionId: req.session?.id?.substring(0, 10) || 'none'
+      sessionId: req.session?.id?.substring(0, 10) || 'none',
+      hasCookies: !!cookieHeader,
+      replit: !!process.env.REPL_SLUG,
+      userAgent: req.headers['user-agent']?.substring(0, 50) || 'none'
     });
   });
+  
+  // Helper-Funktion zum Parsen von Cookies
+  function parseCookies(cookieHeader: string): Record<string, string> {
+    const cookies: Record<string, string> = {};
+    cookieHeader.split(';').forEach(cookie => {
+      const parts = cookie.split('=');
+      const name = parts.shift()?.trim() || '';
+      const value = parts.join('=');
+      cookies[name] = decodeURIComponent(value);
+    });
+    return cookies;
+  }
   
   // HINZUGEFÜGT: Verbesserter Debug-Endpunkt für Render-Probleme
   app.get("/render-debug", (req: Request, res: Response) => {

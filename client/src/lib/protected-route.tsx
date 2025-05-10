@@ -19,13 +19,30 @@ export function ProtectedRoute({
   // Hole den aktuellen Authentifizierungsstatus mit lokalem Fallback
   const { user, isLoading } = useAuth();
   
-  // Debug-Info für geschützte Route
+  // Erweiterte Debug-Info für geschützte Route
   console.log("Protected Route Check:", { 
     path, 
     isLoading, 
     isAuthenticated: !!user,
-    username: user?.username || "none" 
+    username: user?.username || "none",
+    localStorageUser: localStorage.getItem('tradingjournal_user') ? 'vorhanden' : 'nicht vorhanden'
   });
+  
+  // API Health-Check durchführen, um Session-Status zu prüfen
+  useEffect(() => {
+    if (!isLoading) {
+      fetch('/api/health', { credentials: 'include' })
+        .then(res => res.json())
+        .then(data => {
+          console.log("Session-Status von /api/health:", {
+            authenticated: data.authenticated,
+            sessionId: data.sessionId,
+            hasCookies: data.hasCookies
+          });
+        })
+        .catch(err => console.error("Health-Check fehlgeschlagen:", err));
+    }
+  }, [isLoading, path]);
   const [renderTimeout, setRenderTimeout] = useState(false);
   const [location] = useLocation();
   
