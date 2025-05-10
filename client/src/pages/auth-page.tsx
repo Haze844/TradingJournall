@@ -231,9 +231,9 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
           variant: "default",
         });
         
-        // Standard-Navigation mit wouter verwenden
-        console.log("Login erfolgreich - navigiere zur Startseite");
-        navigate("/");
+        // Standard-Navigation mit wouter
+        console.log("Login erfolgreich - navigiere zur Startseite mit wouter");
+        window.location.href = "/";
       }
     });
   };
@@ -388,14 +388,9 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
           variant: "default",
         });
         
-        // Nach erfolgreicher Registrierung zur Hauptseite weiterleiten
-        // Verwende absoluten URL mit Origin für zuverlässiges Routing
-        const cleanUrl = window.location.origin + "/";
-        console.log("Registrierung erfolgreich - navigiere zu:", cleanUrl);
-        
-        setTimeout(() => {
-          window.location.href = cleanUrl;
-        }, 500); // Kurze Verzögerung, damit der Toast sichtbar ist
+        // Standard-Navigation 
+        console.log("Registrierung erfolgreich - navigiere zur Startseite");
+        window.location.href = "/";
       }
     });
   };

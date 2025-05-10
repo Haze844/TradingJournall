@@ -46,15 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
   
   // Lokaler State für zusätzliche Persistenz (als Fallback)
-  const [localUser, setLocalUser] = useState<SelectUser | null>(() => {
-    try {
-      const savedUser = localStorage.getItem('tradingjournal_user');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch (error) {
-      console.error("Fehler beim Lesen des lokalen Users:", error);
-      return null;
-    }
-  });
+  // Lokalen State für den Benutzer aus dem LocalStorage
+  const [localUser, setLocalUser] = useState<SelectUser | null>(null);
 
   // Haupt-Query für Server-seitige Authentifizierung
   const {
@@ -140,17 +133,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen zurück, ${userData.username}!`,
       });
       
-      // Direkte Navigation zur Hauptseite ohne Umwege
+      // Einfache Navigation zur Hauptseite
       console.log("Login erfolgreich:", userData);
       
-      // Absolute URL für die direkte Navigation
-      const cleanUrl = window.location.origin + "/";
-      console.log("Login erfolgreich - navigiere zu:", cleanUrl);
-      
-      // Statt wouter-Navigation verwenden wir direkte URL-Navigation
-      // Mit erzwungenem Reload, um die Session zu nutzen
-      console.log("RELOADING PAGE mit absolutem URL für korrekte Session");
-      window.location.replace(cleanUrl);
+      // Standard-Navigation mit wouter nutzen
+      console.log("Login erfolgreich - navigiere zur Hauptseite");
+      navigate("/");
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
@@ -201,21 +189,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen bei TradingJournal, ${userData.username}!`,
       });
       
-      // DIREKTE NAVIGATION zur Hauptseite - WICHTIG FÜR KORREKTE WEITERLEITUNG
-      // Gleicher Ansatz wie beim Login
-      console.log("Registrierung erfolgreich - navigiere zur Hauptseite über window.location");
+      // Einfache Navigation zur Hauptseite
+      console.log("Registrierung erfolgreich - navigiere zur Hauptseite");
       
-      // Clear any query params to avoid issues
-      const cleanUrl = window.location.origin + "/";
-      console.log("Navigiere zu:", cleanUrl, "mit vollständigem Seitenneuladen");
-      
-      // Kurze Verzögerung, damit Toast angezeigt werden kann
-      setTimeout(() => {
-        // ENTSCHEIDEND: Wir stellen sicher, dass wir einen absoluten URL verwenden
-        // Mit erzwungenem Reload, um die Session zu nutzen
-        console.log("RELOADING PAGE mit absolutem URL für korrekte Session");
-        window.location.replace(cleanUrl);
-      }, 1000);
+      // Standard-Navigation mit wouter nutzen
+      navigate("/");
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen
