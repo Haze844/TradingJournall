@@ -394,8 +394,12 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
         });
         
         // Nach erfolgreicher Registrierung zur Hauptseite weiterleiten
+        // Verwende absoluten URL mit Origin für zuverlässiges Routing
+        const cleanUrl = window.location.origin + "/";
+        console.log("Registrierung erfolgreich - navigiere zu:", cleanUrl);
+        
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.href = cleanUrl;
         }, 500); // Kurze Verzögerung, damit der Toast sichtbar ist
       }
     });
