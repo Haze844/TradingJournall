@@ -148,6 +148,7 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
     rememberMe: false
   });
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   // Beim Start gespeicherte Anmeldedaten abrufen, falls vorhanden
   useEffect(() => {
@@ -233,7 +234,7 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
         
         // Standard-Navigation mit wouter
         console.log("Login erfolgreich - navigiere zur Startseite mit wouter");
-        window.location.href = "/";
+        navigate("/");
       }
     });
   };
@@ -324,6 +325,7 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
   });
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -388,9 +390,9 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
           variant: "default",
         });
         
-        // Standard-Navigation 
+        // Standard-Navigation mit wouter
         console.log("Registrierung erfolgreich - navigiere zur Startseite");
-        window.location.href = "/";
+        navigate("/");
       }
     });
   };

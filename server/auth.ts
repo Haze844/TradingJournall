@@ -34,51 +34,37 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   // Verbesserte Session-Konfiguration für maximale Kompatibilität in Replit-Umgebung
-  // Speziell angepasste Cookie-Einstellungen für Replit - entscheidend für die Persistenz
+  // Standard Cookie-Einstellungen gemäß Neon/Render Dokumentation
   let cookieConfig: session.CookieOptions = {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
     httpOnly: true,
-    path: '/',  // Wichtig für alle Pfade
+    path: '/'
   };
   
-  // Experimentell: Nur Basis-Cookie-Einstellungen ohne secure/sameSite für maximale Kompatibilität
-  console.log("Basis-Cookie-Konfiguration (reduziert) für Replit-Umgebung aktiviert");
-  
-  // Weitere Optionen für Tests auskommentiert
-  /*
-  // Prüfe auf HTTPS/Replit-Umgebung für sichere Cookies
+  // Prüfen, ob wir in Produktion oder auf Replit sind
   const isSecure = process.env.NODE_ENV === "production" || !!process.env.REPL_SLUG;
   if (isSecure) {
-    // Für HTTPS/Replit: Cookie mit sameSite=none für Cross-Site-Anfragen
-    console.log("Sichere Cookie-Konfiguration für Replit-Umgebung aktiviert");
-    cookieConfig = {
-      ...cookieConfig,
-      secure: true,
-      sameSite: "none",
-    };
+    console.log("Produktions-/Replit-Umgebung erkannt - sichere Cookies aktiviert");
+    cookieConfig.secure = true;
   } else {
-    // Für lokale Entwicklung: Cookie mit sameSite=lax
-    console.log("Lokale Cookie-Konfiguration für Entwicklung aktiviert");
-    cookieConfig = {
-      ...cookieConfig,
-      secure: false,
-      sameSite: "lax",
-    };
+    console.log("Lokale Entwicklungsumgebung erkannt - standard Cookies");
   }
-  */
   
+  // Session-Store mit Neon Postgres aufsetzen
+  const sessionStore = new PostgresSessionStore({
+    pool, // Verwende den vorhandenen Pool mit Neon-DB-Verbindung
+    tableName: "sessions",
+    createTableIfMissing: true,
+    pruneSessionInterval: 60, // Prüfe alle 60s auf abgelaufene Sessions
+  });
+
+  // Standard-Session-Konfiguration gemäß Neon/Render Dokumentation
   const sessionOptions: session.SessionOptions = {
     name: "tj_sid", // Kürzerer Name ohne Sonderzeichen
     secret: process.env.SESSION_SECRET || "development-secret",
-    resave: true, // Erzwinge Session-Speicherung bei jeder Anfrage
-    saveUninitialized: true, // Speichere auch nicht initialisierte Sessions
-    rolling: true, // Setze Cookie bei jeder Anfrage zurück
-    store: new PostgresSessionStore({
-      pool,
-      tableName: "sessions",
-      createTableIfMissing: true,
-      pruneSessionInterval: 60, // Prüfe häufiger auf abgelaufene Sessions
-    }),
+    resave: false, // Standard-Wert laut Express-Session Docs
+    saveUninitialized: false, // Standard-Wert laut Express-Session Docs
+    store: sessionStore,
     cookie: cookieConfig
   };
 
