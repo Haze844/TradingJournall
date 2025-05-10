@@ -10,6 +10,7 @@ import NotFound from "./pages/not-found";
 import SimpleHome from "./pages/SimpleHome";
 import AuthPage from "./pages/auth-page";
 import ClientDiagnosticPage from "./pages/client-diagnostic";
+import DebugPage from "./pages/debug-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import PersonalCoach from "./components/PersonalCoach";
 import MacroEconomicCalendar from "./components/MacroEconomicCalendar";
@@ -162,6 +163,7 @@ function Router() {
       <Route path="/booklet" component={Booklet} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/diagnostic" component={ClientDiagnosticPage} />
+      <Route path="/debug" component={DebugPage} />
       <Route path="*" component={NotFound} />
     </Switch>
   );

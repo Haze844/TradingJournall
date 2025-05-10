@@ -6,18 +6,43 @@
 
 /**
  * Erkennt ob die Anwendung in einer Render-Umgebung läuft
- * Berücksichtigt sowohl Hostname-Erkennung als auch APP_CONFIG-Einstellungen
+ * Berücksichtigt mehrere Methoden für eine zuverlässige Erkennung
  */
 export function isRenderEnvironment(): boolean {
+  if (typeof window === 'undefined') return false;
+  
   // 1. Direkte Hostname-Erkennung
-  const isRenderHost = typeof window !== 'undefined' && 
-    window.location.hostname.includes('onrender.com');
+  const isRenderHost = window.location.hostname.includes('onrender.com');
   
   // 2. APP_CONFIG Erkennung - wenn explizit als Render konfiguriert
-  const isRenderConfig = typeof window !== 'undefined' && 
-    (window as any)?.APP_CONFIG?.isRender === true;
+  const isRenderConfig = (window as any)?.APP_CONFIG?.isRender === true;
   
-  return isRenderHost || isRenderConfig;
+  // 3. Manuell gesetzte localStorage-Erkennung (für Debug-Zwecke)
+  const isRenderManual = localStorage.getItem('debug_isRender') === 'true';
+  
+  // 4. Meta Tag Erkennung
+  const metaRender = document.querySelector('meta[name="render-environment"]');
+  const isRenderMeta = metaRender?.getAttribute('content') === 'true';
+  
+  // 5. Subdomain-basierte Heuristik für benutzerdefinierte Domains
+  const isRenderSubdomain = /^[a-z0-9\-]+\.onrender\.com$/.test(window.location.hostname);
+  
+  // Debug-Logging für Umgebungserkennung
+  try {
+    console.debug('[ENV-DETECTION] Render-Umgebung Erkennung:', {
+      isRenderHost,
+      isRenderConfig,
+      isRenderManual,
+      isRenderMeta,
+      isRenderSubdomain,
+      hostname: window.location.hostname,
+      result: isRenderHost || isRenderConfig || isRenderManual || isRenderMeta || isRenderSubdomain
+    });
+  } catch (e) {
+    // Ignoriere Fehler beim Logging
+  }
+  
+  return isRenderHost || isRenderConfig || isRenderManual || isRenderMeta || isRenderSubdomain;
 }
 
 /**
