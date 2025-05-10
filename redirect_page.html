@@ -2,64 +2,14 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="1;url=/auth">
-  <title>LvlUp Trading Journal - Weiterleitung</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-      background-color: #0c1222;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .redirect {
-      background-color: rgba(30, 41, 59, 0.8);
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(10px);
-      max-width: 500px;
-    }
-    h1 {
-      color: #3b82f6;
-      margin-bottom: 20px;
-    }
-    p {
-      margin-bottom: 15px;
-    }
-    a {
-      display: inline-block;
-      background-color: #3b82f6;
-      color: white;
-      text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      margin-top: 15px;
-      transition: background-color 0.3s;
-    }
-    a:hover {
-      background-color: #2563eb;
-    }
-  </style>
+  <title>Direktzugriff - Trading Journal</title>
+  <script>
+    // WICHTIG: Wir überspringen hier die Weiterleitung vollständig
+    // und behalten die aktuelle URL bei
+    console.log("Weiterleitungsseite deaktiviert - direkte Navigation");
+  </script>
 </head>
 <body>
-  <div class="redirect">
-    <h1>LvlUp Trading Journal</h1>
-    <p>Sie werden zur Login-Seite weitergeleitet...</p>
-    <p>Falls die automatische Weiterleitung nicht funktioniert:</p>
-    <a href="/auth">Hier klicken, um zum Login zu gelangen</a>
-  </div>
-  <script>
-    // Fallback, wenn meta refresh nicht funktioniert
-    setTimeout(function() {
-      window.location.href = '/auth';
-    }, 1500);
-  </script>
+  <p>Weiterleitungsseite deaktiviert.</p>
 </body>
 </html>
