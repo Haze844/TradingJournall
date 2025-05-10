@@ -48,7 +48,7 @@ export function setupAuth(app: Express) {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Tage
       httpOnly: true,
       sameSite: "lax",
-      secure: true,  // Auch in Entwicklungsumgebungen mit HTTPS verwenden (z.B. in Replit)
+      secure: process.env.NODE_ENV === "production" || process.env.REPL_ID ? true : false, // Secure in Production und auf Replit
     }
   };
 
@@ -181,8 +181,8 @@ export function setupAuth(app: Express) {
   app.get("/api/user", (req, res) => {
     console.log("Auth-Check - Session:", req.session.id, "Auth-Status:", req.isAuthenticated());
     
+    // FIX: Den Header-Check vereinfachen
     if (!req.isAuthenticated()) {
-      console.log("Nicht authentifiziert - Headers:", req.headers);
       return res.sendStatus(401);
     }
     

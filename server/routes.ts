@@ -17,30 +17,10 @@ function errorMessage(error: unknown): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Direkten Zugriff auf Root zur Auth-Seite umleiten
-  // KRITISCH: Verwende HTTP 303 für zuverlässige POST->GET Weiterleitungen
-  // KRITISCH: Verzögere die Weiterleitung um 500ms für Render & Safari-Browser
+  // Root-Zugriff erlauben
   app.get("/", (req: Request, res: Response) => {
-    console.log("Root-Route aufgerufen - leite zur Auth-Seite weiter");
-    
-    // Füge mehr Debug-Informationen hinzu
-    console.log("Weiterleitung-Details:", {
-      originalUrl: req.originalUrl,
-      query: req.query,
-      isAuthenticated: req.isAuthenticated(),
-      hasSession: !!req.session,
-      method: req.method
-    });
-    
-    // Kurze Verzögerung für zuverlässigere Browser-Weiterleitungen 
-    setTimeout(() => {
-      // Absolute URL für die Weiterleitung verwenden
-      const baseUrl = process.env.RENDER_EXTERNAL_URL || req.protocol + '://' + req.get('host');
-      const redirectUrl = baseUrl + "/auth";
-      
-      console.log("Weiterleitung zu:", redirectUrl);
-      res.redirect(303, redirectUrl);
-    }, 500);
+    console.log("Root-Route aufgerufen - isAuthenticated:", req.isAuthenticated());
+    // Keine Weiterleitung mehr - Root wird vom SPA-Router behandelt
   });
 
   // Spezielle Debug-Endpunkte für Routing/Auth-Diagnose
@@ -331,52 +311,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   function isAuthenticated(req: Request, res: Response, next: NextFunction) {
     console.log("isAuthenticated-Check - Session:", req.session?.id, "Auth-Status:", req.isAuthenticated(), "Path:", req.path);
     
+    // Standard-Authentifizierungsprüfung - keine Demo-Mode mehr
     if (req.isAuthenticated()) {
-      return next();
-    }
-    
-    // Demo-Mode: Für Entwicklung - nicht in Produktion verwenden
-    // Hardcoded User ID verwenden (Mo = 2)
-    const defaultUserId = 2;
-    
-    // GET-Anfragen behandeln
-    if (req.method === "GET") {
-      req.query.userId = String(defaultUserId);
-      console.log("GET Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
-      return next();
-    }
-    
-    // POST-Anfragen behandeln
-    if (req.method === "POST") {
-      if (req.body) {
-        if (Array.isArray(req.body)) {
-          // Array von Objekten (z.B. beim Bulk-Import)
-          req.body.forEach((item) => {
-            item.userId = defaultUserId;
-          });
-        } else {
-          // Einzelnes Objekt
-          req.body.userId = defaultUserId;
-        }
-        console.log("POST Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
-        return next();
-      }
-    }
-    
-    // PUT-Anfragen behandeln (besonders wichtig für Trade-Aktualisierungen)
-    if (req.method === "PUT") {
-      if (req.body) {
-        req.body.userId = defaultUserId;
-        console.log("PUT Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
-        console.log("PUT Request Body:", req.body);
-        return next();
-      }
-    }
-    
-    // DELETE-Anfragen für Trades behandeln
-    if (req.method === "DELETE" && req.path.startsWith("/api/trades/")) {
-      req.query.userId = String(defaultUserId);
-      console.log("DELETE Anfrage akzeptiert für nicht-authentifizierten Benutzer mit userId:", defaultUserId);
+      console.log("Authentifizierter Zugriff - User ID:", req.user.id);
       return next();
     }
     

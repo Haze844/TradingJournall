@@ -172,31 +172,8 @@ try {
 </body>
 </html>`;
 
-  // Liste der Seiten, für die wir Redirects erstellen wollen
-  const routesToRedirect = [
-    '/auth',
-    '/login', 
-    '/dashboard', 
-    '/trades', 
-    '/analysis',
-    '/settings',
-    '/coaching'
-  ];
-  
-  try {
-    routesToRedirect.forEach(route => {
-      const routeDir = path.join(publicDistDir, route);
-      if (!fs.existsSync(routeDir)) {
-        fs.mkdirSync(routeDir, { recursive: true });
-      }
-      
-      fs.writeFileSync(path.join(routeDir, 'index.html'), redirectHtmlContent);
-    });
-    
-    log(`Redirect-Seiten für ${routesToRedirect.length} Routen erstellt`);
-  } catch (e) {
-    error(`Fehler beim Erstellen der Redirect-Seiten: ${e.message}`);
-  }
+  // Keine Weiterleitungsseiten mehr erstellen
+  log('Keine Weiterleitungsseiten mehr - direkte Navigation zu SPA-Routen');
   
   // Erfolg!
   log('Render-Patch abgeschlossen');
