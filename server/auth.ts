@@ -34,8 +34,35 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   // Verbesserte Session-Konfiguration für maximale Kompatibilität in Replit-Umgebung
+  // Speziell angepasste Cookie-Einstellungen für Replit
+  let cookieConfig: session.CookieOptions = {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
+    httpOnly: true,
+    path: '/',  // Wichtig für alle Pfade
+  };
+  
+  // Prüfe auf HTTPS/Replit-Umgebung für sichere Cookies
+  const isSecure = process.env.NODE_ENV === "production" || !!process.env.REPL_SLUG;
+  if (isSecure) {
+    // Für HTTPS/Replit: Cookie mit sameSite=none für Cross-Site-Anfragen
+    console.log("Sichere Cookie-Konfiguration für Replit-Umgebung aktiviert");
+    cookieConfig = {
+      ...cookieConfig,
+      secure: true,
+      sameSite: "none",
+    };
+  } else {
+    // Für lokale Entwicklung: Cookie mit sameSite=lax
+    console.log("Lokale Cookie-Konfiguration für Entwicklung aktiviert");
+    cookieConfig = {
+      ...cookieConfig,
+      secure: false,
+      sameSite: "lax",
+    };
+  }
+  
   const sessionOptions: session.SessionOptions = {
-    name: "trading_sid", // Unterstriche statt Punkte (weniger Probleme mit Replit)
+    name: "tj_sid", // Kürzerer Name ohne Sonderzeichen
     secret: process.env.SESSION_SECRET || "development-secret",
     resave: true, // Erzwinge Session-Speicherung bei jeder Anfrage
     saveUninitialized: true, // Speichere auch nicht initialisierte Sessions
@@ -46,14 +73,7 @@ export function setupAuth(app: Express) {
       createTableIfMissing: true,
       pruneSessionInterval: 60, // Prüfe häufiger auf abgelaufene Sessions
     }),
-    cookie: {
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
-      httpOnly: true,
-      sameSite: "lax", // Alternative zu 'none' für bessere Kompatibilität
-      secure: false, // Temporär auf false für Debugging
-      path: '/', // Stelle sicher, dass der Cookie für alle Pfade gilt
-      domain: undefined, // Explizit undefiniert für automatische Domain-Erkennung
-    }
+    cookie: cookieConfig
   };
 
   // Trust Proxy für Replit

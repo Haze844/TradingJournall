@@ -64,7 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<SelectUser | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
-    // onSuccess-Handler ohne eigene onSuccess-Funktion (TS-Fehler)
+    // Verbesserte Einstellungen für konsistentere Authentifizierung
+    retry: 1,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    staleTime: 2 * 60 * 1000, // 2 Minuten
   });
   
   // Statt onSuccess im Query-Objekt verwenden wir useEffect
