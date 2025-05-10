@@ -4,7 +4,7 @@ services:
     env: node
     repo: https://github.com/Haze844/TradingJournall.git
     buildCommand: npm install --include=dev && npm run build
-    startCommand: node server/standalone-express.js
+    startCommand: node setup-db.js && node render-patch.cjs && node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,5 +13,11 @@ services:
       - key: SESSION_SECRET
         generateValue: true
     
-# Verbindung zur Neon Postgres-Datenbank erfolgt über die Render Dashboard-Einstellung
-# DATABASE_URL muss im Dashboard konfiguriert werden!
+# Neon Postgres-Datenbank: 
+# Wichtig! DATABASE_URL muss im Render Dashboard als Umgebungsvariable konfiguriert werden!
+# Zum Beispiel: postgresql://username:password@ep-xyz-123456.us-east-2.aws.neon.tech/dbname?sslmode=require
+#
+# Die folgenden Optimierungen wurden für Neon mit Render implementiert:
+# 1. WebSocket-Konfiguration für Neon in render-patch.cjs
+# 2. Cookie-Konfiguration mit secure: true und sameSite: 'none'
+# 3. Trust Proxy auf 1 gesetzt für sichere Cookies hinter Render-Proxy
