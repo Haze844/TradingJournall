@@ -53,7 +53,8 @@ export function setupUnifiedSession(app: Express) {
     path: '/',
     sameSite: 'lax',
     // Für Produktion und Render ist secure:true wichtig
-    secure: isRender || isProduction,
+    // Für Replit auch, da Replit HTTPS verwendet
+    secure: isRender || isProduction || isReplit,
   };
   
   // Domain-Einstellung für Render/Produktion

@@ -32,71 +32,12 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Umgebungsabhängige Konfiguration für optimale Kompatibilität
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isRender = process.env.RENDER || process.env.RENDER_EXTERNAL_URL;
-  const isReplit = process.env.REPL_ID || process.env.REPL_SLUG;
+  // Verwende die neue einheitliche Session-Konfiguration
+  // Die gesamte Session-Konfiguration wurde in session-fix.ts ausgelagert
+  // und wird von der Hauptanwendung direkt verwendet
   
-  // COOKIE-FIX: Vereinheitlichte und vereinfachte Cookie-Einstellungen für alle Umgebungen
-  // Dies ist der Schlüssel zur Behebung der Authentifizierungsprobleme
-  const cookieSettings: session.CookieOptions = {
-    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Tage für bessere Persistenz
-    httpOnly: true,
-    path: '/'
-  };
-  
-  // KRITISCH: Setze SameSite immer auf 'lax' - dies erlaubt Cookies bei Redirects über Top-Level-Navigation,
-  // während sie bei CORS-Anfragen blockiert werden. Diese Einstellung funktioniert konsistent über alle
-  // gängigen Browser und Plattformen, im Gegensatz zu 'none', das mit 'secure=true' und zusätzlicher
-  // CORS-Konfiguration verbunden werden muss.
-  cookieSettings.sameSite = 'lax';
-  
-  // Sichere Cookies nur für HTTPS-Umgebungen aktivieren - Replit nutzt HTTPS, daher sicher
-  if (isProduction || isRender || isReplit) {
-    cookieSettings.secure = true;
-  } else {
-    // Lokale Entwicklung ohne HTTPS - keine sicheren Cookies
-    cookieSettings.secure = false;
-  }
-  
-  console.log("Finale Cookie-Einstellungen:", cookieSettings);
-  
-  // KRITISCH: Replit-spezifische Anpassungen, die in der Praxis funktionieren
-  if (isReplit) {
-    console.log("Replit-spezifische Session-Konfiguration aktiviert");
-    // Beim Replit-Deployment ist es wichtig, dass wir die Session bei jedem Request erneuern
-    // und ohne komplexe SameSite-Regeln arbeiten
-  }
-  
-  // Verbesserte Session-Einstellungen mit optimierten Parametern speziell für Replit
-  const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "lvlup-trading-journal-secret-key",
-    // KRITISCH: Diese Einstellungen auf true zu setzen ist essentiell für konsistentes Session-Verhalten
-    resave: true,              // Session bei jedem Request speichern - kritisch für Replit
-    saveUninitialized: true,   // Auch nicht initialisierte Sessions speichern
-    store: storage.sessionStore,
-    rolling: true,             // Cookie-Timestamp bei jedem Request erneuern
-    name: 'app.sid',           // Konsistenter Cookie-Name
-    cookie: cookieSettings
-  };
-  
-  // Debug-Logging mit verbesserter Erkennung des Session-Store-Typs
-  const storeType = storage.sessionStore ? 
-    (storage.sessionStore.constructor.name.includes('Postgres') ? 'PostgreSQL' : 
-     storage.sessionStore.constructor.name.includes('Memory') ? 'Memory' : 
-     storage.sessionStore.constructor.name) : 
-    'KEINE';
-  
-  console.log('Session-Konfiguration initialisiert mit:', {
-    secret: sessionSettings.secret ? 'VORHANDEN' : 'FEHLT',
-    resave: sessionSettings.resave,
-    saveUninitialized: sessionSettings.saveUninitialized,
-    sessionStoreType: storeType,
-    cookieSettings: sessionSettings.cookie
-  });
-
-  app.set("trust proxy", 1);
-  app.use(session(sessionSettings));
+  // Die gesamte Session-Konfiguration wurde in die session-fix.ts Datei verschoben
+  // und wird dort zentral verwaltet
   app.use(passport.initialize());
   app.use(passport.session());
 

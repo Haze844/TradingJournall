@@ -25,6 +25,9 @@ console.log("Umgebung erkannt:", {
   nodeEnv: process.env.NODE_ENV 
 });
 
+// Session-Fix konfigurieren vor allen anderen Middleware
+const sessionConfig = setupUnifiedSession(app);
+
 // GRUNDLEGENDER FIX: Stark vereinfachte CORS-Konfiguration für alle Umgebungen
 // Erlaubt alle Anfragen, unabhängig vom Ursprung - kritisch für Replit
 app.use(cors({
