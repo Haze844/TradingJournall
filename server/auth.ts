@@ -9,6 +9,16 @@ import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db-selector";
 import { logger } from "./logger";
+import { Pool } from "pg";
+
+// Eigener Typ für connect-pg-simple Optionen, da die Bibliothek nicht alle Optionen exportiert
+interface PostgresSessionOptions {
+  pool: Pool;
+  tableName: string;
+  createTableIfMissing: boolean;
+  pruneSessionInterval?: number;
+  errorCallback?: (err: Error) => void;
+}
 
 const PostgresSessionStore = connectPg(session);
 
@@ -58,16 +68,26 @@ export function setupAuth(app: Express) {
   
   // Render-spezifische Konfiguration nach Neon Dokumentation
   if (isRender) {
-    console.log("Verwende optimierte Passport-Auth mit Render-spezifischen Cookie-Einstellungen");
+    logger.info("🍪 Render-optimierte Cookie-Konfiguration aktiviert", { 
+      cookieType: "render-optimized", 
+      secure: true, 
+      sameSite: "none"
+    });
+    
     cookieConfig = {
       ...cookieConfig,
       secure: true,        // Muss true sein in Render-Umgebung
       sameSite: 'none',    // Muss 'none' sein für Cross-Site in Render
+      domain: process.env.RENDER_EXTERNAL_HOSTNAME || undefined // Für Render-Subdomain
     };
   } 
   // Replit-spezifische Konfiguration
   else if (isReplit) {
-    console.log("Verwende optimierte Passport-Auth mit angepassten Cookie-Einstellungen");
+    logger.info("🍪 Replit-optimierte Cookie-Konfiguration aktiviert", { 
+      cookieType: "replit-optimized", 
+      sameSite: "lax" 
+    });
+    
     cookieConfig = {
       ...cookieConfig,
       sameSite: 'lax',     // 'lax' für bessere Browser-Kompatibilität in Replit
@@ -76,7 +96,12 @@ export function setupAuth(app: Express) {
   } 
   // Standard-Produktion
   else if (isProduction) {
-    console.log("Sichere Cookies aktiviert für Produktionsumgebung");
+    logger.info("🍪 Produktions-Cookie-Konfiguration aktiviert", { 
+      cookieType: "production", 
+      secure: true, 
+      sameSite: "lax" 
+    });
+    
     cookieConfig = {
       ...cookieConfig,
       secure: true,
@@ -85,13 +110,18 @@ export function setupAuth(app: Express) {
   } 
   // Lokale Entwicklung
   else {
-    console.log("Entwicklungsmodus - Standard-Cookies ohne 'secure'-Flag");
+    logger.info("🍪 Entwicklungs-Cookie-Konfiguration aktiviert", { 
+      cookieType: "development", 
+      secure: false, 
+      sameSite: "lax" 
+    });
+    
     cookieConfig.sameSite = 'lax';
   }
   
   // Session-Store mit Neon Postgres aufsetzen
   // Umgebungsspezifische Konfiguration
-  let sessionStoreConfig = {
+  let sessionStoreConfig: PostgresSessionOptions = {
     pool, // Verwende den vorhandenen Pool mit Neon-DB-Verbindung
     tableName: "sessions",
     createTableIfMissing: true
@@ -99,12 +129,12 @@ export function setupAuth(app: Express) {
   
   // Für Render spezifische Optimierungen
   if (isRender) {
-    console.log("Optimierter Session-Store für Render-Umgebung wird initialisiert");
+    logger.info("🔧 Render-optimierte Session-Konfiguration aktiviert");
     sessionStoreConfig = {
       ...sessionStoreConfig,
       pruneSessionInterval: 900, // Weniger häufig prüfen in Render (alle 15 Minuten)
-      errorCallback: (err) => {
-        console.error("Session-Store Fehler in Render:", err);
+      errorCallback: (err: Error) => {
+        logger.error("Session-Store Fehler in Render:", { error: err.message, stack: err.stack });
         if (global.renderLogs) {
           global.renderLogs.push(`[${new Date().toISOString()}] [SESSION-ERROR] ${err.message}`);
         }
@@ -113,7 +143,7 @@ export function setupAuth(app: Express) {
   } 
   // Für Replit spezifische Optimierungen
   else if (isReplit) {
-    console.log("Optimierter Session-Store für Replit-Umgebung wird initialisiert");
+    logger.info("🔧 Replit-optimierte Session-Konfiguration aktiviert");
     sessionStoreConfig = {
       ...sessionStoreConfig,
       pruneSessionInterval: 60, // Regelmäßig prüfen in Replit (jede Minute)
@@ -121,6 +151,7 @@ export function setupAuth(app: Express) {
   }
   // Standard-Konfiguration
   else {
+    logger.info("🔧 Standard Session-Konfiguration aktiviert");
     sessionStoreConfig = {
       ...sessionStoreConfig,
       pruneSessionInterval: 300, // Alle 5 Minuten in anderen Umgebungen

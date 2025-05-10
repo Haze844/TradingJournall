@@ -1,0 +1,80 @@
+2025-05-10T23:43:01.678Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:43:01.680Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:43:02.043Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:43:02.044Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:43:02.231Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:43:02.232Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:43:02.329Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:43:02.330Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:43:02.479Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.177.4",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-10T23:43:02.480Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
