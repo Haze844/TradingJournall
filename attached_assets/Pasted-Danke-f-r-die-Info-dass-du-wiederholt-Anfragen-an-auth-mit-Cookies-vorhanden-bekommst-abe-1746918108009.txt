@@ -1,0 +1,59 @@
+Danke für die Info – dass du wiederholt Anfragen an `/auth/` mit **Cookies vorhanden** bekommst, aber scheinbar **nichts passiert**, deutet stark auf eine **Endlosschleife** oder eine Weiterleitung hin, die immer wieder dieselbe Route ansteuert. Das passiert häufig bei Problemen mit:
+
+---
+
+## 🔍 Mögliche Ursache: **Login-Redirect-Loop**
+
+In Flask-basierten Login-Systemen passiert so etwas typischerweise, wenn der Benutzer nicht als eingeloggt erkannt wird und daher immer wieder auf `/auth/` umgeleitet wird, obwohl er schon dort ist.
+
+### Beispiel für ein typisches Szenario:
+
+```python
+@app.route('/auth/')
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))  # <- korrekt
+    return render_template('login.html')
+```
+
+Aber **wenn stattdessen** so etwas steht:
+
+```python
+@app.route('/auth/')
+def login():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))  # ⚠️ führt zurück zu sich selbst!
+```
+
+Dann entsteht eine Endlosschleife – `/auth/` will redirecten zu `/auth/`, weil `current_user` nicht erkannt wird – aber die Cookies sind trotzdem „vorhanden“, was du auch in deinen Logs siehst.
+
+---
+
+## ✅ Was du jetzt prüfen solltest:
+
+1. **Was passiert in deiner `/auth/`-Route?** Poste mir gerne den Code dieser Route.
+2. **Verwendest du `flask-login` oder ein eigenes Auth-System?**
+3. **Stimmen die Namen in deinen Redirects?** – z. B. nicht `redirect(url_for('login'))` in der Login-Route selbst!
+4. **Wird `current_user.is_authenticated` richtig erkannt?**
+5. **Sind deine Cookies domain-übergreifend gültig und sicher gesetzt?** (z. B. `secure=True`, `httponly=True`, etc.)
+
+---
+
+## 🔧 Debug-Tipp
+
+Füge zum Testen in deiner `auth`-Route ein `print(current_user)` oder ein Logging hinzu:
+
+```python
+from flask_login import current_user
+
+@app.route('/auth/')
+def login():
+    print(f"User: {current_user}, Authenticated: {current_user.is_authenticated}")
+    return render_template('login.html')
+```
+
+Dann siehst du im Render-Log, ob Flask den User überhaupt erkennt oder nicht.
+
+---
+
+Wenn du mir den Code deiner `/auth/`-Route oder `app.py` bzw. `routes.py` gibst, finde ich den Fehler ziemlich schnell. Möchtest du den hier posten?

@@ -35,6 +35,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserPassword(id: number, password: string): Promise<User | undefined>;
+  updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
 
   // Trade-Operationen
   getTrades(userId: number): Promise<Trade[]>;
@@ -318,6 +319,13 @@ export class MemStorage implements IStorage {
     const userIndex = this.users.findIndex((u) => u.id === id);
     if (userIndex === -1) return undefined;
     this.users[userIndex].password = password;
+    return this.users[userIndex];
+  }
+  
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    const userIndex = this.users.findIndex((u) => u.id === id);
+    if (userIndex === -1) return undefined;
+    this.users[userIndex] = { ...this.users[userIndex], ...userData };
     return this.users[userIndex];
   }
 
