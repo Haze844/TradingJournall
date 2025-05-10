@@ -133,52 +133,26 @@ try {
   // Umleitung für alle wichtigen HTML-Seiten erstellen
   // Keine Weiterleitungsseiten mehr
 
-  // Spezialisierte HTML-Dateien für den Client erstellen
-  log('Erstelle spezialisierte HTML-Dateien für Auth und SimpleHome');
+  // Keine spezialisierten HTML-Dateien für den Client erstellen - stattdessen Redirect
+  log('Verwende Redirect-Strategie statt spezialisierter HTML-Dateien');
   
-  // index.html in index-client.html umbenennen (falls sie existiert)
-  const indexHtmlPath = path.join(distDir, 'public', 'index.html');
+  // Versuche, existierende index-client.html zu entfernen, um Probleme zu vermeiden
   const indexClientPath = path.join(distDir, 'public', 'index-client.html');
-  
-  if (fs.existsSync(indexHtmlPath)) {
+  if (fs.existsSync(indexClientPath)) {
     try {
-      // Index-Inhalt lesen
-      const indexContent = fs.readFileSync(indexHtmlPath, 'utf8');
-      
-      // Für Client optimierte Version erstellen (für SimpleHome)
-      const clientContent = indexContent.replace(
-        /<title>.*?<\/title>/,
-        '<title>LvlUp Trading Journal - SimpleHome</title>'
-      );
-      
-      // Als index-client.html speichern für SimpleHome
-      fs.writeFileSync(indexClientPath, clientContent);
-      log('index-client.html für SimpleHome erstellt');
-      
-      // Original index.html entfernen
-      fs.unlinkSync(indexHtmlPath);
-      log('Original index.html entfernt - Express steuert jetzt die Weiterleitung');
+      fs.unlinkSync(indexClientPath);
+      log('Alte index-client.html entfernt - verwende Redirect-Strategie');
     } catch (err) {
-      error(`Fehler bei der HTML-Optimierung: ${err.message}`);
+      error(`Fehler beim Entfernen von index-client.html: ${err.message}`);
     }
+  }
+  
+  // Überprüfe, ob index.html existiert
+  const indexHtmlPath = path.join(distDir, 'public', 'index.html');
+  if (!fs.existsSync(indexHtmlPath)) {
+    log('index.html nicht gefunden, keine spezialisierten HTML-Dateien erforderlich mit Redirect-Strategie');
   } else {
-    log('index.html nicht gefunden, erstelle Standard-Version für Client');
-    const standardClientHtml = `<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LvlUp Trading Journal - SimpleHome</title>
-  <base href="/">
-  <script type="module" src="/src/main.tsx"></script>
-</head>
-<body>
-  <div id="root"></div>
-  <noscript>Sie benötigen JavaScript, um diese Anwendung zu nutzen.</noscript>
-</body>
-</html>`;
-    fs.writeFileSync(indexClientPath, standardClientHtml);
-    log('Standard index-client.html erstellt');
+    log('index.html gefunden, aber keine spezialisierten Versionen nötig mit Redirect-Strategie');
   }
   
   // 404.html entfernen falls vorhanden
@@ -251,10 +225,10 @@ try {
         // Bereits existierende Route ersetzen
         serverCode = serverCode.replace(rootRoutePattern, 
           'app.get("/", (req, res) => {\n' +
-          '  // Wenn der Benutzer authentifiziert ist, zeige direktes SimpleHome ohne Umwege\n' +
+          '  // Wenn der Benutzer authentifiziert ist, zu SimpleHome weiterleiten\n' +
           '  if (req.isAuthenticated()) {\n' +
-          '    console.log("Auth Benutzer an Root-Route erkannt, zeige direkt SimpleHome");\n' +
-          '    return res.sendFile(path.join(__dirname, "public", "index-client.html"));\n' +
+          '    console.log("Auth Benutzer an Root-Route erkannt, leite zu /SimpleHome weiter");\n' +
+          '    return res.redirect(302, "/SimpleHome");\n' +
           '  }\n' +
           '  // Nicht authentifiziert, weiterleiten zu /auth mit 303 Status (See Other)\n' +
           '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth mit 303");\n' +
@@ -267,10 +241,10 @@ try {
           expressSetupPattern,
           'app = express();\n\n// Intelligente Weiterleitung basierend auf Auth-Status\n' +
           'app.get("/", (req, res) => {\n' +
-          '  // Wenn der Benutzer authentifiziert ist, zeige direktes SimpleHome ohne Umwege\n' +
+          '  // Wenn der Benutzer authentifiziert ist, direkt zu SimpleHome weiterleiten\n' +
           '  if (req.isAuthenticated()) {\n' +
-          '    console.log("Auth Benutzer an Root-Route erkannt, zeige direkt SimpleHome");\n' +
-          '    return res.sendFile(path.join(__dirname, "public", "index-client.html"));\n' +
+          '    console.log("Auth Benutzer an Root-Route erkannt, leite zu /SimpleHome weiter");\n' +
+          '    return res.redirect(302, "/SimpleHome");\n' +
           '  }\n' +
           '  // Nicht authentifiziert, weiterleiten zu /auth mit 303 Status (See Other)\n' +
           '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth mit 303");\n' +
