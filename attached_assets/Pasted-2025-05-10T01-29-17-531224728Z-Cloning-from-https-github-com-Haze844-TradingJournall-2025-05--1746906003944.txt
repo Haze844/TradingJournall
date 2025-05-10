@@ -1,0 +1,96 @@
+2025-05-10T01:29:17.531224728Z ==> Cloning from https://github.com/Haze844/TradingJournall
+2025-05-10T01:29:18.103852876Z ==> Checking out commit a173bd89d37052e7fcf882bfd9bd2cad84ac2282 in branch main
+2025-05-10T01:29:19.039325086Z ==> Downloading cache...
+2025-05-10T01:29:37.895769988Z ==> Transferred 504MB in 8s. Extraction took 9s.
+2025-05-10T01:29:52.834109258Z ==> Using Node.js version 22.14.0 (default)
+2025-05-10T01:29:52.858660126Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-10T01:29:52.989784574Z ==> Using Bun version 1.1.0 (default)
+2025-05-10T01:29:52.989796634Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-10T01:29:53.036357603Z ==> Running build command 'npm install --include=dev; npm run build'...
+2025-05-10T01:29:54.424212773Z 
+2025-05-10T01:29:54.424239794Z up to date, audited 764 packages in 1s
+2025-05-10T01:29:54.424243614Z 
+2025-05-10T01:29:54.424252324Z 74 packages are looking for funding
+2025-05-10T01:29:54.424255104Z   run `npm fund` for details
+2025-05-10T01:29:54.452629341Z 
+2025-05-10T01:29:54.452658772Z 7 moderate severity vulnerabilities
+2025-05-10T01:29:54.452662082Z 
+2025-05-10T01:29:54.452665192Z To address issues that do not require attention, run:
+2025-05-10T01:29:54.452667742Z   npm audit fix
+2025-05-10T01:29:54.452669982Z 
+2025-05-10T01:29:54.452672672Z To address all issues (including breaking changes), run:
+2025-05-10T01:29:54.452675522Z   npm audit fix --force
+2025-05-10T01:29:54.452677702Z 
+2025-05-10T01:29:54.452680593Z Run `npm audit` for details.
+2025-05-10T01:29:54.59289127Z 
+2025-05-10T01:29:54.592903371Z > rest-express@1.0.0 build
+2025-05-10T01:29:54.592906421Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-10T01:29:54.592909411Z 
+2025-05-10T01:29:54.878370734Z vite v5.4.14 building for production...
+2025-05-10T01:29:54.938872805Z transforming...
+2025-05-10T01:29:55.178344323Z Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+2025-05-10T01:29:55.178361844Z   npx update-browserslist-db@latest
+2025-05-10T01:29:55.178364353Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-10T01:30:02.781008195Z ✓ 3403 modules transformed.
+2025-05-10T01:30:03.53353128Z rendering chunks...
+2025-05-10T01:30:03.549269194Z computing gzip size...
+2025-05-10T01:30:03.583328953Z ../dist/public/index.html                     2.54 kB │ gzip:   1.01 kB
+2025-05-10T01:30:03.583388685Z ../dist/public/assets/index-BVKA95oM.css    101.75 kB │ gzip:  16.75 kB
+2025-05-10T01:30:03.583438806Z ../dist/public/assets/index-CMHtH2-w.js   1,368.66 kB │ gzip: 367.94 kB
+2025-05-10T01:30:03.583664371Z 
+2025-05-10T01:30:03.583678661Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-10T01:30:03.583683622Z - Using dynamic import() to code-split the application
+2025-05-10T01:30:03.583688482Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-10T01:30:03.583692512Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-10T01:30:03.58402958Z ✓ built in 8.69s
+2025-05-10T01:30:03.679940092Z 
+2025-05-10T01:30:03.679961892Z   dist/index.js  175.8kb
+2025-05-10T01:30:03.679965052Z 
+2025-05-10T01:30:03.679967852Z ⚡ Done in 16ms
+2025-05-10T01:30:47.714686744Z ==> Uploading build...
+2025-05-10T01:30:59.314724699Z ==> Uploaded in 6.7s. Compression took 4.9s
+2025-05-10T01:30:59.804791582Z ==> Build successful 🎉
+2025-05-10T01:31:15.25606103Z ==> Deploying...
+2025-05-10T01:31:38.320860175Z ==> Running 'node setup-db.js && node render-patch.cjs && node dist/index.js'
+2025-05-10T01:31:39.142716112Z Datenbank erfolgreich eingerichtet
+2025-05-10T01:31:49.318152381Z [RENDER-PATCH] Render-Umgebung erkannt: JA
+2025-05-10T01:31:49.318374936Z [RENDER-PATCH] Starte Render-spezifische Anpassungen...
+2025-05-10T01:31:49.435639378Z [RENDER-PATCH] Client-Dist-Verzeichnis erstellt: /opt/render/project/src/dist/client
+2025-05-10T01:31:49.44190167Z [RENDER-PATCH] Static index.html wurde nach dist/public kopiert
+2025-05-10T01:31:49.442045923Z [RENDER-PATCH] Custom .htaccess für Render erstellt
+2025-05-10T01:31:49.442253627Z [RENDER-PATCH ERROR] client/index.html nicht gefunden
+2025-05-10T01:31:49.443494095Z [RENDER-PATCH] Redirect-Seiten für 7 Routen erstellt
+2025-05-10T01:31:49.443510326Z [RENDER-PATCH] Render-Patch abgeschlossen
+2025-05-10T01:32:01.219486361Z Datenbankverbindung mit Neon Serverless wird hergestellt...
+2025-05-10T01:32:01.221492027Z Datenbankverbindung erfolgreich initialisiert.
+2025-05-10T01:32:01.221727332Z Storage-Auswahl: DatabaseStorage (DATABASE_URL vorhanden)
+2025-05-10T01:32:01.22295208Z Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite
+2025-05-10T01:32:01.225399715Z Umgebung erkannt: {
+2025-05-10T01:32:01.225411015Z   isRender: true,
+2025-05-10T01:32:01.225415405Z   isReplit: false,
+2025-05-10T01:32:01.225419295Z   isNetlify: false,
+2025-05-10T01:32:01.225423545Z   isProduction: true,
+2025-05-10T01:32:01.225427985Z   nodeEnv: 'production'
+2025-05-10T01:32:01.225431976Z }
+2025-05-10T01:32:01.226149312Z Session-Fix wird angewendet...
+2025-05-10T01:32:01.226165342Z Verwende PostgreSQL Session-Store
+2025-05-10T01:32:01.226170532Z Render-Domain erkannt: trading-journal-fhwv.onrender.com
+2025-05-10T01:32:01.226174752Z Cookie-Domain gesetzt auf: trading-journal-fhwv.onrender.com
+2025-05-10T01:32:01.226178832Z Trust Proxy für Render aktiviert
+2025-05-10T01:32:01.226383287Z Finale Session-Konfiguration: {
+2025-05-10T01:32:01.226393547Z   name: 'trading.sid',
+2025-05-10T01:32:01.226398097Z   secret: 'VORHANDEN',
+2025-05-10T01:32:01.226401918Z   resave: false,
+2025-05-10T01:32:01.226405998Z   saveUninitialized: false,
+2025-05-10T01:32:01.226409848Z   storeType: 'PostgreSQL',
+2025-05-10T01:32:01.226413598Z   cookieSettings: {
+2025-05-10T01:32:01.226417188Z     maxAge: 604800000,
+2025-05-10T01:32:01.226420928Z     httpOnly: true,
+2025-05-10T01:32:01.226424528Z     path: '/',
+2025-05-10T01:32:01.226428068Z     sameSite: 'lax',
+2025-05-10T01:32:01.226431618Z     secure: true,
+2025-05-10T01:32:01.226435788Z     domain: 'trading-journal-fhwv.onrender.com'
+2025-05-10T01:32:01.226439478Z   }
+2025-05-10T01:32:01.226443128Z }
+2025-05-10T01:32:01.817222989Z 1:32:01 AM [express] serving on port 5000
+2025-05-10T01:32:05.997786533Z ==> Your service is live 🎉

@@ -1,13 +1,12 @@
 /**
- * Datenbank-Setup-Skript
+ * Datenbank-Setup-Skript (CommonJS Version für Render)
  * 
  * Dieses Skript richtet die Datenbank für das Trading Journal ein
  * und wird beim Deployment auf Render ausgeführt.
  */
 
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import ws from 'ws';
-import fs from 'fs';
+const { Pool, neonConfig } = require('@neondatabase/serverless');
+const ws = require('ws');
 
 // WebSocket-Konstruktor für Neon einrichten
 neonConfig.webSocketConstructor = ws;
