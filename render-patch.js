@@ -80,7 +80,7 @@ if (fs.existsSync(indexHtmlPath)) {
   }
 }
 
-// 2. Server-Patch: Root-Route zur Auth-Seite umleiten
+// 2. Server-Patch: Direkte Weiterleitung von Root zur Auth-Seite implementieren
 const serverCodePath = './dist/index.js';
 if (fs.existsSync(serverCodePath)) {
   log('Server-Code gefunden. Patche Express-Server...');
@@ -89,18 +89,15 @@ if (fs.existsSync(serverCodePath)) {
     let serverCode = fs.readFileSync(serverCodePath, 'utf8');
     
     // Nur patchen, wenn noch nicht gepatcht
-    if (!serverCode.includes('// Render-Express-Patch')) {
-      // Middleware für Render-spezifisches Routing
-      const middlewareCode = '\n// Render-Express-Patch\n' +
-        'const isRenderEnv = process.env.RENDER === "true" || !!process.env.RENDER_EXTERNAL_URL;\n' +
-        'if (isRenderEnv) {\n' +
-        '  console.log("Render-spezifisches Routing aktiviert");\n' +
-        '  // Root-Route mit statischer HTML-Seite\n' +
-        '  app.get("/", (req, res) => {\n' +
-        '    console.log("Root-Route: Sende statische HTML");\n' +
-        '    res.send(' + JSON.stringify(simpleHtml) + ');\n' +
-        '  });\n' +
-        '}\n';
+    if (!serverCode.includes('// Direkte Weiterleitung zur Auth-Seite')) {
+      // Middleware für direkte Weiterleitung zur Auth-Seite
+      const middlewareCode = '\n// Direkte Weiterleitung zur Auth-Seite\n' +
+        'console.log("Server konfiguriert für direkte Auth-Weiterleitung");\n' +
+        '// Root-Route direkt zur Auth-Seite umleiten\n' +
+        'app.get("/", (req, res) => {\n' +
+        '  console.log("Root-Route aufgerufen - leite zur Auth-Seite weiter");\n' +
+        '  res.redirect("/auth");\n' +
+        '});\n';
       
       // Finde eine geeignete Stelle zum Einfügen
       let position = serverCode.indexOf('app.use(express.static');
@@ -111,12 +108,12 @@ if (fs.existsSync(serverCodePath)) {
       if (position !== -1) {
         serverCode = serverCode.slice(0, position) + middlewareCode + serverCode.slice(position);
         fs.writeFileSync(serverCodePath, serverCode);
-        log('Express-Server erfolgreich gepatcht');
+        log('Express-Server erfolgreich gepatcht - direkte Weiterleitung implementiert');
       } else {
         log('Keine geeignete Stelle im Server-Code gefunden');
       }
     } else {
-      log('Server wurde bereits gepatcht');
+      log('Server wurde bereits für direkte Weiterleitung gepatcht');
     }
   } catch (err) {
     log('Fehler beim Patchen des Servers: ' + err.message);
