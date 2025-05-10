@@ -231,14 +231,9 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
           variant: "default",
         });
         
-        // Nach erfolgreicher Anmeldung zur Hauptseite weiterleiten
-        // Verwende absoluten URL mit Origin für zuverlässiges Routing
-        const cleanUrl = window.location.origin + "/";
-        console.log("Login erfolgreich - navigiere zu:", cleanUrl);
-        
-        setTimeout(() => {
-          window.location.href = cleanUrl;
-        }, 1000); // Längere Verzögerung für zuverlässige Navigation
+        // Standard-Navigation mit wouter verwenden
+        console.log("Login erfolgreich - navigiere zur Startseite");
+        navigate("/");
       }
     });
   };
