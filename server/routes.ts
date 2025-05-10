@@ -49,12 +49,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // API Health Check Endpunkt
+  // API Health Check Endpunkt mit Session-Diagnose
   app.get("/api/health", (req: Request, res: Response) => {
+    console.log('Health-Check - Cookies:', req.headers.cookie ? 'vorhanden' : 'keine');
+    console.log('Health-Check - Session ID:', req.session.id || 'keine');
+    console.log('Health-Check - Authenticated:', req.isAuthenticated());
+    
     res.json({
       status: "ok",
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || "development"
+      environment: process.env.NODE_ENV || "development",
+      authenticated: req.isAuthenticated(),
+      sessionId: req.session?.id?.substring(0, 10) || 'none'
     });
   });
   

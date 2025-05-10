@@ -35,10 +35,11 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   // Verbesserte Session-Konfiguration für maximale Kompatibilität in Replit-Umgebung
   const sessionOptions: session.SessionOptions = {
-    name: "trading.sid",
+    name: "trading_sid", // Unterstriche statt Punkte (weniger Probleme mit Replit)
     secret: process.env.SESSION_SECRET || "development-secret",
     resave: true, // Erzwinge Session-Speicherung bei jeder Anfrage
     saveUninitialized: true, // Speichere auch nicht initialisierte Sessions
+    rolling: true, // Setze Cookie bei jeder Anfrage zurück
     store: new PostgresSessionStore({
       pool,
       tableName: "sessions",
@@ -48,9 +49,10 @@ export function setupAuth(app: Express) {
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
       httpOnly: true,
-      sameSite: "none", // Wichtig für Cross-Site-Requests in Replit-Umgebungen
-      secure: true, // Immer auf secure setzen für HTTPS
+      sameSite: "lax", // Alternative zu 'none' für bessere Kompatibilität
+      secure: false, // Temporär auf false für Debugging
       path: '/', // Stelle sicher, dass der Cookie für alle Pfade gilt
+      domain: undefined, // Explizit undefiniert für automatische Domain-Erkennung
     }
   };
 
