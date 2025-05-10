@@ -17,6 +17,28 @@ export enum LogLevel {
   ERROR = 'ERROR'
 }
 
+// Log-Level aus Umgebungsvariable bestimmen
+const getConfiguredLogLevel = (): LogLevel => {
+  const envLogLevel = process.env.LOG_LEVEL?.toUpperCase();
+  if (envLogLevel && Object.values(LogLevel).includes(envLogLevel as LogLevel)) {
+    return envLogLevel as LogLevel;
+  }
+  // Standard: INFO in Produktion, DEBUG in Entwicklung
+  return process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG;
+};
+
+// Konfiguriertes Log-Level
+const CURRENT_LOG_LEVEL = getConfiguredLogLevel();
+console.log(`Log-Level konfiguriert: ${CURRENT_LOG_LEVEL}`);
+
+// Log-Level-Prioritäten für Filterung
+const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
+  [LogLevel.DEBUG]: 0,
+  [LogLevel.INFO]: 1,
+  [LogLevel.WARN]: 2,
+  [LogLevel.ERROR]: 3
+};
+
 // Log-Farben für Terminal-Ausgabe
 const colors = {
   reset: '\x1b[0m',
@@ -59,6 +81,11 @@ const LOG_FILE = path.join(LOG_DIR, `tradingjournal-${new Date().toISOString().s
  * @param meta Optionale Metadaten
  */
 export function log(level: LogLevel, message: string, meta?: any) {
+  // Prüfen, ob das Log-Level höher ist als das konfigurierte Level
+  if (LOG_LEVEL_PRIORITY[level] < LOG_LEVEL_PRIORITY[CURRENT_LOG_LEVEL]) {
+    return; // Nicht loggen, wenn Level zu niedrig
+  }
+
   const timestamp = new Date().toISOString();
   let coloredLevel = '';
   
