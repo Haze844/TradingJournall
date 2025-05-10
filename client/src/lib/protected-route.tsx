@@ -1,5 +1,5 @@
 import { useAuth } from "../hooks/use-auth";
-import { isRenderEnvironment } from "@/lib/env-detection";
+import { isRenderEnvironment, isReplitEnvironment } from "@/lib/env-detection";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
 import { useEffect, useState } from "react";
@@ -93,18 +93,19 @@ export function ProtectedRoute({
   if (!user) {
     console.log("Nicht authentifiziert, Weiterleitungen:", redirectCounter);
     
-    // Überprüfe zuerst, ob wir einen lokalen Benutzer haben und in der Render-Umgebung sind
+    // Überprüfe zuerst, ob wir einen lokalen Benutzer haben und in der Render/Replit-Umgebung sind
     const isRender = isRenderEnvironment();
+    const isReplit = isReplitEnvironment();
     const localUserString = localStorage.getItem('tradingjournal_user');
     
-    if (isRender && localUserString) {
-      // In Render-Umgebung mit lokalem Benutzer - versuche lokale Authentifizierung
+    if ((isRender || isReplit) && localUserString) {
+      // In Render/Replit-Umgebung mit lokalem Benutzer - versuche lokale Authentifizierung
       try {
         const localUser = JSON.parse(localUserString);
-        console.log("Lokaler Benutzer in Render-Umgebung gefunden:", localUser.username);
+        console.log(`Lokaler Benutzer in ${isReplit ? 'Replit' : 'Render'}-Umgebung gefunden:`, localUser.username);
         
-        // Für Render-Umgebung: Komponente direkt rendern mit lokalem Benutzer
-        console.log("Render-Umgebung: Verwende lokale Authentifizierung ohne Weiterleitung");
+        // Für Render/Replit-Umgebung: Komponente direkt rendern mit lokalem Benutzer
+        console.log(`${isReplit ? 'Replit' : 'Render'}-Umgebung: Verwende lokale Authentifizierung ohne Weiterleitung`);
         return <Route path={path} component={Component} />;
       } catch (e) {
         console.error("Fehler beim Verarbeiten des lokalen Benutzers:", e);
@@ -139,10 +140,12 @@ export function ProtectedRoute({
       localStorage.setItem("redirectAfterLogin", path);
     }
     
-    // Spezielle Behandlung für Render-Umgebung
-    if (isRender) {
-      console.log("Render-Umgebung: Verwende direkte window.location Navigation für maximale Stabilität");
-      window.location.href = "/auth";
+    // Spezielle Behandlung für Render/Replit-Umgebung
+    if (isRender || isReplit) {
+      console.log(`${isReplit ? 'Replit' : 'Render'}-Umgebung: Verwende direkte window.location Navigation für maximale Stabilität`);
+      // Normalisiere URL: Stelle sicher, dass wir nur '/auth' verwenden (ohne Slash am Ende)
+      const authPath = window.location.pathname.endsWith('/auth/') ? '/auth' : '/auth';
+      window.location.href = authPath;
       return <div></div>; // Leeres Div während Weiterleitung
     }
     

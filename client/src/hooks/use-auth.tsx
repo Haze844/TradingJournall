@@ -10,7 +10,7 @@ import { useToast } from "./use-toast";
 import { useLocation } from "wouter";
 
 // Import der zentralen Umgebungserkennung
-import { isRenderEnvironment } from '@/lib/env-detection';
+import { isRenderEnvironment, isReplitEnvironment } from '@/lib/env-detection';
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -357,14 +357,14 @@ export function useAuth() {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   
-  // Spezieller Fall für Render: Wenn kein API-Benutzer vorhanden ist, aber lokale Daten vorhanden,
+  // Spezieller Fall für Render/Replit: Wenn kein API-Benutzer vorhanden ist, aber lokale Daten vorhanden,
   // ein Hybrid-Objekt zurückgeben, das auch den lokalen Benutzer enthält
-  if (isRenderEnvironment() && !context.user) {
+  if ((isRenderEnvironment() || isReplitEnvironment()) && !context.user) {
     try {
       const storedUserString = localStorage.getItem('tradingjournal_user');
       if (storedUserString) {
         const localUser = JSON.parse(storedUserString);
-        console.log("Lokaler Benutzer für Render-Fallback geladen:", localUser.username);
+        console.log(`Lokaler Benutzer für ${isReplitEnvironment() ? 'Replit' : 'Render'}-Fallback geladen:`, localUser.username);
         
         // Als effektiver Benutzer zählt der lokale Benutzer, wenn kein API-Benutzer verfügbar
         return {
