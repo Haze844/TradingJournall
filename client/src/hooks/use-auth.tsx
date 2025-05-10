@@ -45,6 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
   
+  // Lokaler State für zusätzliche Persistenz (als Fallback)
+  const [localUser, setLocalUser] = useState<SelectUser | null>(() => {
+    try {
+      const savedUser = localStorage.getItem('tradingjournal_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (error) {
+      console.error("Fehler beim Lesen des lokalen Users:", error);
+      return null;
+    }
+  });
+
+  // Haupt-Query für Server-seitige Authentifizierung
   const {
     data: user,
     error,
@@ -52,7 +64,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<SelectUser | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    // onSuccess-Handler ohne eigene onSuccess-Funktion (TS-Fehler)
   });
+  
+  // Statt onSuccess im Query-Objekt verwenden wir useEffect
+  useEffect(() => {
+    if (user) {
+      console.log("API User abgerufen, speichere in localStorage:", user.username);
+      localStorage.setItem('tradingjournal_user', JSON.stringify(user));
+      setLocalUser(user);
+    }
+  }, [user]);
+  
+  // Beim Laden der Komponente prüfen, ob wir bereits einen gespeicherten User haben
+  useEffect(() => {
+    if (!user && !isLoading) {
+      // Lokalen Benutzer aus localStorage lesen
+      try {
+        const storedUser = localStorage.getItem('tradingjournal_user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser) as SelectUser;
+          console.log("Lokaler User aus localStorage verwendet:", parsedUser.username);
+          setLocalUser(parsedUser);
+        }
+      } catch (error) {
+        console.error("Fehler beim Lesen des lokalen Users:", error);
+      }
+    }
+  }, [isLoading, user]);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -78,6 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Handle user object inside wrapper if needed
       const userData = data.user || data;
       queryClient.setQueryData(["/api/user"], userData);
+      
+      // In localStorage speichern für Persistenz
+      localStorage.setItem('tradingjournal_user', JSON.stringify(userData));
+      setLocalUser(userData);
       
       // Detaillierte Logs für erfolgreiche Anmeldung
       console.log("Login erfolgreich, User-Daten aktualisiert:", {
@@ -242,10 +285,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Hybride Authentifizierung
+  const effectiveUser = user || localUser;
+
+  // Log für Debugging
+  useEffect(() => {
+    console.log('Auth Provider State:', {
+      apiUser: user ? user.username : null,
+      localUser: localUser ? localUser.username : null,
+      effectiveUser: effectiveUser ? effectiveUser.username : null
+    });
+  }, [user, localUser, effectiveUser]);
+
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
+        user: effectiveUser,
         isLoading,
         error,
         loginMutation,

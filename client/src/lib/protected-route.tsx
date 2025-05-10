@@ -16,7 +16,16 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
+  // Hole den aktuellen Authentifizierungsstatus mit lokalem Fallback
   const { user, isLoading } = useAuth();
+  
+  // Debug-Info für geschützte Route
+  console.log("Protected Route Check:", { 
+    path, 
+    isLoading, 
+    isAuthenticated: !!user,
+    username: user?.username || "none" 
+  });
   const [renderTimeout, setRenderTimeout] = useState(false);
   const [location] = useLocation();
   
