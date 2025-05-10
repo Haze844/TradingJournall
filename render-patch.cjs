@@ -68,20 +68,18 @@ try {
     log(`Public-Dist-Verzeichnis erstellt: ${publicDistDir}`);
   }
   
-  // Kopieren der statischen HTML-Fallback-Seite aus public nach dist/public
+  // KEINE statische HTML-Fallback-Seite kopieren, da wir direkte Weiterleitungen verwenden
+  log('Keine statische HTML-Seite wird kopiert - verwende stattdessen direktes Routing zu /auth');
+  
+  // Überprüfen und ggf. löschen vorhandener index.html-Dateien, um Weiterleitungsprobleme zu vermeiden
   try {
-    const sourceIndexHtml = path.join(publicDir, 'index.html');
     const destIndexHtml = path.join(publicDistDir, 'index.html');
-    
-    if (fs.existsSync(sourceIndexHtml)) {
-      const content = fs.readFileSync(sourceIndexHtml, 'utf8');
-      fs.writeFileSync(destIndexHtml, content);
-      log('Static index.html wurde nach dist/public kopiert');
-    } else {
-      error('Source index.html nicht gefunden in ' + sourceIndexHtml);
+    if (fs.existsSync(destIndexHtml)) {
+      fs.unlinkSync(destIndexHtml);
+      log('Existierende index.html in dist/public wurde entfernt, um Routing-Probleme zu vermeiden');
     }
   } catch (e) {
-    error(`Fehler beim Kopieren der index.html: ${e.message}`);
+    error(`Fehler beim Entfernen der index.html: ${e.message}`);
   }
   
   // Erstellen/Aktualisieren einer speziellen htaccess-Datei für Sonderfälle

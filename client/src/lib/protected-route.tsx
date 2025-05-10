@@ -1,4 +1,4 @@
-import { useAuth } from "../hooks/use-auth";
+import { useAuth, isRenderEnvironment } from "../hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route, useLocation } from "wouter";
 import { useEffect, useState } from "react";
@@ -92,6 +92,24 @@ export function ProtectedRoute({
   if (!user) {
     console.log("Nicht authentifiziert, Weiterleitungen:", redirectCounter);
     
+    // Überprüfe zuerst, ob wir einen lokalen Benutzer haben und in der Render-Umgebung sind
+    const isRender = isRenderEnvironment();
+    const localUserString = localStorage.getItem('tradingjournal_user');
+    
+    if (isRender && localUserString) {
+      // In Render-Umgebung mit lokalem Benutzer - versuche lokale Authentifizierung
+      try {
+        const localUser = JSON.parse(localUserString);
+        console.log("Lokaler Benutzer in Render-Umgebung gefunden:", localUser.username);
+        
+        // Für Render-Umgebung: Komponente direkt rendern mit lokalem Benutzer
+        console.log("Render-Umgebung: Verwende lokale Authentifizierung ohne Weiterleitung");
+        return <Route path={path} component={Component} />;
+      } catch (e) {
+        console.error("Fehler beim Verarbeiten des lokalen Benutzers:", e);
+      }
+    }
+    
     // Wenn wir die maximale Anzahl an Weiterleitungen erreicht haben, Fehlermeldung anzeigen
     if (redirectCounter >= MAX_REDIRECTS) {
       console.error("Maximale Anzahl an Weiterleitungen erreicht! Stoppe Weiterleitungsschleife.");
@@ -120,8 +138,14 @@ export function ProtectedRoute({
       localStorage.setItem("redirectAfterLogin", path);
     }
     
-    // Statt direkter window.location.href-Navigation verwende Wouter's Redirect
-    // Funktioniert besser mit der React-Architektur und verhindert harte Seiten-Reloads
+    // Spezielle Behandlung für Render-Umgebung
+    if (isRender) {
+      console.log("Render-Umgebung: Verwende direkte window.location Navigation für maximale Stabilität");
+      window.location.href = "/auth";
+      return <div></div>; // Leeres Div während Weiterleitung
+    }
+    
+    // Für andere Umgebungen: Normale wouter-Navigation verwenden
     return (
       <Route path={path}>
         <Redirect to="/auth" />

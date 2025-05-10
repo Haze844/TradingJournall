@@ -337,8 +337,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+  
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+  
+  // Spezieller Fall für Render: Wenn kein API-Benutzer vorhanden ist, aber lokale Daten vorhanden,
+  // ein Hybrid-Objekt zurückgeben, das auch den lokalen Benutzer enthält
+  if (isRenderEnvironment() && !context.user) {
+    try {
+      const storedUserString = localStorage.getItem('tradingjournal_user');
+      if (storedUserString) {
+        const localUser = JSON.parse(storedUserString);
+        console.log("Lokaler Benutzer für Render-Fallback geladen:", localUser.username);
+        
+        // Als effektiver Benutzer zählt der lokale Benutzer, wenn kein API-Benutzer verfügbar
+        return {
+          ...context,
+          localUser,
+          // Für ProtectedRoute: Wenn wir einen lokalen Benutzer haben, aber keinen API-Benutzer,
+          // verwenden wir den lokalen Benutzer als Fallback für die Authentifizierung
+          user: context.user || localUser
+        };
+      }
+    } catch (e) {
+      console.error("Fehler beim Laden des lokalen Benutzers:", e);
+    }
+  }
+  
   return context;
 }
