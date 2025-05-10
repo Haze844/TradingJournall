@@ -232,12 +232,21 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
           variant: "default",
         });
         
-        // ABSOLUT DIREKTE Navigation zu SimpleHome ohne Zwischenseite
-        console.log("Login erfolgreich - DIREKTE Weiterleitung zu SimpleHome ohne Umwege");
+        // Prüfen, ob ein spezifisches Weiterleitungsziel gespeichert ist
+        const savedRedirect = localStorage.getItem("redirectAfterLogin");
         
-        // Keine Weiterleitung zu Root, sondern sofort zu SimpleHome
-        // Dies vermeidet jegliche Zwischenseiten und Umwege
-        navigate("/SimpleHome");
+        // ABSOLUT DIREKTE Navigation zu SimpleHome ohne Zwischenseite
+        console.log("Login erfolgreich - DIREKTE Weiterleitung ohne Umwege", 
+                   savedRedirect ? `zu gespeichertem Ziel: ${savedRedirect}` : "zu SimpleHome");
+        
+        // Gespeichertes Ziel verwenden oder direkt zu SimpleHome
+        const redirectTarget = savedRedirect || "/SimpleHome";
+        
+        // Weiterleitungsinformation aus dem LocalStorage entfernen
+        localStorage.removeItem("redirectAfterLogin");
+        
+        // Direkte Navigation ohne Umwege oder Zwischenseiten
+        navigate(redirectTarget);
       }
     });
   };

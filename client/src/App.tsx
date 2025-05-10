@@ -125,18 +125,37 @@ function Router() {
   // Debug-Logging
   console.log("Aktuelle Router-Location:", location);
   
-  // KEIN Redirect mehr von der Root-Page - hauptseite wird durch ProtectedRoute geschützt
-  // Der Nutzer wird immer auf die entsprechende Seite geleitet
-  // WICHTIG: Entfernt um Weiterleitungsprobleme zu vermeiden
+  // ABSOLUT DIREKTE Navigation ohne Zwischenseiten für SimpleHome
+  // WICHTIG: Keine Umwege oder Zwischenseiten bei der Navigation
   if (location === "/") {
-    console.log("Root-Pfad erkannt, zeige direkt die geschützte Route an");
-    // Keine Weiterleitung mehr an dieser Stelle - überlasse das dem ProtectedRoute
+    console.log("Root-Pfad erkannt - prüfe für direkte Navigation zu SimpleHome");
+    
+    // Prüfen, ob Benutzer angemeldet ist (über lokalen Storage)
+    const localUser = localStorage.getItem('tradingjournal_user');
+    
+    if (localUser) {
+      console.log("Benutzer im LocalStorage gefunden, direkte Weiterleitung zu SimpleHome");
+      
+      // Direkte Weiterleitung zu SimpleHome ohne jegliche Zwischenseiten
+      // ABSOLUT DIREKTE NAVIGATION OHNE UMWEGE
+      localStorage.setItem("directNavigation", "true");
+      
+      // Direkte Weiterleitung ohne jegliche Zwischenseiten
+      // Verwende window.location für harten Redirect ohne Client-Routing
+      setTimeout(() => {
+        window.location.href = "/SimpleHome"; 
+      }, 50);
+    } else {
+      console.log("Kein Benutzer im LocalStorage - ProtectedRoute übernimmt Weiterleitung zur Auth-Seite");
+    }
   }
   
   // Standard-Router für alle anderen Pfade
   return (
     <Switch>
       <ProtectedRoute path="/" component={SimpleHome} />
+      {/* Direkte Route für SimpleHome ohne Umwege - absolute direkte Navigation */}
+      <ProtectedRoute path="/SimpleHome" component={SimpleHome} />
       <ProtectedRoute path="/coach" component={PersonalCoach} />
       <ProtectedRoute path="/calendar" component={MacroEconomicCalendar} />
       <ProtectedRoute path="/social" component={SocialTrading} />

@@ -115,10 +115,19 @@ export function ProtectedRoute({
     console.log("Verwende direkte window.location-Navigation zur Auth-Seite");
     
     // Bei Root-Route nicht mehr direkt zur Auth-Seite weiterleiten
-    // Stattdessen mit wouter's Redirect arbeiten, damit die Session erhalten bleibt
+    // ABSOLUT DIREKTE Navigation - keine Umwege beim Weiterleiten
     
-    // Zähler erhöhen und weiterleiten
+    // Zähler erhöhen und zur Auth-Seite weiterleiten
     redirectCounter++;
+    
+    // Für die SimpleHome-Route eine spezielle Behandlung
+    if (path === "/SimpleHome") {
+      console.log("Spezielle Weiterleitung für /SimpleHome zur Auth-Seite");
+      
+      // Speichern, dass der Benutzer zu SimpleHome will, für spätere direkte Weiterleitung
+      localStorage.setItem("redirectAfterLogin", "/SimpleHome");
+    }
+    
     return (
       <Route path={path}>
         <Redirect to="/auth" />
