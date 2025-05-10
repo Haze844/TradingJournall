@@ -82,12 +82,44 @@ export function setupAuth(app: Express) {
   }
   
   // Session-Store mit Neon Postgres aufsetzen
-  const sessionStore = new PostgresSessionStore({
+  // Umgebungsspezifische Konfiguration
+  let sessionStoreConfig = {
     pool, // Verwende den vorhandenen Pool mit Neon-DB-Verbindung
     tableName: "sessions",
-    createTableIfMissing: true,
-    pruneSessionInterval: 60, // Prüfe alle 60s auf abgelaufene Sessions
-  });
+    createTableIfMissing: true
+  };
+  
+  // Für Render spezifische Optimierungen
+  if (isRender) {
+    console.log("Optimierter Session-Store für Render-Umgebung wird initialisiert");
+    sessionStoreConfig = {
+      ...sessionStoreConfig,
+      pruneSessionInterval: 900, // Weniger häufig prüfen in Render (alle 15 Minuten)
+      errorCallback: (err) => {
+        console.error("Session-Store Fehler in Render:", err);
+        if (global.renderLogs) {
+          global.renderLogs.push(`[${new Date().toISOString()}] [SESSION-ERROR] ${err.message}`);
+        }
+      }
+    };
+  } 
+  // Für Replit spezifische Optimierungen
+  else if (isReplit) {
+    console.log("Optimierter Session-Store für Replit-Umgebung wird initialisiert");
+    sessionStoreConfig = {
+      ...sessionStoreConfig,
+      pruneSessionInterval: 60, // Regelmäßig prüfen in Replit (jede Minute)
+    };
+  }
+  // Standard-Konfiguration
+  else {
+    sessionStoreConfig = {
+      ...sessionStoreConfig,
+      pruneSessionInterval: 300, // Alle 5 Minuten in anderen Umgebungen
+    };
+  }
+  
+  const sessionStore = new PostgresSessionStore(sessionStoreConfig);
 
   // Optimierte Session-Konfiguration basierend auf dem Deployment-Typ
   let sessionOptions: session.SessionOptions = {

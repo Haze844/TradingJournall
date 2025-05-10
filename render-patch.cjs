@@ -353,6 +353,26 @@ try {
     global.renderLogs = [];
   }
   
+  // Überprüfen und sicherstellen, dass SESSION_SECRET gesetzt ist
+  // Diese Variable ist entscheidend für die sichere Cookie-Verschlüsselung
+  if (!process.env.SESSION_SECRET) {
+    log('WARNUNG: SESSION_SECRET nicht gesetzt. Generiere einen sicheren Zufallswert...');
+    
+    // Sichere, lange Zeichenkette für SESSION_SECRET generieren
+    const crypto = require('crypto');
+    const randomSecret = crypto.randomBytes(32).toString('hex');
+    process.env.SESSION_SECRET = randomSecret;
+    
+    log('SESSION_SECRET wurde für diese Sitzung generiert');
+    
+    // WARNUNG: Bei jedem Neustart des Servers wird ein neuer Schlüssel generiert,
+    // was alle bestehenden Sessions ungültig macht. In der Produktion sollte
+    // diese Variable in den Render Environment Variables gesetzt sein!
+    log('WICHTIG: Bitte setze SESSION_SECRET als Render Environment Variable!');
+  } else {
+    log('SESSION_SECRET ist korrekt konfiguriert');
+  }
+  
   // Detaillierte Umgebungsinformationen loggen
   const envInfo = {
     isRender: process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL,
@@ -360,6 +380,7 @@ try {
     isProduction: process.env.NODE_ENV === 'production',
     nodeEnv: process.env.NODE_ENV,
     sessionSecret: process.env.SESSION_SECRET ? 'vorhanden' : 'nicht vorhanden',
+    sessionSecretLength: process.env.SESSION_SECRET ? process.env.SESSION_SECRET.length : 0,
     databaseUrl: process.env.DATABASE_URL ? 'vorhanden' : 'nicht vorhanden',
     port: process.env.PORT || '3000 (Standard)'
   };
