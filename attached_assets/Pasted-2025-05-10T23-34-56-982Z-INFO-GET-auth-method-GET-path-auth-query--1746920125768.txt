@@ -1,0 +1,95 @@
+2025-05-10T23:34:56.982Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.195.2",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [
+    "app.sid",
+    "trading.sid"
+  ],
+  "authenticated": false
+}
+2025-05-10T23:34:56.985Z [INFO] ⬅️ GET / 304 in 3ms
+{
+  "statusCode": 304,
+  "responseTime": 3,
+  "userAuth": false
+}
+2025-05-10T23:34:57.077Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.195.2",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [
+    "app.sid",
+    "trading.sid"
+  ],
+  "authenticated": false
+}
+2025-05-10T23:34:57.079Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:34:57.172Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.195.2",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [
+    "app.sid",
+    "trading.sid"
+  ],
+  "authenticated": false
+}
+2025-05-10T23:34:57.173Z [INFO] ⬅️ GET / 304 in 1ms
+{
+  "statusCode": 304,
+  "responseTime": 1,
+  "userAuth": false
+}
+2025-05-10T23:34:57.264Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.195.2",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [
+    "app.sid",
+    "trading.sid"
+  ],
+  "authenticated": false
+}
+2025-05-10T23:34:57.266Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}
+2025-05-10T23:34:57.343Z [INFO] ➡️ GET /auth/
+{
+  "method": "GET",
+  "path": "/auth/",
+  "query": {},
+  "ip": "10.201.195.2",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+  "cookies": [
+    "app.sid",
+    "trading.sid"
+  ],
+  "authenticated": false
+}
+2025-05-10T23:34:57.345Z [INFO] ⬅️ GET / 304 in 2ms
+{
+  "statusCode": 304,
+  "responseTime": 2,
+  "userAuth": false
+}

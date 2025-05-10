@@ -196,6 +196,30 @@ export function setupAuth(app: Express) {
   app.use(session(sessionOptions));
   app.use(passport.initialize());
   app.use(passport.session());
+  
+  // Legacy-Cookie-Bereinigung
+  app.use((req, res, next) => {
+    const legacyCookies = ['app.sid', 'trading.sid', 'connect.sid', 'sid', 'sessionId'];
+    
+    // Überprüfen, ob Legacy-Cookies vorhanden sind
+    const hasLegacyCookies = legacyCookies.some(name => req.cookies && req.cookies[name]);
+    
+    if (hasLegacyCookies) {
+      logger.debug('🍪 Legacy-Cookies gefunden, bereinige...', {
+        cookieNames: Object.keys(req.cookies || {})
+      });
+      
+      // Alle Legacy-Cookies löschen
+      legacyCookies.forEach(name => {
+        if (req.cookies && req.cookies[name]) {
+          res.clearCookie(name, { path: '/' });
+          logger.debug(`🗑️ Legacy-Cookie gelöscht: ${name}`);
+        }
+      });
+    }
+    
+    next();
+  });
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
