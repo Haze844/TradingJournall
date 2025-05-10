@@ -1,0 +1,117 @@
+2025-05-10T20:43:16.811407363Z ==> Cloning from https://github.com/Haze844/TradingJournall
+2025-05-10T20:43:17.373818372Z ==> Checking out commit b1f9f82ab5e9a5e027accb9b9da99261badbfce1 in branch main
+2025-05-10T20:43:18.348307407Z ==> Downloading cache...
+2025-05-10T20:43:45.923573329Z ==> Transferred 505MB in 9s. Extraction took 17s.
+2025-05-10T20:44:04.452698389Z ==> Using Node.js version 22.14.0 (default)
+2025-05-10T20:44:04.481166804Z ==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+2025-05-10T20:44:04.628057784Z ==> Using Bun version 1.1.0 (default)
+2025-05-10T20:44:04.628074865Z ==> Docs on specifying a bun version: https://render.com/docs/bun-version
+2025-05-10T20:44:04.685182738Z ==> Running build command 'npm install --include=dev; npm run build'...
+2025-05-10T20:44:06.340293942Z 
+2025-05-10T20:44:06.340325763Z up to date, audited 798 packages in 2s
+2025-05-10T20:44:06.340339143Z 
+2025-05-10T20:44:06.340344433Z 77 packages are looking for funding
+2025-05-10T20:44:06.340349703Z   run `npm fund` for details
+2025-05-10T20:44:06.370823071Z 
+2025-05-10T20:44:06.370849971Z 7 moderate severity vulnerabilities
+2025-05-10T20:44:06.370854062Z 
+2025-05-10T20:44:06.370858342Z To address issues that do not require attention, run:
+2025-05-10T20:44:06.370861662Z   npm audit fix
+2025-05-10T20:44:06.370864792Z 
+2025-05-10T20:44:06.370868112Z To address all issues (including breaking changes), run:
+2025-05-10T20:44:06.370871922Z   npm audit fix --force
+2025-05-10T20:44:06.370875072Z 
+2025-05-10T20:44:06.370878972Z Run `npm audit` for details.
+2025-05-10T20:44:06.524781232Z 
+2025-05-10T20:44:06.524803652Z > rest-express@1.0.0 build
+2025-05-10T20:44:06.524807912Z > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-05-10T20:44:06.524811892Z 
+2025-05-10T20:44:06.866966382Z vite v5.4.14 building for production...
+2025-05-10T20:44:06.939178306Z transforming...
+2025-05-10T20:44:07.194295126Z Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+2025-05-10T20:44:07.194319817Z   npx update-browserslist-db@latest
+2025-05-10T20:44:07.194323857Z   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-05-10T20:44:14.890354543Z ✓ 3403 modules transformed.
+2025-05-10T20:44:15.676015435Z rendering chunks...
+2025-05-10T20:44:15.697209945Z computing gzip size...
+2025-05-10T20:44:15.734102478Z ../dist/public/index.html                     2.54 kB │ gzip:   1.01 kB
+2025-05-10T20:44:15.734260642Z ../dist/public/assets/index-CyRmp4SV.css    101.20 kB │ gzip:  16.72 kB
+2025-05-10T20:44:15.734325133Z ../dist/public/assets/index-DPCU9pSg.js   1,369.50 kB │ gzip: 368.32 kB
+2025-05-10T20:44:15.734532918Z 
+2025-05-10T20:44:15.734543308Z (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-05-10T20:44:15.734548628Z - Using dynamic import() to code-split the application
+2025-05-10T20:44:15.734554008Z - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-05-10T20:44:15.734558328Z - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-05-10T20:44:15.734927266Z ✓ built in 8.85s
+2025-05-10T20:44:15.953125502Z 
+2025-05-10T20:44:15.953145732Z   dist/index.js  171.1kb
+2025-05-10T20:44:15.953149122Z 
+2025-05-10T20:44:15.953151952Z ⚡ Done in 64ms
+2025-05-10T20:44:36.601515101Z ==> Uploading build...
+2025-05-10T20:44:47.269335567Z ==> Uploaded in 6.0s. Compression took 4.6s
+2025-05-10T20:44:47.315658111Z ==> Build successful 🎉
+2025-05-10T20:45:05.029543798Z ==> Deploying...
+2025-05-10T20:45:25.109847211Z ==> Running 'node setup-db.js && node render-patch.cjs && node dist/index.js'
+2025-05-10T20:45:26.415109705Z Datenbank erfolgreich eingerichtet
+2025-05-10T20:45:26.61438563Z [RENDER-PATCH] Render-Umgebung erkannt: JA
+2025-05-10T20:45:26.616158813Z [RENDER-PATCH] Starte Render-spezifische Anpassungen...
+2025-05-10T20:45:26.676903262Z [RENDER-PATCH] Client-Dist-Verzeichnis erstellt: /opt/render/project/src/dist/client
+2025-05-10T20:45:26.685688357Z [RENDER-PATCH] Static index.html wurde nach dist/public kopiert
+2025-05-10T20:45:26.685704767Z [RENDER-PATCH] Custom .htaccess für Render erstellt
+2025-05-10T20:45:26.685720137Z [RENDER-PATCH ERROR] client/index.html nicht gefunden
+2025-05-10T20:45:26.702637854Z [RENDER-PATCH] Keine Weiterleitungsseiten mehr - direkte Navigation zu SPA-Routen
+2025-05-10T20:45:26.702910989Z [RENDER-PATCH] db.js nicht gefunden - keine Neon-Optimierung möglich
+2025-05-10T20:45:26.703794196Z [RENDER-PATCH] Optimiere Cookie-Einstellungen für Render-Umgebung gemäß Neon Dokumentation
+2025-05-10T20:45:26.704565421Z [RENDER-PATCH] Cookie-Konfiguration nicht gefunden
+2025-05-10T20:45:26.72639638Z [RENDER-PATCH] Session-Konfiguration für Render optimiert
+2025-05-10T20:45:26.72641299Z [RENDER-PATCH] Render-Patch abgeschlossen
+2025-05-10T20:45:38.003027918Z Datenbankverbindung mit Neon Serverless wird hergestellt...
+2025-05-10T20:45:38.004837672Z Datenbankverbindung erfolgreich initialisiert.
+2025-05-10T20:45:38.005042916Z Storage-Auswahl: DatabaseStorage (DATABASE_URL vorhanden)
+2025-05-10T20:45:38.005957003Z Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite
+2025-05-10T20:45:38.008127744Z Umgebung erkannt: {
+2025-05-10T20:45:38.008138324Z   isRender: true,
+2025-05-10T20:45:38.008143054Z   isReplit: false,
+2025-05-10T20:45:38.008147524Z   isNetlify: false,
+2025-05-10T20:45:38.008151544Z   isProduction: true,
+2025-05-10T20:45:38.008155334Z   nodeEnv: 'production'
+2025-05-10T20:45:38.008159394Z }
+2025-05-10T20:45:38.009414288Z Verwende optimierte Passport-Auth mit angepassten Cookie-Einstellungen
+2025-05-10T20:45:38.009699693Z Produktions-/Replit-Umgebung erkannt - sichere Cookies aktiviert
+2025-05-10T20:45:38.013009335Z Produktions-/Replit-Umgebung erkannt - sichere Cookies aktiviert
+2025-05-10T20:45:38.415365417Z 8:45:38 PM [express] serving on port 5000
+2025-05-10T20:45:38.944420123Z Request an: /
+2025-05-10T20:45:38.944438323Z Cookies: keine
+2025-05-10T20:45:45.863793782Z ==> Your service is live 🎉
+2025-05-10T20:45:47.598857086Z Request an: /
+2025-05-10T20:45:47.598876286Z Cookies: keine
+2025-05-10T20:45:55.352225832Z Request an: /
+2025-05-10T20:45:55.379291009Z Cookies: vorhanden
+2025-05-10T20:45:55.570088316Z Request an: /favicon.ico
+2025-05-10T20:45:55.57032992Z Cookies: vorhanden
+2025-05-10T20:45:57.072035188Z Request an: /auth/
+2025-05-10T20:45:57.072075849Z Cookies: vorhanden
+2025-05-10T20:45:58.677406629Z Request an: /auth/
+2025-05-10T20:45:58.677426039Z Cookies: vorhanden
+2025-05-10T20:45:58.77830271Z Request an: /favicon.ico
+2025-05-10T20:45:58.77832214Z Cookies: vorhanden
+2025-05-10T20:45:59.907971984Z Request an: /auth/
+2025-05-10T20:45:59.907989414Z Cookies: vorhanden
+2025-05-10T20:46:00.041315354Z Request an: /favicon.ico
+2025-05-10T20:46:00.04216705Z Cookies: vorhanden
+2025-05-10T20:46:01.562253422Z Request an: /auth/
+2025-05-10T20:46:01.562272462Z Cookies: vorhanden
+2025-05-10T20:46:01.702189445Z Request an: /favicon.ico
+2025-05-10T20:46:01.702218896Z Cookies: vorhanden
+2025-05-10T20:46:14.448678635Z Request an: /
+2025-05-10T20:46:14.448700095Z Cookies: vorhanden
+2025-05-10T20:46:14.674375421Z Request an: /favicon.ico
+2025-05-10T20:46:14.674414802Z Cookies: vorhanden
+2025-05-10T20:46:16.17805268Z Request an: /auth/
+2025-05-10T20:46:16.17807088Z Cookies: vorhanden
+2025-05-10T20:46:16.327616694Z Request an: /favicon.ico
+2025-05-10T20:46:16.327631774Z Cookies: vorhanden
+2025-05-10T20:46:17.780412308Z Request an: /auth/
+2025-05-10T20:46:17.780441158Z Cookies: vorhanden
+2025-05-10T20:46:17.864214961Z Request an: /favicon.ico
+2025-05-10T20:46:17.864241751Z Cookies: vorhanden

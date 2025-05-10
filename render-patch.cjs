@@ -113,67 +113,39 @@ try {
   }
   
   // Umleitung für alle wichtigen HTML-Seiten erstellen
-  const redirectHtmlContent = `<!DOCTYPE html>
+  // Keine Weiterleitungsseiten mehr
+
+  // Alle Weiterleitungen entfernen und direkt die Auth-Seite anzeigen
+  log('Entferne alle Weiterleitungsseiten und konfiguriere direkte Navigation zu /auth');
+  
+  // Wir patchen die index.html für direkte Auth-Navigation
+  const indexHtmlPath = path.join(distDir, 'public', 'index.html');
+  if (fs.existsSync(indexHtmlPath)) {
+    const directAuthHtml = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LvlUp Trading Journal - Weiterleitung</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: linear-gradient(135deg, #121212 0%, #1e1e30 100%);
-      color: white;
-    }
-    .container {
-      text-align: center;
-      max-width: 500px;
-      padding: 40px;
-      border-radius: 16px;
-      background: rgba(30, 30, 48, 0.7);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    }
-    h1 { color: #4f9eff; }
-    .loader {
-      display: inline-block;
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(79, 158, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #4f9eff;
-      animation: spin 1s ease-in-out infinite;
-      margin-bottom: 20px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  </style>
+  <base href="/">
+  <title>LvlUp Trading Journal</title>
   <script>
-    window.onload = function() {
-      setTimeout(function() {
-        const targetRoute = window.location.pathname;
-        window.location.href = targetRoute;
-      }, 1000);
-    };
+    // Direkte Weiterleitung zu /auth ohne Umwege
+    window.location.replace('/auth');
   </script>
 </head>
 <body>
-  <div class="container">
-    <div class="loader"></div>
-    <h1>LvlUp Trading Journal</h1>
-    <p>Weiterleitung läuft...</p>
-  </div>
+  <noscript>JavaScript wird benötigt, um diese Anwendung zu nutzen.</noscript>
 </body>
 </html>`;
-
-  // Keine Weiterleitungsseiten mehr erstellen
-  log('Keine Weiterleitungsseiten mehr - direkte Navigation zu SPA-Routen');
+    
+    fs.writeFileSync(indexHtmlPath, directAuthHtml);
+    log('index.html wurde mit direkter Auth-Weiterleitung überschrieben');
+    
+    // Auch 404.html für Client-Routing erstellen
+    const notFoundPath = path.join(path.dirname(indexHtmlPath), '404.html');
+    fs.writeFileSync(notFoundPath, directAuthHtml);
+    log('404.html mit direkter Auth-Weiterleitung erstellt');
+  }
 
   // Neon-Datenbank-Konfiguration und Session-Konfiguration für Render anpassen
   try {
@@ -219,6 +191,15 @@ try {
     const serverFile = path.join(distDir, 'index.js');
     if (fs.existsSync(serverFile)) {
       let serverCode = fs.readFileSync(serverFile, 'utf8');
+      
+      // Zuerst Root-Redirect-Route entfernen, falls vorhanden
+      const rootRedirectPattern = /app\.get\(['"]\/['"]\s*,\s*.*\s*=>.*res\.redirect.*\);\s*/gs;
+      if (serverCode.match(rootRedirectPattern)) {
+        serverCode = serverCode.replace(rootRedirectPattern, '// Keine Root-Weiterleitung mehr\n');
+        log('Root-Redirect-Route wurde entfernt');
+      } else {
+        log('Keine Root-Redirect-Route gefunden');
+      }
       
       // Cookie-Konfiguration anpassen
       log('Optimiere Cookie-Einstellungen für Render-Umgebung gemäß Neon Dokumentation');
