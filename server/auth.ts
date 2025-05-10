@@ -396,29 +396,68 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/logout", (req, res, next) => {
-    console.log("Logout-Anfrage erhalten. Session-ID:", req.session.id);
+    const sessionId = req.session.id;
+    const userId = req.user ? (req.user as any).id : null;
+    const username = req.user ? (req.user as any).username : null;
+    
+    logger.info("🚪 Logout-Anfrage erhalten", { 
+      sessionId: sessionId,
+      userId: userId,
+      username: username,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      isAuthenticated: req.isAuthenticated()
+    });
     
     // Optimierter Logout-Prozess mit vollständiger Session-Zerstörung
     req.logout((logoutErr: any) => {
       if (logoutErr) {
-        console.error("Fehler beim Logout:", logoutErr);
+        logger.error("❌ Fehler beim Logout-Prozess", {
+          sessionId: sessionId,
+          userId: userId,
+          username: username,
+          error: logoutErr instanceof Error ? logoutErr.message : String(logoutErr),
+          stack: logoutErr instanceof Error ? logoutErr.stack : undefined
+        });
         return next(logoutErr);
       }
+      
+      logger.debug("👤 Passport-Logout erfolgreich", { 
+        sessionId: sessionId,
+        userId: userId,
+        username: username
+      });
       
       // Komplett Session zerstören
       req.session.destroy((destroyErr: any) => {
         if (destroyErr) {
-          console.error("Fehler beim Zerstören der Session:", destroyErr);
+          logger.error("❌ Fehler beim Zerstören der Session", {
+            sessionId: sessionId,
+            userId: userId,
+            username: username,
+            error: destroyErr instanceof Error ? destroyErr.message : String(destroyErr),
+            stack: destroyErr instanceof Error ? destroyErr.stack : undefined
+          });
           // Trotzdem 200 senden, da der Client die Daten lokal löscht
           return res.sendStatus(200);
         }
         
-        console.log("Logout erfolgreich, Session vollständig zerstört");
+        logger.info("✅ Logout erfolgreich", {
+          sessionId: sessionId,
+          userId: userId, 
+          username: username,
+          ip: req.ip,
+          timestamp: new Date().toISOString()
+        });
         
         // Zusätzlich Legacy-Cookies löschen
         res.clearCookie("trading.sid");
         res.clearCookie("trading_sid");
         // Das aktuelle Cookie "tj_sid" wird automatisch von Express Session entfernt
+        
+        logger.debug("🍪 Legacy-Cookies gelöscht", {
+          cookies: ["trading.sid", "trading_sid"]
+        });
         
         res.sendStatus(200);
       });
@@ -426,28 +465,69 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    console.log("Auth-Check - Session:", req.session.id, "Auth-Status:", req.isAuthenticated());
+    logger.debug("🔍 Auth-Check durchgeführt", { 
+      sessionId: req.session.id, 
+      isAuthenticated: req.isAuthenticated(),
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      path: req.path,
+      query: req.query
+    });
     
     // FIX: Den Header-Check vereinfachen
     if (!req.isAuthenticated()) {
+      logger.debug("👤 Benutzer nicht authentifiziert", { 
+        sessionId: req.session.id,
+        ip: req.ip,
+        path: req.path,
+        cookies: req.headers.cookie ? 'vorhanden' : 'fehlen'
+      });
       return res.sendStatus(401);
     }
     
     // Don't send password to the client
     const { password, ...userWithoutPassword } = req.user as SelectUser;
-    console.log("Authentifiziert als Benutzer:", userWithoutPassword.username);
+    
+    logger.debug("✅ Benutzer authentifiziert", {
+      userId: userWithoutPassword.id,
+      username: userWithoutPassword.username,
+      sessionId: req.session.id
+    });
+    
     res.json(userWithoutPassword);
   });
   
   // Endpunkt für Passwortänderung
   app.post("/api/change-password", async (req, res) => {
     if (!req.isAuthenticated()) {
+      logger.warn("❌ Passwortänderung verweigert: Nicht authentifiziert", {
+        ip: req.ip,
+        sessionId: req.session.id,
+        path: req.path
+      });
       return res.status(401).json({ message: "Nicht authentifiziert" });
     }
+    
+    const userId = (req.user as any).id;
+    const username = (req.user as any).username;
+    
+    logger.info("🔑 Passwortänderung angefordert", {
+      userId: userId,
+      username: username,
+      ip: req.ip,
+      sessionId: req.session.id
+    });
     
     const { currentPassword, newPassword } = req.body;
     
     if (!currentPassword || !newPassword) {
+      logger.warn("⚠️ Passwortänderung fehlgeschlagen: Unvollständige Daten", {
+        userId: userId,
+        username: username,
+        ip: req.ip,
+        hasCurrentPassword: !!currentPassword,
+        hasNewPassword: !!newPassword
+      });
       return res.status(400).json({ message: "Aktuelles Passwort und neues Passwort sind erforderlich" });
     }
     
@@ -455,13 +535,24 @@ export function setupAuth(app: Express) {
       const user = await storage.getUser(req.user!.id);
       
       if (!user) {
+        logger.error("❌ Passwortänderung fehlgeschlagen: Benutzer nicht gefunden", {
+          userId: userId,
+          username: username,
+          ip: req.ip
+        });
         return res.status(404).json({ message: "Benutzer nicht gefunden" });
       }
       
       // Überprüfen des aktuellen Passworts
       // Im Dev-Modus einfacher String-Vergleich, in Produktion comparePasswords verwenden
       // if (!(await comparePasswords(currentPassword, user.password))) {
-      if (currentPassword !== user.password) {
+      const isCurrentPasswordValid = currentPassword === user.password;
+      if (!isCurrentPasswordValid) {
+        logger.warn("⚠️ Passwortänderung fehlgeschlagen: Falsches aktuelles Passwort", {
+          userId: userId,
+          username: username,
+          ip: req.ip
+        });
         return res.status(400).json({ message: "Aktuelles Passwort ist falsch" });
       }
       
@@ -472,9 +563,21 @@ export function setupAuth(app: Express) {
         password: newPassword
       });
       
+      logger.info("✅ Passwort erfolgreich geändert", {
+        userId: userId,
+        username: username,
+        ip: req.ip,
+        timestamp: new Date().toISOString()
+      });
+      
       return res.status(200).json({ message: "Passwort erfolgreich geändert" });
     } catch (error) {
-      console.error("Fehler beim Ändern des Passworts:", error);
+      logger.error("❌ Fehler bei Passwortänderung", {
+        userId: userId,
+        username: username,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       return res.status(500).json({ message: "Fehler beim Ändern des Passworts" });
     }
   });
