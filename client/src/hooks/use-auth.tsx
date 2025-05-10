@@ -9,6 +9,11 @@ import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "./use-toast";
 import { useLocation } from "wouter";
 
+// Neue Hilfsfunktion, um festzustellen, ob wir uns in der Render-Umgebung befinden
+export const isRenderEnvironment = () => {
+  return window.location.hostname.includes('onrender.com');
+};
+
 type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
@@ -29,19 +34,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [, navigate] = useLocation();
   const [isDebugMode, setDebugMode] = useState(false);
   
-  // Debug-Status für Netlify-Deployment aktivieren
+  // Speziellen Modus für Render aktivieren
   useEffect(() => {
+    const isOnRender = isRenderEnvironment();
     const isNetlify = window.location.hostname.includes('netlify');
+    
     if (isNetlify) {
       setDebugMode(true);
       console.log("Debug-Modus für Netlify aktiviert");
       
-      // Ab hier können wir bei Bedarf für Netlify spezifischen Code ausführen
-      // Netlify-API-Health Check manuell durchführen
+      // Netlify-spezifische API-Prüfung
       fetch('/.netlify/functions/api/debug')
         .then(res => res.json())
         .then(data => console.log("Netlify API Debug:", data))
         .catch(err => console.error("Netlify API Debug Fehler:", err));
+    }
+    
+    if (isOnRender) {
+      setDebugMode(true);
+      console.log("Render-Umgebung erkannt - Aktiviere speziellen Auth-Modus");
+      
+      // Prüfen, ob wir in einer Redirect-Schleife stecken
+      const pathName = window.location.pathname;
+      const redirectCount = parseInt(sessionStorage.getItem('render_redirect_count') || '0');
+      
+      if (pathName === '/auth' && redirectCount > 3) {
+        console.warn("Mögliche Redirect-Schleife in Render erkannt. Versuche lokale Authentifizierung.");
+        
+        // Versuche, einen gespeicherten lokalen Benutzer zu laden
+        try {
+          const storedUser = localStorage.getItem('tradingjournal_user');
+          if (storedUser) {
+            console.log("Lokaler Benutzer gefunden, versuche direkte Navigation zu SimpleHome");
+            window.location.href = "/SimpleHome";
+            return;
+          }
+        } catch (e) {
+          console.error("Fehler beim Überprüfen des lokalen Speichers:", e);
+        }
+      }
+      
+      // Zähler für Redirects erhöhen
+      if (pathName === '/auth') {
+        sessionStorage.setItem('render_redirect_count', (redirectCount + 1).toString());
+      }
     }
   }, []);
   

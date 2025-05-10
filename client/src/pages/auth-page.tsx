@@ -28,7 +28,29 @@ export default function AuthPage() {
     
     if (isNetlify || isRender) {
       console.log("Deployment-Umgebung erkannt in Auth-Page:", { isNetlify, isRender });
-      console.log("WICHTIG: Keine automatischen Weiterleitungen in dieser Umgebung!");
+      
+      // In Render-Umgebung besonders vorsichtig mit Weiterleitungen sein
+      if (isRender) {
+        console.log("Render-spezifisches Verhalten für Auth-Seite aktiviert");
+        
+        // Prüfen auf lokalen Benutzer, auch ohne API-Benutzer
+        try {
+          const storedUserData = localStorage.getItem('tradingjournal_user');
+          
+          if (storedUserData && !user && !isLoading) {
+            // Wir haben lokale Daten, aber keinen API-Benutzer
+            const parsedUser = JSON.parse(storedUserData);
+            console.log("Lokaler Benutzer in Render-Umgebung gefunden:", parsedUser.username);
+            
+            // Direkte manuelle Navigation (ohne wouter), um Probleme zu vermeiden
+            console.log("Verwende direkte window.location Weiterleitung für stabile Navigation in Render");
+            window.location.href = "/SimpleHome"; 
+            return;
+          }
+        } catch (e) {
+          console.error("Fehler beim Überprüfen lokaler Benutzerdaten:", e);
+        }
+      }
     }
 
     // Debug-Log für Authentifizierungsstatus
@@ -45,9 +67,15 @@ export default function AuthPage() {
       localStorage.removeItem("redirectAfterLogin");
       
       // Kurze Verzögerung für stabilere Navigation
-      setTimeout(() => {
-        navigate(redirectTarget);
-      }, 100);
+      if (isRender) {
+        // In Render direkte Navigation verwenden für maximale Stabilität
+        window.location.href = redirectTarget;
+      } else {
+        // Für andere Umgebungen normale wouter-Navigation verwenden
+        setTimeout(() => {
+          navigate(redirectTarget);
+        }, 100);
+      }
     } else if (!isLoading) {
       console.log("Nicht eingeloggt - zeige Login-Formular");
     }
@@ -237,6 +265,18 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
       onSuccess: (data: any) => {
         console.log("Login erfolgreich:", data);
         
+        // Benutzer im localStorage speichern für Render-Umgebung
+        try {
+          localStorage.setItem('tradingjournal_user', JSON.stringify({
+            id: data.id,
+            username: data.username,
+            timestamp: new Date().toISOString()
+          }));
+          console.log("Benutzer im localStorage gespeichert für Render-Fallback-Mechanismus");
+        } catch (e) {
+          console.error("Fehler beim Speichern im localStorage:", e);
+        }
+        
         toast({
           title: "Login erfolgreich",
           description: `Willkommen zurück, ${data.username}!`,
@@ -256,8 +296,17 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
         // Weiterleitungsinformation aus dem LocalStorage entfernen
         localStorage.removeItem("redirectAfterLogin");
         
-        // Direkte Navigation ohne Umwege oder Zwischenseiten
-        navigate(redirectTarget);
+        // Spezielle Behandlung für Render-Umgebung
+        const isRender = window.location.hostname.includes('onrender.com');
+        
+        if (isRender) {
+          console.log("Render-Umgebung: Verwende direkte window.location Navigation für maximale Stabilität");
+          // Hardcoded Navigations-Fix für Render-Umgebung
+          window.location.href = redirectTarget;
+        } else {
+          // Für andere Umgebungen normale wouter-Navigation verwenden
+          navigate(redirectTarget);
+        }
       }
     });
   };
@@ -407,15 +456,42 @@ function RegisterForm({ registerMutation }: { registerMutation: any }) {
       onSuccess: (data: any) => {
         console.log("Registrierung erfolgreich:", data);
         
+        // Benutzer im localStorage speichern für Render-Umgebung
+        try {
+          localStorage.setItem('tradingjournal_user', JSON.stringify({
+            id: data.id,
+            username: data.username,
+            timestamp: new Date().toISOString()
+          }));
+          console.log("Benutzer im localStorage gespeichert für Render-Fallback-Mechanismus");
+        } catch (e) {
+          console.error("Fehler beim Speichern im localStorage:", e);
+        }
+        
         toast({
           title: "Konto erstellt",
           description: `Willkommen bei TradingJournal, ${data.username}!`,
           variant: "default",
         });
         
-        // Standard-Navigation mit wouter
-        console.log("Registrierung erfolgreich - navigiere zur Startseite");
-        navigate("/");
+        // Prüfen, ob ein spezifisches Weiterleitungsziel gespeichert ist
+        const savedRedirect = localStorage.getItem("redirectAfterLogin");
+        const redirectTarget = savedRedirect || "/SimpleHome";
+        
+        // Weiterleitungsinformation aus dem LocalStorage entfernen
+        localStorage.removeItem("redirectAfterLogin");
+        
+        // Spezielle Behandlung für Render-Umgebung
+        const isRender = window.location.hostname.includes('onrender.com');
+        
+        if (isRender) {
+          console.log("Render-Umgebung: Verwende direkte window.location Navigation für maximale Stabilität");
+          // Hardcoded Navigations-Fix für Render-Umgebung
+          window.location.href = redirectTarget;
+        } else {
+          // Für andere Umgebungen normale wouter-Navigation verwenden
+          navigate(redirectTarget);
+        }
       }
     });
   };
