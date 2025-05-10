@@ -1,8 +1,14 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { setupAuth } from "./auth-simple";
 import { registerRoutes } from "./routes";
+
+// ES Module __dirname Äquivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Server-Konfiguration
 const app = express();

@@ -92,20 +92,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen zurück, ${userData.username}!`,
       });
       
-      // DIREKTE NAVIGATION zur Hauptseite - WICHTIG FÜR KORREKTE WEITERLEITUNG
-      // Wir verwenden window.location für einen vollständigen Reload und Navigation
-      // Das ist die ENTSCHEIDENDE Lösung, die das Problem mit der statischen HTML-Weiterleitung behebt
-      console.log("Login erfolgreich - navigiere zur Hauptseite über window.location");
+      // Einfache Navigation zur Hauptseite
+      console.log("Login erfolgreich - navigiere zur Hauptseite");
       
-      // Clear any query params to avoid issues
-      const cleanUrl = window.location.origin + "/";
-      console.log("Navigiere zu:", cleanUrl, "mit vollständigem Seitenneuladen");
-      
-      // Kurze Verzögerung, damit Toast angezeigt werden kann
-      setTimeout(() => {
-        // ENTSCHEIDEND: Wir stellen sicher, dass wir einen absoluten URL verwenden
-        window.location.href = cleanUrl;
-      }, 1000);
+      // Verwende die normale Navigation ohne Workarounds
+      navigate("/");
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen

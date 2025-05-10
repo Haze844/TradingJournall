@@ -7,6 +7,7 @@ import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 
 const PostgresSessionStore = connectPg(session);
 
@@ -32,12 +33,30 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Verwende die neue einheitliche Session-Konfiguration
-  // Die gesamte Session-Konfiguration wurde in session-fix.ts ausgelagert
-  // und wird von der Hauptanwendung direkt verwendet
+  // Einfache, direkte Session-Konfiguration (keine komplexen Workarounds)
+  const sessionOptions: session.SessionOptions = {
+    name: "trading.sid",
+    secret: process.env.SESSION_SECRET || "development-secret",
+    resave: false,
+    saveUninitialized: false,
+    store: new PostgresSessionStore({
+      pool,
+      tableName: "sessions",
+      createTableIfMissing: true
+    }),
+    cookie: {
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Tage
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,  // Auch in Entwicklungsumgebungen mit HTTPS verwenden (z.B. in Replit)
+    }
+  };
+
+  // Trust Proxy für Replit
+  app.set("trust proxy", 1);
   
-  // Die gesamte Session-Konfiguration wurde in die session-fix.ts Datei verschoben
-  // und wird dort zentral verwaltet
+  // Session-Middleware anwenden
+  app.use(session(sessionOptions));
   app.use(passport.initialize());
   app.use(passport.session());
 
