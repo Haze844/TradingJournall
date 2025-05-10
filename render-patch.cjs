@@ -174,6 +174,9 @@ try {
     }
   }
 
+  // Auth-Routen-Handler optimieren für direkte SimpleHome-Verbindung
+  log('Optimiere Auth-Routen für direkte SimpleHome-Verbindung');
+  
   // Neon-Datenbank-Konfiguration und Session-Konfiguration für Render anpassen
   try {
     // Zunächst Datenbankverbindung für Neon optimieren
@@ -235,9 +238,9 @@ try {
           '    console.log("Auth Benutzer an Root-Route erkannt, zeige direkt SimpleHome");\n' +
           '    return res.sendFile(path.join(__dirname, "public", "index-client.html"));\n' +
           '  }\n' +
-          '  // Nicht authentifiziert, weiterleiten zu /auth\n' +
-          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth");\n' +
-          '  res.redirect("/auth");\n' +
+          '  // Nicht authentifiziert, weiterleiten zu /auth mit 303 Status (See Other)\n' +
+          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth mit 303");\n' +
+          '  res.redirect(303, "/auth");\n' +
           '});');
         log('Existierende Root-Route durch intelligente Auth/SimpleHome-Weiterleitung ersetzt');
       } else if (serverCode.match(expressSetupPattern)) {
@@ -251,9 +254,9 @@ try {
           '    console.log("Auth Benutzer an Root-Route erkannt, zeige direkt SimpleHome");\n' +
           '    return res.sendFile(path.join(__dirname, "public", "index-client.html"));\n' +
           '  }\n' +
-          '  // Nicht authentifiziert, weiterleiten zu /auth\n' +
-          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth");\n' +
-          '  res.redirect("/auth");\n' +
+          '  // Nicht authentifiziert, weiterleiten zu /auth mit 303 Status (See Other)\n' +
+          '  console.log("Nicht authentifiziert an Root-Route, weiterleiten zu /auth mit 303");\n' +
+          '  res.redirect(303, "/auth");\n' +
           '});'
         );
         log('Intelligente Auth/SimpleHome-Weiterleitung für Root-Route hinzugefügt');

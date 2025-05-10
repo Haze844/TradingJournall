@@ -232,8 +232,11 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
           variant: "default",
         });
         
-        // Standard-Navigation mit wouter
-        console.log("Login erfolgreich - navigiere zur Startseite mit wouter");
+        // Navigation mit direkter Verbindung zu SimpleHome
+        console.log("Login erfolgreich - navigiere direkt zu SimpleHome");
+        
+        // Direkte Navigation zur Root-Route, die automatisch SimpleHome anzeigt
+        // für authentifizierte Benutzer (über serverseitige Erkennung)
         navigate("/");
       }
     });
