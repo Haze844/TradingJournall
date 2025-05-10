@@ -585,25 +585,48 @@ export function setupAuth(app: Express) {
   // Seed initial users if they don't exist - for development purposes
   (async () => {
     try {
+      logger.info("🌱 Überprüfung auf benötigte Standard-Benutzer");
+      
       const existingUser1 = await storage.getUserByUsername("admin");
       if (!existingUser1) {
-        await storage.createUser({
+        logger.info("➕ Erstelle Standard-Administrator-Benutzer");
+        const user = await storage.createUser({
           username: "admin",
           password: "admin123" // In production, use hashPassword
         });
-        console.log("Created default admin user");
+        logger.info("✅ Administrator-Benutzer erstellt", { 
+          userId: user.id, 
+          username: user.username 
+        });
+      } else {
+        logger.debug("👤 Administrator-Benutzer existiert bereits", { 
+          userId: existingUser1.id 
+        });
       }
       
       const existingUser2 = await storage.getUserByUsername("mo");
       if (!existingUser2) {
-        await storage.createUser({
+        logger.info("➕ Erstelle Standard-Benutzer 'mo'");
+        const user = await storage.createUser({
           username: "mo",
           password: "mo123" // In production, use hashPassword
         });
-        console.log("Created user 'mo'");
+        logger.info("✅ Benutzer 'mo' erstellt", { 
+          userId: user.id, 
+          username: user.username 
+        });
+      } else {
+        logger.debug("👤 Benutzer 'mo' existiert bereits", { 
+          userId: existingUser2.id
+        });
       }
+      
+      logger.info("✅ Benutzer-Initialisierung abgeschlossen");
     } catch (error) {
-      console.error("Failed to seed initial users:", error);
+      logger.error("❌ Fehler beim Erstellen der Standard-Benutzer", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
     }
   })();
 }
