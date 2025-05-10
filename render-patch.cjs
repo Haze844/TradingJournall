@@ -175,8 +175,47 @@ try {
   // Keine Weiterleitungsseiten mehr erstellen
   log('Keine Weiterleitungsseiten mehr - direkte Navigation zu SPA-Routen');
 
-  // Session-Konfiguration für Render anpassen
+  // Neon-Datenbank-Konfiguration und Session-Konfiguration für Render anpassen
   try {
+    // Zunächst Datenbankverbindung für Neon optimieren
+    const dbFilePath = path.join(distDir, 'db.js');
+    if (fs.existsSync(dbFilePath)) {
+      let dbCode = fs.readFileSync(dbFilePath, 'utf8');
+      
+      // Prüfen, ob wir Neon WebSocket-Konfiguration hinzufügen müssen
+      if (!dbCode.includes('neonConfig.webSocketConstructor') && dbCode.includes('neonConfig')) {
+        const poolImportPattern = /import\s*{\s*Pool\s*}/;
+        const neonConfigImport = 'import { Pool, neonConfig } from \'@neondatabase/serverless\';';
+        const wsImport = 'import ws from \'ws\';';
+        
+        // Wenn Pool-Import gefunden, ersetzen wir ihn durch die erweiterte Version
+        if (dbCode.match(poolImportPattern)) {
+          dbCode = dbCode.replace(poolImportPattern, neonConfigImport);
+          
+          // ws-Import hinzufügen, falls nicht vorhanden
+          if (!dbCode.includes('import ws from')) {
+            const firstImportEnd = dbCode.indexOf(';', dbCode.indexOf('import')) + 1;
+            dbCode = dbCode.slice(0, firstImportEnd) + '\n' + wsImport + dbCode.slice(firstImportEnd);
+          }
+          
+          // WebSocket-Konfiguration hinzufügen
+          const poolConfigStart = dbCode.indexOf('export const pool');
+          if (poolConfigStart !== -1) {
+            const wsConfigCode = '\n// Für Neon in der Render-Umgebung wird WebSocket benötigt\nneonConfig.webSocketConstructor = ws;\n\n';
+            dbCode = dbCode.slice(0, poolConfigStart) + wsConfigCode + dbCode.slice(poolConfigStart);
+          }
+          
+          fs.writeFileSync(dbFilePath, dbCode);
+          log('Neon-Datenbank-Konfiguration für Render optimiert mit WebSocket-Unterstützung');
+        }
+      } else {
+        log('Neon WebSocket-Konfiguration bereits vorhanden oder nicht notwendig');
+      }
+    } else {
+      log('db.js nicht gefunden - keine Neon-Optimierung möglich');
+    }
+    
+    // Session-Konfiguration anpassen
     const serverFile = path.join(distDir, 'index.js');
     if (fs.existsSync(serverFile)) {
       let serverCode = fs.readFileSync(serverFile, 'utf8');
@@ -186,6 +225,7 @@ try {
       
       // Session-Optionen-Patch
       const cookieConfigPattern = /cookie:\s*{[^}]*}/gs;
+      // Neon-Dokumentation empfiehlt diese Konfiguration für Render
       const newCookieConfig = `cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
         httpOnly: true,
