@@ -16,6 +16,12 @@ function errorMessage(error: unknown): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Direkten Zugriff auf Root zur Auth-Seite umleiten
+  app.get("/", (req: Request, res: Response) => {
+    console.log("Root-Route aufgerufen - leite zur Auth-Seite weiter");
+    res.redirect("/auth");
+  });
+
   // Spezielle Debug-Endpunkte für Routing/Auth-Diagnose
   app.get("/api/debug", (req: Request, res: Response) => {
     const isAuthenticated = req.isAuthenticated();

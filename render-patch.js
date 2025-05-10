@@ -21,10 +21,10 @@ const simpleHtml = '<!DOCTYPE html>' +
 '  <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
 '  <title>Weiterleitung...</title>' +
 '  <script>' +
-'    // Minimale Weiterleitungslogik' +
+'    // Direkte Weiterleitung zur Auth-Seite' +
 '    (function() {' +
-'      console.log("Weiterleitungsseite geladen");' +
-'      window.location.replace(window.location.origin + "/#spaLoaded");' +
+'      console.log("Direkte Weiterleitung zur Auth-Seite");' +
+'      window.location.replace(window.location.origin + "/auth");' +
 '    })();' +
 '  </script>' +
 '</head>' +
