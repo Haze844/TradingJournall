@@ -1,0 +1,102 @@
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LvlUp Trading Journal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #121212 0%, #1e1e30 100%);
+      color: white;
+    }
+    .container {
+      text-align: center;
+      max-width: 500px;
+      padding: 40px;
+      border-radius: 16px;
+      background: rgba(30, 30, 48, 0.7);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #4f9eff;
+    }
+    p {
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .loader {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(79, 158, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #4f9eff;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+    .manual-link {
+      display: inline-block;
+      background-color: #4f9eff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 20px;
+      transition: background-color 0.3s ease;
+    }
+    .manual-link:hover {
+      background-color: #3d7dcf;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  <script>
+    // Sofortige Weiterleitung beim Laden der Seite
+    window.onload = function() {
+      // Einige Browser blockieren Weiterleitungen die zu schnell passieren
+      setTimeout(function() {
+        // Verwende den absoluten Pfad basierend auf dem aktuellen Hostname
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        const authUrl = `${protocol}//${host}/auth`;
+        
+        // Schreiben wir Diagnoseinformationen auf die Seite für Debugging
+        const debugInfo = document.getElementById('debug-info');
+        if (debugInfo) {
+          debugInfo.innerHTML = `
+            <p><strong>Debug-Info:</strong></p>
+            <p>Protokoll: ${protocol}<br>
+            Host: ${host}<br>
+            Ziel-URL: ${authUrl}</p>
+          `;
+        }
+        
+        // Weiterleitung zur Auth-Seite
+        window.location.href = authUrl;
+      }, 1500); // Kurze Verzögerung von 1,5 Sekunden
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="loader"></div>
+    <h1>LvlUp Trading Journal wird geladen...</h1>
+    <p>Du wirst automatisch zur Anmeldeseite weitergeleitet.</p>
+    <p>Falls die automatische Weiterleitung nicht funktioniert, klicke bitte den folgenden Link:</p>
+    <a href="/auth" class="manual-link">Zur Anmeldeseite</a>
+    <div id="debug-info" style="margin-top: 30px; font-size: 12px; text-align: left; opacity: 0.7;"></div>
+  </div>
+</body>
