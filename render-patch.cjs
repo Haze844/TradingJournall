@@ -174,6 +174,69 @@ try {
 
   // Keine Weiterleitungsseiten mehr erstellen
   log('Keine Weiterleitungsseiten mehr - direkte Navigation zu SPA-Routen');
+
+  // Session-Konfiguration für Render anpassen
+  try {
+    const serverFile = path.join(distDir, 'index.js');
+    if (fs.existsSync(serverFile)) {
+      let serverCode = fs.readFileSync(serverFile, 'utf8');
+      
+      // Cookie-Konfiguration anpassen
+      log('Optimiere Cookie-Einstellungen für Render-Umgebung gemäß Neon Dokumentation');
+      
+      // Session-Optionen-Patch
+      const cookieConfigPattern = /cookie:\s*{[^}]*}/gs;
+      const newCookieConfig = `cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Tage
+        httpOnly: true,
+        path: '/',
+        secure: true, // Immer 'secure' in Render-Umgebung
+        sameSite: 'none' // Wichtig für Cross-Site in Render
+      }`;
+      
+      // Cookie-Konfiguration ersetzen, wenn gefunden
+      if (serverCode.match(cookieConfigPattern)) {
+        serverCode = serverCode.replace(cookieConfigPattern, newCookieConfig);
+        log('Cookie-Konfiguration für Render optimiert');
+      } else {
+        log('Cookie-Konfiguration nicht gefunden');
+      }
+      
+      // Session resave und saveUninitialized anpassen
+      const sessionOptionsPattern = /resave:\s*true/g;
+      const saveUninitializedPattern = /saveUninitialized:\s*true/g;
+      
+      if (serverCode.match(sessionOptionsPattern)) {
+        serverCode = serverCode.replace(sessionOptionsPattern, 'resave: false');
+        log('Session resave auf false gesetzt');
+      }
+      
+      if (serverCode.match(saveUninitializedPattern)) {
+        serverCode = serverCode.replace(saveUninitializedPattern, 'saveUninitialized: false');
+        log('Session saveUninitialized auf false gesetzt');
+      }
+      
+      // Trust Proxy sicherstellen
+      if (!serverCode.includes('app.set("trust proxy"')) {
+        const expressSetupPattern = /app\s*=\s*express\(\);/;
+        if (serverCode.match(expressSetupPattern)) {
+          serverCode = serverCode.replace(
+            expressSetupPattern, 
+            'app = express();\napp.set("trust proxy", 1); // Wichtig für Render mit Secure Cookies'
+          );
+          log('Trust Proxy für Render hinzugefügt');
+        }
+      }
+      
+      // Änderungen speichern
+      fs.writeFileSync(serverFile, serverCode);
+      log('Session-Konfiguration für Render optimiert');
+    } else {
+      error('Server-Datei nicht gefunden: ' + serverFile);
+    }
+  } catch (e) {
+    error(`Fehler beim Anpassen der Session-Konfiguration: ${e.message}`);
+  }
   
   // Erfolg!
   log('Render-Patch abgeschlossen');
