@@ -1,4 +1,4 @@
-// redirect-fix.js - Automatischer Redirect zur Auth-Seite
+// redirect-fix.js - DEAKTIVIERT - KEINE WEITERLEITUNGEN MEHR
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,69 +8,38 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-console.log('Starte direkten Auth-Redirect ohne Landing Page...');
+console.log('Weiterleitungen wurden deaktiviert - verwende standard Vite-Index');
 
-// Einfache HTML-Seite mit direktem Redirect zur Auth-Seite
-const redirectHtml = `<!DOCTYPE html>
+// Einfache statische HTML-Seite OHNE Redirect
+const staticHtml = `<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=/auth">
-  <title>LvlUp Tradingtagebuch - Umleitung</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #0c1222;
-      color: white;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LvlUp Trading Journal</title>
 </head>
 <body>
-  <script>
-    // Sofortige Weiterleitung zur Auth-Seite
-    window.location.href = "/auth";
-  </script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>`;
 
-// Speichere die Weiterleitungsseite als index.html direkt im Hauptverzeichnis
+// Stelle sicher, dass wir eine statische Index-Seite ohne Weiterleitungen verwenden
 try {
-  // Finde das Hauptverzeichnis (außerhalb von dist)
+  // Finde das Hauptverzeichnis
   const basePath = path.resolve(__dirname);
   const indexPath = path.join(basePath, 'index.html');
   
-  // Schreibe die Redirect-Seite
-  fs.writeFileSync(indexPath, redirectHtml);
-  console.log(`Redirect zur Auth-Seite nach ${indexPath} geschrieben`);
-  
-  // Kopiere auch nach public/ falls dort gesucht wird
-  const publicIndexPath = path.join(basePath, 'public', 'index.html');
-  if (fs.existsSync(path.dirname(publicIndexPath))) {
-    fs.writeFileSync(publicIndexPath, redirectHtml);
-    console.log(`Redirect zur Auth-Seite nach ${publicIndexPath} kopiert`);
+  // Prüfe, ob die Datei Weiterleitungscode enthält
+  if (fs.existsSync(indexPath)) {
+    const content = fs.readFileSync(indexPath, 'utf8');
+    if (content.includes('refresh') || content.includes('redirect') || content.includes('window.location.href')) {
+      console.log('Weiterleitungscode in index.html gefunden - ersetze mit statischer Version');
+      fs.writeFileSync(indexPath, staticHtml);
+    }
   }
   
-  // Spezialfall für dist/
-  const distIndexPath = path.join(basePath, 'dist', 'index.html');
-  if (fs.existsSync(path.dirname(distIndexPath))) {
-    fs.writeFileSync(distIndexPath, redirectHtml);
-    console.log(`Redirect zur Auth-Seite nach ${distIndexPath} kopiert`);
-  }
-
-  // Auch in dist/public/ speichern
-  const distPublicIndexPath = path.join(basePath, 'dist', 'public', 'index.html');
-  if (fs.existsSync(path.dirname(distPublicIndexPath))) {
-    fs.writeFileSync(distPublicIndexPath, redirectHtml);
-    console.log(`Redirect zur Auth-Seite nach ${distPublicIndexPath} kopiert`);
-  }
-  
-  console.log('Auth-Redirect erfolgreich erstellt!');
+  console.log('Weiterleitungsskript deaktiviert');
 } catch (error) {
-  console.error('Fehler beim Anwenden des Redirect-Fixes:', error);
+  console.error('Fehler beim Deaktivieren von Weiterleitungen:', error);
 }
