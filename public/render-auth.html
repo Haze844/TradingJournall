@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LvlUp Trading Journal - Auth</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #121212 0%, #1e1e30 100%);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      padding: 2rem;
+      background: rgba(30, 30, 48, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    h1 {
+      color: #4f9eff;
+      margin-bottom: 1rem;
+    }
+    .form {
+      margin-top: 2rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #4f9eff;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(79, 158, 255, 0.3);
+      background: rgba(0, 0, 0, 0.2);
+      color: white;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background: #4f9eff;
+      color: #000;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: rgba(79, 158, 255, 0.1);
+      border-radius: 0.5rem;
+    }
+    .credentials {
+      margin-top: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LvlUp Trading Journal</h1>
+    <p>Diese Seite ist ein direkter Anmelde-Notfallzugang für Render-Deployments.</p>
+    
+    <div class="form">
+      <div class="form-group">
+        <label for="username">Benutzername</label>
+        <input type="text" id="username" placeholder="Benutzername eingeben" />
+      </div>
+      <div class="form-group">
+        <label for="password">Passwort</label>
+        <input type="password" id="password" placeholder="Passwort eingeben" />
+      </div>
+      <button id="loginBtn">Anmelden</button>
+    </div>
+    
+    <div class="info">
+      <h3>Demo-Zugangsdaten</h3>
+      <div class="credentials">
+        <p><strong>Admin:</strong><br>Benutzer: admin<br>Passwort: admin123</p>
+      </div>
+      <div class="credentials">
+        <p><strong>Benutzer:</strong><br>Benutzer: mo<br>Passwort: mo123</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', async function() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        alert('Bitte gib Benutzername und Passwort ein');
+        return;
+      }
+      
+      try {
+        // Status-Anzeige
+        this.innerText = 'Wird angemeldet...';
+        this.disabled = true;
+        
+        // API-Anfrage zum Login
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password }),
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          alert(`Anmeldung erfolgreich! Willkommen, ${data.username}`);
+          // Navigation zur Hauptseite
+          window.location.href = '/';
+        } else {
+          const errorText = await response.text();
+          alert(`Anmeldung fehlgeschlagen: ${errorText || 'Ungültige Anmeldedaten'}`);
+          this.innerText = 'Anmelden';
+          this.disabled = false;
+        }
+      } catch (error) {
+        alert(`Ein Fehler ist aufgetreten: ${error.message}`);
+        this.innerText = 'Anmelden';
+        this.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

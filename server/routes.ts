@@ -117,6 +117,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(debug);
   });
   
+  // NOTFALL-AUTH-SEITE - nur für Render-Probleme
+  app.get("/render-auth", (req: Request, res: Response) => {
+    const htmlPath = path.join(process.cwd(), 'public', 'render-auth.html');
+    if (fs.existsSync(htmlPath)) {
+      res.sendFile(htmlPath);
+    } else {
+      res.send(`
+        <html>
+          <head><title>Auth Notfallseite</title></head>
+          <body>
+            <h1>Die Notfall-Auth-Seite wurde nicht gefunden</h1>
+            <p>Bitte stelle sicher, dass die Datei public/render-auth.html existiert.</p>
+            <p>Debug-Info:</p>
+            <pre>Aktuelles Verzeichnis: ${process.cwd()}</pre>
+            <pre>Gesuchter Pfad: ${htmlPath}</pre>
+          </body>
+        </html>
+      `);
+    }
+  });
+  
   // Set up authentication routes
   setupAuth(app);
   
