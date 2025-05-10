@@ -115,36 +115,28 @@ try {
   // Umleitung für alle wichtigen HTML-Seiten erstellen
   // Keine Weiterleitungsseiten mehr
 
-  // Alle Weiterleitungen entfernen und direkt die Auth-Seite anzeigen
-  log('Entferne alle Weiterleitungsseiten und konfiguriere direkte Navigation zu /auth');
+  // Keine Weiterleitungsseiten erstellen, index.html entfernen
+  log('Keine Weiterleitungsseiten oder index.html - direkte Navigation zu /auth über Express');
   
-  // Wir patchen die index.html für direkte Auth-Navigation
+  // index.html und 404.html entfernen, falls sie existieren
   const indexHtmlPath = path.join(distDir, 'public', 'index.html');
   if (fs.existsSync(indexHtmlPath)) {
-    const directAuthHtml = `<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <base href="/">
-  <title>LvlUp Trading Journal</title>
-  <script>
-    // Direkte Weiterleitung zu /auth ohne Umwege
-    window.location.replace('/auth');
-  </script>
-</head>
-<body>
-  <noscript>JavaScript wird benötigt, um diese Anwendung zu nutzen.</noscript>
-</body>
-</html>`;
-    
-    fs.writeFileSync(indexHtmlPath, directAuthHtml);
-    log('index.html wurde mit direkter Auth-Weiterleitung überschrieben');
-    
-    // Auch 404.html für Client-Routing erstellen
-    const notFoundPath = path.join(path.dirname(indexHtmlPath), '404.html');
-    fs.writeFileSync(notFoundPath, directAuthHtml);
-    log('404.html mit direkter Auth-Weiterleitung erstellt');
+    try {
+      fs.unlinkSync(indexHtmlPath);
+      log('index.html wurde komplett entfernt');
+    } catch (err) {
+      error(`Fehler beim Entfernen von index.html: ${err.message}`);
+    }
+  }
+  
+  const notFoundPath = path.join(path.dirname(indexHtmlPath), '404.html');
+  if (fs.existsSync(notFoundPath)) {
+    try {
+      fs.unlinkSync(notFoundPath);
+      log('404.html wurde komplett entfernt');
+    } catch (err) {
+      error(`Fehler beim Entfernen von 404.html: ${err.message}`);
+    }
   }
 
   // Neon-Datenbank-Konfiguration und Session-Konfiguration für Render anpassen
@@ -192,13 +184,27 @@ try {
     if (fs.existsSync(serverFile)) {
       let serverCode = fs.readFileSync(serverFile, 'utf8');
       
-      // Zuerst Root-Redirect-Route entfernen, falls vorhanden
-      const rootRedirectPattern = /app\.get\(['"]\/['"]\s*,\s*.*\s*=>.*res\.redirect.*\);\s*/gs;
-      if (serverCode.match(rootRedirectPattern)) {
-        serverCode = serverCode.replace(rootRedirectPattern, '// Keine Root-Weiterleitung mehr\n');
-        log('Root-Redirect-Route wurde entfernt');
+      // Root-Redirect-Route hinzufügen (gerade weil index.html nicht existiert)
+      log('Füge strikte serverseitige Auth-Weiterleitung ein');
+      
+      // Express App-Konfiguration finden
+      const expressSetupPattern = /app\s*=\s*express\(\);/;
+      const rootRoutePattern = /app\.get\(['"]\/['"]\s*,\s*.*\s*=>.*/gs;
+      
+      if (serverCode.match(rootRoutePattern)) {
+        // Bereits existierende Route ersetzen
+        serverCode = serverCode.replace(rootRoutePattern, 
+          'app.get("/", (req, res) => { res.redirect("/auth"); });');
+        log('Existierende Root-Route durch strikte Auth-Weiterleitung ersetzt');
+      } else if (serverCode.match(expressSetupPattern)) {
+        // Neue Route hinzufügen
+        serverCode = serverCode.replace(
+          expressSetupPattern,
+          'app = express();\n\n// Strikte Weiterleitung von / zu /auth ohne Umwege\napp.get("/", (req, res) => { res.redirect("/auth"); });'
+        );
+        log('Strikte Auth-Weiterleitung für Root-Route hinzugefügt');
       } else {
-        log('Keine Root-Redirect-Route gefunden');
+        log('Konnte Express-Setup nicht finden, keine Auth-Weiterleitung hinzugefügt');
       }
       
       // Cookie-Konfiguration anpassen
