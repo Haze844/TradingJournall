@@ -47,7 +47,7 @@ export function setupAuth(app: Express) {
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Tage
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none", // Wichtig für Cross-Site-Requests in Replit-Umgebungen
       secure: process.env.NODE_ENV === "production" || process.env.REPL_ID ? true : false, // Secure in Production und auf Replit
     }
   };
