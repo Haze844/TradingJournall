@@ -232,12 +232,12 @@ function LoginForm({ loginMutation }: { loginMutation: any }) {
           variant: "default",
         });
         
-        // Navigation mit direkter Verbindung zu SimpleHome
-        console.log("Login erfolgreich - navigiere direkt zu SimpleHome");
+        // ABSOLUT DIREKTE Navigation zu SimpleHome ohne Zwischenseite
+        console.log("Login erfolgreich - DIREKTE Weiterleitung zu SimpleHome ohne Umwege");
         
-        // Direkte Navigation zur Root-Route, die automatisch SimpleHome anzeigt
-        // für authentifizierte Benutzer (über serverseitige Erkennung)
-        navigate("/");
+        // Keine Weiterleitung zu Root, sondern sofort zu SimpleHome
+        // Dies vermeidet jegliche Zwischenseiten und Umwege
+        navigate("/SimpleHome");
       }
     });
   };
