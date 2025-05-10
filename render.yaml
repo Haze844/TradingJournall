@@ -2,9 +2,9 @@ services:
   - type: web
     name: trading-journal
     env: node
-    plan: free
-    buildCommand: npm install --include=dev; npm run build
-    startCommand: node setup-db.js && node render-patch.js && node dist/index.js
+    repo: https://github.com/Haze844/TradingJournall.git
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: node server/standalone-express.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -12,5 +12,6 @@ services:
         value: 5000
       - key: SESSION_SECRET
         generateValue: true
-      - key: DATABASE_URL
-        sync: false
+    
+# Verbindung zur Neon Postgres-Datenbank erfolgt über die Render Dashboard-Einstellung
+# DATABASE_URL muss im Dashboard konfiguriert werden!
