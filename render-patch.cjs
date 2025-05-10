@@ -97,7 +97,7 @@ try {
       if (htmlContent.includes('window.APP_CONFIG')) {
         htmlContent = htmlContent.replace(
           /window\.APP_CONFIG\s*=\s*\{[^}]*\}/,
-          'window.APP_CONFIG = { isRender: true, noRedirects: false, directAuth: true }'
+          'window.APP_CONFIG = { isRender: true, noRedirects: false, directAuth: true, sessionCookieName: "trading.sid" }'
         );
         
         fs.writeFileSync(appConfigFile, htmlContent);

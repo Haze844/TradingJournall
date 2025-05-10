@@ -31,10 +31,14 @@ export function setupUnifiedSession(app: Express) {
   // In Produktionsumgebungen verwenden wir PostgreSQL als Session-Store
   if (process.env.DATABASE_URL) {
     const PostgresStore = connectPg(session);
+    
+    // KRITISCH: Wir deaktivieren die automatische Tabellenerstellung, um den Fehler
+    // "relation session_pkey already exists" zu vermeiden. Die Tabelle wurde bereits 
+    // von einer früheren Instanz erstellt oder muss manuell erstellt werden.
     store = new PostgresStore({
       pool,
       tableName: 'sessions', // Einheitlicher Tabellenname
-      createTableIfMissing: true,
+      createTableIfMissing: false, // Wichtig: Änderung von true zu false
     });
     console.log('Verwende PostgreSQL Session-Store');
   } else {
