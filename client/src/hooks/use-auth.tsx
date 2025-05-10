@@ -92,11 +92,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Willkommen zurück, ${userData.username}!`,
       });
       
-      // Einfache Navigation zur Hauptseite
-      console.log("Login erfolgreich - navigiere zur Hauptseite");
+      // Direkte Navigation zur Hauptseite ohne Umwege
+      console.log("Login erfolgreich:", userData);
       
-      // Verwende die normale Navigation ohne Workarounds
-      navigate("/");
+      // Absolute URL für die direkte Navigation
+      const cleanUrl = window.location.origin + "/";
+      console.log("Login erfolgreich - navigiere zu:", cleanUrl);
+      
+      // Statt wouter-Navigation verwenden wir direkte URL-Navigation
+      window.location.href = cleanUrl;
     },
     onError: (error: Error) => {
       // Detaillierte Fehlerinformationen

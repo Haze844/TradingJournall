@@ -88,11 +88,8 @@ export function ProtectedRoute({
     // statt wouter's Redirect, um Sitzungs-/Cookie-Probleme zu umgehen
     console.log("Verwende direkte window.location-Navigation zur Auth-Seite");
     
-    // FALLS ES EINE ROOT-ROUTE IST, SOFORT WEITERLEITEN
-    if (path === "/") {
-      window.location.href = "/auth";
-      return <div>Weiterleitung...</div>;
-    }
+    // Bei Root-Route nicht mehr direkt zur Auth-Seite weiterleiten
+    // Stattdessen mit wouter's Redirect arbeiten, damit die Session erhalten bleibt
     
     // Zähler erhöhen und weiterleiten
     redirectCounter++;
