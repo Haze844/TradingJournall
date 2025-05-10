@@ -76,6 +76,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // HINZUGEFÜGT: Verbesserter Debug-Endpunkt für Render-Probleme
+  app.get("/render-debug", (req: Request, res: Response) => {
+    // Sammle alle möglichen Informationen für die Diagnose
+    const debug = {
+      timestamp: new Date().toISOString(),
+      server: {
+        env: process.env.NODE_ENV,
+        isRender: process.env.RENDER === "true" || !!process.env.RENDER_EXTERNAL_URL,
+        isReplit: !!process.env.REPL_ID || !!process.env.REPL_SLUG,
+        renderUrl: process.env.RENDER_EXTERNAL_URL,
+        hostname: req.hostname,
+        ip: req.ip,
+        path: req.path,
+        originalUrl: req.originalUrl,
+      },
+      headers: req.headers,
+      database: {
+        connectionAvailable: !!process.env.DATABASE_URL,
+        pgHost: process.env.PGHOST ? "vorhanden" : "fehlt", 
+        neonDbConfig: !!process.env.DATABASE_URL
+      },
+      auth: {
+        sessionSecret: process.env.SESSION_SECRET ? "vorhanden" : "fehlt",
+        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+        sessionId: req.session ? req.session.id : "keine Session"
+      },
+      routeHandlers: {
+        rootRedirect: true,
+        authPage: true,
+        apis: {
+          health: true,
+          debug: true
+        }
+      }
+    };
+    
+    // Als JSON und mit CORS-Header für einfache externe Diagnose
+    res.header("Access-Control-Allow-Origin", "*");
+    res.json(debug);
+  });
+  
   // Set up authentication routes
   setupAuth(app);
   
