@@ -17,10 +17,11 @@ function errorMessage(error: unknown): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Root-Zugriff erlauben
-  app.get("/", (req: Request, res: Response) => {
+  // Root-Zugriff erlauben ohne Weiterleitung
+  app.get("/", (req: Request, res: Response, next: NextFunction) => {
     console.log("Root-Route aufgerufen - isAuthenticated:", req.isAuthenticated());
-    // Keine Weiterleitung mehr - Root wird vom SPA-Router behandelt
+    // Leite an Vite/Static-Middleware weiter, so dass index.html direkt ausgeliefert wird
+    next();
   });
 
   // Spezielle Debug-Endpunkte für Routing/Auth-Diagnose
