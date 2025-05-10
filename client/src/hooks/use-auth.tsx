@@ -272,8 +272,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Benutzer-Session entfernen
       queryClient.setQueryData(["/api/user"], null);
       
+      // Lokalen User zurücksetzen
+      setLocalUser(null);
+      
+      // Lokale Speicherdaten löschen
+      localStorage.removeItem('tradingjournal_user');
+      
+      // Health-Check aufrufen, um alte Cookies zu löschen
+      fetch('/api/health').catch(e => console.error("Health-Check beim Logout fehlgeschlagen:", e));
+      
       // Detaillierte Logs für erfolgreiche Abmeldung
-      console.log("Logout erfolgreich, User-Daten zurückgesetzt");
+      console.log("Logout erfolgreich, User-Daten zurückgesetzt und lokaler Speicher bereinigt");
       
       // Nutzer-Feedback
       toast({
@@ -293,14 +302,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Detaillierte Fehlerinformationen
       console.error("Logout-Mutation fehlgeschlagen:", error);
       
+      // Trotz Fehler lokale Daten löschen
+      localStorage.removeItem('tradingjournal_user');
+      setLocalUser(null);
+      queryClient.setQueryData(["/api/user"], null);
+      
+      // Health-Check aufrufen, um alte Cookies zu löschen
+      fetch('/api/health').catch(e => console.error("Health-Check beim Logout-Fehler-Fall fehlgeschlagen:", e));
+      
       toast({
         title: "Abmeldung fehlgeschlagen",
-        description: error.message || "Die Abmeldung konnte nicht durchgeführt werden. Bitte versuche es erneut.",
-        variant: "destructive",
+        description: "Lokale Daten wurden trotzdem bereinigt. Bitte versuche es erneut, falls nötig.",
+        variant: "default",
       });
       
       // Trotz Fehler zur Auth-Seite navigieren, aber mit Verzögerung
-      console.log("Trotz Fehler zur Auth-Seite navigieren");
+      console.log("Logout-Bereinigung lokal durchgeführt - zur Auth-Seite navigieren");
       setTimeout(() => navigate("/auth"), 300);
     },
   });

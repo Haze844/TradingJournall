@@ -287,21 +287,28 @@ export function setupAuth(app: Express) {
   app.post("/api/logout", (req, res, next) => {
     console.log("Logout-Anfrage erhalten. Session-ID:", req.session.id);
     
-    // FIX: Vereinfachter, robusterer Logout-Prozess ohne Session-Regeneration
+    // Optimierter Logout-Prozess mit vollständiger Session-Zerstörung
     req.logout((logoutErr: any) => {
       if (logoutErr) {
         console.error("Fehler beim Logout:", logoutErr);
         return next(logoutErr);
       }
       
-      // Session direkt speichern ohne Regeneration
-      req.session.save((saveErr) => {
-        if (saveErr) {
-          console.error("Fehler beim Speichern der Session nach Logout:", saveErr);
-          return next(saveErr);
+      // Komplett Session zerstören
+      req.session.destroy((destroyErr: any) => {
+        if (destroyErr) {
+          console.error("Fehler beim Zerstören der Session:", destroyErr);
+          // Trotzdem 200 senden, da der Client die Daten lokal löscht
+          return res.sendStatus(200);
         }
         
-        console.log("Logout erfolgreich, Session gespeichert. Session-ID:", req.session.id);
+        console.log("Logout erfolgreich, Session vollständig zerstört");
+        
+        // Zusätzlich Legacy-Cookies löschen
+        res.clearCookie("trading.sid");
+        res.clearCookie("trading_sid");
+        // Das aktuelle Cookie "tj_sid" wird automatisch von Express Session entfernt
+        
         res.sendStatus(200);
       });
     });

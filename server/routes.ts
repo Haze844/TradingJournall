@@ -163,37 +163,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('Health-Check - Cookies:', cookieHeader ? 'vorhanden' : 'keine');
     
     // Standardantwort vorbereiten
-    const responseData = {
+    const responseData: any = {
       status: "ok",
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || "development",
       authenticated: req.isAuthenticated(),
       sessionId: req.session?.id?.substring(0, 10) || 'none',
       hasCookies: !!cookieHeader,
-      replit: !!process.env.REPL_SLUG,
+      replit: !!process.env.REPL_SLUG || !!process.env.REPL_ID,
       userAgent: req.headers['user-agent']?.substring(0, 50) || 'none'
     };
     
     if (cookieHeader) {
       // Detaillierte Cookie-Analyse
       const cookies = parseCookies(cookieHeader);
-      console.log('Cookie-Namen:', Object.keys(cookies));
+      const cookieKeys = Object.keys(cookies);
+      console.log('Cookie-Namen:', cookieKeys);
       
-      // Alte Legacy-Cookies zum Löschen erkennen
-      const legacyCookies = Object.keys(cookies).filter(name => 
-        name === 'trading.sid' || name === 'trading_sid');
+      // Erweiterte Suche nach Legacy-Cookies
+      const legacyCookies = cookieKeys.filter(name => 
+        name === 'trading.sid' || 
+        name === 'trading_sid' || 
+        name === 'connect.sid' ||
+        name.includes('_sid') && name !== 'tj_sid');
       
       if (legacyCookies.length > 0) {
         console.log("Alte Legacy-Cookies gefunden:", legacyCookies);
         
-        // Alte Cookies löschen - setze Expiration in die Vergangenheit
+        // Alte Cookies löschen - mit mehreren Methoden für maximale Kompatibilität
         legacyCookies.forEach(cookieName => {
+          // Methode 1: Expiration in Vergangenheit setzen
           res.cookie(cookieName, '', { 
             expires: new Date(0), 
             httpOnly: true,
             path: '/',
             secure: process.env.NODE_ENV === 'production'
           });
+          
+          // Methode 2: Explizites clearCookie
+          res.clearCookie(cookieName);
+          
+          console.log(`Legacy-Cookie '${cookieName}' gelöscht`);
         });
         
         responseData.cookiesCleared = legacyCookies;
@@ -202,11 +212,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Session-Cookie prüfen
       const sessionCookieName = 'tj_sid'; // Muss mit dem Namen in auth.ts übereinstimmen
       console.log('Session-Cookie vorhanden:', !!cookies[sessionCookieName]);
+      responseData.hasSessionCookie = !!cookies[sessionCookieName];
     }
     
     console.log('Health-Check - Session ID:', req.session?.id || 'keine');
     console.log('Health-Check - Session Cookie:', req.session?.cookie ? 'vorhanden' : 'keine');
     console.log('Health-Check - Authenticated:', req.isAuthenticated());
+    
+    // Falls der Benutzer authentifiziert ist, minimale Benutzerinformationen zurückgeben
+    if (req.isAuthenticated() && req.user) {
+      responseData.user = {
+        id: req.user.id,
+        username: req.user.username
+      };
+    }
     
     res.json(responseData);
   });
