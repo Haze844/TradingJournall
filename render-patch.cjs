@@ -1,6 +1,7 @@
 /**
  * Render-Patch als CommonJS-Modul (für Verträglichkeit mit älteren Node-Versionen)
- * Diese Version behebt das Problem mit dem falschen APP_CONFIG-Setting
+ * Diese Version behebt das Problem mit dem falschen APP_CONFIG-Setting und
+ * implementiert direkte Weiterleitung zur Auth-Seite ohne Zwischenschritte
  */
 
 const fs = require('fs');

@@ -17,9 +17,29 @@ function errorMessage(error: unknown): string {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Direkten Zugriff auf Root zur Auth-Seite umleiten
+  // KRITISCH: Verwende HTTP 303 für zuverlässige POST->GET Weiterleitungen
+  // KRITISCH: Verzögere die Weiterleitung um 500ms für Render & Safari-Browser
   app.get("/", (req: Request, res: Response) => {
     console.log("Root-Route aufgerufen - leite zur Auth-Seite weiter");
-    res.redirect("/auth");
+    
+    // Füge mehr Debug-Informationen hinzu
+    console.log("Weiterleitung-Details:", {
+      originalUrl: req.originalUrl,
+      query: req.query,
+      isAuthenticated: req.isAuthenticated(),
+      hasSession: !!req.session,
+      method: req.method
+    });
+    
+    // Kurze Verzögerung für zuverlässigere Browser-Weiterleitungen 
+    setTimeout(() => {
+      // Absolute URL für die Weiterleitung verwenden
+      const baseUrl = process.env.RENDER_EXTERNAL_URL || req.protocol + '://' + req.get('host');
+      const redirectUrl = baseUrl + "/auth";
+      
+      console.log("Weiterleitung zu:", redirectUrl);
+      res.redirect(303, redirectUrl);
+    }, 500);
   });
 
   // Spezielle Debug-Endpunkte für Routing/Auth-Diagnose
