@@ -4,7 +4,7 @@ services:
     env: node
     repo: https://github.com/Haze844/TradingJournall.git
     branch: main
-    buildCommand: npm install --include=dev && npm run build
+    buildCommand: npm install --include=dev && node render-build.js
     startCommand: >
       node --max-old-space-size=256 setup-db.js &&
       node --max-old-space-size=256 render-patch.cjs &&
@@ -14,5 +14,7 @@ services:
         value: production
       - key: PORT
         value: 5000
+      - key: RENDER
+        value: "true"
       - key: SESSION_SECRET
         generateValue: true
