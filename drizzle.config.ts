@@ -1,14 +1,16 @@
+// drizzle.config.ts
+
 import { defineConfig } from "drizzle-kit";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL, ensure the database is provisioned");
+  throw new Error("DATABASE_URL ist nicht gesetzt. Bitte .env prüfen.");
 }
 
 export default defineConfig({
+  schema: "./shared/dbSchema.ts",
   out: "./migrations",
-  schema: "./shared/schema.ts", // Stelle sicher, dass dieser Pfad stimmt
-  driver: "pg",
+  dialect: "postgresql",
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL,
+    url: process.env.DATABASE_URL,
   },
 });
