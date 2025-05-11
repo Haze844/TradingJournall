@@ -519,7 +519,7 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get("/api/user", async (req, res) => {
     logger.debug("🔍 Auth-Check durchgeführt", { 
       sessionId: req.session.id, 
       isAuthenticated: req.isAuthenticated(),
@@ -529,27 +529,64 @@ export function setupAuth(app: Express) {
       query: req.query
     });
     
-    // FIX: Den Header-Check vereinfachen
-    if (!req.isAuthenticated()) {
-      logger.debug("👤 Benutzer nicht authentifiziert", { 
-        sessionId: req.session.id,
-        ip: req.ip,
-        path: req.path,
-        cookies: req.headers.cookie ? 'vorhanden' : 'fehlen'
+    // Umgebungserkennung für Render-spezifische Anpassungen
+    const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
+    
+    // #1: Reguläre Session-Authentifizierung prüfen
+    if (req.isAuthenticated()) {
+      // Don't send password to the client
+      const { password, ...userWithoutPassword } = req.user as SelectUser;
+      
+      logger.debug("✅ Benutzer per Session authentifiziert", {
+        userId: userWithoutPassword.id,
+        username: userWithoutPassword.username,
+        sessionId: req.session.id
       });
-      return res.sendStatus(401);
+      
+      return res.json(userWithoutPassword);
     }
     
-    // Don't send password to the client
-    const { password, ...userWithoutPassword } = req.user as SelectUser;
+    // #2: Für Render - userId im Query-Parameter prüfen (Fallback-Authentifizierung)
+    const userIdParam = req.query.userId;
+    const validUserIds = ['1', '2', 1, 2]; // Admin=1, Mo=2
+    const isValidUserId = userIdParam !== undefined && 
+                         (validUserIds.includes(userIdParam as any) || 
+                          validUserIds.includes(Number(userIdParam)));
     
-    logger.debug("✅ Benutzer authentifiziert", {
-      userId: userWithoutPassword.id,
-      username: userWithoutPassword.username,
-      sessionId: req.session.id
+    if (isRender && isValidUserId) {
+      // Benutzer aus der Datenbank holen
+      try {
+        const userId = typeof userIdParam === 'string' ? parseInt(userIdParam, 10) : userIdParam;
+        const user = await storage.getUser(userId as number);
+        
+        if (user) {
+          // Don't send password to the client
+          const { password, ...userWithoutPassword } = user;
+          
+          logger.debug("✅ Render Fallback-Authentifizierung via URL-Parameter", {
+            userId: userWithoutPassword.id,
+            username: userWithoutPassword.username,
+            queryParam: userIdParam
+          });
+          
+          return res.json(userWithoutPassword);
+        }
+      } catch (error) {
+        logger.error("❌ Fehler bei Render URL-Parameter Auth", {
+          userIdParam,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+    
+    // Wenn keine Authentifizierung erfolgreich war
+    logger.debug("👤 Benutzer nicht authentifiziert", { 
+      sessionId: req.session.id,
+      ip: req.ip,
+      path: req.path,
+      cookies: req.headers.cookie ? 'vorhanden' : 'fehlen'
     });
-    
-    res.json(userWithoutPassword);
+    return res.sendStatus(401);
   });
   
   // Endpunkt für Passwortänderung
