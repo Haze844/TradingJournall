@@ -9,7 +9,6 @@ async function setupDatabase() {
   try {
     console.log('🔄 Starte Datenbank-Setup für Trading Journal...');
 
-    // Tabelle: sessions
     await pool.query(`
       CREATE TABLE IF NOT EXISTS sessions (
         sid VARCHAR NOT NULL PRIMARY KEY,
@@ -17,12 +16,9 @@ async function setupDatabase() {
         expire TIMESTAMP(6) NOT NULL
       );
     `);
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS IDX_sessions_expire ON sessions (expire);
-    `);
-    console.log('✅ Sessions-Tabelle und Index erstellt');
+    await pool.query(`CREATE INDEX IF NOT EXISTS IDX_sessions_expire ON sessions (expire);`);
+    console.log('✅ Sessions-Tabelle & Index erstellt');
 
-    // Tabelle: users
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -33,7 +29,6 @@ async function setupDatabase() {
     `);
     console.log('✅ Benutzer-Tabelle erstellt');
 
-    // Tabelle: trades
     await pool.query(`
       CREATE TABLE IF NOT EXISTS trades (
         id SERIAL PRIMARY KEY,
@@ -81,7 +76,6 @@ async function setupDatabase() {
     `);
     console.log('✅ Trades-Tabelle erstellt');
 
-    // Tabelle: settings
     await pool.query(`
       CREATE TABLE IF NOT EXISTS settings (
         id SERIAL PRIMARY KEY,
@@ -94,7 +88,6 @@ async function setupDatabase() {
     `);
     console.log('✅ Settings-Tabelle erstellt');
 
-    // Tabelle: weekly_summary
     await pool.query(`
       CREATE TABLE IF NOT EXISTS weekly_summary (
         id SERIAL PRIMARY KEY,
@@ -110,21 +103,20 @@ async function setupDatabase() {
     `);
     console.log('✅ Weekly-Summary-Tabelle erstellt');
 
-    // Standardbenutzer einfügen
-    const result = await pool.query('SELECT COUNT(*) FROM users');
-    if (parseInt(result.rows[0].count) === 0) {
+    const res = await pool.query('SELECT COUNT(*) FROM users');
+    if (parseInt(res.rows[0].count) === 0) {
       await pool.query(`
         INSERT INTO users (username, password)
         VALUES ('admin', 'admin123'), ('mo', 'mo123');
       `);
-      console.log('✅ Standard-Benutzer wurden erfolgreich erstellt');
+      console.log('✅ Standard-Benutzer wurden erstellt');
     } else {
       console.log('ℹ️ Benutzer existieren bereits – kein Einfügen notwendig');
     }
 
     console.log('🏁 Datenbank-Setup abgeschlossen');
   } catch (error) {
-    console.error('❌ Fehler beim Einrichten der Datenbank:', error);
+    console.error('❌ Fehler beim Setup der Datenbank:', error);
     process.exit(1);
   } finally {
     await pool.end();
