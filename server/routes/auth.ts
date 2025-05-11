@@ -1,52 +1,39 @@
-// server/routes/auth.ts
-
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import passport from 'passport';
 
 const router = Router();
 
-// Demo-Nutzerliste (normalerweise aus einer Datenbank)
-const users = [
-  { username: 'admin', password: 'admin123' },
-  { username: 'mo', password: 'mo123' }
-];
+// Login-Route mit Passport
+router.post('/login', (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.status(401).json({ error: info?.message || 'Login fehlgeschlagen' });
 
-// Login-Route
-router.post('/login', (req: Request, res: Response) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Benutzername und Passwort erforderlich' });
-  }
-
-  const user = users.find(
-    (u) => u.username === username && u.password === password
-  );
-
-  if (!user) {
-    return res.status(401).json({ error: 'Ungültige Anmeldedaten' });
-  }
-
-  // Benutzer in der Session speichern
-  req.session.user = { username: user.username };
-  res.status(200).json({ message: 'Login erfolgreich', username: user.username });
+    req.logIn(user, (err) => {
+      if (err) return next(err);
+      return res.status(200).json({
+        message: 'Login erfolgreich',
+        user: { id: user.id, username: user.username },
+        redirectTo: '/simplehome' // <-- Frontend kann hierhin navigieren
+      });
+    });
+  })(req, res, next);
 });
 
 // Logout-Route
 router.post('/logout', (req: Request, res: Response) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error('Fehler beim Logout:', err);
-      return res.status(500).json({ error: 'Logout fehlgeschlagen' });
-    }
-    res.clearCookie('trading.sid');
-    res.status(200).json({ message: 'Logout erfolgreich' });
+  req.logout(() => {
+    req.session.destroy(() => {
+      res.clearCookie('trading.sid');
+      res.status(200).json({ message: 'Logout erfolgreich' });
+    });
   });
 });
 
-// Session-Prüfung
+// Wer bin ich? (Session-Check)
 router.get('/me', (req: Request, res: Response) => {
-  if (req.session.user) {
-    res.status(200).json({ user: req.session.user });
+  if (req.isAuthenticated()) {
+    res.status(200).json({ user: req.user });
   } else {
     res.status(401).json({ error: 'Nicht eingeloggt' });
   }
