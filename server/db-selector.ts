@@ -18,8 +18,8 @@ import * as renderInternalDb from './db-render-internal';
 
 // Definition der Datenbank-Typ-Schnittstelle für bessere Typsicherheit
 interface DatabaseModule {
-  pool: any; // Ermöglicht verschiedene Pool-Typen
-  db: any;   // Drizzle-Instanz
+  pool: Pool; // Ermöglicht verschiedene Pool-Typen
+  db: any;    // Drizzle-Instanz
   testDatabaseConnection?: () => Promise<boolean>;
 }
 
@@ -52,6 +52,12 @@ export function selectDatabaseConnection(): DatabaseModule {
 // Ausgewählte Datenbankverbindung
 const selectedDb = selectDatabaseConnection();
 
+// Überprüfe, ob die Verbindung korrekt ausgewählt wurde
+if (!selectedDb || !selectedDb.pool || !selectedDb.db) {
+  logger.error("Datenbankverbindung konnte nicht ausgewählt werden.");
+  throw new Error("Datenbankverbindung ist ungültig.");
+}
+
 // Exportieren der Pool- und db-Instanzen aus der ausgewählten Datenbankverbindung
 export const pool = selectedDb.pool;
 export const db = selectedDb.db;
@@ -73,11 +79,13 @@ export async function executeSafely<T>(
     return await operation();
   } catch (error) {
     logger.error(`${errorMessage}:`, error);
-    
+
+    // Rückgabe des Fallback-Werts, wenn definiert
     if (fallbackValue !== undefined) {
       return fallbackValue;
     }
-    
+
+    // Fehler erneut werfen, wenn kein Fallback-Wert definiert ist
     throw error;
   }
 }
@@ -85,15 +93,17 @@ export async function executeSafely<T>(
 // Führe einen Test der Datenbankverbindung durch
 export async function testConnection() {
   try {
-    if (selectedDb && 'testDatabaseConnection' in selectedDb && typeof selectedDb.testDatabaseConnection === 'function') {
+    // Prüfe, ob eine spezifische Testmethode für die ausgewählte Datenbank vorhanden ist
+    if (selectedDb && selectedDb.testDatabaseConnection) {
       return await selectedDb.testDatabaseConnection();
     } else {
+      // Andernfalls Standard-Pool-Verbindung testen
       const result = await pool.query('SELECT NOW()');
       logger.info(`Datenbank-Verbindungstest erfolgreich: ${result.rows[0].now}`);
       return true;
     }
   } catch (error) {
-    logger.error('Fehler beim Datenbank-Verbindungstest:', error);
+    logger.error('Fehler beim Testen der Datenbankverbindung:', error);
     return false;
   }
 }
