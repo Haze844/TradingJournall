@@ -8,7 +8,7 @@
 
 import type { Express, Request, Response, NextFunction } from "express";
 import { storage } from "./storage";
-import { SelectUser } from "@shared/schema";
+import { User } from "@shared/schema";
 import { logger } from "./logger";
 
 /**
@@ -170,7 +170,7 @@ export async function renderUserRoute(req: Request, res: Response) {
   // #1: Reguläre Session-Authentifizierung prüfen
   if (req.isAuthenticated && req.isAuthenticated()) {
     // Don't send password to the client
-    const { password, ...userWithoutPassword } = req.user as SelectUser;
+    const { password, ...userWithoutPassword } = req.user as User;
     
     logger.debug("✅ Benutzer per Session authentifiziert", {
       userId: userWithoutPassword.id,
