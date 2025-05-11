@@ -10,11 +10,26 @@
  */
 
 import pg from 'pg';
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless';
 import * as schema from "@shared/schema";
 import { logger } from './logger';
 
 const { Pool } = pg;
+
+// Wandle PostgreSQL-Pool in ein Neon-kompatibles Format um
+function wrapPgPoolForNeon(pool: pg.Pool): any {
+  return {
+    query: async (sql: string, params: any[] = []) => {
+      const result = await pool.query(sql, params);
+      return {
+        rows: result.rows,
+        rowCount: result.rowCount
+      };
+    },
+    connect: pool.connect.bind(pool),
+    end: pool.end.bind(pool)
+  };
+}
 
 // Optimierte Erkennung der Render-Umgebung
 export function isRenderEnvironment(): boolean {
@@ -50,8 +65,8 @@ pool.on('error', (err: Error) => {
   logger.error('Unerwarteter Fehler am Datenbankpool (Render-intern):', err);
 });
 
-// Drizzle ORM Konfiguration
-export const db = drizzle(pool, { schema });
+// Drizzle ORM Konfiguration - Wrapper für Standard-PG-Pool um Neon-Kompatibilität herzustellen
+export const db = drizzleNeon(wrapPgPoolForNeon(pool), { schema });
 
 // Testfunktion für die Datenbankverbindung
 export async function testDatabaseConnection() {

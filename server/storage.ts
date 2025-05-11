@@ -79,8 +79,10 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     try {
-      const [user] = await executeSafely(db => 
-        db.select().from(users).where(eq(users.username, username))
+      const [user] = await executeSafely(
+        () => db.select().from(users).where(eq(users.username, username)),
+        undefined,
+        `Fehler beim Abrufen des Benutzers mit Username ${username}`
       );
       return user;
     } catch (error) {
@@ -91,8 +93,10 @@ export class DatabaseStorage implements IStorage {
 
   async createUser(user: InsertUser): Promise<User> {
     try {
-      const [createdUser] = await executeSafely(db => 
-        db.insert(users).values(user).returning()
+      const [createdUser] = await executeSafely(
+        () => db.insert(users).values(user).returning(),
+        undefined,
+        "Fehler beim Erstellen eines Benutzers"
       );
       return createdUser;
     } catch (error) {
