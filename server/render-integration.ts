@@ -6,18 +6,21 @@
  * IPv6-Netzwerkverbindungen.
  */
 
-import { Request, Response, NextFunction, Express } from 'express';
-import { logger } from './logger';
-import { storage } from './storage';
-import { User as SelectUser } from "@shared/schema";
+import type { Express, Request, Response, NextFunction } from "express";
+import { storage } from "./storage";
+import { SelectUser } from "@shared/schema";
+import { logger } from "./logger";
 
 /**
  * Prüft, ob die Anwendung in der Render-Umgebung läuft
  */
 export function isRenderEnvironment(): boolean {
-  return process.env.RENDER === 'true' || 
-         !!process.env.RENDER_EXTERNAL_URL || 
-         !!process.env.RENDER_SERVICE_ID;
+  // Mehrere Möglichkeiten zur Erkennung der Render-Umgebung
+  const isRenderVar = process.env.RENDER === 'true';
+  const hasRenderUrl = !!process.env.RENDER_EXTERNAL_URL;
+  const hasRenderServiceID = !!process.env.RENDER_SERVICE_ID;
+
+  return isRenderVar || hasRenderUrl || hasRenderServiceID;
 }
 
 /**
@@ -25,41 +28,43 @@ export function isRenderEnvironment(): boolean {
  */
 export function configureForRender(app: Express): void {
   if (!isRenderEnvironment()) {
-    logger.debug("🔄 Keine Render-Umgebung erkannt, Render-Konfiguration wird übersprungen");
+    logger.debug("👉 Keine Render-Umgebung erkannt, überspringe spezielle Konfiguration");
     return;
   }
 
-  logger.info("🚀 Render-spezifische Konfiguration wird angewendet");
-  
-  // Verbesserte Trust Proxy Einstellung für Render's Architektur
-  app.set("trust proxy", 1);
-  
-  // Globales Logging für Render-Debugging
-  if (!global.renderLogs) {
-    global.renderLogs = [];
-  }
+  logger.info("🔧 Richte Render-spezifische Konfiguration ein...");
 
-  // Verbindungstest-Route speziell für Render
-  app.get("/api/render-status", (req, res) => {
-    res.json({
-      status: "ok",
-      environment: "render",
-      timestamp: new Date().toISOString(),
-      headers: {
-        userAgent: req.get('User-Agent'),
-        host: req.get('Host'),
-        forwardedProto: req.get('X-Forwarded-Proto')
-      },
-      render: {
-        external_url: process.env.RENDER_EXTERNAL_URL,
-        service_id: process.env.RENDER_SERVICE_ID
-      },
-      connectionType: {
-        usingIPv4Only: true,
-        usingFallbackAuth: true
-      }
+  // Spezielles Verhalten für Render: Fallback auf URL-Parameter-Authentifizierung
+  app.use((req, res, next) => {
+    // Füge ein Debug-Log für die Anfrage zur Session hinzu
+    logger.debug("📡 Render-Anfrage empfangen", {
+      method: req.method,
+      path: req.path,
+      ip: req.ip,
+      hasSession: !!req.session,
+      sessionID: req.session?.id || 'keine',
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : 'undefined'
     });
+
+    // Prüfe, ob der Request eine userId als Parameter enthält
+    // Dies ist eine Render-spezifische Lösung für Session-Probleme
+    const userIdParam = req.query.userId || req.body?.userId;
+    const validUserIds = ['1', '2', 1, 2]; // Admin=1, Mo=2
+
+    if (userIdParam && 
+        (validUserIds.includes(userIdParam as any) || 
+         validUserIds.includes(Number(userIdParam)))) {
+      logger.debug("🔑 Render URL Parameter Auth aktiviert", {
+        userIdParam,
+        path: req.path,
+        method: req.method
+      });
+    }
+
+    next();
   });
+
+  logger.info("✅ Render-spezifische Konfiguration erfolgreich eingerichtet");
 }
 
 /**
@@ -70,131 +75,153 @@ export function configureForRender(app: Express): void {
  * um einen alternativen Authentifizierungsmechanismus zu bieten.
  */
 export async function renderAuthMiddleware(req: Request, res: Response, next: NextFunction) {
-  // Zuerst prüfen wir, ob die Render-Anpassungen überhaupt nötig sind
-  if (!isRenderEnvironment()) {
-    // Standardverhalten in Nicht-Render-Umgebungen: Weiterleitung
-    return next();
-  }
-
-  // Logging für Debug-Zwecke
-  logger.debug("🔍 Render Auth-Check durchgeführt", { 
-    path: req.path,
-    query: req.query,
-    hasSession: !!req.session,
-    sessionId: req.session?.id,
-    isAuthenticated: req.isAuthenticated()
-  });
-
-  // 1. Standard-Authentifizierung über Session prüfen
-  if (req.isAuthenticated()) {
-    logger.debug("✅ Render: Benutzer per Session authentifiziert", {
-      userId: (req.user as any).id,
-      path: req.path
+  // Prüfe zuerst reguläre Authentifizierung
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    logger.debug("✅ Benutzer regulär authentifiziert", {
+      sessionId: req.session?.id,
+      userId: (req.user as any)?.id
     });
     return next();
   }
 
-  // 2. Fallback: userId im Query-Parameter prüfen
-  const userIdParam = req.query.userId;
-  
-  // Sicherheitsüberprüfung: nur bestimmte User-IDs zulassen
-  const validUserIds = ['1', '2', 1, 2]; // Admin=1, Mo=2
-  const isValidUserId = userIdParam !== undefined && 
-                       (validUserIds.includes(userIdParam as any) || 
-                        validUserIds.includes(Number(userIdParam)));
-  
-  if (isValidUserId) {
-    try {
-      // User-ID konvertieren
-      const userId = typeof userIdParam === 'string' ? parseInt(userIdParam, 10) : userIdParam;
+  // Wenn in Render-Umgebung und nicht authentifiziert, prüfe alternatives Auth-Schema
+  if (isRenderEnvironment()) {
+    // Prüfe, ob der Request eine userId als Parameter enthält
+    const userIdParam = req.query.userId || req.body?.userId;
+    const validUserIds = ['1', '2', 1, 2]; // Admin=1, Mo=2
+    const isValidUserId = userIdParam !== undefined && 
+                         (validUserIds.includes(userIdParam as any) || 
+                          validUserIds.includes(Number(userIdParam)));
+    
+    // Debug-Log für Authentifizierungsprüfung
+    logger.debug("🔐 Authentifizierungsprüfung", {
+      sessionId: req.session?.id,
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      userInSession: !!req.user,
+      userId: (req.user as any)?.id || null,
+      username: (req.user as any)?.username || null,
+      userIdParam: userIdParam as string,
+      hasCookies: !!req.headers.cookie,
+      cookieNames: req.headers.cookie ? req.headers.cookie.split(';').map(c => c.split('=')[0].trim()) : []
+    });
+    
+    if (isValidUserId) {
+      const userId = typeof userIdParam === 'string' ? parseInt(userIdParam, 10) : userIdParam as number;
+      
+      // Log dazwischen einfügen
+      console.log('isAuthenticated-Check - Session:', req.session?.id, 'Auth-Status:', req.isAuthenticated ? req.isAuthenticated() : false, 'Path:', req.path);
+      console.log('Alternativer Auth-Mechanismus via userId in Request-Parameter:', userId);
       
       // Benutzer aus der Datenbank holen
-      const user = await storage.getUser(userId as number);
-      
-      if (user) {
-        // Benutzer im Request-Objekt speichern, ohne Session
-        (req as any).renderAuthUser = user;
-        (req as any).effectiveUserId = user.id;
+      try {
+        const user = await storage.getUser(userId);
         
-        logger.debug("✅ Render: Fallback-Authentifizierung über URL-Parameter", {
-          userId: user.id,
-          username: user.username,
+        if (user) {
+          logger.info("✅ Authentifizierter Zugriff via Request-Parameter", {
+            userId: user.id,
+            path: req.path,
+            method: req.method,
+            ip: req.ip,
+            parameterSource: 'query'
+          });
+          
+          // Füge benutzer zum request ohne passport hinzu
+          (req as any).renderAuthUser = user;
+          return next();
+        }
+      } catch (error) {
+        logger.error("❌ Fehler beim alternativen Auth-Mechanismus", {
+          userIdParam,
+          error: error instanceof Error ? error.message : String(error),
           path: req.path
         });
-        
-        return next();
       }
-    } catch (error) {
-      logger.error("❌ Render: Fehler bei URL-Parameter-Authentifizierung", {
-        userIdParam,
-        path: req.path,
-        error: error instanceof Error ? error.message : String(error)
-      });
     }
   }
-
-  // 3. Wenn keine Authentifizierung erfolgreich war
-  logger.debug("❌ Render: Nicht authentifiziert", { 
+  
+  // Wenn keine Authentifizierung erfolgreich war
+  logger.debug("👤 Render Auth: Benutzer nicht authentifiziert", {
+    sessionId: req.session?.id,
+    ip: req.ip,
     path: req.path,
-    userIdParam
+    cookies: req.headers.cookie ? 'vorhanden' : 'fehlen'
   });
   
-  res.status(401).json({ message: "Nicht authentifiziert" });
+  return res.status(401).json({ message: "Unauthorized" });
 }
 
 /**
  * Spezielle GET /api/user Route für Render
  */
 export async function renderUserRoute(req: Request, res: Response) {
-  // Spezial-Route für Render
-  if (!isRenderEnvironment()) {
-    return res.status(400).json({ message: "Diese Route ist nur für Render verfügbar" });
-  }
-
-  // 1. Reguläre Session-Authentifizierung
-  if (req.isAuthenticated()) {
+  logger.debug("🔍 Render Auth-Check durchgeführt", { 
+    sessionId: req.session?.id, 
+    isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    path: req.path,
+    query: req.query
+  });
+  
+  // #1: Reguläre Session-Authentifizierung prüfen
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    // Don't send password to the client
     const { password, ...userWithoutPassword } = req.user as SelectUser;
+    
+    logger.debug("✅ Benutzer per Session authentifiziert", {
+      userId: userWithoutPassword.id,
+      username: userWithoutPassword.username,
+      sessionId: req.session?.id
+    });
+    
     return res.json(userWithoutPassword);
   }
-
-  // 2. Fallback: userId im Query-Parameter prüfen
-  const userIdParam = req.query.userId;
   
-  // Sicherheitsüberprüfung: nur bestimmte User-IDs zulassen
+  // #2: Für Render - userId im Query-Parameter prüfen (Fallback-Authentifizierung)
+  const userIdParam = req.query.userId;
   const validUserIds = ['1', '2', 1, 2]; // Admin=1, Mo=2
   const isValidUserId = userIdParam !== undefined && 
                        (validUserIds.includes(userIdParam as any) || 
                         validUserIds.includes(Number(userIdParam)));
   
-  if (isValidUserId) {
+  if (isRenderEnvironment() && isValidUserId) {
+    // Benutzer aus der Datenbank holen
     try {
-      // User-ID konvertieren
-      const userId = typeof userIdParam === 'string' ? parseInt(userIdParam, 10) : userIdParam;
-      
-      // Benutzer aus der Datenbank holen
-      const user = await storage.getUser(userId as number);
+      const userId = typeof userIdParam === 'string' ? parseInt(userIdParam, 10) : userIdParam as number;
+      const user = await storage.getUser(userId);
       
       if (user) {
         // Don't send password to the client
         const { password, ...userWithoutPassword } = user;
         
-        logger.debug("✅ Render: User-Daten via URL-Parameter bereitgestellt", {
+        logger.debug("✅ Render Fallback-Authentifizierung via URL-Parameter", {
           userId: userWithoutPassword.id,
-          username: userWithoutPassword.username
+          username: userWithoutPassword.username,
+          queryParam: userIdParam
         });
         
         return res.json(userWithoutPassword);
       }
     } catch (error) {
-      logger.error("❌ Render: Fehler beim Bereitstellen der User-Daten", {
+      logger.error("❌ Fehler bei Render URL-Parameter Auth", {
         userIdParam,
         error: error instanceof Error ? error.message : String(error)
       });
     }
   }
-
+  
   // Wenn keine Authentifizierung erfolgreich war
-  res.status(401).json({ message: "Nicht authentifiziert" });
+  logger.debug("👤 Benutzer nicht authentifiziert", { 
+    sessionId: req.session?.id,
+    ip: req.ip,
+    path: req.path,
+    cookies: req.headers.cookie ? 'vorhanden' : 'fehlen'
+  });
+  return res.sendStatus(401);
 }
 
 /**
@@ -202,38 +229,27 @@ export async function renderUserRoute(req: Request, res: Response) {
  * Diese Funktion fügt die notwendigen IPv4-Parameter zur Datenbank-URL hinzu
  */
 export function getOptimizedDatabaseUrl(): string {
-  const dbUrl = process.env.DATABASE_URL;
+  const originalUrl = process.env.DATABASE_URL || '';
   
-  if (!dbUrl) {
-    throw new Error("DATABASE_URL ist nicht definiert");
-  }
-  
-  // Prüfen, ob in der Render-Umgebung
-  if (!isRenderEnvironment()) {
-    return dbUrl;
+  // Prüfe, ob es eine valide URL ist
+  if (!originalUrl || !originalUrl.includes('postgres')) {
+    logger.error("❌ Ungültige Datenbank-URL für Optimierung");
+    return originalUrl;
   }
   
   try {
-    const url = new URL(dbUrl);
-    
-    // Parameter für IPv4-Verbindung hinzufügen, wenn noch nicht vorhanden
-    if (!url.searchParams.has('ip_type')) {
-      url.searchParams.set('ip_type', 'ipv4');
-      logger.info("📊 Datenbank-URL für Render optimiert (IPv4-Parameter hinzugefügt)");
+    // Wenn die URL bereits ip_type=ipv4 hat, nichts ändern
+    if (originalUrl.includes('ip_type=ipv4')) {
+      return originalUrl;
     }
     
-    return url.toString();
+    // Füge Parameter ip_type=ipv4 zur URL hinzu
+    const separator = originalUrl.includes('?') ? '&' : '?';
+    return `${originalUrl}${separator}ip_type=ipv4`;
   } catch (error) {
-    logger.error("❌ Fehler beim Optimieren der Datenbank-URL", {
+    logger.error("❌ Fehler bei der URL-Optimierung", {
       error: error instanceof Error ? error.message : String(error)
     });
-    
-    // Im Fehlerfall die Original-URL zurückgeben
-    return dbUrl;
+    return originalUrl;
   }
-}
-
-// Typerweiterung für globale Variablen
-declare global {
-  var renderLogs: string[];
 }

@@ -42,7 +42,30 @@ declare global {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // ERWEITERTE RENDER-DEBUGGING-ROUTEN
+  // RENDER-SPEZIFISCHE OPTIMIERUNGEN FÜR NEUE IMPLEMENTIERUNG
+  
+  // Spezielle Benutzer-Route für Render-Umgebung mit URL-Parameter-Authentifizierung
+  app.get('/api/user', async (req, res) => {
+    // Wenn wir in einer Render-Umgebung sind, verwenden wir die spezielle Render-Route
+    if (isRenderEnvironment()) {
+      return await renderUserRoute(req, res);
+    }
+    
+    // Standardverhalten außerhalb von Render
+    if (!req.isAuthenticated()) {
+      logger.debug("👤 Benutzer nicht authentifiziert", { 
+        sessionId: req.session?.id,
+        ip: req.ip,
+        path: req.path,
+        cookies: req.headers.cookie ? 'vorhanden' : 'fehlen'
+      });
+      return res.sendStatus(401);
+    }
+    
+    // Passwort nicht an den Client senden
+    const { password, ...userWithoutPassword } = req.user as SelectUser;
+    return res.json(userWithoutPassword);
+  });
   
   // API-Route für Clientseitige Debug-Logs
   app.post('/api/debug-logs', handleDebugLogs);
