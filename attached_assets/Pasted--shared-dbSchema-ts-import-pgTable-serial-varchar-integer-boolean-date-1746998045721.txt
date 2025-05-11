@@ -1,0 +1,56 @@
+// shared/dbSchema.ts
+
+import {
+  pgTable,
+  serial,
+  varchar,
+  integer,
+  boolean,
+  date,
+  numeric,
+} from "drizzle-orm/pg-core";
+
+// Users-Tabelle
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 255 }).notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
+});
+
+// Trades-Tabelle
+export const trades = pgTable("trades", {
+  id: serial("id").primaryKey(),
+  date: date("date", { mode: "string" }).defaultNow(),
+  symbol: varchar("symbol", { length: 50 }),
+  setup: varchar("setup", { length: 50 }),
+  mainTrendM15: varchar("main_trend_m15", { length: 50 }),
+  internalTrendM5: varchar("internal_trend_m5", { length: 50 }),
+  entryType: varchar("entry_type", { length: 50 }),
+  entryLevel: varchar("entry_level", { length: 10 }),
+  liquidation: varchar("liquidation", { length: 50 }),
+  location: varchar("location", { length: 255 }),
+  accountType: varchar("account_type", { length: 10 }),
+  session: varchar("session", { length: 50 }),
+  rrAchieved: numeric("rr_achieved"),
+  rrPotential: numeric("rr_potential"),
+  profitLoss: numeric("profit_loss"),
+  isWin: boolean("is_win"),
+  userId: integer("user_id").references(() => users.id),
+  trend: varchar("trend", { length: 50 }),
+  internalTrend: varchar("internal_trend", { length: 50 }),
+  microTrend: varchar("micro_trend", { length: 50 }),
+  structure: varchar("structure", { length: 50 }),
+  timeframeEntry: varchar("timeframe_entry", { length: 10 }),
+  unmitZone: varchar("unmit_zone", { length: 10 }),
+  rangePoints: integer("range_points"),
+  marketPhase: varchar("market_phase", { length: 50 }),
+  slType: varchar("sl_type", { length: 50 }),
+  slPoints: integer("sl_points"),
+  riskSum: numeric("risk_sum"),
+  riskPoints: numeric("risk_points"),
+  riskAmount: numeric("risk_amount"),
+  size: numeric("size"),
+  liquidationEntry: varchar("liquidation_entry", { length: 100 }),
+  gptFeedback: varchar("gpt_feedback", { length: 500 }),
+  chartImage: varchar("chart_image", { length: 500 }),
+});
