@@ -16,6 +16,9 @@ import { logger } from './logger';
 // WebSocket-Unterstützung für Neon/Supabase
 neonConfig.webSocketConstructor = ws;
 
+// Keine Neon-Konfiguration, da wir die interne Render-Datenbank verwenden
+logger.info("DB-Konfiguration: Verwende interne Render-Datenbank (keine Neon-Verbindung)");
+
 // IPv4-Optimierung für Render (kritisch für die Verbindung zu Supabase)
 function getOptimizedDatabaseUrl(): string {
   const dbUrl = process.env.DATABASE_URL;
@@ -102,7 +105,7 @@ function isConnectionError(err: any): boolean {
 /**
  * Stellt die Datenbankverbindung automatisch wieder her
  */
-function reconnect() {
+async function reconnect() {
   if (isReconnecting) return;
   
   isReconnecting = true;
@@ -111,19 +114,46 @@ function reconnect() {
   logger.info(`Versuche Datenbankverbindung wiederherzustellen (Versuch ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
 
   // Verzögerter Reconnect-Versuch
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      // Alten Pool schließen
+      // Alten Pool schließen, falls vorhanden
       try {
-        pool.end().catch(e => 
+        await pool.end().catch(e => 
           logger.error("Fehler beim Schließen des alten Pools:", e)
         );
       } catch (e) {
         logger.error("Fehler beim Schließen des alten Pools:", e);
       }
       
+      // Neuen Pool mit optimierter URL erstellen
+      const newOptimizedUrl = getOptimizedDatabaseUrl();
+      logger.info("Erstelle neuen Datenbankpool mit optimierter URL...");
+      
+      // Aktualisiere die exportierte Pool-Referenz
+      Object.defineProperty(exports, 'pool', {
+        value: new Pool({ 
+          connectionString: newOptimizedUrl,
+          max: 20,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 10000
+        }),
+        writable: true,
+        configurable: true
+      });
+      
+      // Aktualisiere die db-Referenz mit dem neuen Pool
+      Object.defineProperty(exports, 'db', {
+        value: drizzle(exports.pool, { schema }),
+        writable: true,
+        configurable: true
+      });
+      
+      // Neu erstellten Pool testen
+      await exports.pool.query('SELECT 1');
+      
+      logger.info('✅ Datenbankverbindung erfolgreich wiederhergestellt');
       isReconnecting = false;
-      logger.info('Verbindung zurückgesetzt, versuche mit bestehendem Pool weiterzuarbeiten');
+      reconnectAttempts = 0;
     } catch (error) {
       logger.error(`Reconnect-Versuch ${reconnectAttempts} fehlgeschlagen:`, error);
       isReconnecting = false;
