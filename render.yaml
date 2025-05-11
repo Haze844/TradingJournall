@@ -3,8 +3,16 @@ services:
     name: trading-journal
     env: node
     repo: https://github.com/Haze844/TradingJournall.git
-    buildCommand: npm install && npm run build
-    startCommand: node setup-db.js && node render-patch.cjs && node dist/index.mjs
+
+    # 🛠️ Installiert auch Dev-Dependencies (z. B. Vite & esbuild) und baut das Projekt
+    buildCommand: npm install --include=dev && npm run build
+
+    # 🚀 Startet mit Speicherbegrenzung, um OOM-Fehler auf Render zu vermeiden
+    startCommand: >
+      node --max-old-space-size=256 setup-db.js &&
+      node --max-old-space-size=256 render-patch.cjs &&
+      node --max-old-space-size=256 dist/index.mjs
+
     envVars:
       - key: NODE_ENV
         value: production
@@ -12,5 +20,6 @@ services:
         value: 5000
       - key: SESSION_SECRET
         generateValue: true
-      - key: DATABASE_URL
-        sync: false  # Stelle sicher, dass du diesen Schlüssel im Render Dashboard einrichtest!
+
+    # ❗WICHTIG: DATABASE_URL manuell im Render-Dashboard setzen!
+    # Beispiel: postgresql://username:password@ep-xyz-123456.us-east-2.aws.neon.tech/dbname?sslmode=require
