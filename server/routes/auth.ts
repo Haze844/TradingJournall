@@ -3,9 +3,21 @@ import passport from 'passport';
 
 const router = Router();
 
+// Typdefinitionen für Passport-Parameter
+interface PassportUser {
+  id: string | number;
+  username: string;
+  [key: string]: any;
+}
+
+interface AuthInfo {
+  message?: string;
+  [key: string]: any;
+}
+
 // Login-Route mit Passport
 router.post('/login', (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('local', (err, user, info) => {
+  passport.authenticate('local', (err: Error | null, user: PassportUser | false, info?: AuthInfo) => {
     if (err) return next(err);
     if (!user) return res.status(401).json({ error: info?.message || 'Login fehlgeschlagen' });
 

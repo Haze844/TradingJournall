@@ -1,13 +1,15 @@
 /**
- * Session-Konfiguration-Fix für Render-Deployments
- * Dieses Modul vereinheitlicht die Session-Konfiguration für alle Umgebungen
- * und behebt spezifische Probleme mit Render/Production
+ * Session-Konfiguration + Passport-Initialisierung
+ * Vereinheitlicht die Session-Konfiguration für alle Umgebungen
+ * und initialisiert Passport korrekt (für Login, Auth etc.)
  */
 
 import session from 'express-session';
 import { Express } from 'express';
 import connectPg from 'connect-pg-simple';
 import { pool } from './db';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
 
 const COOKIE_NAME = 'trading.sid';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'local-dev-secret';
@@ -66,8 +68,6 @@ export function setupUnifiedSession(app: Express) {
   if (isRender) {
     app.set('trust proxy', 1);
     console.log('Trust Proxy für Render aktiviert');
-
-    // ➕ HTTPS-Redirect Middleware (nur für Render)
     app.use((req, res, next) => {
       if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
         const httpsUrl = `https://${req.headers.host}${req.originalUrl}`;
@@ -76,7 +76,6 @@ export function setupUnifiedSession(app: Express) {
       }
       next();
     });
-
   } else if (isReplit) {
     app.set('trust proxy', 'loopback');
     console.log('Trust Proxy für Replit aktiviert');
@@ -100,14 +99,52 @@ export function setupUnifiedSession(app: Express) {
     cookieSettings,
   });
 
+  // 1. Session Middleware aktivieren
   app.use(session(sessionOptions));
 
+  // 2. Passport initialisieren
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // 3. Passport serialize/deserialize definieren
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser(async (id: string, done) => {
+    try {
+      const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+      if (result.rows.length === 0) return done(null, false);
+      done(null, result.rows[0]);
+    } catch (err) {
+      done(err);
+    }
+  });
+
+  // 4. Optional: LocalStrategy definieren (falls nicht woanders gemacht)
+  passport.use(new LocalStrategy(async (username, password, done) => {
+    try {
+      const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+      const user = result.rows[0];
+      if (!user) return done(null, false, { message: 'Falscher Benutzername' });
+
+      const isValid = password === user.password; // Ersetze das durch Hash-Vergleich
+      if (!isValid) return done(null, false, { message: 'Falsches Passwort' });
+
+      done(null, user);
+    } catch (err) {
+      done(err);
+    }
+  }));
+
+  // Debug-Logging nur in Entwicklung
   if (!isProduction) {
     app.use((req, res, next) => {
       console.log('SESSION-DEBUG:', {
         id: req.session.id,
         cookie: req.session.cookie,
         isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+        user: req.user || null,
       });
       next();
     });
