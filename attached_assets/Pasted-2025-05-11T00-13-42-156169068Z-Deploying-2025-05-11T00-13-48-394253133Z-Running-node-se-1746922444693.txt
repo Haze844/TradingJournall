@@ -1,0 +1,37 @@
+2025-05-11T00:13:42.156169068Z ==> Deploying...
+2025-05-11T00:13:48.394253133Z ==> Running 'node setup-supabase.cjs && node render-patch.cjs && node dist/index.js'
+2025-05-11T00:13:48.955960221Z node:internal/modules/cjs/loader:1228
+2025-05-11T00:13:48.955989102Z   throw err;
+2025-05-11T00:13:48.955992452Z   ^
+2025-05-11T00:13:48.955994472Z 
+2025-05-11T00:13:48.955997202Z Error: Cannot find module '/opt/render/project/src/setup-supabase.cjs'
+2025-05-11T00:13:48.955999332Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-11T00:13:48.956001962Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-11T00:13:48.956004232Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-11T00:13:48.956006242Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-11T00:13:48.956009372Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-11T00:13:48.956011692Z     at node:internal/main/run_main_module:36:49 {
+2025-05-11T00:13:48.956014652Z   code: 'MODULE_NOT_FOUND',
+2025-05-11T00:13:48.956017822Z   requireStack: []
+2025-05-11T00:13:48.956019932Z }
+2025-05-11T00:13:48.956021812Z 
+2025-05-11T00:13:48.956023802Z Node.js v22.14.0
+2025-05-11T00:13:50.025241931Z ==> Exited with status 1
+2025-05-11T00:13:50.176936203Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-05-11T00:13:54.426151731Z ==> Running 'node setup-supabase.cjs && node render-patch.cjs && node dist/index.js'
+2025-05-11T00:13:54.713443772Z node:internal/modules/cjs/loader:1228
+2025-05-11T00:13:54.713474933Z   throw err;
+2025-05-11T00:13:54.713478413Z   ^
+2025-05-11T00:13:54.713481093Z 
+2025-05-11T00:13:54.713484493Z Error: Cannot find module '/opt/render/project/src/setup-supabase.cjs'
+2025-05-11T00:13:54.713488243Z     at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+2025-05-11T00:13:54.713491703Z     at Function._load (node:internal/modules/cjs/loader:1055:27)
+2025-05-11T00:13:54.713495433Z     at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+2025-05-11T00:13:54.713498413Z     at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+2025-05-11T00:13:54.713502403Z     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:170:5)
+2025-05-11T00:13:54.713505363Z     at node:internal/main/run_main_module:36:49 {
+2025-05-11T00:13:54.713508533Z   code: 'MODULE_NOT_FOUND',
+2025-05-11T00:13:54.713512053Z   requireStack: []
+2025-05-11T00:13:54.713514934Z }
+2025-05-11T00:13:54.713517464Z 
+2025-05-11T00:13:54.713520694Z Node.js v22.14.0

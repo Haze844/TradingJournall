@@ -1,0 +1,128 @@
+},
+  [Symbol(kType)]: 'error',
+  [Symbol(kError)]: Error: connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)
+      at internalConnect (node:net:1115:16)
+      at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+      at GetAddrInfoReqWrap.emitLookup [as callback] (node:net:1520:9)
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:132:8) {
+    errno: -101,
+    code: 'ENETUNREACH',
+    syscall: 'connect',
+2025-05-11T00:22:14.163Z [ERROR] ❌ Fehler beim Erstellen der Standard-Benutzer
+    address: '2a05:d014:1c06:5f0d:a984:f24e:2623:a294',
+{
+  "error": "[object Object]"
+}
+    port: 443
+  },
+  [Symbol(kMessage)]: 'connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)'
+}
+Fehler bei Datenbankoperation (Versuch 1/3): ErrorEvent {
+  [Symbol(kTarget)]: WebSocket {
+    _events: [Object: null prototype] {
+      error: [Function],
+      message: [Function],
+      close: [Function],
+      open: [Function]
+    },
+    _eventsCount: 4,
+    _maxListeners: undefined,
+    _binaryType: 'arraybuffer',
+    _closeCode: 1006,
+    _closeFrameReceived: false,
+    _closeFrameSent: false,
+    _closeMessage: <Buffer >,
+    _closeTimer: null,
+    _errorEmitted: true,
+    _extensions: {},
+    _paused: false,
+    _protocol: '',
+    _readyState: 3,
+    _receiver: null,
+    _sender: null,
+    _socket: null,
+    _bufferedAmount: 0,
+    _isServer: false,
+    _redirects: 0,
+    _autoPong: true,
+    _url: 'wss://db.fjkzmznsleasgsysegvx.supabase.co/v2',
+    _req: null,
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false
+  },
+  [Symbol(kType)]: 'error',
+  [Symbol(kError)]: Error: connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)
+      at internalConnect (node:net:1115:16)
+      at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+      at GetAddrInfoReqWrap.emitLookup [as callback] (node:net:1520:9)
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:132:8) {
+    errno: -101,
+    code: 'ENETUNREACH',
+    syscall: 'connect',
+    address: '2a05:d014:1c06:5f0d:a984:f24e:2623:a294',
+    port: 443
+  },
+  [Symbol(kMessage)]: 'connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)'
+}
+2025-05-11T00:22:14.164Z [ERROR] ❌ Fehler beim Erstellen der Standard-Benutzer
+Fehler beim Erstellen eines Benutzers: ErrorEvent {
+{
+  "error": "[object Object]"
+}
+  [Symbol(kTarget)]: WebSocket {
+    _events: [Object: null prototype] {
+      error: [Function],
+      message: [Function],
+      close: [Function],
+      open: [Function]
+    },
+    _eventsCount: 4,
+    _maxListeners: undefined,
+    _binaryType: 'arraybuffer',
+    _closeCode: 1006,
+    _closeFrameReceived: false,
+    _closeFrameSent: false,
+    _closeMessage: <Buffer >,
+    _closeTimer: null,
+    _errorEmitted: true,
+    _extensions: {},
+    _paused: false,
+    _protocol: '',
+    _readyState: 3,
+    _receiver: null,
+    _sender: null,
+    _socket: null,
+    _bufferedAmount: 0,
+    _isServer: false,
+    _redirects: 0,
+    _autoPong: true,
+    _url: 'wss://db.fjkzmznsleasgsysegvx.supabase.co/v2',
+    _req: null,
+    [Symbol(shapeMode)]: false,
+    [Symbol(kCapture)]: false
+  },
+  [Symbol(kType)]: 'error',
+  [Symbol(kError)]: Error: connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)
+      at internalConnect (node:net:1115:16)
+      at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+      at GetAddrInfoReqWrap.emitLookup [as callback] (node:net:1520:9)
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:132:8) {
+    errno: -101,
+    code: 'ENETUNREACH',
+    syscall: 'connect',
+    address: '2a05:d014:1c06:5f0d:a984:f24e:2623:a294',
+    port: 443
+  },
+  [Symbol(kMessage)]: 'connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)'
+}
+2025-05-11T00:22:14.734Z [INFO] ➡️ HEAD /
+{
+  "method": "HEAD",
+  "path": "/",
+  "query": {},
+  "ip": "127.0.0.1",
+  "userAgent": "Go-http-client/1.1",
+  "cookies": [],
+  "authenticated": false
+}
+2025-05-11T00:22:14.738Z [INFO] ⬅️

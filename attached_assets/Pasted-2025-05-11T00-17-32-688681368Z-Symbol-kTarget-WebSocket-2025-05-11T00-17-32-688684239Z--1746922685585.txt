@@ -1,0 +1,181 @@
+2025-05-11T00:17:32.688681368Z   [Symbol(kTarget)]: WebSocket {
+2025-05-11T00:17:32.688684239Z     _events: [Object: null prototype] {
+2025-05-11T00:17:32.688686959Z       error: [Function],
+2025-05-11T00:17:32.688689949Z       message: [Function],
+2025-05-11T00:17:32.688692349Z       close: [Function],
+2025-05-11T00:17:32.688694839Z       open: [Function]
+2025-05-11T00:17:32.688697219Z     },
+2025-05-11T00:17:32.688699679Z     _eventsCount: 4,
+2025-05-11T00:17:32.688702199Z     _maxListeners: undefined,
+2025-05-11T00:17:32.688704419Z     _binaryType: 'arraybuffer',
+2025-05-11T00:17:32.688706659Z     _closeCode: 1006,
+2025-05-11T00:17:32.688709119Z     _closeFrameReceived: false,
+2025-05-11T00:17:32.688711609Z     _closeFrameSent: false,
+2025-05-11T00:17:32.688713919Z     _closeMessage: <Buffer >,
+2025-05-11T00:17:32.688716159Z     _closeTimer: null,
+2025-05-11T00:17:32.688718439Z     _errorEmitted: true,
+2025-05-11T00:17:32.688720669Z     _extensions: {},
+2025-05-11T00:17:32.68872298Z     _paused: false,
+2025-05-11T00:17:32.688725449Z     _protocol: '',
+2025-05-11T00:17:32.68872772Z     _readyState: 3,
+2025-05-11T00:17:32.68873007Z     _receiver: null,
+2025-05-11T00:17:32.68873228Z     _sender: null,
+2025-05-11T00:17:32.68873454Z     _socket: null,
+2025-05-11T00:17:32.68873693Z     _bufferedAmount: 0,
+2025-05-11T00:17:32.68873924Z     _isServer: false,
+2025-05-11T00:17:32.68874148Z     _redirects: 0,
+2025-05-11T00:17:32.68874373Z     _autoPong: true,
+2025-05-11T00:17:32.68875192Z     _url: 'wss://db.fjkzmznsleasgsysegvx.supabase.co/v2',
+2025-05-11T00:17:32.6887544Z     _req: null,
+2025-05-11T00:17:32.68875671Z     [Symbol(shapeMode)]: false,
+2025-05-11T00:17:32.68875907Z     [Symbol(kCapture)]: false
+2025-05-11T00:17:32.68876137Z   },
+2025-05-11T00:17:32.688763721Z   [Symbol(kType)]: 'error',
+2025-05-11T00:17:32.68876609Z   [Symbol(kError)]: Error: connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)
+2025-05-11T00:17:32.688768761Z       at internalConnect (node:net:1115:16)
+2025-05-11T00:17:32.68877133Z       at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+2025-05-11T00:17:32.688773741Z       at GetAddrInfoReqWrap.emitLookup [as callback] (node:net:1520:9)
+2025-05-11T00:17:32.688775851Z       at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:132:8) {
+2025-05-11T00:17:32.688777971Z     errno: -101,
+2025-05-11T00:17:32.688780181Z     code: 'ENETUNREACH',
+2025-05-11T00:17:32.688782311Z     syscall: 'connect',
+2025-05-11T00:17:32.688785041Z     address: '2a05:d014:1c06:5f0d:a984:f24e:2623:a294',
+2025-05-11T00:17:32.688787421Z     port: 443
+2025-05-11T00:17:32.688789811Z   },
+2025-05-11T00:17:32.688792381Z   [Symbol(kMessage)]: 'connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)'
+2025-05-11T00:17:32.688794771Z }
+2025-05-11T00:17:32.688922434Z 2025-05-11T00:17:32.688Z [ERROR] ❌ Fehler beim Erstellen der Standard-Benutzer
+2025-05-11T00:17:32.688929294Z {
+2025-05-11T00:17:32.688932914Z   "error": "[object Object]"
+2025-05-11T00:17:40.315044415Z ==> Your service is live 🎉
+2025-05-11T00:17:32.688935724Z }
+2025-05-11T00:17:32.689428825Z Fehler bei Datenbankoperation (Versuch 1/3): ErrorEvent {
+2025-05-11T00:17:32.689434905Z   [Symbol(kTarget)]: WebSocket {
+2025-05-11T00:17:32.689438196Z     _events: [Object: null prototype] {
+2025-05-11T00:17:32.689441636Z       error: [Function],
+2025-05-11T00:17:32.689444526Z       message: [Function],
+2025-05-11T00:17:32.689447076Z       close: [Function],
+2025-05-11T00:17:32.689449966Z       open: [Function]
+2025-05-11T00:17:32.689452756Z     },
+2025-05-11T00:17:32.689455456Z     _eventsCount: 4,
+2025-05-11T00:17:32.689458246Z     _maxListeners: undefined,
+2025-05-11T00:17:32.689460856Z     _binaryType: 'arraybuffer',
+2025-05-11T00:17:32.689463306Z     _closeCode: 1006,
+2025-05-11T00:17:32.689466106Z     _closeFrameReceived: false,
+2025-05-11T00:17:32.689468486Z     _closeFrameSent: false,
+2025-05-11T00:17:32.689473046Z     _closeMessage: <Buffer >,
+2025-05-11T00:17:32.689475717Z     _closeTimer: null,
+2025-05-11T00:17:32.689478846Z     _errorEmitted: true,
+2025-05-11T00:17:32.689481587Z     _extensions: {},
+2025-05-11T00:17:32.689484217Z     _paused: false,
+2025-05-11T00:17:32.689486817Z     _protocol: '',
+2025-05-11T00:17:32.689489297Z     _readyState: 3,
+2025-05-11T00:17:32.689491767Z     _receiver: null,
+2025-05-11T00:17:32.689494177Z     _sender: null,
+2025-05-11T00:17:32.689496957Z     _socket: null,
+2025-05-11T00:17:32.689499487Z     _bufferedAmount: 0,
+2025-05-11T00:17:32.689502017Z     _isServer: false,
+2025-05-11T00:17:32.689504417Z     _redirects: 0,
+2025-05-11T00:17:32.689506957Z     _autoPong: true,
+2025-05-11T00:17:32.689509667Z     _url: 'wss://db.fjkzmznsleasgsysegvx.supabase.co/v2',
+2025-05-11T00:17:32.689512307Z     _req: null,
+2025-05-11T00:17:32.689514937Z     [Symbol(shapeMode)]: false,
+2025-05-11T00:17:32.689517518Z     [Symbol(kCapture)]: false
+2025-05-11T00:17:32.689520178Z   },
+2025-05-11T00:17:32.689522667Z   [Symbol(kType)]: 'error',
+2025-05-11T00:17:32.689525978Z   [Symbol(kError)]: Error: connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)
+2025-05-11T00:17:32.689536198Z       at internalConnect (node:net:1115:16)
+2025-05-11T00:17:32.689539338Z       at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+2025-05-11T00:17:32.689541728Z       at GetAddrInfoReqWrap.emitLookup [as callback] (node:net:1520:9)
+2025-05-11T00:17:32.689544248Z       at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:132:8) {
+2025-05-11T00:17:32.689546678Z     errno: -101,
+2025-05-11T00:17:32.689549168Z     code: 'ENETUNREACH',
+2025-05-11T00:17:32.689551928Z     syscall: 'connect',
+2025-05-11T00:17:32.689554738Z     address: '2a05:d014:1c06:5f0d:a984:f24e:2623:a294',
+2025-05-11T00:17:32.689557218Z     port: 443
+2025-05-11T00:17:32.689559948Z   },
+2025-05-11T00:17:32.689562639Z   [Symbol(kMessage)]: 'connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)'
+2025-05-11T00:17:32.689587139Z }
+2025-05-11T00:17:32.777685146Z Fehler beim Erstellen eines Benutzers: ErrorEvent {
+2025-05-11T00:17:32.777706236Z   [Symbol(kTarget)]: WebSocket {
+2025-05-11T00:17:32.777710476Z     _events: [Object: null prototype] {
+2025-05-11T00:17:32.777714686Z       error: [Function],
+2025-05-11T00:17:32.777718216Z       message: [Function],
+2025-05-11T00:17:32.777721556Z       close: [Function],
+2025-05-11T00:17:32.777724527Z       open: [Function]
+2025-05-11T00:17:32.777727776Z     },
+2025-05-11T00:17:32.777731127Z     _eventsCount: 4,
+2025-05-11T00:17:32.777734217Z     _maxListeners: undefined,
+2025-05-11T00:17:32.777737277Z     _binaryType: 'arraybuffer',
+2025-05-11T00:17:32.777740297Z     _closeCode: 1006,
+2025-05-11T00:17:32.777743407Z     _closeFrameReceived: false,
+2025-05-11T00:17:32.777746717Z     _closeFrameSent: false,
+2025-05-11T00:17:32.777749537Z     _closeMessage: <Buffer >,
+2025-05-11T00:17:32.777752287Z     _closeTimer: null,
+2025-05-11T00:17:32.777755477Z     _errorEmitted: true,
+2025-05-11T00:17:32.777758507Z     _extensions: {},
+2025-05-11T00:17:32.777762507Z     _paused: false,
+2025-05-11T00:17:32.777765808Z     _protocol: '',
+2025-05-11T00:17:32.777769308Z     _readyState: 3,
+2025-05-11T00:17:32.777772588Z     _receiver: null,
+2025-05-11T00:17:32.777775748Z     _sender: null,
+2025-05-11T00:17:32.777778638Z     _socket: null,
+2025-05-11T00:17:32.777782218Z     _bufferedAmount: 0,
+2025-05-11T00:17:32.777785638Z     _isServer: false,
+2025-05-11T00:17:32.777788588Z     _redirects: 0,
+2025-05-11T00:17:32.777791598Z     _autoPong: true,
+2025-05-11T00:17:32.777794498Z     _url: 'wss://db.fjkzmznsleasgsysegvx.supabase.co/v2',
+2025-05-11T00:17:32.777797978Z     _req: null,
+2025-05-11T00:17:32.777801318Z     [Symbol(shapeMode)]: false,
+2025-05-11T00:17:32.777804518Z     [Symbol(kCapture)]: false
+2025-05-11T00:17:32.777808048Z   },
+2025-05-11T00:17:32.777811358Z   [Symbol(kType)]: 'error',
+2025-05-11T00:17:32.777815549Z   [Symbol(kError)]: Error: connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)
+2025-05-11T00:17:32.777819429Z       at internalConnect (node:net:1115:16)
+2025-05-11T00:17:32.777823269Z       at defaultTriggerAsyncIdScope (node:internal/async_hooks:464:18)
+2025-05-11T00:17:32.777826899Z       at GetAddrInfoReqWrap.emitLookup [as callback] (node:net:1520:9)
+2025-05-11T00:17:32.777830399Z       at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:132:8) {
+2025-05-11T00:17:32.777833839Z     errno: -101,
+2025-05-11T00:17:32.777837489Z     code: 'ENETUNREACH',
+2025-05-11T00:17:32.777841269Z     syscall: 'connect',
+2025-05-11T00:17:32.777844439Z     address: '2a05:d014:1c06:5f0d:a984:f24e:2623:a294',
+2025-05-11T00:17:32.777859319Z 2025-05-11T00:17:32.777Z [ERROR] ❌ Fehler beim Erstellen der Standard-Benutzer
+2025-05-11T00:17:32.77786219Z     port: 443
+2025-05-11T00:17:32.77786597Z {
+2025-05-11T00:17:32.77787011Z   "error": "[object Object]"
+2025-05-11T00:17:32.77787369Z }
+2025-05-11T00:17:32.777907271Z   },
+2025-05-11T00:17:32.777910651Z   [Symbol(kMessage)]: 'connect ENETUNREACH 2a05:d014:1c06:5f0d:a984:f24e:2623:a294:443 - Local (:::0)'
+2025-05-11T00:17:32.777913831Z }
+2025-05-11T00:17:33.128500957Z 2025-05-11T00:17:33.128Z [INFO] ➡️ HEAD /
+2025-05-11T00:17:33.128525977Z {
+2025-05-11T00:17:33.128529387Z   "method": "HEAD",
+2025-05-11T00:17:33.128531777Z   "path": "/",
+2025-05-11T00:17:33.128534047Z   "query": {},
+2025-05-11T00:17:33.128536747Z   "ip": "127.0.0.1",
+2025-05-11T00:17:33.128539687Z   "userAgent": "Go-http-client/1.1",
+2025-05-11T00:17:33.128541988Z   "cookies": [],
+2025-05-11T00:17:33.128544298Z   "authenticated": false
+2025-05-11T00:17:33.128546578Z }
+2025-05-11T00:17:33.132933517Z 2025-05-11T00:17:33.132Z [INFO] ⬅️ HEAD / 200 in 4ms
+2025-05-11T00:17:33.132947877Z {
+2025-05-11T00:17:33.132950957Z   "statusCode": 200,
+2025-05-11T00:17:33.132953487Z   "responseTime": 4,
+2025-05-11T00:17:33.132955767Z   "userAuth": false
+2025-05-11T00:17:33.132958077Z }
+2025-05-11T00:17:41.693004132Z 2025-05-11T00:17:41.692Z [INFO] ➡️ GET /
+2025-05-11T00:17:41.693027242Z {
+2025-05-11T00:17:41.693030792Z   "method": "GET",
+2025-05-11T00:17:41.693033342Z   "path": "/",
+2025-05-11T00:17:41.693035762Z   "query": {},
+2025-05-11T00:17:41.693038782Z   "ip": "10.201.157.132",
+2025-05-11T00:17:41.693044273Z   "userAgent": "Go-http-client/2.0",
+2025-05-11T00:17:41.693047142Z   "cookies": [],
+2025-05-11T00:17:41.693049902Z   "authenticated": false
+2025-05-11T00:17:41.693052323Z }
+2025-05-11T00:17:41.696148463Z 2025-05-11T00:17:41.696Z [INFO] ⬅️ GET / 200 in 4ms
+2025-05-11T00:17:41.696162193Z {
+2025-05-11T00:17:41.696165153Z   "statusCode": 200,
+2025-05-11T00:17:41.696167273Z   "responseTime": 4,
+2025-05-11T00:17:41.696169713Z   "userAuth": false
+2025-05-11T00:17:41.696171873Z }
