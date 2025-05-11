@@ -1,24 +1,24 @@
 /**
- * Datenbank-Selektor
+ * Datenbank-Selektor mit RENDER-INTERNER DATENBANK PRIORISIERUNG
  * 
  * Diese Datei ermöglicht das Umschalten zwischen verschiedenen Datenbankanbindungen
  * basierend auf Umgebungsvariablen und bietet Hilfsfunktionen für sichere Datenbankaufrufe.
+ * 
+ * WICHTIG: In Render-Umgebung wird nun ausschließlich die interne Datenbank verwendet.
  */
 
-// Pool-Typen dynamisch importieren basierend auf der verwendeten Datenbankverbindung
-import { Pool as PgPool } from 'pg';               // Standard PostgreSQL für Render
-import { Pool as NeonPool } from '@neondatabase/serverless'; // Neon für Supabase/Development
+// Nur Standard-PostgreSQL-Pool verwenden (keine Neon-Verbindung)
+import { Pool } from 'pg';  // Standard PostgreSQL für alle Umgebungen
 import { logger } from "./logger";
 import { isRenderEnvironment } from './render-integration';
 
 // Import der verschiedenen Datenbankkonfigurationen
 import * as localDb from './db-local';
-import * as supabaseDb from './db-supabase';
 import * as renderInternalDb from './db-render-internal';
 
 // Definition der Datenbank-Typ-Schnittstelle für bessere Typsicherheit
 interface DatabaseModule {
-  pool: any; // Ermöglicht verschiedene Pool-Typen (Neon und Standard-PG)
+  pool: any; // Ermöglicht verschiedene Pool-Typen
   db: any;   // Drizzle-Instanz
   testDatabaseConnection?: () => Promise<boolean>;
 }
@@ -39,10 +39,10 @@ export function selectDatabaseConnection(): DatabaseModule {
     return renderInternalDb as DatabaseModule;
   }
   
-  // Externe Datenbankverbindungen
-  if (provider === 'supabase') {
-    logger.info('Verwende Supabase-Datenbank');
-    return supabaseDb as DatabaseModule;
+  // Wir verwenden nur noch die Render-interne Datenbank oder lokale Datenbank
+  if (isRender || provider === 'render_internal') {
+    logger.info('Verwende Render-interne Datenbank als Fallback');
+    return renderInternalDb as DatabaseModule;
   } else {
     logger.info('Verwende lokale Datenbank');
     return localDb as DatabaseModule;

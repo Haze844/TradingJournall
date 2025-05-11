@@ -62,6 +62,16 @@ function applyRenderPatches() {
   
   log('Render-Umgebung erkannt, Patches werden angewendet...');
   
+  // Wichtig: Datenbankanbieter auf Render-intern setzen
+  log('Datenbankanbieter wird auf render_internal gesetzt...');
+  process.env.DATABASE_PROVIDER = 'render_internal';
+  
+  // Render-Flag setzen, falls noch nicht vorhanden
+  if (!process.env.RENDER) {
+    process.env.RENDER = 'true';
+    log('RENDER-Flag wurde gesetzt');
+  }
+  
   // Umgebungsvariablen protokollieren (ohne sensible Daten)
   log(`NODE_ENV: ${process.env.NODE_ENV}`);
   log(`RENDER_EXTERNAL_URL: ${process.env.RENDER_EXTERNAL_URL || 'nicht gesetzt'}`);
