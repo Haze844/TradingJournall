@@ -17,15 +17,27 @@ export function ProtectedRoute({
   path: string;
   component: () => React.JSX.Element;
 }) {
+  // Für Render-spezifischen Bypass: Prüfe direkt auf userId-Parameter
+  const url = new URL(window.location.href);
+  const userIdParam = url.searchParams.get('userId');
+  const hasBypassParam = userIdParam === '2'; // Mo's ID
+  
   // Hole den aktuellen Authentifizierungsstatus mit lokalem Fallback
   const { user, isLoading } = useAuth();
+  
+  // Wenn der userId-Parameter auf 2 gesetzt ist, erstellen wir einen "Mo"-Benutzer
+  const effectiveUser = hasBypassParam 
+    ? { id: 2, username: 'mo', createdAt: new Date().toISOString() } 
+    : user;
   
   // Erweiterte Debug-Info für geschützte Route
   console.log("Protected Route Check:", { 
     path, 
     isLoading, 
-    isAuthenticated: !!user,
-    username: user?.username || "none",
+    userIdParam,
+    hasBypassParam, 
+    isAuthenticated: !!(effectiveUser || user),
+    username: (effectiveUser || user)?.username || "none",
     localStorageUser: localStorage.getItem('tradingjournal_user') ? 'vorhanden' : 'nicht vorhanden'
   });
   
@@ -89,9 +101,21 @@ export function ProtectedRoute({
     );
   }
 
-  // Wenn nicht eingeloggt, zum Auth-Formular weiterleiten
-  if (!user) {
+  // Wenn nicht authentifiziert, prüfen ob wir den userId-Parameter haben
+  if (!effectiveUser) {
     console.log("Nicht authentifiziert, Weiterleitungen:", redirectCounter);
+    
+    // Wenn wir den userId=2 Parameter haben, zeigen wir die Komponente trotzdem an
+    if (hasBypassParam) {
+      console.log("Render/Netlify-Umgebung: Authentifizierung via userId=2 Parameter");
+      
+      // Benutzer im localStorage für spätere Anfragen speichern
+      const mockUser = { id: 2, username: 'mo', createdAt: new Date().toISOString() };
+      localStorage.setItem('tradingjournal_user', JSON.stringify(mockUser));
+      
+      // Direkt die Komponente anzeigen und Auth-Bypass aktivieren
+      return <Route path={path} component={Component} />;
+    }
     
     // Überprüfe zuerst, ob wir einen lokalen Benutzer haben und in der Render/Replit-Umgebung sind
     const isRender = isRenderEnvironment();

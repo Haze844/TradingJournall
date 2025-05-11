@@ -129,6 +129,14 @@ function getApiBaseUrl() {
 
 // Hilfsfunktion zum Abrufen der aktiven Benutzer-ID
 function getActiveUserId(): number | null {
+  // Prüfe zuerst, ob ein userId Parameter in der URL vorhanden ist
+  const url = new URL(window.location.href);
+  const userIdParam = url.searchParams.get('userId');
+  if (userIdParam === '2') {
+    console.log("userId=2 in URL gefunden, verwende für API-Anfragen");
+    return 2; // Mo's ID direkt zurückgeben
+  }
+  
   // Versuche, den Benutzer aus dem localStorage zu holen
   const localStorageUser = localStorage.getItem('tradingjournal_user');
   if (localStorageUser) {

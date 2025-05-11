@@ -83,14 +83,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Lokalen State für den Benutzer aus dem LocalStorage
   const [localUser, setLocalUser] = useState<SelectUser | null>(null);
 
+  // Prüfen, ob der userId-Parameter auf 2 (Mo) gesetzt ist für direkten Bypass
+  const url = new URL(window.location.href);
+  const userIdParam = url.searchParams.get('userId');
+  const hasBypassParam = userIdParam === '2'; // Mo's ID
+  
   // Haupt-Query für Server-seitige Authentifizierung
   const {
     data: user,
     error,
     isLoading,
   } = useQuery<SelectUser | undefined, Error>({
-    queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryKey: ["/api/user", userIdParam],
+    queryFn: (context) => {
+      // Direkter Auth-Bypass, wenn userId=2 Parameter vorhanden ist
+      if (hasBypassParam) {
+        console.log("Auth-Bypass durch userId=2 Parameter aktiviert, sende Mo-Benutzer");
+        return Promise.resolve({ 
+          id: 2, 
+          username: 'mo',
+          createdAt: new Date().toISOString(),
+          // Weitere Felder, die für Ihre User-Struktur erforderlich sind
+        } as SelectUser);
+      }
+      
+      // Ansonsten normale API-Anfrage
+      return getQueryFn({ on401: "returnNull" })(context);
+    },
     // Verbesserte Einstellungen für konsistentere Authentifizierung
     retry: 1,
     refetchOnWindowFocus: true,
