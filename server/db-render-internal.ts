@@ -10,26 +10,13 @@
  */
 
 import pg from 'pg';
-import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 import { logger } from './logger';
 
 const { Pool } = pg;
 
-// Wandle PostgreSQL-Pool in ein Neon-kompatibles Format um
-function wrapPgPoolForNeon(pool: pg.Pool): any {
-  return {
-    query: async (sql: string, params: any[] = []) => {
-      const result = await pool.query(sql, params);
-      return {
-        rows: result.rows,
-        rowCount: result.rowCount
-      };
-    },
-    connect: pool.connect.bind(pool),
-    end: pool.end.bind(pool)
-  };
-}
+// Diese Funktion wird nicht mehr benötigt, da wir den nativen PostgreSQL-Treiber verwenden
 
 // Optimierte Erkennung der Render-Umgebung
 export function isRenderEnvironment(): boolean {
@@ -38,7 +25,20 @@ export function isRenderEnvironment(): boolean {
 
 // Verbindungsparameter für Render-interne Datenbank
 export function getInternalDatabaseConfig() {
-  // Diese Werte werden von Render automatisch gesetzt
+  // Direkte Verbindungszeichenfolge (höchste Priorität)
+  const directConnectionString = "postgresql://trading_journal_user:bYjsrkaLdHZUO6GZgjKVG2qZJtr85EuD@dpg-d0gern2dbo4c73bb08q0-a/trading_journal_12k5";
+  
+  // Wenn die Verbindungszeichenfolge existiert, verwenden wir diese direkt
+  if (directConnectionString) {
+    logger.info('Verwende direkte Verbindungszeichenfolge für Render-interne Datenbank');
+    return {
+      connectionString: directConnectionString,
+      ssl: true
+    };
+  }
+  
+  // Fallback auf einzelne Parameter
+  logger.info('Verwende einzelne Parameter für Render-interne Datenbank');
   return {
     database: process.env.PGDATABASE || 'trading_journal',
     user: process.env.PGUSER || 'trading_journal_user',
@@ -65,8 +65,8 @@ pool.on('error', (err: Error) => {
   logger.error('Unerwarteter Fehler am Datenbankpool (Render-intern):', err);
 });
 
-// Drizzle ORM Konfiguration - Wrapper für Standard-PG-Pool um Neon-Kompatibilität herzustellen
-export const db = drizzleNeon(wrapPgPoolForNeon(pool), { schema });
+// Verwende direkt node-postgres Drizzle Adapter für den PostgreSQL-Pool
+export const db = drizzle(pool, { schema });
 
 // Testfunktion für die Datenbankverbindung
 export async function testDatabaseConnection() {
