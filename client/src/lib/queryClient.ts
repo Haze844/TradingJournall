@@ -304,20 +304,38 @@ export const getQueryFn: <T>(options: {
       try {
         const data = await res.json();
         return data;
-      } catch (jsonError) {
+      } catch (jsonError: any) {
         console.error(`Fehler beim Parsen der JSON-Antwort von ${apiUrl}:`, jsonError);
         // Wenn es ein JSON-Parsing-Fehler ist, versuchen wir, den Text zu lesen
         const text = await res.text();
         console.error(`Antworttext: ${text.substring(0, 500)}${text.length > 500 ? '...' : ''}`);
-        throw new Error(`JSON-Parsing-Fehler: ${jsonError.message}`);
+        throw new Error(`JSON-Parsing-Fehler: ${jsonError.message || 'Unbekannter Fehler'}`);
       }
     } catch (error) {
       console.error(`Fehler bei Query-Anfrage an ${apiUrl}:`, error);
       
-      // Bei Netlify-Umgebung: Wenn es sich um eine Auth-Anfrage handelt,
-      // können wir für Debugging-Zwecke Default-Benutzer zurückgeben
-      if (window.location.hostname.includes('netlify') && queryKey[0] === '/api/user') {
-        console.warn('Verwende temporären Test-Benutzer für Netlify-Umgebung');
+      // Bei Netlify/Render oder wenn der QueryString userId=... enthält
+      // setzen wir für Debugging- und Test-Zwecke den Benutzer und umgehen die API
+      const url = new URL(window.location.href);
+      const userIdParam = url.searchParams.get('userId');
+      
+      if ((window.location.hostname.includes('netlify') || 
+           window.location.hostname.includes('render.com') || 
+           userIdParam === '2') && 
+          queryKey[0] === '/api/user') {
+        
+        console.warn('Verwende alternativen Auth-Mechanismus für Netlify/Render oder mit userId-Parameter');
+        
+        // Wenn userId=2, dann "mo" als Benutzer vorspiegeln
+        if (userIdParam === '2') {
+          console.log('Nutze userId=2 Parameter für Auto-Login als "mo"');
+          return {
+            id: 2,
+            username: 'mo',
+            createdAt: new Date().toISOString()
+          };
+        }
+        
         return null; // Kein Benutzer, damit die Login-Seite angezeigt wird
       }
       

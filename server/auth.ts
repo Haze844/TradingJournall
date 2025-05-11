@@ -66,19 +66,19 @@ export function setupAuth(app: Express) {
     path: '/'
   };
   
-  // Render-spezifische Konfiguration nach Neon Dokumentation
+  // Render-spezifische Konfiguration mit weniger strikten Einstellungen
   if (isRender) {
-    logger.info("🍪 Render-optimierte Cookie-Konfiguration aktiviert", { 
-      cookieType: "render-optimized", 
-      secure: true, 
-      sameSite: "none"
+    logger.info("🍪 Render-optimierte Cookie-Konfiguration aktiviert (weniger strikt)", { 
+      cookieType: "render-optimized-relaxed", 
+      secure: false, 
+      sameSite: "lax"
     });
     
     cookieConfig = {
       ...cookieConfig,
-      secure: true,        // Muss true sein in Render-Umgebung
-      sameSite: 'none',    // Muss 'none' sein für Cross-Site in Render
-      domain: process.env.RENDER_EXTERNAL_HOSTNAME || undefined // Für Render-Subdomain
+      secure: false,       // Auf "false" gesetzt für mehr Kompatibilität
+      sameSite: 'lax',     // Auf "lax" gesetzt für mehr Kompatibilität
+      // Domain-Einstellung entfernt für mehr Kompatibilität
     };
   } 
   // Replit-spezifische Konfiguration
@@ -168,15 +168,15 @@ export function setupAuth(app: Express) {
     cookie: cookieConfig
   };
 
-  // Für Render-Umgebung empfohlene Einstellungen nach Neon-Dokumentation
+  // Für Render-Umgebung angepasste Session-Einstellungen mit weniger strikter Konfiguration
   if (isRender) {
     sessionOptions = {
       ...sessionOptions,
-      resave: false,
-      saveUninitialized: false,
-      rolling: true
+      resave: true,                // Auf true setzen - speichere Session bei jeder Anfrage
+      saveUninitialized: true,     // Auf true setzen - speichere auch nicht initialisierte Sessions
+      rolling: true                // Session-Ablaufzeit bei jedem Request erneuern
     };
-    logger.info("🔧 Render-optimierte Session-Konfiguration aktiviert", { sessionOptions });
+    logger.info("🔧 Render-optimierte Session-Konfiguration aktiviert (weniger strikt)", { sessionOptions });
   }
   // Für Replit-Umgebung
   else if (isReplit) {
