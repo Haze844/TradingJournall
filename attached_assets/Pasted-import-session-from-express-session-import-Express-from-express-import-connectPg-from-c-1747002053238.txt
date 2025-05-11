@@ -1,0 +1,105 @@
+import session from 'express-session';
+import { Express } from 'express';
+import connectPg from 'connect-pg-simple';
+import { pool } from './db';
+
+const COOKIE_NAME = 'trading.sid';
+const SESSION_SECRET = process.env.SESSION_SECRET || 'local-dev-secret';
+const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 Tage
+
+export function setupUnifiedSession(app: Express) {
+  console.log('Session-Fix wird angewendet...');
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isRender = !!process.env.RENDER || !!process.env.RENDER_EXTERNAL_URL;
+  const isReplit = !!process.env.REPL_ID || !!process.env.REPL_OWNER;
+
+  let store;
+
+  if (process.env.DATABASE_URL) {
+    const PostgresStore = connectPg(session);
+    store = new PostgresStore({
+      pool,
+      tableName: 'sessions',
+      createTableIfMissing: false,
+    });
+    console.log('Verwende PostgreSQL Session-Store');
+  } else {
+    const MemoryStore = require('memorystore')(session);
+    store = new MemoryStore({
+      checkPeriod: 86400000,
+    });
+    console.log('Verwende Memory Session-Store (Entwicklungsumgebung)');
+  }
+
+  const baseCookieSettings: session.CookieOptions = {
+    maxAge: SESSION_MAX_AGE,
+    httpOnly: true,
+    path: '/',
+    sameSite: 'lax',
+    secure: false, // wird dynamisch gesetzt
+  };
+
+  // Render-URL nur für Logging – domain wird NICHT gesetzt
+  if (isRender) {
+    const renderExternalUrl = process.env.RENDER_EXTERNAL_URL || '';
+    if (renderExternalUrl) {
+      try {
+        const domain = new URL(renderExternalUrl).hostname;
+        console.log(`Render-Domain erkannt: ${domain}`);
+        if (!domain.includes('localhost')) {
+          console.log('Cookie-Domain wird NICHT explizit gesetzt (automatisch durch Browser)');
+        }
+      } catch (error) {
+        console.error('Fehler beim Parsen der Render-URL:', error);
+      }
+    }
+  }
+
+  // Trust-Proxy-Konfiguration
+  if (isRender) {
+    app.set('trust proxy', 1);
+    console.log('Trust Proxy für Render aktiviert');
+  } else if (isReplit) {
+    app.set('trust proxy', 'loopback');
+    console.log('Trust Proxy für Replit aktiviert');
+  }
+
+  const sessionOptions: session.SessionOptions = {
+    name: COOKIE_NAME,
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store,
+    cookie: baseCookieSettings,
+  };
+
+  app.use((req, res, next) => {
+    // Dynamisch secure setzen, abhängig von HTTPS-Erkennung durch Express
+    if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+      req.session.cookie.secure = true;
+    } else {
+      req.session.cookie.secure = false;
+    }
+    next();
+  });
+
+  app.use(session(sessionOptions));
+
+  if (!isProduction) {
+    app.use((req, res, next) => {
+      console.log('SESSION-DEBUG:', {
+        id: req.session.id,
+        cookie: req.session.cookie,
+        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      });
+      next();
+    });
+  }
+
+  return {
+    store,
+    cookieSettings: baseCookieSettings,
+    name: COOKIE_NAME,
+  };
+}
