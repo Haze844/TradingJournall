@@ -1,31 +1,53 @@
 /**
- * SUPABASE DATENBANKKONFIGURATION
+ * SUPABASE DATENBANK-KONFIGURATION mit FEHLERBEHANDLUNG für RENDER
  * 
- * Diese Datei konfiguriert die Verbindung zu einer Supabase PostgreSQL-Datenbank.
- * Supabase bietet PostgreSQL in der Cloud mit einfacher Verwaltung.
+ * Diese Datei wurde optimiert, um mit häufigen Datenbankproblemen
+ * in der Render-Umgebung zuverlässig umzugehen. Bei Verbindungsproblemen
+ * wird automatisch ein Reconnect versucht.
  * 
- * Anleitung zur Verbindung:
- * 1. Erstelle ein Projekt in Supabase (https://supabase.com/dashboard)
- * 2. Kopiere die Verbindungs-URL aus dem Dashboard
- *    (Connection Pooling URL oder Direct Connection URL)
- * 3. Setze die Umgebungsvariable DATABASE_URL auf diese URL
+ * WICHTIG: Für die Verbindung von Render zu Supabase muss der IPv4-Parameter verwendet werden.
  */
 
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
-import * as schema from "../shared/schema";
+import * as schema from "@shared/schema";
+import { isRenderEnvironment } from './render-integration';
+import { logger } from './logger';
 
-// WebSocket-Konstruktor für die Serverless-Umgebung konfigurieren
 neonConfig.webSocketConstructor = ws;
 
-// Verbesserte Fehlerbehandlung und Debugging
-if (!process.env.DATABASE_URL) {
-  console.error("KRITISCHER FEHLER: DATABASE_URL fehlt! Die Anwendung kann nicht mit der Datenbank verbunden werden.");
-  throw new Error(
-    "DATABASE_URL must be set. Die URL sollte aus dem Supabase Dashboard kopiert werden."
-  );
+// IPv4-Optimierung für Render (wichtig für die Verbindung zu Supabase)
+function getOptimizedDatabaseUrl(): string {
+  const dbUrl = process.env.DATABASE_URL;
+  
+  if (!dbUrl) {
+    throw new Error("DATABASE_URL fehlt in den Umgebungsvariablen");
+  }
+
+  // Füge den IP-Typ-Parameter nur in der Render-Umgebung hinzu
+  if (isRenderEnvironment()) {
+    logger.info("IPv4-Optimierung für Supabase-Verbindung in Render aktiviert");
+    
+    // Überprüfen, ob die URL bereits den Parameter enthält
+    if (dbUrl.includes('?')) {
+      // Es gibt bereits Parameter
+      if (!dbUrl.includes('ip_type=')) {
+        return `${dbUrl}&ip_type=ipv4`;
+      }
+      return dbUrl;
+    } else {
+      // Es gibt noch keine Parameter
+      return `${dbUrl}?ip_type=ipv4`;
+    }
+  }
+  
+  return dbUrl;
 }
+
+// Verbesserte Verbindung mit Fehlerbehandlung
+const optimizedUrl = getOptimizedDatabaseUrl();
+logger.info("Datenbankverbindung mit Supabase wird hergestellt...");
 
 // Variablen für Reconnect-Management
 let reconnectAttempts = 0;
@@ -33,13 +55,8 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 2000; // 2 Sekunden
 let isReconnecting = false;
 
-// Log der Datenbankverbindung (ohne sensible Daten)
-const dbUrlParts = process.env.DATABASE_URL.split('@');
-const dbHost = dbUrlParts.length > 1 ? dbUrlParts[1].split('/')[0] : 'versteckt';
-console.log(`Verbindung zu Supabase-Datenbank wird hergestellt (Host: ${dbHost})...`);
-
 export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
+  connectionString: optimizedUrl,
   max: 20, // Erhöhte Poolgrößen für bessere Leistung
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
@@ -49,7 +66,7 @@ export const pool = new Pool({
  * Prüft, ob ein Fehler ein Verbindungsfehler ist, der ein Reconnect rechtfertigt
  */
 function isConnectionError(err: any): boolean {
-  // Typische Verbindungsfehler mit PostgreSQL
+  // Typische Verbindungsfehler mit Neon
   const connectionErrorCodes = [
     '57P01', // Termination aufgrund Inaktivität
     '08006', // Verbindung geschlossen
@@ -57,7 +74,8 @@ function isConnectionError(err: any): boolean {
     '08004', // Verbindung zurückgewiesen
     'ECONNRESET', // Zurückgesetzte Verbindung
     'EPIPE', // Broken Pipe
-    'ETIMEDOUT' // Timeout
+    'ETIMEDOUT', // Timeout
+    'ENETUNREACH' // Network unreachable (IPv6-Problem)
   ];
 
   // Prüfen auf PostgreSQL-Fehlercode
@@ -69,7 +87,8 @@ function isConnectionError(err: any): boolean {
   if (err.message && (
     err.message.includes('connection') || 
     err.message.includes('timeout') ||
-    err.message.includes('socket')
+    err.message.includes('socket') ||
+    err.message.includes('network')
   )) {
     return true;
   }
@@ -86,7 +105,7 @@ function reconnect() {
   isReconnecting = true;
   reconnectAttempts++;
 
-  console.log(`Versuche Supabase-Datenbankverbindung wiederherzustellen (Versuch ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+  logger.info(`Versuche Datenbankverbindung wiederherzustellen (Versuch ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
 
   // Verzögerter Reconnect-Versuch
   setTimeout(() => {
@@ -94,26 +113,23 @@ function reconnect() {
       // Alten Pool schließen
       try {
         pool.end().catch(e => 
-          console.error("Fehler beim Schließen des alten Pools:", e)
+          logger.error("Fehler beim Schließen des alten Pools:", e)
         );
       } catch (e) {
-        console.error("Fehler beim Schließen des alten Pools:", e);
+        logger.error("Fehler beim Schließen des alten Pools:", e);
       }
       
-      // Neuen Pool erstellen würde hier folgen, ist aber in diesem Fall nicht möglich,
-      // da die Konstante nicht neu zugewiesen werden kann
-      
       isReconnecting = false;
-      console.log('Verbindung zurückgesetzt, versuche mit bestehendem Pool weiterzuarbeiten');
+      logger.info('Verbindung zurückgesetzt, versuche mit bestehendem Pool weiterzuarbeiten');
     } catch (error) {
-      console.error(`Reconnect-Versuch ${reconnectAttempts} fehlgeschlagen:`, error);
+      logger.error(`Reconnect-Versuch ${reconnectAttempts} fehlgeschlagen:`, error);
       isReconnecting = false;
       
       // Weitere Versuche, wenn Maximum nicht erreicht
       if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
         reconnect();
       } else {
-        console.error(`Maximale Anzahl von Reconnect-Versuchen (${MAX_RECONNECT_ATTEMPTS}) erreicht.`);
+        logger.error(`Maximale Anzahl von Reconnect-Versuchen (${MAX_RECONNECT_ATTEMPTS}) erreicht.`);
       }
     }
   }, RECONNECT_DELAY);
@@ -121,46 +137,25 @@ function reconnect() {
 
 // Überwache Pool-Fehler und versuche Reconnect bei schwerwiegenden Fehlern
 pool.on('error', (err) => {
-  console.error('Unerwarteter Fehler am Supabase-Datenbankpool:', err);
+  logger.error('Unerwarteter Fehler am Datenbankpool:', err);
   
   // Bei Verbindungsfehlern Reconnect versuchen
   if (isConnectionError(err)) {
-    console.log('Verbindungsfehler erkannt, versuche Reconnect...');
+    logger.info('Verbindungsfehler erkannt, versuche Reconnect...');
     reconnect();
   }
 });
 
-// Drizzle ORM mit Schema initialisieren
-export const db = drizzle({ client: pool, schema });
+export const db = drizzle(pool, { schema });
 
-// Hilfsfunktion zum Ausführen von Datenbankoperationen mit automatischem Retry
-export async function executeWithRetry<T>(
-  operation: (dbInstance: typeof db) => Promise<T>,
-  maxRetries = 3
-): Promise<T> {
-  let lastError;
-  
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      return await operation(db);
-    } catch (error: any) {
-      lastError = error;
-      console.error(`Fehler bei Datenbankoperation (Versuch ${attempt + 1}/${maxRetries}):`, error);
-      
-      // Bei Verbindungsfehlern Reconnect versuchen
-      if (isConnectionError(error)) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
-        
-        if (!isReconnecting) {
-          reconnect();
-        }
-      } else {
-        throw error;
-      }
-    }
+// Testfunktion für die Datenbankverbindung
+export async function testDatabaseConnection() {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    logger.info(`Supabase-Datenbankverbindung erfolgreich: ${result.rows[0].now}`);
+    return true;
+  } catch (error) {
+    logger.error('Fehler bei der Verbindung zur Supabase-Datenbank:', error);
+    return false;
   }
-  
-  throw lastError;
 }
-
-console.log("Supabase-Datenbankverbindung erfolgreich initialisiert.");

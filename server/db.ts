@@ -1,25 +1,54 @@
 /**
- * DATENBANK-KONFIGURATION mit FEHLERBEHANDLUNG für RENDER
+ * DATENBANK-KONFIGURATION mit RENDER IPv6-FIX und FEHLERBEHANDLUNG
  * 
- * Diese Datei wurde optimiert, um mit häufigen Datenbankproblemen
- * in der Render-Umgebung zuverlässig umzugehen. Bei Verbindungsproblemen
- * wird automatisch ein Reconnect versucht.
+ * Diese Datei wurde optimiert, um mit den IPv6-Verbindungsproblemen
+ * speziell bei Render-zu-Supabase-Verbindungen umzugehen.
+ * 
+ * WICHTIG: Der ipv4-Parameter wurde hinzugefügt, um ENETUNREACH-Fehler zu vermeiden.
  */
 
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "../shared/schema";
+import { logger } from './logger';
 
+// WebSocket-Unterstützung für Neon/Supabase
 neonConfig.webSocketConstructor = ws;
 
-// Verbesserte Fehlerbehandlung und Debugging
-if (!process.env.DATABASE_URL) {
-  console.error("KRITISCHER FEHLER: DATABASE_URL fehlt! Die Anwendung kann nicht mit der Datenbank verbunden werden.");
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+// IPv4-Optimierung für Render (kritisch für die Verbindung zu Supabase)
+function getOptimizedDatabaseUrl(): string {
+  const dbUrl = process.env.DATABASE_URL;
+  
+  if (!dbUrl) {
+    logger.error("KRITISCHER FEHLER: DATABASE_URL fehlt - Datenbankverbindung unmöglich");
+    throw new Error("DATABASE_URL muss gesetzt sein.");
+  }
+
+  // Erkennen der Render-Umgebung
+  const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
+  
+  if (isRender) {
+    logger.info("Render-Umgebung erkannt - verwende IPv4-Optimierung für Datenbankverbindung");
+    
+    // IPv4-Parameter hinzufügen, wenn nicht bereits vorhanden
+    if (dbUrl.includes('?')) {
+      // URL hat bereits Parameter
+      if (!dbUrl.includes('ip_type=')) {
+        return `${dbUrl}&ip_type=ipv4`;
+      }
+    } else {
+      // URL hat noch keine Parameter
+      return `${dbUrl}?ip_type=ipv4`;
+    }
+  }
+  
+  return dbUrl;
 }
+
+// Optimierte Verbindungs-URL mit IPv4-Fix für Render
+const optimizedUrl = getOptimizedDatabaseUrl();
+logger.info("Verbindung zur Datenbank wird hergestellt...");
 
 // Variablen für Reconnect-Management
 let reconnectAttempts = 0;
@@ -27,11 +56,9 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 2000; // 2 Sekunden
 let isReconnecting = false;
 
-// Verbesserte Verbindung mit Fehlerbehandlung
-console.log("Datenbankverbindung mit Neon Serverless wird hergestellt...");
-
+// Pool-Konfiguration mit verbesserter Fehlerbehandlung
 export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
+  connectionString: optimizedUrl,
   max: 20, // Erhöhte Poolgrößen für bessere Leistung
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
@@ -41,7 +68,7 @@ export const pool = new Pool({
  * Prüft, ob ein Fehler ein Verbindungsfehler ist, der ein Reconnect rechtfertigt
  */
 function isConnectionError(err: any): boolean {
-  // Typische Verbindungsfehler mit Neon
+  // Typische Verbindungsfehler mit Neon/Supabase
   const connectionErrorCodes = [
     '57P01', // Termination aufgrund Inaktivität
     '08006', // Verbindung geschlossen
@@ -49,7 +76,8 @@ function isConnectionError(err: any): boolean {
     '08004', // Verbindung zurückgewiesen
     'ECONNRESET', // Zurückgesetzte Verbindung
     'EPIPE', // Broken Pipe
-    'ETIMEDOUT' // Timeout
+    'ETIMEDOUT', // Timeout
+    'ENETUNREACH' // Network unreachable (IPv6-Problem)
   ];
 
   // Prüfen auf PostgreSQL-Fehlercode
@@ -57,11 +85,13 @@ function isConnectionError(err: any): boolean {
     return true;
   }
 
-  // Prüfen auf Netzwerkfehler
+  // Prüfen auf Netzwerkfehler-Meldungen
   if (err.message && (
     err.message.includes('connection') || 
     err.message.includes('timeout') ||
-    err.message.includes('socket')
+    err.message.includes('socket') ||
+    err.message.includes('network') ||
+    err.message.includes('unreachable')
   )) {
     return true;
   }
@@ -78,7 +108,7 @@ function reconnect() {
   isReconnecting = true;
   reconnectAttempts++;
 
-  console.log(`Versuche Datenbankverbindung wiederherzustellen (Versuch ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+  logger.info(`Versuche Datenbankverbindung wiederherzustellen (Versuch ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
 
   // Verzögerter Reconnect-Versuch
   setTimeout(() => {
@@ -86,26 +116,23 @@ function reconnect() {
       // Alten Pool schließen
       try {
         pool.end().catch(e => 
-          console.error("Fehler beim Schließen des alten Pools:", e)
+          logger.error("Fehler beim Schließen des alten Pools:", e)
         );
       } catch (e) {
-        console.error("Fehler beim Schließen des alten Pools:", e);
+        logger.error("Fehler beim Schließen des alten Pools:", e);
       }
       
-      // Neuen Pool erstellen würde hier folgen, ist aber in diesem Fall nicht möglich,
-      // da die Konstante nicht neu zugewiesen werden kann
-      
       isReconnecting = false;
-      console.log('Verbindung zurückgesetzt, versuche mit bestehendem Pool weiterzuarbeiten');
+      logger.info('Verbindung zurückgesetzt, versuche mit bestehendem Pool weiterzuarbeiten');
     } catch (error) {
-      console.error(`Reconnect-Versuch ${reconnectAttempts} fehlgeschlagen:`, error);
+      logger.error(`Reconnect-Versuch ${reconnectAttempts} fehlgeschlagen:`, error);
       isReconnecting = false;
       
       // Weitere Versuche, wenn Maximum nicht erreicht
       if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
         reconnect();
       } else {
-        console.error(`Maximale Anzahl von Reconnect-Versuchen (${MAX_RECONNECT_ATTEMPTS}) erreicht.`);
+        logger.error(`Maximale Anzahl von Reconnect-Versuchen (${MAX_RECONNECT_ATTEMPTS}) erreicht.`);
       }
     }
   }, RECONNECT_DELAY);
@@ -113,15 +140,27 @@ function reconnect() {
 
 // Überwache Pool-Fehler und versuche Reconnect bei schwerwiegenden Fehlern
 pool.on('error', (err) => {
-  console.error('Unerwarteter Fehler am Datenbankpool:', err);
+  logger.error('Unerwarteter Fehler am Datenbankpool:', err);
   
   // Bei Verbindungsfehlern Reconnect versuchen
   if (isConnectionError(err)) {
-    console.log('Verbindungsfehler erkannt, versuche Reconnect...');
+    logger.info('Verbindungsfehler erkannt, versuche Reconnect...');
     reconnect();
   }
 });
 
-export const db = drizzle({ client: pool, schema });
+export const db = drizzle(pool, { schema });
 
-console.log("Datenbankverbindung erfolgreich initialisiert.");
+logger.info("✅ Datenbankverbindung initialisiert - Optimierungen für Render aktiv");
+
+// Testfunktion für die Datenbankverbindung
+export async function testDatabaseConnection() {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    logger.info(`Datenbankverbindungstest erfolgreich: ${result.rows[0].now}`);
+    return true;
+  } catch (error) {
+    logger.error('⚠️ Fehler bei der Datenbankverbindung:', error);
+    return false;
+  }
+}

@@ -1,72 +1,97 @@
 /**
- * DATENBANKAUSWAHL
+ * Datenbank-Selektor
  * 
- * Diese Datei ermöglicht das einfache Umschalten zwischen verschiedenen
- * Datenbankanbietern wie Neon, Supabase oder lokalem PostgreSQL, ohne
- * dass Änderungen am Code vorgenommen werden müssen.
- * 
- * Die Auswahl erfolgt automatisch basierend auf den Umgebungsvariablen:
- * - Wenn DATABASE_PROVIDER=supabase gesetzt ist, wird Supabase verwendet
- * - Wenn DATABASE_PROVIDER=neon gesetzt ist, wird Neon verwendet
- * - Standardmäßig wird die Standardkonfiguration verwendet (abhängig von DATABASE_URL)
+ * Diese Datei ermöglicht das Umschalten zwischen verschiedenen Datenbankanbindungen
+ * basierend auf Umgebungsvariablen und bietet Hilfsfunktionen für sichere Datenbankaufrufe.
  */
 
-import * as neonDb from './db';
-import * as supabaseDb from './db-supabase';
+import { Pool } from '@neondatabase/serverless';
+import { logger } from "./logger";
+import { isRenderEnvironment } from './render-integration';
 
-// Typ für exportierte Datenbank-Module
+// Import der verschiedenen Datenbankkonfigurationen
+import * as localDb from './db-local';
+import * as supabaseDb from './db-supabase';
+import * as renderInternalDb from './db-render-internal';
+
+// Definition der Datenbank-Typ-Schnittstelle für bessere Typsicherheit
 interface DatabaseModule {
-  db: typeof neonDb.db;
-  pool: typeof neonDb.pool;
-  executeWithRetry?: <T>(
-    operation: (db: typeof neonDb.db) => Promise<T>,
-    maxRetries?: number
-  ) => Promise<T>;
+  pool: any; // Ermöglicht verschiedene Pool-Typen (Neon und Standard-PG)
+  db: any;   // Drizzle-Instanz
+  testDatabaseConnection?: () => Promise<boolean>;
 }
 
-// Prüfen, welche Datenbank verwendet werden soll
-const databaseProvider = process.env.DATABASE_PROVIDER?.toLowerCase() || 'auto';
+// Bestimmen der zu verwendenden Datenbankverbindung
+export function selectDatabaseConnection(): DatabaseModule {
+  // Umgebungsvariable für Datenbankauswahl prüfen
+  const provider = process.env.DATABASE_PROVIDER || 'local';
+  const environment = process.env.NODE_ENV || 'development';
+  const isRender = isRenderEnvironment();
+  
+  logger.info(`Datenbank-Konfiguration: Provider=${provider}, Umgebung=${environment}, Render=${isRender}`);
 
-// Datenbank-Modul basierend auf der Konfiguration auswählen
-let selectedDb: DatabaseModule;
-
-if (databaseProvider === 'supabase') {
-  console.log('Verwende Supabase als Datenbankanbieter (explizit konfiguriert)');
-  selectedDb = supabaseDb;
-} else if (databaseProvider === 'neon') {
-  console.log('Verwende Neon als Datenbankanbieter (explizit konfiguriert)');
-  selectedDb = neonDb;
-} else {
-  // Automatische Erkennung basierend auf der DATABASE_URL
-  if (process.env.DATABASE_URL?.includes('supabase.co')) {
-    console.log('Supabase-Datenbank-URL erkannt, verwende Supabase-Konfiguration');
-    selectedDb = supabaseDb;
-  } else if (process.env.DATABASE_URL?.includes('neon.tech')) {
-    console.log('Neon-Datenbank-URL erkannt, verwende Neon-Konfiguration');
-    selectedDb = neonDb;
+  // Spezielle Behandlung für die interne Render-Datenbank
+  // Wenn wir in der Render-Umgebung sind und PGHOST gesetzt ist, verwenden wir die interne Datenbank
+  if (isRender && process.env.PGHOST && provider === 'render_internal') {
+    logger.info('Verwende Render-interne PostgreSQL-Datenbank (trading_journal_db)');
+    return renderInternalDb as DatabaseModule;
+  }
+  
+  // Externe Datenbankverbindungen
+  if (provider === 'supabase') {
+    logger.info('Verwende Supabase-Datenbank');
+    return supabaseDb as DatabaseModule;
   } else {
-    console.log('Verwende Standard-Datenbankkonfiguration');
-    selectedDb = neonDb;
+    logger.info('Verwende lokale Datenbank');
+    return localDb as DatabaseModule;
   }
 }
 
-// Exportiere die ausgewählte Datenbankkonfiguration
-export const db = selectedDb.db;
-export const pool = selectedDb.pool;
-export const executeWithRetry = selectedDb.executeWithRetry;
+// Ausgewählte Datenbankverbindung
+const selectedDb = selectDatabaseConnection();
 
-// Hilfsfunktion zum Ausführen einer Datenbankoperation
+// Exportieren der Pool- und db-Instanzen aus der ausgewählten Datenbankverbindung
+export const pool = selectedDb.pool;
+export const db = selectedDb.db;
+
+/**
+ * Führt eine Datenbank-Anfrage sicher aus und handhabt Fehler
+ * 
+ * @param operation Die auszuführende Datenbankoperation (Funktion)
+ * @param fallbackValue Der Wert, der bei einem Fehler zurückgegeben wird (optional)
+ * @param errorMessage Eine benutzerdefinierte Fehlermeldung (optional)
+ * @returns Das Ergebnis der Operation oder den Fallback-Wert
+ */
 export async function executeSafely<T>(
-  operation: (db: typeof neonDb.db) => Promise<T>
+  operation: () => Promise<T>,
+  fallbackValue?: T,
+  errorMessage: string = "Fehler bei Datenbankoperation"
 ): Promise<T> {
-  if (executeWithRetry) {
-    return await executeWithRetry(operation);
-  } else {
-    try {
-      return await operation(db);
-    } catch (error) {
-      console.error('Fehler bei Datenbankoperation ohne Retry-Mechanismus:', error);
-      throw error;
+  try {
+    return await operation();
+  } catch (error) {
+    logger.error(`${errorMessage}:`, error);
+    
+    if (fallbackValue !== undefined) {
+      return fallbackValue;
     }
+    
+    throw error;
+  }
+}
+
+// Führe einen Test der Datenbankverbindung durch
+export async function testConnection() {
+  try {
+    if (selectedDb && 'testDatabaseConnection' in selectedDb && typeof selectedDb.testDatabaseConnection === 'function') {
+      return await selectedDb.testDatabaseConnection();
+    } else {
+      const result = await pool.query('SELECT NOW()');
+      logger.info(`Datenbank-Verbindungstest erfolgreich: ${result.rows[0].now}`);
+      return true;
+    }
+  } catch (error) {
+    logger.error('Fehler beim Datenbank-Verbindungstest:', error);
+    return false;
   }
 }
