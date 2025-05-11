@@ -8,37 +8,50 @@ import { setupUnifiedSession } from "./session-fix";
 import { setupAuth } from "./auth";
 import { fixRenderDirectories } from "./render-dir-fix";
 import { logger, requestLogger, errorLogger } from "./logger";
+import { configureForRender, isRenderEnvironment, getOptimizedDatabaseUrl } from "./render-integration";
 
-// Render-Fix: Direktes Routing zur Auth-Seite ohne Umwege
-// KEIN statisches HTML notwendig - wir implementieren direktes Routing
+// Logging zum Serverstart
 logger.info("🚀 Trading Journal Server startet...");
-logger.info("Direkter Auth-Zugriff aktiviert - keine statische HTML-Seite notwendig");
 
 // Stellen sicher, dass alle notwendigen Verzeichnisse existieren
 // Dies behebt den häufigen Fehler "ENOENT: no such file or directory" in Render
 fixRenderDirectories();
 
+// Optimierung: Setze optimierte DATABASE_URL wenn in Render-Umgebung
+if (isRenderEnvironment()) {
+  try {
+    process.env.DATABASE_URL = getOptimizedDatabaseUrl();
+    logger.info("📊 Datenbank-URL für Render optimiert (IPv4-Modus)");
+  } catch (error) {
+    logger.error("❌ Fehler bei der Datenbank-URL-Optimierung", {
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+}
+
 const app = express();
 
 // Umgebungsvariablen erkennen
-const isRender = process.env.RENDER === "true" || !!process.env.RENDER_EXTERNAL_URL;
+const isRender = isRenderEnvironment();
 const isReplit = !!process.env.REPL_ID || !!process.env.REPL_SLUG;
 const isNetlify = process.env.NETLIFY === "true";
 const isProduction = process.env.NODE_ENV === 'production';
 
-console.log("Umgebung erkannt:", { 
+logger.info("🌐 Umgebung erkannt", { 
   isRender, 
   isReplit, 
   isNetlify,
   isProduction,
-  nodeEnv: process.env.NODE_ENV 
+  nodeEnv: process.env.NODE_ENV
 });
 
-// GRUNDLEGENDER FIX: Stark vereinfachte CORS-Konfiguration für alle Umgebungen
-// Erlaubt alle Anfragen, unabhängig vom Ursprung - kritisch für Replit
+// Render-spezifische Konfigurationen anwenden
+configureForRender(app);
+
+// CORS-Konfiguration für alle Umgebungen
 app.use(cors({
   origin: true, // Erlaubt alle Origins
-  credentials: true, // Erlaubt Cookies bei Cross-Origin-Anfragen, essentiell für den Auth-Fix
+  credentials: true, // Erlaubt Cookies bei Cross-Origin-Anfragen
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Client-Info']
 }));

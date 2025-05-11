@@ -12,6 +12,11 @@ import { z } from "zod";
 import { renderDiagnostic } from "./render-diagnostic";
 import { handleDebugLogs, getDebugLogs, serverDebugLog, serverErrorLog } from "./render-debug-logs";
 import { logger, LogLevel } from "./logger";
+import { 
+  isRenderEnvironment, 
+  renderAuthMiddleware, 
+  renderUserRoute 
+} from "./render-integration";
 
 // Helper function to handle error messages safely
 function errorMessage(error: unknown): string {
