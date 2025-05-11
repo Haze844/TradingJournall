@@ -7,20 +7,16 @@
  * WICHTIG: Der ipv4-Parameter wurde hinzugefügt, um ENETUNREACH-Fehler zu vermeiden.
  */
 
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "../shared/schema";
 import { logger } from './logger';
 
-// WebSocket-Unterstützung für Neon/Supabase
-neonConfig.webSocketConstructor = ws;
+// Keine Neon-Datenbank wird verwendet
+logger.info("DB-Konfiguration: Verwende nur die interne Render-Datenbank (keine Neon-Verbindung)");
 
-// Keine Neon-Konfiguration, da wir die interne Render-Datenbank verwenden
-logger.info("DB-Konfiguration: Verwende interne Render-Datenbank (keine Neon-Verbindung)");
-
-// IPv4-Optimierung für Render (kritisch für die Verbindung zu Supabase)
-function getOptimizedDatabaseUrl(): string {
+// Einfache Prüfung auf vorhandene Datenbankverbindung
+function getDatabaseUrl(): string {
   const dbUrl = process.env.DATABASE_URL;
   
   if (!dbUrl) {
@@ -32,25 +28,14 @@ function getOptimizedDatabaseUrl(): string {
   const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
   
   if (isRender) {
-    logger.info("Render-Umgebung erkannt - verwende IPv4-Optimierung für Datenbankverbindung");
-    
-    // IPv4-Parameter hinzufügen, wenn nicht bereits vorhanden
-    if (dbUrl.includes('?')) {
-      // URL hat bereits Parameter
-      if (!dbUrl.includes('ip_type=')) {
-        return `${dbUrl}&ip_type=ipv4`;
-      }
-    } else {
-      // URL hat noch keine Parameter
-      return `${dbUrl}?ip_type=ipv4`;
-    }
+    logger.info("Render-Umgebung erkannt - verwende interne PostgreSQL-Datenbank");
   }
   
   return dbUrl;
 }
 
-// Optimierte Verbindungs-URL mit IPv4-Fix für Render
-const optimizedUrl = getOptimizedDatabaseUrl();
+// Datenbankverbindungsstring
+const dbUrl = getDatabaseUrl();
 logger.info("Verbindung zur Datenbank wird hergestellt...");
 
 // Variablen für Reconnect-Management

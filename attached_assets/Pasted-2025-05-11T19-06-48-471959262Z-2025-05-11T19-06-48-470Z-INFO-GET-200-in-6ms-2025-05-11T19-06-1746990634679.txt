@@ -1,0 +1,50 @@
+2025-05-11T19:06:48.471959262Z 2025-05-11T19:06:48.470Z [INFO] ⬅️ GET / 200 in 6ms
+2025-05-11T19:06:48.471974242Z {
+2025-05-11T19:06:48.471979552Z   "statusCode": 200,
+2025-05-11T19:06:48.471983893Z   "responseTime": 6,
+2025-05-11T19:06:48.471988242Z   "userAuth": false
+2025-05-11T19:06:48.471992653Z }
+2025-05-11T19:06:48.47729339Z Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+2025-05-11T19:06:48.47731267Z     at ServerResponse.setHeader (node:_http_outgoing:699:11)
+2025-05-11T19:06:48.47733194Z     at ServerResponse.header (/opt/render/project/src/node_modules/express/lib/response.js:794:10)
+2025-05-11T19:06:48.477335061Z     at ServerResponse.send (/opt/render/project/src/node_modules/express/lib/response.js:174:12)
+2025-05-11T19:06:48.477340401Z     at ServerResponse.json (/opt/render/project/src/node_modules/express/lib/response.js:278:15)
+2025-05-11T19:06:48.477343211Z     at file:///opt/render/project/src/dist/index.js:4794:24
+2025-05-11T19:06:48.477345751Z     at Layer.handle_error (/opt/render/project/src/node_modules/express/lib/router/layer.js:71:5)
+2025-05-11T19:06:48.477348351Z     at trim_prefix (/opt/render/project/src/node_modules/express/lib/router/index.js:326:13)
+2025-05-11T19:06:48.477352211Z     at /opt/render/project/src/node_modules/express/lib/router/index.js:286:9
+2025-05-11T19:06:48.477354931Z     at Function.process_params (/opt/render/project/src/node_modules/express/lib/router/index.js:346:12)
+2025-05-11T19:06:48.477357541Z     at next (/opt/render/project/src/node_modules/express/lib/router/index.js:280:10)
+2025-05-11T19:07:07.439950012Z 2025-05-11T19:07:07.439Z [DEBUG] 📡 Render-Anfrage empfangen
+2025-05-11T19:07:07.439989083Z {
+2025-05-11T19:07:07.439994153Z   "method": "GET",
+2025-05-11T19:07:07.439998033Z   "path": "/",
+2025-05-11T19:07:07.440001793Z   "ip": "10.201.35.131",
+2025-05-11T19:07:07.440005553Z   "hasSession": false,
+2025-05-11T19:07:07.440009263Z   "sessionID": "keine",
+2025-05-11T19:07:07.440013873Z   "isAuthenticated": "undefined"
+2025-05-11T19:07:07.440017663Z }
+2025-05-11T19:07:07.440820528Z 2025-05-11T19:07:07.440Z [INFO] ➡️ GET /
+2025-05-11T19:07:07.440835049Z {
+2025-05-11T19:07:07.440839749Z   "method": "GET",
+2025-05-11T19:07:07.440843659Z   "path": "/",
+2025-05-11T19:07:07.440847599Z   "query": {},
+2025-05-11T19:07:07.440866519Z   "ip": "10.201.35.131",
+2025-05-11T19:07:07.440871369Z   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+2025-05-11T19:07:07.440875449Z   "cookies": [
+2025-05-11T19:07:07.440879269Z     "tj_sid"
+2025-05-11T19:07:07.440883219Z   ],
+2025-05-11T19:07:07.440887479Z   "authenticated": false
+2025-05-11T19:07:07.44089153Z }
+2025-05-11T19:07:07.442388607Z 2025-05-11T19:07:07.442Z [INFO] ⬅️ GET / 500 in 2ms
+2025-05-11T19:07:07.442399817Z {
+2025-05-11T19:07:07.442404937Z   "statusCode": 500,
+2025-05-11T19:07:07.442408967Z   "responseTime": 2,
+2025-05-11T19:07:07.442413007Z   "userAuth": false
+2025-05-11T19:07:07.442417007Z }
+2025-05-11T19:07:07.44420848Z Error: connect ECONNREFUSED 10.202.118.136:443
+2025-05-11T19:07:07.444223651Z     at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-05-11T19:07:07.444228531Z     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+2025-05-11T19:07:07.444233381Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+2025-05-11T19:07:07.444238461Z     at async PGStore._rawEnsureSessionStoreTable (/opt/render/project/src/node_modules/connect-pg-simple/index.js:177:19)
+2025-05-11T19:07:07.444242911Z     at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:315:7)
