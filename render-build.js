@@ -2,7 +2,7 @@
  * Build-Skript für Render-Deployment
  * 
  * Dieses Skript wird verwendet, um die Anwendung für das Deployment auf Render zu bauen.
- * Es verwendet die Render-spezifische Vite-Konfiguration.
+ * Es verwendet die Render-spezifische Vite-Konfiguration und wendet einen Vite-Fix an.
  */
 
 const { execSync } = require('child_process');
@@ -18,6 +18,10 @@ if (process.env.RENDER) {
   log('Render-Deployment erkannt. Verwende optimierte Build-Konfiguration...');
   
   try {
+    // Vite-Fix anwenden
+    log('Wende Vite-Fix an...');
+    execSync('node vite-fix.js', { stdio: 'inherit' });
+    
     // Frontend bauen mit render-spezifischer Konfiguration
     log('Baue Frontend...');
     execSync('npx vite build --config vite.render.js', { stdio: 'inherit' });
