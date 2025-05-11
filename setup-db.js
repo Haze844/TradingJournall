@@ -1,28 +1,15 @@
-/**
- * Datenbank-Setup-Skript für INTERNE RENDER-DATENBANK
- * 
- * Dieses Skript richtet die Datenbank für das Trading Journal ein
- * und wird beim Deployment auf Render ausgeführt.
- * 
- * WICHTIG: Konfiguriert für die interne Render-Datenbank (keine Neon-Abhängigkeit)
- */
-
 import { Pool } from 'pg';
 
-// Verbindung zur Datenbank herstellen mit SSL-Konfiguration
-const pool = new Pool({ 
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  // SSL-Konfiguration für Render-Umgebung
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false // Akzeptiere auch selbstsignierte Zertifikate
-  } : undefined
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
 });
 
 async function setupDatabase() {
   try {
     console.log('🔄 Starte Datenbank-Setup für Trading Journal...');
-    
-    // Sessions-Tabelle erstellen
+
+    // Tabelle: sessions
     await pool.query(`
       CREATE TABLE IF NOT EXISTS sessions (
         sid VARCHAR NOT NULL PRIMARY KEY,
@@ -30,13 +17,10 @@ async function setupDatabase() {
         expire TIMESTAMP(6) NOT NULL
       );
     `);
-    console.log('✅ Sessions-Tabelle erstellt oder existiert bereits');
-
-    // Index für expire-Spalte erstellen
     await pool.query(`
       CREATE INDEX IF NOT EXISTS IDX_sessions_expire ON sessions (expire);
     `);
-    console.log('✅ Sessions-Index erstellt oder existiert bereits');
+    console.log('✅ Sessions-Tabelle und Index erstellt');
 
     // Tabelle: users
     await pool.query(`
@@ -47,7 +31,7 @@ async function setupDatabase() {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
-    console.log('✅ Benutzer-Tabelle erstellt oder existiert bereits');
+    console.log('✅ Benutzer-Tabelle erstellt');
 
     // Tabelle: trades
     await pool.query(`
@@ -95,8 +79,8 @@ async function setupDatabase() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
-    console.log('✅ Trades-Tabelle erstellt oder existiert bereits');
-    
+    console.log('✅ Trades-Tabelle erstellt');
+
     // Tabelle: settings
     await pool.query(`
       CREATE TABLE IF NOT EXISTS settings (
@@ -108,8 +92,8 @@ async function setupDatabase() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
-    console.log('✅ Settings-Tabelle erstellt oder existiert bereits');
-    
+    console.log('✅ Settings-Tabelle erstellt');
+
     // Tabelle: weekly_summary
     await pool.query(`
       CREATE TABLE IF NOT EXISTS weekly_summary (
@@ -124,27 +108,28 @@ async function setupDatabase() {
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `);
-    console.log('✅ Weekly-Summary-Tabelle erstellt oder existiert bereits');
+    console.log('✅ Weekly-Summary-Tabelle erstellt');
 
-    // Benutzer einfügen, wenn leer
-    const { rows } = await pool.query('SELECT COUNT(*) FROM users');
-    if (parseInt(rows[0].count) === 0) {
+    // Standardbenutzer einfügen
+    const result = await pool.query('SELECT COUNT(*) FROM users');
+    if (parseInt(result.rows[0].count) === 0) {
       await pool.query(`
-        INSERT INTO users (username, password) 
+        INSERT INTO users (username, password)
         VALUES ('admin', 'admin123'), ('mo', 'mo123');
       `);
-      console.log('✅ Standard-Benutzer wurden erstellt');
+      console.log('✅ Standard-Benutzer wurden erfolgreich erstellt');
     } else {
-      console.log('ℹ️ Benutzer existieren bereits, überspringe Erstellung');
+      console.log('ℹ️ Benutzer existieren bereits – kein Einfügen notwendig');
     }
 
+    console.log('🏁 Datenbank-Setup abgeschlossen');
   } catch (error) {
-    console.error('❌ Fehler beim Setup der Datenbank:', error);
+    console.error('❌ Fehler beim Einrichten der Datenbank:', error);
+    process.exit(1);
   } finally {
     await pool.end();
-    console.log('🏁 Setup abgeschlossen, Datenbankverbindung geschlossen.');
+    console.log('🔌 Datenbankverbindung geschlossen');
   }
 }
 
-// Datenbank einrichten
 setupDatabase();
