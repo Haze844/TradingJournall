@@ -8,7 +8,7 @@
  * Umgebungsvariablen.
  */
 
-import { Pool } from "@neondatabase/serverless";
+import { Pool } from "pg";
 import { eq } from "drizzle-orm";
 import {
   users,
