@@ -119,13 +119,27 @@ export function setupAuth(app: Express) {
     cookieConfig.sameSite = 'lax';
   }
   
-  // Session-Store mit Neon Postgres aufsetzen
-  // Umgebungsspezifische Konfiguration
-  let sessionStoreConfig: PostgresSessionOptions = {
-    pool, // Verwende den vorhandenen Pool mit Neon-DB-Verbindung
-    tableName: "sessions",
-    createTableIfMissing: true
-  };
+  // Session-Store mit PostgreSQL aufsetzen
+  // Umgebungsspezifische Konfiguration für verschiedene Datenbankumgebungen
+  let sessionStoreConfig: PostgresSessionOptions;
+  
+  // Render-interne Datenbank nutzt direkte Verbindungszeichenfolge
+  if (isRender && process.env.DATABASE_PROVIDER === 'render_internal') {
+    logger.info("🔧 Verwende Render-interne Datenbankverbindung für Session-Store");
+    sessionStoreConfig = {
+      pool, // Pool aus db-selector
+      tableName: "sessions",
+      createTableIfMissing: true
+    };
+  } 
+  // Standard-Konfiguration
+  else {
+    sessionStoreConfig = {
+      pool, // Verwende den vorhandenen Pool
+      tableName: "sessions",
+      createTableIfMissing: true
+    };
+  }
   
   // Für Render spezifische Optimierungen
   if (isRender) {

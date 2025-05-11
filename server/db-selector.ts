@@ -5,7 +5,9 @@
  * basierend auf Umgebungsvariablen und bietet Hilfsfunktionen für sichere Datenbankaufrufe.
  */
 
-import { Pool } from '@neondatabase/serverless';
+// Pool-Typen dynamisch importieren basierend auf der verwendeten Datenbankverbindung
+import { Pool as PgPool } from 'pg';               // Standard PostgreSQL für Render
+import { Pool as NeonPool } from '@neondatabase/serverless'; // Neon für Supabase/Development
 import { logger } from "./logger";
 import { isRenderEnvironment } from './render-integration';
 
