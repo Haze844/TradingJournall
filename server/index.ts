@@ -108,11 +108,9 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
-
       log(logLine);
     }
   });
@@ -121,13 +119,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  // 📡 API-Routen initialisieren
+  await registerRoutes(app);
 
+  // ❌ Globale Fehlerbehandlung
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    // If the request is looking for a PDF file, check if it's in the public directory
     if (_req.path.endsWith('.pdf')) {
       log(`PDF request: ${_req.path}`);
       return _next();
@@ -137,24 +136,16 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // ⚙️ Nur in Dev: Vite-Integration
   if (app.get("env") === "development") {
-    await setupVite(app, server);
+    await setupVite(app);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
+  // 🚀 Starte den Server auf Port 5000
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  app.listen(port, "0.0.0.0", () => {
+    log(`🚀 Server läuft auf Port ${port}`);
   });
 })();
