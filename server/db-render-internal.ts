@@ -25,19 +25,22 @@ export function isRenderEnvironment(): boolean {
 
 // Verbindungsparameter für Render-interne Datenbank
 export function getInternalDatabaseConfig() {
-  // Direkte Verbindungszeichenfolge (höchste Priorität)
-  const directConnectionString = "postgresql://trading_journal_user:bYjsrkaLdHZUO6GZgjKVG2qZJtr85EuD@dpg-d0gern2dbo4c73bb08q0-a/trading_journal_12k5";
+  // Umgebungsvariable für die Datenbankverbindung (höchste Priorität)
+  const envConnectionString = process.env.DATABASE_URL;
   
-  // Wenn die Verbindungszeichenfolge existiert, verwenden wir diese direkt
-  if (directConnectionString) {
-    logger.info('Verwende direkte Verbindungszeichenfolge für Render-interne Datenbank');
+  // Wenn die Umgebungsvariable existiert, verwenden wir diese direkt
+  if (envConnectionString) {
+    logger.info('Verwende DATABASE_URL für Render-interne Datenbank');
     return {
-      connectionString: directConnectionString,
-      ssl: true
+      connectionString: envConnectionString,
+      // SSL-Verbindung basierend auf der URL konfigurieren
+      ssl: envConnectionString.includes('ssl=true') || {
+        rejectUnauthorized: false // Weniger strikt für Entwicklungsumgebungen
+      }
     };
   }
   
-  // Fallback auf einzelne Parameter
+  // Fallback auf einzelne Parameter mit Umgebungsvariablen
   logger.info('Verwende einzelne Parameter für Render-interne Datenbank');
   return {
     database: process.env.PGDATABASE || 'trading_journal',
@@ -45,8 +48,10 @@ export function getInternalDatabaseConfig() {
     password: process.env.PGPASSWORD,
     host: process.env.PGHOST || 'localhost',
     port: parseInt(process.env.PGPORT || '5432'),
-    // Render-interne Verbindungen erfordern SSL nur in der Produktionsumgebung
-    ssl: isRenderEnvironment() && process.env.NODE_ENV === 'production',
+    // SSL-Konfiguration für verschiedene Umgebungen
+    ssl: {
+      rejectUnauthorized: false // Erlaubt selbstsignierte Zertifikate
+    }
   };
 }
 
