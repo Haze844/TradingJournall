@@ -1,0 +1,67 @@
+ Fehler & Verbesserungen:
+Doppelte Erstellung derselben Tabellen (users, trades, settings, weekly_summary werden zweimal erstellt).
+
+Doppelte Einfügung der users-Standardwerte (zwei Mal SELECT COUNT(*) FROM users direkt hintereinander).
+
+Try-Catch verschachtelt in Try – unklarer Ablauf bei Fehlern.
+
+Fehlender Abschluss der äußeren Funktion (async function), falls du nur den Body gepostet hast.
+
+Kein Aufruf von pool.end(), dadurch bleibt die Verbindung ggf. offen.
+
+✅ Empfohlene, korrigierte Struktur (vereinfacht):
+ts
+Kopieren
+Bearbeiten
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+async function setupDatabase() {
+  try {
+    // Tabelle: users
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+    console.log('Benutzer-Tabelle erstellt oder existiert bereits');
+
+    // Tabelle: trades
+    await pool.query(`-- deine CREATE TABLE trades Definition --`);
+    console.log('Trades-Tabelle erstellt oder existiert bereits');
+
+    // Tabelle: settings
+    await pool.query(`-- deine CREATE TABLE settings Definition --`);
+    console.log('Settings-Tabelle erstellt oder existiert bereits');
+
+    // Tabelle: weekly_summary
+    await pool.query(`-- deine CREATE TABLE weekly_summary Definition --`);
+    console.log('Weekly Summary-Tabelle erstellt oder existiert bereits');
+
+    // Benutzer einfügen, wenn leer
+    const { rows } = await pool.query('SELECT COUNT(*) FROM users');
+    if (parseInt(rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO users (username, password)
+        VALUES ('admin', 'admin123'), ('mo', 'mo123');
+      `);
+      console.log('Standard-Benutzer wurden erstellt');
+    } else {
+      console.log('Benutzer existieren bereits');
+    }
+  } catch (error) {
+    console.error('❌ Fehler beim Setup:', error);
+  } finally {
+    await pool.end();
+    console.log('✅ Setup abgeschlossen, Verbindung geschlossen.');
+  }
+}
+
+setupDatabase();
