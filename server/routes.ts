@@ -173,6 +173,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("Nicht authentifiziert an Root-Route, leite zu /auth weiter");
     return res.redirect(302, "/auth");
   });
+  
+  // Handler für /auth Route - fehlt diese, entsteht ein Redirect-Loop
+  app.get("/auth", (req: Request, res: Response) => {
+    // Einfacher Handler, der nur HTML zurückgibt, damit die Frontend-App das Rendering übernehmen kann
+    console.log("Auth-Route aufgerufen - isAuthenticated:", req.isAuthenticated(), "Session:", req.sessionID || 'keine');
+    
+    // Aktuellen Status erfassen und in Logs speichern
+    if (global.renderLogs) {
+      global.renderLogs.push(`[${new Date().toISOString()}] [AUTH-ROUTE] Auth: ${req.isAuthenticated() ? 'Ja' : 'Nein'}, Session: ${req.sessionID || 'keine'}, Cookies: ${req.headers.cookie ? 'vorhanden' : 'keine'}`);
+    }
+    
+    // Wenn der Benutzer bereits authentifiziert ist, zu SimpleHome weiterleiten (verhindert Loop)
+    if (req.isAuthenticated()) {
+      console.log("Auth Benutzer an Auth-Route erkannt, leite zu /SimpleHome weiter");
+      return res.redirect(302, "/SimpleHome");
+    }
+    
+    // Anfrage direkt an das Frontend weiterleiten
+    // Wir verwenden das Hauptverzeichnis für index.html, nicht ./public
+    res.sendFile("index.html", { root: "." });
+  });
 
   // Spezielle Debug-Endpunkte für Routing/Auth-Diagnose
   app.get("/api/debug", (req: Request, res: Response) => {
@@ -2324,8 +2345,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PWA und Multi-Device Routen
-  app.get("/api/settings", async (req: Request, res: Response) => {
+  // PWA und Multi-Device Routen - umbenannt, um Kollision zu vermeiden
+  app.get("/api/user-settings", async (req: Request, res: Response) => {
     try {
       // Unterstützt jetzt auch userId Parameter für nicht-authentifizierte Anfragen
       const userId = req.query.userId ? parseInt(req.query.userId as string) 
@@ -2339,7 +2360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log("GET /api/settings für userId:", userId);
+      console.log("GET /api/user-settings für userId:", userId);
 
       const settings = await storage.getAppSettings(userId, deviceId);
       
@@ -3149,7 +3170,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // App Settings API routes
   // Alias route für Kompatibilität mit dem Frontend
-  app.get("/api/settings", isAuthenticated, async (req: Request, res: Response) => {
+  // Behalte den alten Endpunkt für Kompatibilität, aber leite intern zur neuen Route um
+  app.get("/api/settings", async (req: Request, res: Response) => {
     try {
       const userId = Number(req.query.userId);
       
