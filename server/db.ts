@@ -1,10 +1,10 @@
 /**
- * DATENBANK-KONFIGURATION mit RENDER IPv6-FIX und FEHLERBEHANDLUNG
+ * DATENBANK-KONFIGURATION für INTERNE RENDER-DATENBANK
  * 
- * Diese Datei wurde optimiert, um mit den IPv6-Verbindungsproblemen
- * speziell bei Render-zu-Supabase-Verbindungen umzugehen.
- * 
- * WICHTIG: Der ipv4-Parameter wurde hinzugefügt, um ENETUNREACH-Fehler zu vermeiden.
+ * Diese Datei wurde aktualisiert, um ausschließlich mit der internen Render-Datenbank
+ * zu arbeiten und alle Verbindungen zu externen Neon-Datenbanken zu entfernen.
+ *
+ * WICHTIG: Es wird nur die interne Render-PostgreSQL-Datenbank verwendet (keine Neon-Verbindung).
  */
 
 import { Pool } from 'pg';
@@ -44,19 +44,23 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 2000; // 2 Sekunden
 let isReconnecting = false;
 
-// Pool-Konfiguration mit verbesserter Fehlerbehandlung
+// Pool-Konfiguration mit verbesserter Fehlerbehandlung - nur für Standard-PG
 export const pool = new Pool({ 
-  connectionString: optimizedUrl,
+  connectionString: dbUrl,
   max: 20, // Erhöhte Poolgrößen für bessere Leistung
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
+  // SSL-Konfiguration für Produktionsumgebung
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false // Akzeptiere auch selbstsignierte Zertifikate in Render
+  } : undefined
 });
 
 /**
  * Prüft, ob ein Fehler ein Verbindungsfehler ist, der ein Reconnect rechtfertigt
  */
 function isConnectionError(err: any): boolean {
-  // Typische Verbindungsfehler mit Neon/Supabase
+  // Typische PostgreSQL-Verbindungsfehler
   const connectionErrorCodes = [
     '57P01', // Termination aufgrund Inaktivität
     '08006', // Verbindung geschlossen
@@ -110,14 +114,14 @@ async function reconnect() {
         logger.error("Fehler beim Schließen des alten Pools:", e);
       }
       
-      // Neuen Pool mit optimierter URL erstellen
-      const newOptimizedUrl = getOptimizedDatabaseUrl();
-      logger.info("Erstelle neuen Datenbankpool mit optimierter URL...");
+      // Neuen Pool erstellen
+      const newDbUrl = getDatabaseUrl();
+      logger.info("Erstelle neuen Datenbankpool...");
       
       // Aktualisiere die exportierte Pool-Referenz
       Object.defineProperty(exports, 'pool', {
         value: new Pool({ 
-          connectionString: newOptimizedUrl,
+          connectionString: newDbUrl,
           max: 20,
           idleTimeoutMillis: 30000,
           connectionTimeoutMillis: 10000
