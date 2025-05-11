@@ -1,23 +1,23 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
 import { setupUnifiedSession } from "./session-fix";
 import { setupAuth } from "./auth";
 import { fixRenderDirectories } from "./render-dir-fix";
 import { logger, requestLogger, errorLogger } from "./logger";
 import { configureForRender, isRenderEnvironment, getOptimizedDatabaseUrl } from "./render-integration";
 
-// Logging zum Serverstart
+// 🚀 Serverstart-Logging
 logger.info("🚀 Trading Journal Server startet...");
 
-// Stellen sicher, dass alle notwendigen Verzeichnisse existieren
-// Dies behebt den häufigen Fehler "ENOENT: no such file or directory" in Render
+// 📁 Verzeichnisse für Render vorbereiten
 fixRenderDirectories();
 
-// Optimierung: Setze optimierte DATABASE_URL wenn in Render-Umgebung
+// 🌍 Render-spezifische DB-Optimierung
 if (isRenderEnvironment()) {
   try {
     process.env.DATABASE_URL = getOptimizedDatabaseUrl();
@@ -31,70 +31,63 @@ if (isRenderEnvironment()) {
 
 const app = express();
 
-// Umgebungsvariablen erkennen
+// 🌐 Umgebung erkennen
 const isRender = isRenderEnvironment();
 const isReplit = !!process.env.REPL_ID || !!process.env.REPL_SLUG;
 const isNetlify = process.env.NETLIFY === "true";
 const isProduction = process.env.NODE_ENV === 'production';
 
-logger.info("🌐 Umgebung erkannt", { 
-  isRender, 
-  isReplit, 
+logger.info("🌐 Umgebung erkannt", {
+  isRender,
+  isReplit,
   isNetlify,
   isProduction,
   nodeEnv: process.env.NODE_ENV
 });
 
-// Render-spezifische Konfigurationen anwenden
+// 🛠️ Konfigurationen für Render aktivieren
 configureForRender(app);
 
-// CORS-Konfiguration für alle Umgebungen
+// 🔐 Sessions initialisieren (wichtig vor setupAuth!)
+setupUnifiedSession(app);
+
+// 🌍 CORS
 app.use(cors({
-  origin: true, // Erlaubt alle Origins
-  credentials: true, // Erlaubt Cookies bei Cross-Origin-Anfragen
+  origin: true,
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Client-Info']
 }));
 
-// Cookie-Parser für JWT-Token hinzufügen
+// 🍪 Cookies parsen
 app.use(cookieParser());
 
-// WICHTIG: Erhöhe die Größenbeschränkung für JSON-Anfragen auf 10MB für größere Bilder
-// Session Cookie Debugging Middleware
-app.use((req, res, next) => {
-  // Diese einfache Middleware bleibt für Kompatibilität
-  next();
-});
-
-// Erweiterte Request-Logging-Middleware
-app.use(requestLogger);
-
-// Fehler-Logging-Middleware
-app.use(errorLogger);
-
-// Diese Middleware MUSS vor setupAuth sein, damit req.body in den Auth-Routes verfügbar ist
+// 🧠 Body-Parser für JSON & Formulardaten
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Verwende Standard-Passport-Auth für alle Umgebungen
-console.log("Verwende optimierte Passport-Auth mit angepassten Cookie-Einstellungen");
+// 📋 Logging
+app.use(requestLogger);
+app.use(errorLogger);
+
+// 🔐 Auth aktivieren
 setupAuth(app);
 
-// Dient Assets aus dem public Verzeichnis, aber ohne index.html als Fallback
+// 🖼️ Statische Dateien aus /public
 app.use(express.static(path.join(process.cwd(), "public")));
 
-// Direktes Routing zur Auth-Seite für Root-Pfad
+// 📍 Root-Redirect zu /auth
 app.get("/", (req, res) => {
-  console.log("Root-Pfad-Anfrage erkannt - Weiterleitung zu /auth");
+  logger.info("📍 Root-Pfad-Anfrage erkannt – Weiterleitung zu /auth");
   return res.redirect("/auth");
 });
 
+// 🧪 Erweiterte Logging-Middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  let capturedJsonResponse: any;
 
-  // Log incoming cookies for debugging
   if (path.startsWith("/api")) {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
     console.log(`Cookies: ${JSON.stringify(req.headers.cookie || 'none')}`);
