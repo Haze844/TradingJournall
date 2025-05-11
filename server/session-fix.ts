@@ -1,3 +1,9 @@
+/**
+ * Session-Konfiguration-Fix für Render-Deployments
+ * Dieses Modul vereinheitlicht die Session-Konfiguration für alle Umgebungen
+ * und behebt spezifische Probleme mit Render/Production
+ */
+
 import session from 'express-session';
 import { Express } from 'express';
 import connectPg from 'connect-pg-simple';
@@ -21,26 +27,25 @@ export function setupUnifiedSession(app: Express) {
     store = new PostgresStore({
       pool,
       tableName: 'sessions',
-      createTableIfMissing: false,
+      createTableIfMissing: false, // Wichtig: nicht automatisch erstellen
     });
     console.log('Verwende PostgreSQL Session-Store');
   } else {
     const MemoryStore = require('memorystore')(session);
     store = new MemoryStore({
-      checkPeriod: 86400000,
+      checkPeriod: 86400000, // 24 Stunden
     });
     console.log('Verwende Memory Session-Store (Entwicklungsumgebung)');
   }
 
-  const baseCookieSettings: session.CookieOptions = {
+  const cookieSettings: session.CookieOptions = {
     maxAge: SESSION_MAX_AGE,
     httpOnly: true,
     path: '/',
     sameSite: 'lax',
-    secure: isRender || isProduction || isReplit, // Statisch setzen basierend auf Umgebung
+    secure: isRender || isProduction || isReplit,
   };
 
-  // Render-URL nur für Logging – domain wird NICHT gesetzt
   if (isRender) {
     const renderExternalUrl = process.env.RENDER_EXTERNAL_URL || '';
     if (renderExternalUrl) {
@@ -48,7 +53,8 @@ export function setupUnifiedSession(app: Express) {
         const domain = new URL(renderExternalUrl).hostname;
         console.log(`Render-Domain erkannt: ${domain}`);
         if (!domain.includes('localhost')) {
-          console.log('Cookie-Domain wird NICHT explizit gesetzt (automatisch durch Browser)');
+          cookieSettings.domain = domain;
+          console.log(`Cookie-Domain gesetzt auf: ${domain}`);
         }
       } catch (error) {
         console.error('Fehler beim Parsen der Render-URL:', error);
@@ -56,10 +62,21 @@ export function setupUnifiedSession(app: Express) {
     }
   }
 
-  // Trust-Proxy-Konfiguration
+  // Proxy-Einstellungen
   if (isRender) {
     app.set('trust proxy', 1);
     console.log('Trust Proxy für Render aktiviert');
+
+    // ➕ HTTPS-Redirect Middleware (nur für Render)
+    app.use((req, res, next) => {
+      if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
+        const httpsUrl = `https://${req.headers.host}${req.originalUrl}`;
+        console.log(`➡️  Redirect auf HTTPS: ${httpsUrl}`);
+        return res.redirect(301, httpsUrl);
+      }
+      next();
+    });
+
   } else if (isReplit) {
     app.set('trust proxy', 'loopback');
     console.log('Trust Proxy für Replit aktiviert');
@@ -71,10 +88,18 @@ export function setupUnifiedSession(app: Express) {
     resave: false,
     saveUninitialized: false,
     store,
-    cookie: baseCookieSettings,
+    cookie: cookieSettings,
   };
 
-  // Session-Middleware anwenden
+  console.log('Finale Session-Konfiguration:', {
+    name: COOKIE_NAME,
+    secret: SESSION_SECRET ? 'VORHANDEN' : 'FEHLT',
+    resave: false,
+    saveUninitialized: false,
+    storeType: process.env.DATABASE_URL ? 'PostgreSQL' : 'Memory',
+    cookieSettings,
+  });
+
   app.use(session(sessionOptions));
 
   if (!isProduction) {
@@ -88,18 +113,9 @@ export function setupUnifiedSession(app: Express) {
     });
   }
 
-  console.log('Finale Session-Konfiguration:', {
-    name: COOKIE_NAME,
-    secret: SESSION_SECRET ? 'VORHANDEN' : 'FEHLT',
-    resave: false,
-    saveUninitialized: false,
-    storeType: process.env.DATABASE_URL ? 'PostgreSQL' : 'Memory',
-    cookieSettings: baseCookieSettings
-  });
-
   return {
     store,
-    cookieSettings: baseCookieSettings,
+    cookieSettings,
     name: COOKIE_NAME,
   };
 }
