@@ -59,8 +59,9 @@ export function setupAuth(app: Express) {
   const store = new PostgresSessionStore({
     pool,
     tableName: 'sessions',
-    createTableIfMissing: true
-  } as any);
+    createTableIfMissing: true,
+    errorCallback: (err) => logger.error("Fehler im Session-Store:", err)
+  } satisfies PostgresSessionOptions);
 
   app.use(
     session({
@@ -84,7 +85,7 @@ export function setupAuth(app: Express) {
 
   passport.deserializeUser(async (id: number, done) => {
     try {
-      const user = await storage.getUser(id);
+      const user = await storage.user.findUnique({ where: { id } });
       done(null, user || false);
     } catch (err) {
       done(err);
@@ -94,7 +95,7 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        const user = await storage.getUserByUsername(username);
+        const user = await storage.user.findFirst({ where: { username } });
         if (!user) return done(null, false, { message: "Falsche Anmeldedaten." });
 
         const valid = await comparePasswords(password, user.password);
