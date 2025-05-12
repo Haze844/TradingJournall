@@ -2,6 +2,20 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format } from "date-fns";
 
+// Helper function to check if running on Render
+export function isRender(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    (window.location.hostname.includes("render.com") ||
+     window.location.hostname.endsWith(".render.app"))
+  );
+}
+
+// Helper function for async delay
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

@@ -1,83 +1,60 @@
-import { createContext, ReactNode, useContext, useState, useEffect } from "react";
-import {
-  useQuery,
-  useMutation,
-  UseMutationResult,
-} from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "../shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
-import { useToast } from "./use-toast";
-import { useLocation } from "wouter";
-
-// Import der zentralen Umgebungserkennung
-import { isRenderEnvironment, isReplitEnvironment } from '@/lib/env-detection';
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/api";
+import { isRender, sleep } from "@/lib/utils";
+import { User } from "../shared/schema";
 
 type AuthContextType = {
-  user: SelectUser | null;
+  user?: User | null;
   isLoading: boolean;
-  error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
-  logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password"> & { rememberMe?: boolean };
+const AuthContext = createContext<AuthContextType>({
+  user: undefined,
+  isLoading: true,
+});
 
-// HINWEIS: Beim Ändern dieses Exports unbedingt Datenstruktur identisch halten
-// sonst bekommt man Vite "Fast Refresh is not working" Fehler
-export const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [localUser, setLocalUser] = useState<User | null | undefined>(() => {
+    if (typeof localStorage === "undefined") return;
+    const stored = localStorage.getItem("auth_user");
+    return stored ? (JSON.parse(stored) as User) : undefined;
+  });
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { toast } = useToast();
-  const [, navigate] = useLocation();
-  const [isDebugMode, setDebugMode] = useState(false);
-  
-  // Speziellen Modus für Render aktivieren
+  const isOnRender = typeof window !== "undefined" && isRender();
+
+  const { data: user, isLoading: isUserLoading } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 5,
+  });
+
   useEffect(() => {
-    const isOnRender = isRenderEnvironment();
-    const isNetlify = window.location.hostname.includes('netlify');
-    
-    if (isNetlify) {
-      setDebugMode(true);
-      console.log("Debug-Modus für Netlify aktiviert");
-      
-      // Netlify-spezifische API-Prüfung
-      fetch('/.netlify/functions/api/debug')
-        .then(res => res.json())
-        .then(data => console.log("Netlify API Debug:", data))
-        .catch(err => console.error("Netlify API Debug Fehler:", err));
+    // Speichere in localStorage, wenn ein Nutzer geladen wurde (nicht undefined)
+    if (user !== undefined) {
+      localStorage.setItem("auth_user", JSON.stringify(user ?? ""));
+      setLocalUser(user);
     }
-    
-    if (isOnRender) {
-      setDebugMode(true);
-      console.log("Render-Umgebung erkannt - Aktiviere speziellen Auth-Modus");
-      
-      // Prüfen, ob wir in einer Redirect-Schleife stecken
-      const pathName = window.location.pathname;
-      const redirectCount = parseInt(sessionStorage.getItem('render_redirect_count') || '0');
-      
-      if (pathName === '/auth' && redirectCount > 3) {
-        console.warn("Mögliche Redirect-Schleife in Render erkannt. Versuche lokale Authentifizierung.");
-        
-        // Versuche, einen gespeicherten lokalen Benutzer zu laden
-        try {
-          const storedUser = localStorage.getItem('tradingjournal_user');
-          if (storedUser) {
-            console.log("Lokaler Benutzer gefunden, versuche direkte Navigation zu SimpleHome");
-            window.location.href = "/SimpleHome";
-            return;
-          }
-        } catch (e) {
-          console.error("Fehler beim Überprüfen des lokalen Speichers:", e);
-        }
-      }
-      
-      // Zähler für Redirects erhöhen
-      if (pathName === '/auth') {
-        sessionStorage.setItem('render_redirect_count', (redirectCount + 1).toString());
+  }, [user]);
+
+  useEffect(() => {
+    // Verhindere Redirect-Loop bei Render, indem der Versuch gezählt wird
+    if (isOnRender && window.location.pathname === "/auth") {
+      const redirectCount = parseInt(sessionStorage.getItem("render_redirect_count") || "0");
+
+      const shouldRedirect = !user && !localUser && redirectCount < 3;
+
+      if (shouldRedirect) {
+        sessionStorage.setItem("render_redirect_count", `${redirectCount + 1}`);
+        console.warn("🔁 Render redirect count increased:", redirectCount + 1);
+      } else if (redirectCount >= 3) {
+        console.warn("🛑 Render redirect loop detected. Aborting auto-redirect.");
+        // Optional: Zeige dem Nutzer eine Fehlermeldung oder fallback
       }
     }
-  }, []);
+  }, [user, localUser, isOnRender]);
   
   // Lokaler State für zusätzliche Persistenz (als Fallback)
   // Lokalen State für den Benutzer aus dem LocalStorage
