@@ -10,7 +10,7 @@ module.exports = defineConfig({
   root: 'client',
   plugins: [react()],
   build: {
-    outDir: path.resolve(__dirname, 'dist/public'),
+    outDir: path.resolve(__dirname, 'dist'), // <-- Geändert: Kein /public mehr!
     emptyOutDir: true,
   },
   resolve: {

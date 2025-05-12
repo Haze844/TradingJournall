@@ -18,9 +18,9 @@ if (process.env.RENDER) {
   log('Render-Deployment erkannt. Verwende optimierte Build-Konfiguration...');
   
   try {
-    // Frontend bauen mit benutzerdefinierter Konfiguration
-    log('Baue Frontend mit benutzerdefinierter Konfiguration...');
-    execSync('npx vite build --config vite.config.custom.ts', { stdio: 'inherit' });
+    // Frontend bauen mit angepasster Render-Konfiguration
+    log('Baue Frontend mit Render-spezifischer Konfiguration...');
+    execSync('npx vite build --config vite.render.js', { stdio: 'inherit' });
     
     // Backend bauen
     log('Baue Backend...');
