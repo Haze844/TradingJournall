@@ -43,40 +43,12 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const isReplit = !!process.env.REPL_SLUG || !!process.env.REPL_ID;
   const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
   const isProduction = process.env.NODE_ENV === "production";
 
-  logger.info("🔐 Auth-System wird eingerichtet", {
-    environment: {
-      isRender,
-      isReplit,
-      isProduction,
-      nodeEnv: process.env.NODE_ENV
-    }
-  });
+  logger.info("🔐 Auth-System wird eingerichtet");
 
-  const store = new PostgresSessionStore({
-    pool,
-    tableName: 'sessions',
-    createTableIfMissing: true,
-    errorCallback: (err) => logger.error("Fehler im Session-Store:", err)
-  } satisfies PostgresSessionOptions);
-
-  app.use(
-    session({
-      store,
-      secret: process.env.SESSION_SECRET || 'dev-secret',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        secure: isRender || isProduction,
-        sameSite: isRender || isProduction ? 'none' : 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 Tage
-      }
-    })
-  );
+  // KEINE eigene Session hier mehr!
 
   passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
