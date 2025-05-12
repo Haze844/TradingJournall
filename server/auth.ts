@@ -43,12 +43,40 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  const isReplit = !!process.env.REPL_SLUG || !!process.env.REPL_ID;
   const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
   const isProduction = process.env.NODE_ENV === "production";
 
-  logger.info("🔐 Auth-System wird eingerichtet");
+  logger.info("🔐 Auth-System wird eingerichtet", {
+    environment: {
+      isRender,
+      isReplit,
+      isProduction,
+      nodeEnv: process.env.NODE_ENV
+    }
+  });
 
-  // KEINE eigene Session hier mehr!
+  const store = new PostgresSessionStore({
+    pool,
+    tableName: 'sessions',
+    createTableIfMissing: true
+  } as any);
+
+  app.use(
+    session({
+      name: 'trading.sid', // <--- Wichtig: damit Logout funktioniert
+      store,
+      secret: process.env.SESSION_SECRET || 'dev-secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: isRender || isProduction,
+        sameSite: isRender || isProduction ? 'none' : 'lax',
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 Tage
+      }
+    })
+  );
 
   passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
@@ -56,7 +84,7 @@ export function setupAuth(app: Express) {
 
   passport.deserializeUser(async (id: number, done) => {
     try {
-      const user = await storage.user.findUnique({ where: { id } });
+      const user = await storage.getUser(id);
       done(null, user || false);
     } catch (err) {
       done(err);
@@ -66,7 +94,7 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        const user = await storage.user.findFirst({ where: { username } });
+        const user = await storage.getUserByUsername(username);
         if (!user) return done(null, false, { message: "Falsche Anmeldedaten." });
 
         const valid = await comparePasswords(password, user.password);
