@@ -13,32 +13,25 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ➤ CORS & JSON Middleware
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+// ➤ Middleware
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
-// ➤ Auth & Session Setup (inkl. Passport)
-setupAuth(app); // beinhaltet session(), passport.initialize(), passport.session()
-
-// ➤ Statische Dateien (für SPA)
-app.use(express.static(path.join(__dirname, 'dist/public')));
+// ➤ Auth & Session
+setupAuth(app); // enthält session(), passport.initialize(), etc.
 
 // ➤ API-Routen
 await registerRoutes(app);
 
-// ➤ Health Check
-app.get('/api/health', (req, res) => {
+// ➤ Healthcheck
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', environment: process.env.NODE_ENV || 'development' });
 });
 
-// ➤ Debug-Check
+// ➤ Debug-Routen
 app.get('/api/debug', (req, res) => {
   res.json({
     environment: process.env.NODE_ENV || 'development',
-    hostname: req.hostname,
     headers: req.headers,
     session: req.session || null,
     user: req.user || null,
@@ -46,7 +39,16 @@ app.get('/api/debug', (req, res) => {
   });
 });
 
-// ➤ SPA Catch-All Route
+// ➤ Statische Dateien aus Vite-Build
+const clientPath = path.join(__dirname, 'dist');
+app.use(express.static(clientPath));
+
+// ➤ Weiterleitung von "/" direkt zu "/auth"
+app.get('/', (_req, res) => {
+  res.redirect('/auth');
+});
+
+// ➤ SPA-Fallback: alle nicht-API- und nicht-Datei-Routen auf index.html
 app.get('*', (req, res, next) => {
   if (
     req.method === 'GET' &&
@@ -54,7 +56,7 @@ app.get('*', (req, res, next) => {
     !req.path.includes('.') &&
     req.headers.accept?.includes('text/html')
   ) {
-    return res.sendFile(path.join(__dirname, 'dist/public/index.html'));
+    return res.sendFile(path.join(clientPath, 'index.html'));
   }
   next();
 });
