@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AuthPage from "./pages/auth-page";
 import SimpleHome from "./pages/SimpleHome";
-import { useAuth } from "./hooks/use-auth-new"; // optionaler Auth-Hook
+import { useAuth } from "./hooks/use-auth"; // optionaler Auth-Hook
 
 export default function App() {
   const { user, isLoading } = useAuth(); // via Context
