@@ -1,17 +1,30 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 
+// Typdefinitionen für Passport
+interface PassportUser {
+  id: string;
+  username: string;
+  password: string;
+  [key: string]: any;
+}
+
+interface PassportInfo {
+  message?: string;
+  [key: string]: any;
+}
+
 const router = Router();
 
 // POST /login – Authentifizierung via Passport
 router.post('/login', (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('local', (err, user, info) => {
+  passport.authenticate('local', (err: any, user: PassportUser | false, info?: PassportInfo) => {
     if (err) return next(err);
     if (!user) {
       return res.status(401).json({ error: info?.message || 'Login fehlgeschlagen' });
     }
 
-    req.logIn(user, (err) => {
+    req.logIn(user, (err: any) => {
       if (err) return next(err);
 
       // Optional: Session speichern erzwingen
@@ -28,7 +41,7 @@ router.post('/login', (req: Request, res: Response, next: NextFunction) => {
 
 // POST /logout – Session beenden
 router.post('/logout', (req: Request, res: Response, next: NextFunction) => {
-  req.logout((err) => {
+  req.logout((err: any) => {
     if (err) return next(err);
 
     req.session.destroy(() => {
@@ -45,6 +58,11 @@ router.get('/me', (req: Request, res: Response) => {
   } else {
     res.status(401).json({ error: 'Nicht eingeloggt' });
   }
+});
+
+// GET /csrf – CSRF Token abrufen
+router.get('/csrf', (req: Request, res: Response) => {
+  res.json({ csrfToken: req.csrfToken() });
 });
 
 export default router;

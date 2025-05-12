@@ -1,19 +1,35 @@
 /**
  * Session-Konfiguration + Passport-Initialisierung
- * Vereinheitlicht die Session-Konfiguration für alle Umgebungen
- * und initialisiert Passport korrekt (für Login, Auth etc.)
  */
 
 import session from 'express-session';
-import { Express } from 'express';
+import { Express, Request } from 'express';
 import connectPg from 'connect-pg-simple';
 import { pool } from './db';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
+import bcrypt from 'bcrypt';
+import csrf from 'csurf';
 
 const COOKIE_NAME = 'trading.sid';
 const SESSION_SECRET = process.env.SESSION_SECRET || 'local-dev-secret';
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 Tage
+
+// Erweitere Express Request um CSRF-Token-Methode
+declare global {
+  namespace Express {
+    interface Request {
+      csrfToken(): string;
+    }
+    
+    interface User {
+      id: string;
+      username: string;
+      password: string;
+      [key: string]: any;
+    }
+  }
+}
 
 export function setupUnifiedSession(app: Express) {
   console.log('Session-Fix wird angewendet...');
@@ -29,13 +45,13 @@ export function setupUnifiedSession(app: Express) {
     store = new PostgresStore({
       pool,
       tableName: 'sessions',
-      createTableIfMissing: false, // Wichtig: nicht automatisch erstellen
+      createTableIfMissing: false,
     });
     console.log('Verwende PostgreSQL Session-Store');
   } else {
     const MemoryStore = require('memorystore')(session);
     store = new MemoryStore({
-      checkPeriod: 86400000, // 24 Stunden
+      checkPeriod: 86400000,
     });
     console.log('Verwende Memory Session-Store (Entwicklungsumgebung)');
   }
@@ -59,15 +75,18 @@ export function setupUnifiedSession(app: Express) {
           console.log(`Cookie-Domain gesetzt auf: ${domain}`);
         }
       } catch (error) {
-        console.error('Fehler beim Parsen der Render-URL:', error);
+        console.error('Fehler beim Parsen der Render-URL:', renderExternalUrl, error);
       }
     }
   }
 
-  // Proxy-Einstellungen
-  if (isRender) {
+  const shouldTrustProxy = process.env.TRUST_PROXY || isRender || isReplit;
+  if (shouldTrustProxy) {
     app.set('trust proxy', 1);
-    console.log('Trust Proxy für Render aktiviert');
+    console.log('Trust Proxy aktiviert');
+  }
+
+  if (isRender) {
     app.use((req, res, next) => {
       if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
         const httpsUrl = `https://${req.headers.host}${req.originalUrl}`;
@@ -76,9 +95,6 @@ export function setupUnifiedSession(app: Express) {
       }
       next();
     });
-  } else if (isReplit) {
-    app.set('trust proxy', 'loopback');
-    console.log('Trust Proxy für Replit aktiviert');
   }
 
   const sessionOptions: session.SessionOptions = {
@@ -99,15 +115,12 @@ export function setupUnifiedSession(app: Express) {
     cookieSettings,
   });
 
-  // 1. Session Middleware aktivieren
+  // Middleware-Reihenfolge: Session → Passport → CSRF
   app.use(session(sessionOptions));
-
-  // 2. Passport initialisieren
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // 3. Passport serialize/deserialize definieren
-  passport.serializeUser((user: any, done) => {
+  passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
   });
 
@@ -121,14 +134,13 @@ export function setupUnifiedSession(app: Express) {
     }
   });
 
-  // 4. Optional: LocalStrategy definieren (falls nicht woanders gemacht)
   passport.use(new LocalStrategy(async (username, password, done) => {
     try {
       const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
       const user = result.rows[0];
       if (!user) return done(null, false, { message: 'Falscher Benutzername' });
 
-      const isValid = password === user.password; // Ersetze das durch Hash-Vergleich
+      const isValid = await bcrypt.compare(password, user.password);
       if (!isValid) return done(null, false, { message: 'Falsches Passwort' });
 
       done(null, user);
@@ -137,7 +149,14 @@ export function setupUnifiedSession(app: Express) {
     }
   }));
 
-  // Debug-Logging nur in Entwicklung
+  // CSRF-Schutz aktivieren (optional nur für bestimmte Routen)
+  app.use(csrf());
+  app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken();
+    next();
+  });
+
+  // Debug-Ausgabe
   if (!isProduction) {
     app.use((req, res, next) => {
       console.log('SESSION-DEBUG:', {
