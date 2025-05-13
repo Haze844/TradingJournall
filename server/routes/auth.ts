@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 
-// Typdefinitionen für Passport
 interface PassportUser {
   id: string;
   username: string;
@@ -16,7 +15,6 @@ interface PassportInfo {
 
 const router = Router();
 
-// 📥 POST /login – Authentifizierung via Passport
 router.post('/login', (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', (err: any, user: PassportUser | false, info?: PassportInfo) => {
     if (err) return next(err);
@@ -26,8 +24,6 @@ router.post('/login', (req: Request, res: Response, next: NextFunction) => {
 
     req.logIn(user, (err: any) => {
       if (err) return next(err);
-
-      // Optional: Session speichern erzwingen
       req.session.save(() => {
         res.status(200).json({
           message: 'Login erfolgreich',
@@ -39,25 +35,16 @@ router.post('/login', (req: Request, res: Response, next: NextFunction) => {
   })(req, res, next);
 });
 
-// 🚪 POST /logout – Session beenden + Cookies löschen
 router.post('/logout', (req: Request, res: Response, next: NextFunction) => {
   req.logout((err: any) => {
     if (err) return next(err);
-
     req.session.destroy(() => {
-      // Nur dieser ist korrekt
-      res.clearCookie('tj_sid', { path: '/' });
-
-      // Optional: zusätzliche Cookies defensiv mitlöschen (falls früher falsch verwendet)
-      res.clearCookie('trading.sid', { path: '/' });
-      res.clearCookie('trading_sid', { path: '/' });
-
+      res.clearCookie('tj_sid'); // ✅ nur noch tj_sid wird entfernt
       res.status(200).json({ message: 'Logout erfolgreich' });
     });
   });
 });
 
-// 🔍 GET /me – Aktuelle Session prüfen
 router.get('/me', (req: Request, res: Response) => {
   if (req.isAuthenticated()) {
     res.status(200).json({ user: req.user });
@@ -66,7 +53,6 @@ router.get('/me', (req: Request, res: Response) => {
   }
 });
 
-// 🔐 GET /csrf – CSRF Token abrufen
 router.get('/csrf', (req: Request, res: Response) => {
   res.json({ csrfToken: req.csrfToken() });
 });
