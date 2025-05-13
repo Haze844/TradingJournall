@@ -46,10 +46,10 @@ router.post('/logout', (req: Request, res: Response, next: NextFunction) => {
 
     req.session.destroy(() => {
       // Nur dieser ist korrekt
-      res.clearCookie('trading.sid', { path: '/' });
+      res.clearCookie('tj_sid', { path: '/' });
 
       // Optional: zusätzliche Cookies defensiv mitlöschen (falls früher falsch verwendet)
-      res.clearCookie('tj_sid', { path: '/' });
+      res.clearCookie('trading.sid', { path: '/' });
       res.clearCookie('trading_sid', { path: '/' });
 
       res.status(200).json({ message: 'Logout erfolgreich' });

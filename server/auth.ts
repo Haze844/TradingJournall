@@ -10,7 +10,6 @@ import connectPg from "connect-pg-simple";
 import { pool } from "./db-selector";
 import { logger } from "./logger";
 import { Pool } from "pg";
-import cookieParser from "cookie-parser";
 
 interface PostgresSessionOptions {
   pool: Pool;
@@ -44,14 +43,12 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const isReplit = !!process.env.REPL_SLUG || !!process.env.REPL_ID;
   const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
   const isProduction = process.env.NODE_ENV === "production";
 
   logger.info("🔐 Auth-System wird eingerichtet", {
     environment: {
       isRender,
-      isReplit,
       isProduction,
       nodeEnv: process.env.NODE_ENV
     }
@@ -64,24 +61,9 @@ export function setupAuth(app: Express) {
     errorCallback: (err) => logger.error("Fehler im Session-Store:", err)
   } satisfies PostgresSessionOptions);
 
-  // 🍪 Parser für alte Cookie-Bereinigung
-  app.use(cookieParser());
-
-  // 🧹 Alte Cookies wie tj_sid oder trading_sid entfernen
-  app.use((req, res, next) => {
-    const legacyCookies = ['tj_sid', 'trading_sid'];
-    legacyCookies.forEach(name => {
-      if (req.cookies?.[name]) {
-        res.clearCookie(name, { path: '/' });
-        logger.info(`🧹 Alte Session-Cookie gelöscht: ${name}`);
-      }
-    });
-    next();
-  });
-
   app.use(
     session({
-      name: 'trading.sid', // Aktiver Session-Cookie
+      name: 'tj_sid', // ✅ Einheitlicher Cookie-Name
       store,
       secret: process.env.SESSION_SECRET || 'dev-secret',
       resave: false,
@@ -90,13 +72,10 @@ export function setupAuth(app: Express) {
         httpOnly: true,
         secure: isRender || isProduction,
         sameSite: isRender || isProduction ? 'none' : 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 Tage
+        maxAge: 1000 * 60 * 60 * 24 * 7
       }
     })
   );
-
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
@@ -126,6 +105,9 @@ export function setupAuth(app: Express) {
       }
     })
   );
+
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   logger.info("✅ Auth-System erfolgreich eingerichtet");
 }
