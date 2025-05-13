@@ -16,7 +16,7 @@ interface PassportInfo {
 
 const router = Router();
 
-// POST /login – Authentifizierung via Passport
+// 📥 POST /login – Authentifizierung via Passport
 router.post('/login', (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', (err: any, user: PassportUser | false, info?: PassportInfo) => {
     if (err) return next(err);
@@ -39,19 +39,25 @@ router.post('/login', (req: Request, res: Response, next: NextFunction) => {
   })(req, res, next);
 });
 
-// POST /logout – Session beenden
+// 🚪 POST /logout – Session beenden + Cookies löschen
 router.post('/logout', (req: Request, res: Response, next: NextFunction) => {
   req.logout((err: any) => {
     if (err) return next(err);
 
     req.session.destroy(() => {
-      res.clearCookie('trading.sid');
+      // Nur dieser ist korrekt
+      res.clearCookie('trading.sid', { path: '/' });
+
+      // Optional: zusätzliche Cookies defensiv mitlöschen (falls früher falsch verwendet)
+      res.clearCookie('tj_sid', { path: '/' });
+      res.clearCookie('trading_sid', { path: '/' });
+
       res.status(200).json({ message: 'Logout erfolgreich' });
     });
   });
 });
 
-// GET /me – Aktuelle Session prüfen
+// 🔍 GET /me – Aktuelle Session prüfen
 router.get('/me', (req: Request, res: Response) => {
   if (req.isAuthenticated()) {
     res.status(200).json({ user: req.user });
@@ -60,7 +66,7 @@ router.get('/me', (req: Request, res: Response) => {
   }
 });
 
-// GET /csrf – CSRF Token abrufen
+// 🔐 GET /csrf – CSRF Token abrufen
 router.get('/csrf', (req: Request, res: Response) => {
   res.json({ csrfToken: req.csrfToken() });
 });
