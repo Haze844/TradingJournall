@@ -10,6 +10,7 @@ import connectPg from "connect-pg-simple";
 import { pool } from "./db-selector";
 import { logger } from "./logger";
 import { Pool } from "pg";
+import cookieParser from "cookie-parser";
 
 interface PostgresSessionOptions {
   pool: Pool;
@@ -63,9 +64,24 @@ export function setupAuth(app: Express) {
     errorCallback: (err) => logger.error("Fehler im Session-Store:", err)
   } satisfies PostgresSessionOptions);
 
+  // 🍪 Parser für alte Cookie-Bereinigung
+  app.use(cookieParser());
+
+  // 🧹 Alte Cookies wie tj_sid oder trading_sid entfernen
+  app.use((req, res, next) => {
+    const legacyCookies = ['tj_sid', 'trading_sid'];
+    legacyCookies.forEach(name => {
+      if (req.cookies?.[name]) {
+        res.clearCookie(name, { path: '/' });
+        logger.info(`🧹 Alte Session-Cookie gelöscht: ${name}`);
+      }
+    });
+    next();
+  });
+
   app.use(
     session({
-      name: 'trading.sid', // <--- Wichtig: damit Logout funktioniert
+      name: 'trading.sid', // Aktiver Session-Cookie
       store,
       secret: process.env.SESSION_SECRET || 'dev-secret',
       resave: false,
@@ -78,6 +94,9 @@ export function setupAuth(app: Express) {
       }
     })
   );
+
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
@@ -107,9 +126,6 @@ export function setupAuth(app: Express) {
       }
     })
   );
-
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   logger.info("✅ Auth-System erfolgreich eingerichtet");
 }
