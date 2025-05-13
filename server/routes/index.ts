@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import authRoutes from './routes/auth';
+import authRoutes from './auth';
 
 export function registerRoutes(app: Express): Promise<Server> {
   // Auth-Routen hinzufügen
