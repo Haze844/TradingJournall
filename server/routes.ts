@@ -1,6 +1,9 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Express, Request, Response, NextFunction, Router } from 'express';
 import passport from 'passport';
 
+const router = Router();
+
+// Typdefinitionen
 interface PassportUser {
   id: string;
   username: string;
@@ -13,8 +16,7 @@ interface PassportInfo {
   [key: string]: any;
 }
 
-const router = Router();
-
+// POST /login
 router.post('/login', (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', (err: any, user: PassportUser | false, info?: PassportInfo) => {
     if (err) return next(err);
@@ -35,16 +37,18 @@ router.post('/login', (req: Request, res: Response, next: NextFunction) => {
   })(req, res, next);
 });
 
+// POST /logout
 router.post('/logout', (req: Request, res: Response, next: NextFunction) => {
   req.logout((err: any) => {
     if (err) return next(err);
     req.session.destroy(() => {
-      res.clearCookie('tj_sid'); // ✅ nur noch tj_sid wird entfernt
+      res.clearCookie('tj_sid'); // ✅ Nur relevanter Cookie wird gelöscht
       res.status(200).json({ message: 'Logout erfolgreich' });
     });
   });
 });
 
+// GET /me
 router.get('/me', (req: Request, res: Response) => {
   if (req.isAuthenticated()) {
     res.status(200).json({ user: req.user });
@@ -53,8 +57,12 @@ router.get('/me', (req: Request, res: Response) => {
   }
 });
 
+// GET /csrf
 router.get('/csrf', (req: Request, res: Response) => {
   res.json({ csrfToken: req.csrfToken() });
 });
 
-export default router;
+// ✅ Neuer benannter Export
+export function registerRoutes(app: Express) {
+  app.use("/api", router);
+}
