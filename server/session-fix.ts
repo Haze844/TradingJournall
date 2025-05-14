@@ -1,7 +1,3 @@
-/**
- * Session-Konfiguration + Passport-Initialisierung
- */
-
 import session from 'express-session';
 import { Express, Request } from 'express';
 import connectPg from 'connect-pg-simple';
@@ -11,17 +7,15 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcrypt';
 import csrf from 'csurf';
 
-const COOKIE_NAME = 'trading.sid';
+const COOKIE_NAME = 'tj_sid'; // ✅ statt 'trading.sid'
 const SESSION_SECRET = process.env.SESSION_SECRET || 'local-dev-secret';
 const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 Tage
 
-// Erweitere Express Request um CSRF-Token-Methode
 declare global {
   namespace Express {
     interface Request {
       csrfToken(): string;
     }
-    
     interface User {
       id: string;
       username: string;
@@ -115,7 +109,16 @@ export function setupUnifiedSession(app: Express) {
     cookieSettings,
   });
 
-  // Middleware-Reihenfolge: Session → Passport → CSRF
+  // 🧼 Entferne veraltete Cookies wie "trading.sid"
+  app.use((req, res, next) => {
+    if (req.headers.cookie?.includes("trading.sid")) {
+      res.clearCookie("trading.sid", { path: "/" });
+      console.log("🧹 Alter Cookie 'trading.sid' entfernt");
+    }
+    next();
+  });
+
+  // Session → Passport → CSRF
   app.use(session(sessionOptions));
   app.use(passport.initialize());
   app.use(passport.session());
@@ -149,14 +152,12 @@ export function setupUnifiedSession(app: Express) {
     }
   }));
 
-  // CSRF-Schutz aktivieren (optional nur für bestimmte Routen)
   app.use(csrf());
   app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     next();
   });
 
-  // Debug-Ausgabe
   if (!isProduction) {
     app.use((req, res, next) => {
       console.log('SESSION-DEBUG:', {
