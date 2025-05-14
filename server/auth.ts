@@ -63,7 +63,7 @@ export function setupAuth(app: Express) {
 
   app.use(
     session({
-      name: 'tj_sid', // ✅ Einheitlicher Cookie-Name
+      name: 'tj_sid', // ✅ Einheitlicher Cookie-Name (alt: trading.sid)
       store,
       secret: process.env.SESSION_SECRET || 'dev-secret',
       resave: false,
@@ -72,10 +72,23 @@ export function setupAuth(app: Express) {
         httpOnly: true,
         secure: isRender || isProduction,
         sameSite: isRender || isProduction ? 'none' : 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 7
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 Tage
       }
     })
   );
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // ✅ Logout-Middleware zur Entfernung veralteter Cookies (falls vorhanden)
+  app.use((req, res, next) => {
+    const cookies = req.headers.cookie || "";
+    if (cookies.includes("trading.sid")) {
+      res.clearCookie("trading.sid", { path: "/" });
+      logger.info("🧹 Veralteter Cookie 'trading.sid' entfernt");
+    }
+    next();
+  });
 
   passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
@@ -105,9 +118,6 @@ export function setupAuth(app: Express) {
       }
     })
   );
-
-  app.use(passport.initialize());
-  app.use(passport.session());
 
   logger.info("✅ Auth-System erfolgreich eingerichtet");
 }
