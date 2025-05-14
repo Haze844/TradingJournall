@@ -1,26 +1,11 @@
-// server/auth.ts
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
-import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
-import connectPg from "connect-pg-simple";
-import { pool } from "./db-selector";
 import { logger } from "./logger";
-import { Pool } from "pg";
-
-interface PostgresSessionOptions {
-  pool: Pool;
-  tableName: string;
-  createTableIfMissing: boolean;
-  pruneSessionInterval?: number;
-  errorCallback?: (err: Error) => void;
-}
-
-const PostgresSessionStore = connectPg(session);
 
 declare global {
   namespace Express {
@@ -44,39 +29,7 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_EXTERNAL_URL;
-  const isProduction = process.env.NODE_ENV === "production";
-
-  logger.info("🔐 Auth-System wird eingerichtet", {
-    environment: {
-      isRender,
-      isProduction,
-      nodeEnv: process.env.NODE_ENV
-    }
-  });
-
-  const store = new PostgresSessionStore({
-    pool,
-    tableName: 'sessions',
-    createTableIfMissing: true,
-    errorCallback: (err) => logger.error("Fehler im Session-Store:", err)
-  } satisfies PostgresSessionOptions);
-
-  app.use(
-    session({
-      name: 'tj_sid', // ✅ Einheitlicher Cookie-Name
-      store,
-      secret: process.env.SESSION_SECRET || 'dev-secret',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        secure: isRender || isProduction,
-        sameSite: isRender || isProduction ? 'none' : 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 7
-      }
-    })
-  );
+  logger.info("🔐 Auth-System wird eingerichtet");
 
   passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
