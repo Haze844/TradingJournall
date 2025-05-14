@@ -1,178 +1,62 @@
-import session from 'express-session';
-import { Express, Request } from 'express';
-import connectPg from 'connect-pg-simple';
-import { pool } from './db';
-import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
-import bcrypt from 'bcrypt';
-import csrf from 'csurf';
+import session from "express-session";
+import { Express } from "express";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
+import passport from "passport";
+import csrf from "csurf";
 
-const COOKIE_NAME = 'tj_sid'; // ✅ statt 'trading.sid'
-const SESSION_SECRET = process.env.SESSION_SECRET || 'local-dev-secret';
-const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 Tage
-
-declare global {
-  namespace Express {
-    interface Request {
-      csrfToken(): string;
-    }
-    interface User {
-      id: string;
-      username: string;
-      password: string;
-      [key: string]: any;
-    }
-  }
-}
+const COOKIE_NAME = "tj_sid";
+const SESSION_SECRET = process.env.SESSION_SECRET || "local-dev-secret";
+const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 export function setupUnifiedSession(app: Express) {
-  console.log('Session-Fix wird angewendet...');
-
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
   const isRender = !!process.env.RENDER || !!process.env.RENDER_EXTERNAL_URL;
-  const isReplit = !!process.env.REPL_ID || !!process.env.REPL_OWNER;
 
-  let store;
-
-  if (process.env.DATABASE_URL) {
-    const PostgresStore = connectPg(session);
-    store = new PostgresStore({
-      pool,
-      tableName: 'sessions',
-      createTableIfMissing: false,
-    });
-    console.log('Verwende PostgreSQL Session-Store');
-  } else {
-    const MemoryStore = require('memorystore')(session);
-    store = new MemoryStore({
-      checkPeriod: 86400000,
-    });
-    console.log('Verwende Memory Session-Store (Entwicklungsumgebung)');
-  }
+  const PostgresStore = connectPg(session);
+  const store = new PostgresStore({
+    pool,
+    tableName: "sessions",
+    createTableIfMissing: true,
+  });
 
   const cookieSettings: session.CookieOptions = {
     maxAge: SESSION_MAX_AGE,
     httpOnly: true,
-    path: '/',
-    sameSite: 'lax',
-    secure: isRender || isProduction || isReplit,
+    path: "/",
+    sameSite: isRender || isProduction ? "none" : "lax",
+    secure: isRender || isProduction,
   };
 
   if (isRender) {
-    const renderExternalUrl = process.env.RENDER_EXTERNAL_URL || '';
-    if (renderExternalUrl) {
-      try {
-        const domain = new URL(renderExternalUrl).hostname;
-        console.log(`Render-Domain erkannt: ${domain}`);
-        if (!domain.includes('localhost')) {
-          cookieSettings.domain = domain;
-          console.log(`Cookie-Domain gesetzt auf: ${domain}`);
-        }
-      } catch (error) {
-        console.error('Fehler beim Parsen der Render-URL:', renderExternalUrl, error);
+    const renderUrl = process.env.RENDER_EXTERNAL_URL;
+    if (renderUrl) {
+      const domain = new URL(renderUrl).hostname;
+      if (!domain.includes("localhost")) {
+        cookieSettings.domain = domain;
       }
     }
   }
 
-  const shouldTrustProxy = process.env.TRUST_PROXY || isRender || isReplit;
-  if (shouldTrustProxy) {
-    app.set('trust proxy', 1);
-    console.log('Trust Proxy aktiviert');
-  }
+  app.set("trust proxy", 1);
 
-  if (isRender) {
-    app.use((req, res, next) => {
-      if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
-        const httpsUrl = `https://${req.headers.host}${req.originalUrl}`;
-        console.log(`➡️  Redirect auf HTTPS: ${httpsUrl}`);
-        return res.redirect(301, httpsUrl);
-      }
-      next();
-    });
-  }
+  app.use(
+    session({
+      name: COOKIE_NAME,
+      secret: SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      store,
+      cookie: cookieSettings,
+    })
+  );
 
-  const sessionOptions: session.SessionOptions = {
-    name: COOKIE_NAME,
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store,
-    cookie: cookieSettings,
-  };
-
-  console.log('Finale Session-Konfiguration:', {
-    name: COOKIE_NAME,
-    secret: SESSION_SECRET ? 'VORHANDEN' : 'FEHLT',
-    resave: false,
-    saveUninitialized: false,
-    storeType: process.env.DATABASE_URL ? 'PostgreSQL' : 'Memory',
-    cookieSettings,
-  });
-
-  // 🧼 Entferne veraltete Cookies wie "trading.sid"
-  app.use((req, res, next) => {
-    if (req.headers.cookie?.includes("trading.sid")) {
-      res.clearCookie("trading.sid", { path: "/" });
-      console.log("🧹 Alter Cookie 'trading.sid' entfernt");
-    }
-    next();
-  });
-
-  // Session → Passport → CSRF
-  app.use(session(sessionOptions));
   app.use(passport.initialize());
   app.use(passport.session());
-
-  passport.serializeUser((user: Express.User, done) => {
-    done(null, user.id);
-  });
-
-  passport.deserializeUser(async (id: string, done) => {
-    try {
-      const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-      if (result.rows.length === 0) return done(null, false);
-      done(null, result.rows[0]);
-    } catch (err) {
-      done(err);
-    }
-  });
-
-  passport.use(new LocalStrategy(async (username, password, done) => {
-    try {
-      const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-      const user = result.rows[0];
-      if (!user) return done(null, false, { message: 'Falscher Benutzername' });
-
-      const isValid = await bcrypt.compare(password, user.password);
-      if (!isValid) return done(null, false, { message: 'Falsches Passwort' });
-
-      done(null, user);
-    } catch (err) {
-      done(err);
-    }
-  }));
 
   app.use(csrf());
   app.use((req, res, next) => {
     res.locals.csrfToken = req.csrfToken();
     next();
   });
-
-  if (!isProduction) {
-    app.use((req, res, next) => {
-      console.log('SESSION-DEBUG:', {
-        id: req.session.id,
-        cookie: req.session.cookie,
-        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
-        user: req.user || null,
-      });
-      next();
-    });
-  }
-
-  return {
-    store,
-    cookieSettings,
-    name: COOKIE_NAME,
-  };
 }
