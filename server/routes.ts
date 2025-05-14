@@ -1,12 +1,13 @@
 import { Express } from "express";
-import authRoutes from "./routes/auth"; // ← dein geposteter Code ist in dieser Datei
+import authRoutes from "./routes/auth";
 
 /**
- * Registriert alle Anwendungsrouten (z. B. Authentifizierung).
+ * Registriert alle Anwendungsrouten.
  */
-export function registerRoutes(app: Express) {
-  // Authentifizierungs-Endpunkte unter /auth
+export async function registerRoutes(app: Express) {
+  // Beispiel: Authentifizierungsrouten
   app.use("/auth", authRoutes);
 
-  // Weitere Routen (z. B. /api/user, /protected) kannst du hier einfügen
+  // Weitere Routen kannst du hier hinzufügen, z. B.:
+  // app.use("/api", apiRoutes);
 }
