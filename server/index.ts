@@ -6,24 +6,41 @@ import { setupUnifiedSession } from "./session-fix";
 import { setupAuth } from "./auth";
 import { registerRoutes } from "./routes";
 
+// 🔧 Wichtig: Pfad zur gebauten Vite-Client-App
+const clientPath = path.join(process.cwd(), "dist/public");
+
 const app = express();
 
-// Middleware-Reihenfolge wichtig
+// 🍪 Cookie Parser zuerst
 app.use(cookieParser());
+
+// 🔐 Session & Auth vorbereiten
 setupUnifiedSession(app);
+setupAuth(app);
+
+// 🌍 CORS
 app.use(cors({ origin: true, credentials: true }));
+
+// 📦 JSON & Formulardaten parsen
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-setupAuth(app);
-registerRoutes(app); // ggf. await verwenden, falls async
+// 🔀 Routen registrieren
+registerRoutes(app);
 
-// Statische Dateien ausliefern
-app.use(express.static(path.join(process.cwd(), "public")));
+// 🌐 Root-Redirect z. B. auf Login-Seite
+app.get("/", (_req, res) => res.redirect("/auth"));
 
-// SPA-Fallback für alle anderen Routen
+// 🖼️ Statische Dateien aus dem Client-Build
+app.use(express.static(clientPath));
+
+// 🧭 SPA-Fallback für React Router (z. B. /simplehome)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(process.cwd(), "public", "index.html"));
+  res.sendFile(path.join(clientPath, "index.html"));
 });
 
-app.listen(5000, () => console.log("Server läuft auf Port 5000"));
+// 🚀 Server starten
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server läuft auf Port ${PORT}`);
+});
